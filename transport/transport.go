@@ -25,7 +25,9 @@ func (e Endpoint) String() string {
 	return e.Address
 }
 
-// ParseEndpoint parses "host:port", "tcp:host:port", "serial:/dev/ttyUSB0@115200",
+const DefaultSerialBaud = 57600
+
+// ParseEndpoint parses "host:port", "tcp:host:port", "serial:/dev/ttyUSB0@57600",
 // or a bare POSIX serial device path.
 func ParseEndpoint(target string) (Endpoint, bool) {
 	target = strings.TrimSpace(target)
@@ -38,7 +40,7 @@ func ParseEndpoint(target string) (Endpoint, bool) {
 	}
 	if strings.HasPrefix(lower, "serial:") || strings.HasPrefix(target, "/dev/") || strings.HasPrefix(strings.ToUpper(target), "COM") {
 		raw := strings.TrimPrefix(target, "serial:")
-		baud := 115200
+		baud := DefaultSerialBaud
 		if at := strings.LastIndex(raw, "@"); at != -1 {
 			if b, err := strconv.Atoi(strings.TrimSpace(raw[at+1:])); err == nil && b > 0 {
 				baud = b

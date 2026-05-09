@@ -25,6 +25,21 @@ func TestBuildSingleGetFrameFormat(t *testing.T) {
 	}
 }
 
+func TestReferenceCRCVector(t *testing.T) {
+	payload := []byte("#0015AB?VR03E801")
+	if got := CRC16(payload); got != 0xC21A {
+		t.Fatalf("CRC16(%q) = %04X, want C21A", payload, got)
+	}
+}
+
+func TestBuildSingleGetFrameReferenceVector(t *testing.T) {
+	got := string(BuildSingleGetFrame(0x00, 0x15AB, 1000, 1))
+	const want = "#0015AB?VR03E801C21A\r"
+	if got != want {
+		t.Fatalf("frame = %q, want %q", got, want)
+	}
+}
+
 func TestParseSingleResponseFloat(t *testing.T) {
 	got, err := ParseSingleResponse([]byte("!500001+41CC0000ABCD\r"), DataTypeFloat32)
 	if err != nil {

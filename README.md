@@ -13,6 +13,11 @@ protocol code for:
 Protocol definitions and tests use small synthetic fixtures. Vendor PDFs,
 site-specific endpoints, and lab captures are not vendored here.
 
+Reference vectors cover the captured MeComAPI CRC-16-CCITT frame example
+`#0015AB?VR03E801C21A\r`. Serial endpoints default to `57600` baud when no
+explicit rate is supplied. Ethernet serial-device-server targets typically use
+TCP port `50000`.
+
 ## Packages
 
 - `objectdict`: shared semantic model for parameters, CANopen objects, and
@@ -39,7 +44,7 @@ site-specific endpoints, and lab captures are not vendored here.
 ## Example
 
 ```go
-ep, ok := transport.ParseEndpoint("serial:/dev/ttyUSB0@115200")
+ep, ok := transport.ParseEndpoint("serial:/dev/ttyUSB0@57600")
 if !ok {
     panic("invalid endpoint")
 }
