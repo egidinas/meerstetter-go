@@ -46,4 +46,7 @@ func TestTargetsFromDictionaryMapsAccessToDirection(t *testing.T) {
 	if targets[0].Direction != DirectionTM || targets[0].Ownership != OwnershipRemoteNode {
 		t.Fatalf("target = %#v", targets[0])
 	}
+	if targets[0].Metadata["readout"] != "ring_buffer" || targets[0].Metadata["resume"] != "sequence" {
+		t.Fatalf("metadata = %#v", targets[0].Metadata)
+	}
 }

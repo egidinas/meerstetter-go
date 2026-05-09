@@ -61,7 +61,11 @@ value, err := client.ReadFloat32(context.Background(), 1000, 1)
 ## Scope
 
 This repo owns protocol-correct reusable code. Applications still decide device
-ownership, polling cadence, command authority, logging, and UI behavior.
+ownership, polling cadence, command authority, and UI behavior. Telemetry
+readout should default to `tmtclog.NewRecorder`, which commits TM/TC events to
+the local ring before forwarding live updates and lets controller sessions
+resume from their last seen sequence. That is the zero-loss path within the
+configured retention window; raw live-only streaming is a compatibility mode.
 
 Loom and Gossamer should consume these packages as shared contracts. Product
 code should add only app-specific adapters: NATS, REST, HTTP, SSH fallback,

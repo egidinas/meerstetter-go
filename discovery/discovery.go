@@ -130,6 +130,11 @@ func TargetsFromDictionary(dict objectdict.Dictionary, nodeID, owner string) []T
 				Kind:            entry.Kind,
 				Dictionary:      dict.DefinitionID,
 				DictionaryEntry: entry.ID,
+				Metadata: map[string]string{
+					"readout":     "ring_buffer",
+					"resume":      "sequence",
+					"loss_policy": "lossless_within_retention",
+				},
 			})
 		}
 	}

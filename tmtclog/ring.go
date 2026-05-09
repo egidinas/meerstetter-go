@@ -1,6 +1,7 @@
 package tmtclog
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -24,6 +25,8 @@ type Entry struct {
 	Event *tmtc.CommandEvent `json:"event,omitempty"`
 }
 
+const DefaultCapacity = 100000
+
 // Ring is a bounded in-memory loop buffer for troubleshooting and later export.
 type Ring struct {
 	mu      sync.Mutex
@@ -38,6 +41,10 @@ func New(capacity int) *Ring {
 		capacity = 1
 	}
 	return &Ring{entries: make([]Entry, capacity)}
+}
+
+func NewDefault() *Ring {
+	return New(DefaultCapacity)
 }
 
 func (r *Ring) Append(entry Entry) Entry {
@@ -66,4 +73,22 @@ func (r *Ring) Snapshot() []Entry {
 	out = append(out, r.entries[r.next:]...)
 	out = append(out, r.entries[:r.next]...)
 	return out
+}
+
+// Since returns buffered entries with sequence numbers greater than afterSeq.
+// If afterSeq is older than the retained window, the returned slice starts at
+// the oldest retained entry. Callers can compare the first returned sequence
+// with afterSeq+1 to detect whether a disconnect exceeded buffer capacity.
+func (r *Ring) Since(afterSeq uint64) []Entry {
+	entries := r.Snapshot()
+	idx := sort.Search(len(entries), func(i int) bool {
+		return entries[i].Seq > afterSeq
+	})
+	return append([]Entry(nil), entries[idx:]...)
+}
+
+func (r *Ring) LatestSeq() uint64 {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.seq
 }
