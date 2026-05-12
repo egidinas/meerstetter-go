@@ -1,0 +1,44 @@
+{
+  "http_listen": "0.0.0.0:18080",
+  "listen_host": "0.0.0.0",
+  "passthrough_base_port": 15000,
+  "devices": [
+    {
+      "id": "tec-01",
+      "target": "serial:/dev/ttyUSB0@57600"
+    },
+    {
+      "id": "tec-02",
+      "target": "serial:/dev/ttyUSB1@57600"
+    },
+    {
+      "id": "tec-03",
+      "target": "serial:/dev/ttyUSB2@57600"
+    },
+    {
+      "id": "tec-04",
+      "target": "serial:/dev/ttyUSB3@57600"
+    }
+  ],
+  "read_policy": {
+    "default_mode": "single",
+    "targets": {
+      "device:tec-01:temperature:hr": "ring_since_last_read",
+      "device:tec-01:temperature:lr": "ring_since_last_read",
+      "device:tec-01:power:hr": "ring_since_last_read",
+      "device:tec-01:power:lr": "ring_since_last_read",
+      "device:tec-02:temperature:hr": "ring_since_last_read",
+      "device:tec-02:temperature:lr": "ring_since_last_read",
+      "device:tec-02:power:hr": "ring_since_last_read",
+      "device:tec-02:power:lr": "ring_since_last_read",
+      "device:tec-03:temperature:hr": "ring_since_last_read",
+      "device:tec-03:temperature:lr": "ring_since_last_read",
+      "device:tec-03:power:hr": "ring_since_last_read",
+      "device:tec-03:power:lr": "ring_since_last_read",
+      "device:tec-04:temperature:hr": "ring_since_last_read",
+      "device:tec-04:temperature:lr": "ring_since_last_read",
+      "device:tec-04:power:hr": "ring_since_last_read",
+      "device:tec-04:power:lr": "ring_since_last_read"
+    }
+  }
+}

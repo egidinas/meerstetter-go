@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/egidinas/meerstetter-go/mecom"
-	"github.com/egidinas/meerstetter-go/transport"
 )
 
 const (
@@ -97,7 +96,7 @@ func Serve(ctx context.Context, ln net.Listener, cfg Config) error {
 
 // DialTarget creates a downstream dialer for a TCP or serial MeCom endpoint.
 func DialTarget(target string) (DownstreamDial, error) {
-	ep, ok := transport.ParseEndpoint(target)
+	ep, ok := mecom.ParseTarget(strings.TrimSpace(target))
 	if !ok {
 		return nil, fmt.Errorf("mecomserver: target required")
 	}
@@ -108,7 +107,7 @@ func DialTarget(target string) (DownstreamDial, error) {
 				timeout = d
 			}
 		}
-		conn, err := transport.Dial(ctx, ep, timeout)
+		conn, err := mecom.Open(ep, timeout)
 		return conn, ep.String(), err
 	}, nil
 }

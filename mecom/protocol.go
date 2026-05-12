@@ -3,6 +3,7 @@ package mecom
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/egidinas/meerstetter-go/canopen"
 )
 
 const FrameTerminator byte = '\r'
@@ -31,6 +34,45 @@ type Parameter struct {
 	Unit     string
 	Type     DataType
 	Writable bool
+}
+
+const (
+	RingStatusAllDataRead byte = 0
+	RingStatusHasMoreData byte = 1
+	RingStatusOverlap     byte = 2
+
+	maxRingCaptureParameters = 16
+)
+
+// RingCaptureParameter configures one CRTVStream capture slot.
+type RingCaptureParameter struct {
+	Parameter
+	// InhibitTime10us is encoded in 10 microsecond steps by the MeCom protocol.
+	InhibitTime10us uint16
+}
+
+// RingReadResponse is the decoded response to a CRTVStream ring-buffer read.
+type RingReadResponse struct {
+	BytesAdded uint16
+	Status     byte
+	Data       []byte
+}
+
+// RingSample is one decoded sample from a CRTVStream data frame.
+type RingSample struct {
+	ConfigIndex int
+	Type        DataType
+	Value       float64
+}
+
+// RingFrame is one decoded CRTVStream normal or sync frame.
+type RingFrame struct {
+	Sync               bool
+	HasCaptureConfigID bool
+	CaptureConfigID    uint16
+	Timestamp10us      uint16
+	Samples            []RingSample
+	Raw                []byte
 }
 
 var errorsByCode = map[int]string{
@@ -61,6 +103,8 @@ func CRC16(data []byte) uint16 {
 	return crc
 }
 
+// ── ASCII MeCom (Serial/TCP) ──────────────────────────────────────────────────
+
 // BuildSingleGetFrame constructs a ?VR frame for reading one parameter.
 func BuildSingleGetFrame(addr int, seq uint16, paramID, instance int) []byte {
 	body := fmt.Sprintf("?VR%04X%02X", paramID, instance)
@@ -77,6 +121,41 @@ func BuildBulkGetFrame(addr int, seq uint16, params []Parameter) []byte {
 	return appendCRC(addr, seq, body.String())
 }
 
+// BuildRingPointerFrame constructs a CRTVStream current-ring-pointer request.
+func BuildRingPointerFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "?RS0000")
+}
+
+// BuildRingReadFrame constructs a CRTVStream ring-buffer read request.
+func BuildRingReadFrame(addr int, seq uint16, start uint32, maxBytes uint16) []byte {
+	body := fmt.Sprintf("?RS0001%08X%04X", start, maxBytes)
+	return appendCRC(addr, seq, body)
+}
+
+// BuildRingCaptureConfigFrame constructs a volatile CRTVStream capture config request.
+func BuildRingCaptureConfigFrame(addr int, seq uint16, captureID uint16, params []RingCaptureParameter) ([]byte, error) {
+	if len(params) > maxRingCaptureParameters {
+		return nil, fmt.Errorf("mecom: ring capture supports at most %d parameters, got %d", maxRingCaptureParameters, len(params))
+	}
+	var body strings.Builder
+	fmt.Fprintf(&body, "?RS0002%04X%02X", captureID, len(params))
+	for _, p := range params {
+		if p.ID < 0 || p.ID > 0xFFFF {
+			return nil, fmt.Errorf("mecom: invalid parameter id %d", p.ID)
+		}
+		if p.Instance < 0 || p.Instance > 0xFF {
+			return nil, fmt.Errorf("mecom: invalid parameter instance %d", p.Instance)
+		}
+		fmt.Fprintf(&body, "%04X%02X%04X", p.ID, p.Instance, p.InhibitTime10us)
+	}
+	return appendCRC(addr, seq, body.String()), nil
+}
+
+// BuildRingTriggerSyncFrame constructs a CRTVStream trigger-sync request.
+func BuildRingTriggerSyncFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "?RS0003")
+}
+
 // BuildWriteFloat32Frame constructs a VS frame for writing a float32 parameter.
 func BuildWriteFloat32Frame(addr int, seq uint16, paramID, instance int, value float32) []byte {
 	return buildWriteFrame(addr, seq, paramID, instance, encodeFloat32(value))
@@ -90,6 +169,16 @@ func BuildWriteInt32Frame(addr int, seq uint16, paramID, instance int, value int
 // BuildWriteStringFrame constructs a VS frame for writing a string parameter.
 func BuildWriteStringFrame(addr int, seq uint16, paramID, instance int, value string) []byte {
 	return buildWriteFrame(addr, seq, paramID, instance, strings.ToUpper(hex.EncodeToString([]byte(value))))
+}
+
+// BuildSaveToFlashFrame constructs an SP frame for explicitly saving all parameter values to flash.
+func BuildSaveToFlashFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "SP")
+}
+
+// BuildResetFrame constructs an RS frame for resetting the device.
+func BuildResetFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "RS")
 }
 
 func buildWriteFrame(addr int, seq uint16, paramID, instance int, valueHex string) []byte {
@@ -158,6 +247,102 @@ func ParseBulkResponse(raw []byte, params []Parameter) ([]float64, error) {
 	return values, nil
 }
 
+// ParseRingPointerResponse decodes the current CRTVStream ring-buffer pointer.
+func ParseRingPointerResponse(raw []byte) (uint32, error) {
+	payload, err := parsePayload(raw)
+	if err != nil {
+		return 0, err
+	}
+	payload = hexOnly(payload)
+	if len(payload) < 8 {
+		return 0, fmt.Errorf("mecom: invalid ring pointer payload %q", payload)
+	}
+	v, err := strconv.ParseUint(payload[:8], 16, 32)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(v), nil
+}
+
+// ParseRingReadResponse decodes a CRTVStream ring-buffer read response.
+func ParseRingReadResponse(raw []byte) (RingReadResponse, error) {
+	payload, err := parsePayload(raw)
+	if err != nil {
+		return RingReadResponse{}, err
+	}
+	payload = hexOnly(payload)
+	if len(payload) < 6 {
+		return RingReadResponse{}, fmt.Errorf("mecom: invalid ring read payload %q", payload)
+	}
+	bytesAdded, err := strconv.ParseUint(payload[:4], 16, 16)
+	if err != nil {
+		return RingReadResponse{}, err
+	}
+	status, err := strconv.ParseUint(payload[4:6], 16, 8)
+	if err != nil {
+		return RingReadResponse{}, err
+	}
+	data, err := hex.DecodeString(payload[6:])
+	if err != nil {
+		return RingReadResponse{}, err
+	}
+	return RingReadResponse{BytesAdded: uint16(bytesAdded), Status: byte(status), Data: data}, nil
+}
+
+// ParseRingCaptureConfigResponse validates a CRTVStream capture config acknowledgement.
+func ParseRingCaptureConfigResponse(raw []byte) error {
+	payload, err := parsePayload(raw)
+	if err != nil {
+		return err
+	}
+	payload = hexOnly(payload)
+	if payload == "" || payload == "00" {
+		return nil
+	}
+	code, err := strconv.ParseUint(payload, 16, 8)
+	if err != nil {
+		return fmt.Errorf("mecom: invalid ring capture config response %q", payload)
+	}
+	if code == 0 {
+		return nil
+	}
+	if name, ok := errorsByCode[int(code)]; ok {
+		return fmt.Errorf("mecom: ring capture config error %02X (%s)", code, name)
+	}
+	return fmt.Errorf("mecom: ring capture config error %02X", code)
+}
+
+// ParseRingFrames decodes complete CRTVStream frames and returns any trailing partial bytes.
+func ParseRingFrames(data []byte, config []RingCaptureParameter) ([]RingFrame, []byte, error) {
+	var frames []RingFrame
+	offset := 0
+	for {
+		start := findRingStart(data[offset:])
+		if start < 0 {
+			return frames, nil, nil
+		}
+		start += offset
+		end := findRingEnd(data[start+2:])
+		if end < 0 {
+			return frames, append([]byte(nil), data[start:]...), nil
+		}
+		end += start + 2
+		unescaped, err := unescapeRingPayload(data[start+2 : end])
+		if err != nil {
+			return frames, nil, err
+		}
+		frame, err := decodeRingFrame(data[start+1], unescaped, data[start:end+2], config)
+		if err != nil {
+			return frames, nil, err
+		}
+		frames = append(frames, frame)
+		offset = end + 2
+		if offset >= len(data) {
+			return frames, nil, nil
+		}
+	}
+}
+
 // ParseWriteResponse validates a write acknowledgement and returns NACKs as errors.
 func ParseWriteResponse(raw []byte) error {
 	_, err := parsePayload(raw)
@@ -174,6 +359,106 @@ func DecodeNumeric(chunk string, dataType DataType) (float64, error) {
 		return float64(int32(uint32(bits))), nil
 	}
 	return float64(math.Float32frombits(uint32(bits))), nil
+}
+
+func findRingStart(data []byte) int {
+	for i := 0; i+1 < len(data); i++ {
+		if data[i] == 0x88 && (data[i+1] == 0x00 || data[i+1] == 0x01) {
+			return i
+		}
+	}
+	return -1
+}
+
+func findRingEnd(data []byte) int {
+	for i := 0; i+1 < len(data); i++ {
+		if data[i] != 0x88 {
+			continue
+		}
+		switch data[i+1] {
+		case 0x88:
+			i++
+		case 0x10:
+			return i
+		}
+	}
+	return -1
+}
+
+func unescapeRingPayload(data []byte) ([]byte, error) {
+	out := make([]byte, 0, len(data))
+	for i := 0; i < len(data); i++ {
+		if data[i] != 0x88 {
+			out = append(out, data[i])
+			continue
+		}
+		if i+1 >= len(data) {
+			return nil, fmt.Errorf("mecom: truncated ring escape")
+		}
+		if data[i+1] != 0x88 {
+			return nil, fmt.Errorf("mecom: unexpected ring marker 0x88 0x%02X in payload", data[i+1])
+		}
+		out = append(out, 0x88)
+		i++
+	}
+	return out, nil
+}
+
+func decodeRingFrame(kind byte, payload, raw []byte, config []RingCaptureParameter) (RingFrame, error) {
+	frame := RingFrame{Sync: kind == 0x01, Raw: append([]byte(nil), raw...)}
+	offset := 0
+	if frame.Sync {
+		if len(payload) < 4 {
+			return RingFrame{}, fmt.Errorf("mecom: sync ring frame too short")
+		}
+		frame.HasCaptureConfigID = true
+		frame.CaptureConfigID = binary.LittleEndian.Uint16(payload[:2])
+		frame.Timestamp10us = binary.LittleEndian.Uint16(payload[2:4])
+		offset = 4
+	} else {
+		if len(payload) < 2 {
+			return RingFrame{}, fmt.Errorf("mecom: ring frame too short")
+		}
+		frame.Timestamp10us = binary.LittleEndian.Uint16(payload[:2])
+		offset = 2
+	}
+	for offset < len(payload) {
+		if offset+5 > len(payload) {
+			return RingFrame{}, fmt.Errorf("mecom: truncated ring sample")
+		}
+		tag := payload[offset]
+		offset++
+		index := int(tag & 0x7F)
+		dataType := DataTypeFloat32
+		if index < len(config) && config[index].Type != "" {
+			dataType = config[index].Type
+		}
+		if tag&0x80 != 0 {
+			if offset >= len(payload) {
+				return RingFrame{}, fmt.Errorf("mecom: truncated ring sample type")
+			}
+			switch payload[offset] {
+			case 0x01:
+				dataType = DataTypeFloat32
+			case 0x02:
+				dataType = DataTypeInt32
+			default:
+				return RingFrame{}, fmt.Errorf("mecom: unsupported ring sample type 0x%02X", payload[offset])
+			}
+			offset++
+		}
+		if offset+4 > len(payload) {
+			return RingFrame{}, fmt.Errorf("mecom: truncated ring sample value")
+		}
+		bits := binary.LittleEndian.Uint32(payload[offset : offset+4])
+		offset += 4
+		value := float64(math.Float32frombits(bits))
+		if dataType == DataTypeInt32 {
+			value = float64(int32(bits))
+		}
+		frame.Samples = append(frame.Samples, RingSample{ConfigIndex: index, Type: dataType, Value: value})
+	}
+	return frame, nil
 }
 
 func parsePayload(raw []byte) (string, error) {
@@ -217,6 +502,58 @@ func hexOnly(v string) string {
 	}, v)
 }
 
+// ── Binary MeCom (over CAN) ───────────────────────────────────────────────────
+
+// BinaryCommand constants for MeCom-over-CAN.
+const (
+	BinaryCmdQueryValue    uint16 = 0x01
+	BinaryCmdSetValue      uint16 = 0x02
+	BinaryCmdQueryBulk     uint16 = 0x05
+	BinaryCmdResponseError uint16 = 0x06
+)
+
+// BuildBinarySingleGetFrame constructs a binary MeCom ?VR request.
+// This is typically encapsulated in a CAN frame with ID 0x300 + address.
+func BuildBinarySingleGetFrame(addr int, seq uint16, paramID, instance int) []byte {
+	buf := make([]byte, 7)
+	buf[0] = byte(seq & 0x7F) // Control: Bit 7=0 (Request)
+	buf[1] = byte(addr)       // Device Address
+	binary.BigEndian.PutUint16(buf[2:4], BinaryCmdQueryValue)
+	binary.BigEndian.PutUint16(buf[4:6], uint16(paramID))
+	buf[6] = byte(instance)
+	return buf
+}
+
+// DecodeBinaryCANFrame parses a binary MeCom response frame from CAN.
+// It handles !VR responses (CAN ID 0x400 + address).
+func DecodeBinaryCANFrame(f canopen.Frame, dataType DataType) (float64, error) {
+	if f.DLC < 8 {
+		return 0, fmt.Errorf("mecom: binary response DLC %d too short", f.DLC)
+	}
+	// Byte 0: Control Byte
+	if f.Data[0]&0x80 == 0 {
+		return 0, fmt.Errorf("mecom: CAN frame is not a response (bit 7 clear)")
+	}
+	// Byte 2-3: Command (should match original request, or be 0x01 for !VR)
+	cmd := binary.BigEndian.Uint16(f.Data[2:4])
+	if cmd == BinaryCmdResponseError {
+		code := f.Data[4]
+		if name, ok := errorsByCode[int(code)]; ok {
+			return 0, fmt.Errorf("mecom: binary nack %02X (%s)", code, name)
+		}
+		return 0, fmt.Errorf("mecom: binary nack %02X", code)
+	}
+
+	// Byte 4-7: Value
+	bits := binary.BigEndian.Uint32(f.Data[4:8])
+	if dataType == DataTypeInt32 {
+		return float64(int32(bits)), nil
+	}
+	return float64(math.Float32frombits(bits)), nil
+}
+
+// ── Client ────────────────────────────────────────────────────────────────────
+
 // ClientConfig configures a synchronous MeCom client.
 type ClientConfig struct {
 	Address byte
@@ -250,6 +587,92 @@ func (c *Client) ReadFloat32(ctx context.Context, paramID, instance int) (float6
 func (c *Client) ReadInt32(ctx context.Context, paramID, instance int) (int32, error) {
 	v, err := c.readNumeric(ctx, paramID, instance, DataTypeInt32)
 	return int32(v), err
+}
+
+// ReadBulk reads a chunk of parameters via ?VX. It is the preferred primitive
+// for background round-robin polling.
+func (c *Client) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
+	raw, err := c.roundTrip(ctx, BuildBulkGetFrame(int(c.address), c.nextSeq(), params))
+	if err != nil {
+		return nil, err
+	}
+	return ParseBulkResponse(raw, params)
+}
+
+func (c *Client) ReadRingPointer(ctx context.Context) (uint32, error) {
+	raw, err := c.roundTrip(ctx, BuildRingPointerFrame(int(c.address), c.nextSeq()))
+	if err != nil {
+		return 0, err
+	}
+	return ParseRingPointerResponse(raw)
+}
+
+func (c *Client) ReadRingBuffer(ctx context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
+	raw, err := c.roundTrip(ctx, BuildRingReadFrame(int(c.address), c.nextSeq(), start, maxBytes))
+	if err != nil {
+		return RingReadResponse{}, err
+	}
+	return ParseRingReadResponse(raw)
+}
+
+func (c *Client) ConfigureRingCapture(ctx context.Context, captureID uint16, params []RingCaptureParameter) error {
+	frame, err := BuildRingCaptureConfigFrame(int(c.address), c.nextSeq(), captureID, params)
+	if err != nil {
+		return err
+	}
+	raw, err := c.roundTrip(ctx, frame)
+	if err != nil {
+		return err
+	}
+	return ParseRingCaptureConfigResponse(raw)
+}
+
+func (c *Client) TriggerRingSync(ctx context.Context) error {
+	raw, err := c.roundTrip(ctx, BuildRingTriggerSyncFrame(int(c.address), c.nextSeq()))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
+func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
+	raw, err := c.roundTrip(ctx, BuildWriteFloat32Frame(int(c.address), c.nextSeq(), paramID, instance, value))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
+func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
+	raw, err := c.roundTrip(ctx, BuildWriteInt32Frame(int(c.address), c.nextSeq(), paramID, instance, value))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
+func (c *Client) WriteString(ctx context.Context, paramID, instance int, value string) error {
+	raw, err := c.roundTrip(ctx, BuildWriteStringFrame(int(c.address), c.nextSeq(), paramID, instance, value))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
+func (c *Client) SaveToFlash(ctx context.Context) error {
+	raw, err := c.roundTrip(ctx, BuildSaveToFlashFrame(int(c.address), c.nextSeq()))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
+func (c *Client) Reset(ctx context.Context) error {
+	raw, err := c.roundTrip(ctx, BuildResetFrame(int(c.address), c.nextSeq()))
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
 }
 
 func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
