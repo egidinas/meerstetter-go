@@ -27,6 +27,9 @@ duplicating protocol code.
   listed as easy but not yet proven.
 - Added utility graph-wall defaults focused on a four-controller TEC bank with
   in-memory/ring-first signal handling.
+- Confirmed the current PiXtend CAN route works with four TEC controllers on
+  the live bus. This validates the four-controller graph-wall baseline as a
+  real deployment case, not only a fixture.
 - Added LUT/TMTC automation scaffolding plus sample-program documentation for
   a simple four-cycle workflow.
 - Verified the baseline with `/home/svc_pmg_testbed_b/.local/go/bin/go test
