@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egidinas/loom-gossamer-shared/go/transport"
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/mecomdict"
 )
@@ -136,11 +135,11 @@ func readChunk(ctx context.Context, client *mecom.Client, target string, address
 }
 
 func dial(ctx context.Context, target string, timeout time.Duration) (net.Conn, error) {
-	ep, ok := transport.ParseEndpoint(target)
+	ep, ok := mecom.ParseEndpoint(target)
 	if !ok {
 		return nil, fmt.Errorf("invalid target %q", target)
 	}
-	return transport.Dial(ctx, ep, timeout)
+	return mecom.Dial(ctx, ep, timeout)
 }
 
 func dataTypeForFormat(format string) mecom.DataType {

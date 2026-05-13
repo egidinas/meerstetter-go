@@ -67,8 +67,8 @@ func TestNewHubConfigCreatesPerDevicePassthroughAndQueues(t *testing.T) {
 
 func TestNewHubConfigRejectsAmbiguousDeviceOwnership(t *testing.T) {
 	_, err := NewHubConfig("127.0.0.1", 15000, []DeviceSpec{
-		{ID: "tec-01", Target: "tcp:192.168.1.10:50000"},
-		{ID: "tec-01", Target: "tcp:192.168.1.11:50000"},
+		{ID: "tec-01", Target: "tcp:127.0.0.1:50000"},
+		{ID: "tec-01", Target: "tcp:127.0.0.1:50001"},
 	})
 	if err == nil {
 		t.Fatal("expected duplicate device id error")

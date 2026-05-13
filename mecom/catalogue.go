@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/egidinas/loom-gossamer-shared/go/graphsem"
+	"github.com/egidinas/signalforge/graphsem"
 )
 
 const DefaultMeComTECCatalogueSourceID = "mecom_tec"

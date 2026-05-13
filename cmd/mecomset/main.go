@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egidinas/loom-gossamer-shared/go/transport"
 	"github.com/egidinas/meerstetter-go/mecom"
 )
 
@@ -128,11 +127,11 @@ func run(ctx context.Context, targets []string, address int, specs []setSpec, ti
 }
 
 func dial(ctx context.Context, target string, timeout time.Duration) (net.Conn, error) {
-	ep, ok := transport.ParseEndpoint(target)
+	ep, ok := mecom.ParseEndpoint(target)
 	if !ok {
 		return nil, fmt.Errorf("invalid target %q", target)
 	}
-	return transport.Dial(ctx, ep, timeout)
+	return mecom.Dial(ctx, ep, timeout)
 }
 
 func parseSetSpecs(values []string) ([]setSpec, error) {
