@@ -140,12 +140,41 @@ direct edge UI with 220 targets, graph-wall tiles, and live event rows.
 Targeted Meerstetter-Go and Loom adapter tests passed. This run did not include
 bounded service restarts or physical fault injection.
 
+2026-05-13 21:07 UTC: reran the recovery-included MVP gate against the current
+clean repo state and live Pi at `.229`:
+
+```sh
+PI_BASE_URL=http://192.168.6.229:18080 \
+LOOM_BASE_URL=http://127.0.0.1:18087 \
+RUN_RECOVERY=1 \
+./deploy/verify_mvp_completion.sh
+```
+
+Result: `PASS Meerstetter-Go MVP gate`. The run verified the direct PiXtend
+SocketCAN edge route, Loom/operator gateway route, edge autonomy during a
+gateway-idle window, direct browser UI population, targeted Meerstetter-Go
+tests, targeted Loom adapter tests, decoder-service restart recovery, and
+CAN-ring-worker restart recovery. It confirmed four live TEC controllers,
+220 discovery targets, 16 writable paths, 208 decoded polling targets, 144
+source-catalogue entries, 16 write rows, 10 remote routes, fresh high-priority
+telemetry within 30 seconds, RAM primary CAN-ring data, flash fallback CAN-ring
+data, merged RAM/flash CAN-ring readout without duplicate mirrored frame keys,
+graph-wall tile data, Arrow IPC export, and NDJSON export/import review. The
+decoder restart recovered API health, telemetry sequence advancement, merged
+raw CAN readout, and graph-wall temperature points. The CAN-ring-worker restart
+recovered decoded telemetry, primary RAM raw-CAN advancement, preserved the
+flash fallback counter, restored merged raw CAN readout, and restored graph-wall
+temperature points.
+
+This run did not simulate physical power interruption or a real owner
+disconnect/takeover timing event.
+
 ## Scope Evidence
 
 | Requirement | Current status | Evidence | Remaining gap |
 | --- | --- | --- | --- |
-| Live PiXtend CAN route | Working | `can0` is up on PiXtend `spi0.1`, `ERROR-ACTIVE`, 1 Mbit/s; `meerstettergo.service` and `pixtend-can-ring.service` are active and enabled; `deploy/verify_pixtend_recovery.sh` proves decoder restart recovery with live sequence advancement; `deploy/verify_pixtend_ring_recovery.sh` proves ring-worker restart recovery with RAM raw-CAN advancement; `deploy/verify_pixtend_edge_autonomy.sh` proves direct edge telemetry and RAM CAN-ring counters advance during a gateway-idle window with bounded flush grace. | Add controller power-cycle, bus-congestion, intentional owner-disconnect, and physical power-interruption regression checks. |
-| Four TEC controllers | Working | `/api/log/ring?tail=true&limit=80` returned `tec-75`, `tec-76`, `tec-81`, and `tec-84`. | Revalidate after controller power cycling and bus congestion. |
+| Live PiXtend CAN route | Working | `can0` is up on PiXtend `spi0.1`, `ERROR-ACTIVE`, 1 Mbit/s; `meerstettergo.service` and `pixtend-can-ring.service` are active and enabled; `deploy/verify_pixtend_recovery.sh` proves decoder restart recovery with live sequence advancement; `deploy/verify_pixtend_ring_recovery.sh` proves ring-worker restart recovery with RAM raw-CAN advancement; `deploy/verify_pixtend_edge_autonomy.sh` proves direct edge telemetry and RAM CAN-ring counters advance during a gateway-idle window with bounded flush grace. The 2026-05-13 21:07 UTC recovery-included MVP gate passed against the clean repo state. | Add physical power-interruption and real owner-disconnect/takeover timing regression checks. |
+| Four TEC controllers | Working | `/api/log/ring?tail=true&limit=80` returned `tec-75`, `tec-76`, `tec-81`, and `tec-84`; the recovery-included MVP gate verifies four live decoded controllers through direct edge and Loom gateway routes. | Revalidate after controller power cycling or other physical topology changes. |
 | Decoded telemetry | Working with freshness gate | The live direct and Loom gateway verifiers require `object_temp_c`, `sink_temp_c`, `target_object_temp_c`, `output_current_a`, and `output_voltage_v` to be fresh across all live instanced TEC targets within `MAX_SAMPLE_AGE_SECONDS=30`; the latest gateway run passed with 80 fresh high-priority target values and the polling-status route reported 208/208 targets fresh. | Define tier-specific freshness budgets for lower-priority catalogue variables and add congestion/power-cycle freshness regressions. |
 | Signal tree | Working | `/api/discovery/tree`, `/api/loom/discovery-tree`, `/api/loom/discovery/tree`, and `/api/operator/meerstettergo/discovery/tree` expose the JSON discovery contract with 220 targets and 16 writable target paths. | Continue classifying undocumented parameters before making them active writes. |
 | SignalForge/Loom catalogue | Working for catalogue and write metadata | `/api/loom/source-catalogue` exposes 144 entries, command metadata, target read routes, and lease-required write routes. | Prove ownership handoff through a live Loom node, not only the Meerstetter-Go edge route. |
@@ -155,7 +184,7 @@ bounded service restarts or physical fault injection.
 | Permanent export and review | MVP working with durable archive contract | `/api/log/export` emits NDJSON, `/api/log/export?format=arrow_ipc` emits a binary Arrow IPC telemetry stream, `/api/log/import/review` reviews NDJSON without committing, and `/api/log/archive/manifest` exposes the stable NDJSON/Arrow/HDF5 stream contract for telemetry, raw CAN, command events, object dictionary snapshots, and graph-wall assignments. | HDF5 remains a planned archive contract if required for final production. |
 | Redundant transports | Metadata path present | CAN is active/preferred; serial FTDI and Kvaser-compatible routes are exposed through the same target model. | Validate live FTDI fallback arbitration and TCP device-server sharing under load. |
 | Write path | Present and guarded | Writable targets are initialized with current values and expose sequencer write metadata requiring a lease. Direct no-lease probes are rejected at the edge with HTTP 428, and gateway no-lease probes are rejected with `X-Loom-Sequencer-Lease` enforcement before forwarding. | Add end-to-end command receipt tests against live hardware before routine writes. |
-| One-command MVP gate | Working, with optional bounded recovery coverage | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, browser UI smoke, targeted Go tests, and optional bounded service-restart checks. The default run, a fast no-UI/no-test route run, the post-route-fix `RUN_RECOVERY=1` run, and the post-`/health`-alias default run all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss, controller power cycling, intentional owner-disconnect, or bus congestion. |
+| One-command MVP gate | Working, with bounded recovery coverage verified | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, browser UI smoke, targeted Go tests, and optional bounded service-restart checks. The default run, fast no-UI/no-test route run, post-route-fix `RUN_RECOVERY=1` run, post-`/health`-alias default run, and current clean-state `RUN_RECOVERY=1` run all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss or a real owner-disconnect/takeover timing event. |
 
 ## Prompt-to-Artifact Checklist
 
