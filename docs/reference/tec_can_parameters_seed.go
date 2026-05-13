@@ -1,3 +1,8 @@
+//go:build ignore
+
+// Seed fragment preserved from the live TEC CAN discovery work. It is not part
+// of the build; the maintained catalogue lives in the mecom and mecomdict
+// packages.
 package mecom
 
 var TEC_CAN_PARAMETERS = []ParameterDef{

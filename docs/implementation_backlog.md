@@ -133,6 +133,18 @@ duplicating protocol code.
   [`docs/pixtend_route_audit_2026-05-13.md`](pixtend_route_audit_2026-05-13.md).
 - MVP completion status and the remaining closeout gates are captured in
   [`docs/mvp_completion_audit_2026-05-13.md`](mvp_completion_audit_2026-05-13.md).
+- Cleaned the repository surface after the live PiXtend bring-up by moving
+  tracked deployment binaries out of the root into platform-specific
+  `artifacts/` directories, documenting their install/runtime role, and
+  preserving the hidden TEC CAN parameter seed fragment as an ignored-build
+  reference under `docs/reference`.
+- Tightened the MVP audit to reflect what the Loom/operator gateway verifier
+  already proves live: source-catalogue ownership metadata, remote read/write
+  routes, polling freshness, target-read availability, RAM/flash ring merge,
+  graph-wall data, Arrow/NDJSON export, import review, and gateway-side
+  no-lease write rejection. Remaining work is now focused on real
+  owner-disconnect/takeover timing and leased write acceptance, not basic
+  catalogue plumbing.
 
 Remaining route-hardening work is tracked below as reusable packaging,
 owner-disconnect and power-interruption recovery tests, measured bus budgeting,

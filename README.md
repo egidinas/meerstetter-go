@@ -60,6 +60,8 @@ TCP port `50000`.
   implementation work for the universal Meerstetter utility.
 - [`docs/public_variant_readiness.md`](docs/public_variant_readiness.md): public
   dependency gates and legacy-harvest boundaries.
+- [`artifacts/README.md`](artifacts/README.md): tracked live-bring-up binaries
+  organized by platform; local rebuilds stay in ignored `bin/`.
 
 ## Example
 
@@ -214,6 +216,12 @@ The recovery gate restarts only `meerstettergo.service`; it does not write to
 TEC controllers. It verifies that `pixtend-can-ring.service` remains active,
 telemetry sequence numbers advance again, RAM/flash ring counters do not
 regress, and the merged CAN ring plus graph-wall temperature tile recover.
+
+Checked-in Pi and host binaries from the live bring-up are stored under
+[`artifacts/`](artifacts/). Deployment services still run the installed
+`/usr/local/bin/meerstetterd` and `/usr/local/bin/teccanprobe` paths; the
+artifact directory is for provenance and recovery, not an alternate runtime
+location.
 
 ## Scope
 
