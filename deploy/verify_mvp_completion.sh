@@ -16,6 +16,7 @@ RUN_UI=${RUN_UI:-1}
 RUN_TESTS=${RUN_TESTS:-1}
 RUN_RECOVERY=${RUN_RECOVERY:-0}
 RUN_AUTONOMY=${RUN_AUTONOMY:-1}
+RUN_OWNER_TAKEOVER=${RUN_OWNER_TAKEOVER:-1}
 
 step() {
     printf '\n== %s\n' "$*"
@@ -42,6 +43,10 @@ if [[ "$RUN_AUTONOMY" == "1" ]]; then
     require_file "$ROOT/deploy/verify_pixtend_edge_autonomy.sh"
 fi
 
+if [[ "$RUN_OWNER_TAKEOVER" == "1" ]]; then
+    require_file "$ROOT/deploy/verify_pixtend_owner_takeover.sh"
+fi
+
 if [[ "$RUN_UI" == "1" ]]; then
     require_file "$ROOT/deploy/verify_ui_browser_smoke.sh"
 fi
@@ -62,6 +67,13 @@ if [[ "$RUN_AUTONOMY" == "1" ]]; then
     BASE_URL="$PI_BASE_URL" GATEWAY_BASE_URL="$LOOM_BASE_URL" "$ROOT/deploy/verify_pixtend_edge_autonomy.sh"
 else
     ok "edge autonomy gate skipped (RUN_AUTONOMY=0)"
+fi
+
+if [[ "$RUN_OWNER_TAKEOVER" == "1" ]]; then
+    step "PiXtend owner reconnect/takeover route"
+    BASE_URL="$PI_BASE_URL" GATEWAY_BASE_URL="$LOOM_BASE_URL" "$ROOT/deploy/verify_pixtend_owner_takeover.sh"
+else
+    ok "owner reconnect/takeover gate skipped (RUN_OWNER_TAKEOVER=0)"
 fi
 
 if [[ "$RUN_UI" == "1" ]]; then
@@ -109,10 +121,10 @@ fi
 
 if [[ "$RUN_RECOVERY" == "1" ]]; then
     recovery_line="- bounded decoder-service and CAN-ring-worker restart recovery"
-    uncovered_recovery="- power-interruption recovery\n- physical owner-disconnect/takeover timing"
+    uncovered_recovery="- power-interruption recovery\n- real gateway/owner process-stop timing\n- end-to-end leased write acceptance"
 else
     recovery_line="- bounded service restart recovery skipped; set RUN_RECOVERY=1 to include it"
-    uncovered_recovery="- power-interruption recovery\n- physical owner-disconnect/takeover timing\n- service restart recovery unless RUN_RECOVERY=1 is set"
+    uncovered_recovery="- power-interruption recovery\n- real gateway/owner process-stop timing\n- service restart recovery unless RUN_RECOVERY=1 is set\n- end-to-end leased write acceptance"
 fi
 
 if [[ "$RUN_UI" == "1" ]]; then
@@ -133,6 +145,12 @@ else
     autonomy_line="- PiXtend edge autonomy skipped; set RUN_AUTONOMY=1 to include it"
 fi
 
+if [[ "$RUN_OWNER_TAKEOVER" == "1" ]]; then
+    owner_takeover_line="- route-level owner reconnect/takeover after a gateway-idle window"
+else
+    owner_takeover_line="- owner reconnect/takeover skipped; set RUN_OWNER_TAKEOVER=1 to include it"
+fi
+
 cat <<EOF
 
 PASS Meerstetter-Go MVP gate
@@ -143,6 +161,7 @@ Verified coverage:
 - four-controller decoded telemetry, discovery tree, graph wall, write guard, source catalogue, export/import, Arrow IPC
 - primary RAM CAN ring plus flash fallback ring and merged deduplicated readout
 $autonomy_line
+$owner_takeover_line
 $ui_line
 $tests_line
 $recovery_line

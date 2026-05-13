@@ -169,22 +169,77 @@ temperature points.
 This run did not simulate physical power interruption or a real owner
 disconnect/takeover timing event.
 
+2026-05-13 21:23 UTC: added and ran the route-level owner reconnect/takeover
+verifier:
+
+```sh
+BASE_URL=http://192.168.6.229:18080 \
+GATEWAY_BASE_URL=http://127.0.0.1:18087 \
+./deploy/verify_pixtend_owner_takeover.sh
+```
+
+Result: `PASS PiXtend owner reconnect/takeover route`. The edge advanced while
+the gateway/owner was idle from sequence `91488` to `92112`; the primary RAM
+raw-CAN ring advanced from `69564` to `70928`; the gateway reattached and
+caught up to sequence `92112`; the merged RAM/flash CAN ring remained
+deduplicated; the decoded ring still covered all four expected controllers; the
+graph-wall temperature tile still had live points; and the gateway write path
+remained lease-gated.
+
+The fast non-invasive MVP gate was rerun with the new verifier integrated:
+
+```sh
+PI_BASE_URL=http://192.168.6.229:18080 \
+LOOM_BASE_URL=http://127.0.0.1:18087 \
+RUN_UI=0 RUN_TESTS=0 RUN_RECOVERY=0 \
+./deploy/verify_mvp_completion.sh
+```
+
+Result: `PASS Meerstetter-Go MVP gate`. This run verified the direct PiXtend
+route, Loom/operator gateway route, edge autonomy, and route-level owner
+reconnect/takeover. The integrated owner reconnect section advanced the edge
+from sequence `94192` to `95856`, advanced the RAM raw-CAN ring from `72292` to
+`73656`, reattached the gateway to sequence `95856`, preserved deduplicated
+RAM/flash merged readout, preserved four-controller decoded ring coverage, kept
+the graph-wall temperature tile populated, and kept writes lease-gated.
+
+The full non-restart MVP gate was rerun after fixing the browser smoke count
+assertion:
+
+```sh
+PI_BASE_URL=http://192.168.6.229:18080 \
+LOOM_BASE_URL=http://127.0.0.1:18087 \
+RUN_RECOVERY=0 GO_BIN=/home/svc_pmg_testbed_b/.local/go/bin/go \
+./deploy/verify_mvp_completion.sh
+```
+
+Result: `PASS Meerstetter-Go MVP gate`. This run included the direct PiXtend
+route, Loom/operator gateway route, edge autonomy, owner reconnect, direct
+browser UI smoke, targeted Meerstetter-Go tests, and targeted Loom adapter
+tests. The browser smoke captured a nonblank 1440x1000 screenshot and confirmed
+220 targets plus the graph-wall tiles in the live DOM.
+
+These checks prove a late or idle owner can reconnect to a still-running edge
+and catch up through the same backend/UI route. They do not stop the real
+gateway process, stop a dedicated owner process, simulate Pi power loss,
+simulate CAN congestion, or exercise controller-internal ring-buffer gap-fill.
+
 ## Scope Evidence
 
 | Requirement | Current status | Evidence | Remaining gap |
 | --- | --- | --- | --- |
-| Live PiXtend CAN route | Working | `can0` is up on PiXtend `spi0.1`, `ERROR-ACTIVE`, 1 Mbit/s; `meerstettergo.service` and `pixtend-can-ring.service` are active and enabled; `deploy/verify_pixtend_recovery.sh` proves decoder restart recovery with live sequence advancement; `deploy/verify_pixtend_ring_recovery.sh` proves ring-worker restart recovery with RAM raw-CAN advancement; `deploy/verify_pixtend_edge_autonomy.sh` proves direct edge telemetry and RAM CAN-ring counters advance during a gateway-idle window with bounded flush grace. The 2026-05-13 21:07 UTC recovery-included MVP gate passed against the clean repo state. | Add physical power-interruption and real owner-disconnect/takeover timing regression checks. |
+| Live PiXtend CAN route | Working | `can0` is up on PiXtend `spi0.1`, `ERROR-ACTIVE`, 1 Mbit/s; `meerstettergo.service` and `pixtend-can-ring.service` are active and enabled; `deploy/verify_pixtend_recovery.sh` proves decoder restart recovery with live sequence advancement; `deploy/verify_pixtend_ring_recovery.sh` proves ring-worker restart recovery with RAM raw-CAN advancement; `deploy/verify_pixtend_edge_autonomy.sh` proves direct edge telemetry and RAM CAN-ring counters advance during a gateway-idle window with bounded flush grace; `deploy/verify_pixtend_owner_takeover.sh` proves gateway-idle owner reconnect/catch-up through the Loom route. | Add physical power-interruption and real process-stop owner timing regression checks. |
 | Four TEC controllers | Working | `/api/log/ring?tail=true&limit=80` returned `tec-75`, `tec-76`, `tec-81`, and `tec-84`; the recovery-included MVP gate verifies four live decoded controllers through direct edge and Loom gateway routes. | Revalidate after controller power cycling or other physical topology changes. |
 | Decoded telemetry | Working with freshness gate | The live direct and Loom gateway verifiers require `object_temp_c`, `sink_temp_c`, `target_object_temp_c`, `output_current_a`, and `output_voltage_v` to be fresh across all live instanced TEC targets within `MAX_SAMPLE_AGE_SECONDS=30`; the latest gateway run passed with 80 fresh high-priority target values and the polling-status route reported 208/208 targets fresh. | Define tier-specific freshness budgets for lower-priority catalogue variables and add congestion/power-cycle freshness regressions. |
 | Signal tree | Working | `/api/discovery/tree`, `/api/loom/discovery-tree`, `/api/loom/discovery/tree`, and `/api/operator/meerstettergo/discovery/tree` expose the JSON discovery contract with 220 targets and 16 writable target paths. | Continue classifying undocumented parameters before making them active writes. |
-| SignalForge/Loom catalogue | Working for catalogue, read freshness, and write guards | `/api/loom/source-catalogue` exposes 144 entries, command metadata, target read routes, and lease-required write routes. `deploy/verify_loom_gateway_route.sh` now verifies the running Loom/operator gateway contract: `selection_owner=loom.operator`, remote read/write route metadata, live polling freshness, target-read route availability, and safe gateway rejection for writes without a sequencer lease. | Prove real owner-disconnect/takeover timing and end-to-end leased write acceptance before routine writes. |
+| SignalForge/Loom catalogue | Working for catalogue, read freshness, write guards, and route-level owner reconnect | `/api/loom/source-catalogue` exposes 144 entries, command metadata, target read routes, and lease-required write routes. `deploy/verify_loom_gateway_route.sh` verifies the running Loom/operator gateway contract: `selection_owner=loom.operator`, remote read/write route metadata, live polling freshness, target-read route availability, and safe gateway rejection for writes without a sequencer lease. `deploy/verify_pixtend_owner_takeover.sh` verifies the gateway can reattach after an idle owner window and catch up to the direct edge sequence. | Prove real process-stop owner timing and end-to-end leased write acceptance before routine writes. |
 | Graph wall | Working at API, served UI, and browser-rendered level | `/api/graph-wall` returns temperature, target, power, and event tiles; `/` loads the shared graph-wall renderer and live API routes; the aggregate pseudo-target tile route returns live device series; `deploy/verify_ui_browser_smoke.sh` uses headless Chromium to confirm live plots, graph-wall assignment controls, target controls, and all four TEC nodes instead of `loading...`. | Add richer browser layout regression checks if this becomes a CI/deployment gate. |
 | Temporary logging | Working | `/api/log/ring` serves decoded telemetry from the in-memory log ring; `/api/can/ring` serves raw CAN records from the primary RAM ring. | Add pressure tests for ring sizing and dropped-frame accounting. |
-| Flash fallback | Configured, exposed, and reconciled with RAM | `/api/health` reports RAM as primary and flash as fallback/bootstrap; `/api/can/ring?source=fallback_flash` reads the fallback explicitly; `/api/can/ring?source=merged` returns a RAM-plus-flash tail without duplicate frame keys in the live route and recovery verifiers; `deploy/verify_pixtend_ring_recovery.sh` proves bounded `pixtend-can-ring.service` restart recovery; `deploy/verify_pixtend_edge_autonomy.sh` proves the fallback remains readable and non-regressing while the primary RAM ring advances. | Prove intentional owner-disconnect recovery, physical power-interruption recovery, bus-congestion behavior, and controller-ring gap-fill under scripted fault tests. |
+| Flash fallback | Configured, exposed, and reconciled with RAM | `/api/health` reports RAM as primary and flash as fallback/bootstrap; `/api/can/ring?source=fallback_flash` reads the fallback explicitly; `/api/can/ring?source=merged` returns a RAM-plus-flash tail without duplicate frame keys in the live route and recovery verifiers; `deploy/verify_pixtend_ring_recovery.sh` proves bounded `pixtend-can-ring.service` restart recovery; `deploy/verify_pixtend_edge_autonomy.sh` proves the fallback remains readable and non-regressing while the primary RAM ring advances; `deploy/verify_pixtend_owner_takeover.sh` proves a gateway reattach keeps the merged RAM/flash view deduplicated. | Prove physical power-interruption recovery, bus-congestion behavior, real process-stop owner timing, and controller-ring gap-fill under scripted fault tests. |
 | Permanent export and review | MVP working with durable archive contract | `/api/log/export` emits NDJSON, `/api/log/export?format=arrow_ipc` emits a binary Arrow IPC telemetry stream, `/api/log/import/review` reviews NDJSON without committing, and `/api/log/archive/manifest` exposes the stable NDJSON/Arrow/HDF5 stream contract for telemetry, raw CAN, command events, object dictionary snapshots, and graph-wall assignments. | HDF5 remains a planned archive contract if required for final production. |
 | Redundant transports | Metadata path present | CAN is active/preferred; serial FTDI and Kvaser-compatible routes are exposed through the same target model. | Validate live FTDI fallback arbitration and TCP device-server sharing under load. |
 | Write path | Present and guarded | Writable targets are initialized with current values and expose sequencer write metadata requiring a lease. Direct no-lease probes are rejected at the edge with HTTP 428, and gateway no-lease probes are rejected with `X-Loom-Sequencer-Lease` enforcement before forwarding. | Add end-to-end command receipt tests against live hardware before routine writes. |
-| One-command MVP gate | Working, with bounded recovery coverage verified | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, browser UI smoke, targeted Go tests, and optional bounded service-restart checks. The default run, fast no-UI/no-test route run, post-route-fix `RUN_RECOVERY=1` run, post-`/health`-alias default run, and current clean-state `RUN_RECOVERY=1` run all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss or a real owner-disconnect/takeover timing event. |
+| One-command MVP gate | Working, with bounded recovery and route-level reconnect coverage verified | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, PiXtend owner reconnect verifier, browser UI smoke, targeted Go tests, and optional bounded service-restart checks. The default run, fast no-UI/no-test route run, post-route-fix `RUN_RECOVERY=1` run, post-`/health`-alias default run, current clean-state `RUN_RECOVERY=1` run, post-owner-verifier fast route run, and post-owner-verifier full non-restart run all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss, real process-stop owner timing, or end-to-end leased write acceptance. |
 
 ## Prompt-to-Artifact Checklist
 
@@ -194,11 +249,11 @@ disconnect/takeover timing event.
 | Redundant route model | Source catalogue transport metadata, FTDI/Kvaser route metadata, Loom gateway proxy routes | Metadata path present; live FTDI arbitration still pending. |
 | Same backend/UI contract for all paths | `/api/loom/source-catalogue`, `/api/operator/meerstettergo/*`, target read/write routes | Live gateway verified; write path is lease guarded. |
 | In-RAM primary ring plus flash fallback | `/api/can/ring`, `/api/can/ring?source=fallback_flash`, `/api/can/ring?source=merged` | Live verified with deduped RAM/flash merge. |
-| Edge worker independent of owner | `deploy/verify_pixtend_edge_autonomy.sh` | Live verified for gateway-idle edge advancement; intentional owner outage still pending. |
+| Edge worker independent of owner | `deploy/verify_pixtend_edge_autonomy.sh`, `deploy/verify_pixtend_owner_takeover.sh` | Live verified for gateway-idle edge advancement and gateway reattach/catch-up; real process-stop owner outage still pending. |
 | Four-controller graph wall | `/api/graph-wall`, `/api/tiles`, `deploy/verify_ui_browser_smoke.sh` | API and browser smoke verified. |
 | Full signal catalogue and writable paths | `/api/discovery/tree`, `/api/loom/source-catalogue`, write-guard probes | 220 targets and 16 initialized writable paths verified. |
 | Export and reimport/review | `/api/log/export`, `/api/log/export?format=arrow_ipc`, `/api/log/import/review`, archive manifest | NDJSON and Arrow IPC verified; HDF5 remains manifest-only. |
-| Conservative reliability gate | `deploy/verify_mvp_completion.sh`, recovery verifiers | Functional MVP verified; physical fault injection remains open. |
+| Conservative reliability gate | `deploy/verify_mvp_completion.sh`, recovery verifiers, owner reconnect verifier | Functional MVP verified; physical fault injection and real process-stop owner timing remain open. |
 
 ## Code Contracts
 
@@ -250,6 +305,15 @@ once, leaves the gateway idle during a short direct-edge window, and requires
 the PiXtend edge telemetry sequence plus primary RAM raw-CAN ring counter to
 advance independently. It also verifies the flash fallback and merged ring
 remain readable without duplicate mirrored frame keys.
+
+```sh
+./deploy/verify_pixtend_owner_takeover.sh
+```
+
+The owner reconnect verifier is also non-invasive. It lets the direct edge run
+through a gateway-idle window, then requires the Loom/operator gateway to catch
+up to the edge sequence, keep the merged RAM/flash CAN ring deduplicated, keep
+decoded and graph-wall data populated, and keep writable targets lease-gated.
 
 The direct and gateway verifiers default to a 30-second high-priority freshness
 budget for `object_temp_c`, `sink_temp_c`, `target_object_temp_c`,
@@ -312,16 +376,17 @@ cd /home/svc_pmg_testbed_b/loom
   route. Lower-priority catalogue variables still need tier-specific freshness
   budgets and congestion/power-cycle regression tests.
 - RAM ring and flash fallback have a no-duplicate merge primitive plus live
-  route, decoder restart recovery, and ring-worker service restart verifier
-  coverage. Owner-disconnect, power-interruption recovery, bus-congestion
-  behavior, and controller-ring gap-fill still need scripted proof.
+  route, decoder restart recovery, ring-worker service restart, edge autonomy,
+  and owner-reconnect verifier coverage. Physical power-interruption recovery,
+  real process-stop owner timing, bus-congestion behavior, and controller-ring
+  gap-fill still need scripted proof.
 - Durable archival export now has a stable manifest contract. NDJSON and Arrow
   IPC telemetry export are implemented and live-verifier gated. HDF5 remains a
   planned writer if it becomes a production requirement.
 - The live Loom ownership path is verifier-covered for gateway catalogue
-  ownership metadata, read freshness, and no-lease write rejection. Real
-  owner-disconnect/takeover timing and leased write acceptance still need
-  scripted proof before routine writes.
+  ownership metadata, read freshness, gateway reattach after an idle owner
+  window, and no-lease write rejection. Real process-stop owner timing and
+  leased write acceptance still need scripted proof before routine writes.
 - Browser visual smoke is now automated with headless Chromium; the route
   verifier also covers the aggregate pseudo-target tile query that previously
   left the graph wall empty. Richer pixel/layout regression remains optional

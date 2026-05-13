@@ -210,12 +210,22 @@ LOOM_BASE_URL=http://127.0.0.1:18087 \
 ```sh
 BASE_URL=http://192.168.6.229:18080 ./deploy/verify_pixtend_route.sh
 BASE_URL=http://192.168.6.229:18080 ./deploy/verify_pixtend_recovery.sh
+BASE_URL=http://192.168.6.229:18080 \
+  GATEWAY_BASE_URL=http://127.0.0.1:18087 \
+  ./deploy/verify_pixtend_owner_takeover.sh
 ```
 
 The recovery gate restarts only `meerstettergo.service`; it does not write to
 TEC controllers. It verifies that `pixtend-can-ring.service` remains active,
 telemetry sequence numbers advance again, RAM/flash ring counters do not
 regress, and the merged CAN ring plus graph-wall temperature tile recover.
+
+The owner reconnect gate is non-invasive. It leaves the gateway/owner idle for
+a short direct-edge window, verifies the PiXtend RAM ring advances, then
+requires the Loom/operator gateway to catch up, keep merged RAM/flash CAN
+readout deduplicated, keep graph-wall data populated, and keep writable targets
+lease-gated. It is route-level proof, not physical power-loss or real process
+stop fault injection.
 
 Checked-in Pi and host binaries from the live bring-up are stored under
 [`artifacts/`](artifacts/). Deployment services still run the installed

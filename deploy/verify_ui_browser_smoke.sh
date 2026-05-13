@@ -123,8 +123,8 @@ if grep -Fq "loading..." "$dom"; then
     fail "browser DOM still contains loading placeholder"
 fi
 
-target_count=$(grep -o 'class="target"' "$dom" | wc -l | tr -d ' ')
-event_count=$(grep -o 'class="event"' "$dom" | wc -l | tr -d ' ')
+target_count=$( (grep -o 'class="target"' "$dom" || true) | wc -l | tr -d ' ')
+event_count=$( (grep -o 'class="event"' "$dom" || true) | wc -l | tr -d ' ')
 graph_count=0
 grep -Fq "All Temperatures" "$dom" && graph_count=$((graph_count + 1))
 grep -Fq "All Output Power" "$dom" && graph_count=$((graph_count + 1))

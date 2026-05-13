@@ -123,8 +123,8 @@ ssh -i /home/svc_pmg_testbed_b/.ssh/router_lan_can pi@192.168.6.229 \
 - Validate the exact Meerstetter controller ring-buffer primitive on live
   controllers and encode wrap/limit behavior in tests.
 - Add measured bus-capacity budgets for 4, 8, and 16 controller cases.
-- Add reconnect/resume checks that prove owner-disconnect and controller
-  ring-buffer gap-fill do not duplicate samples.
+- Extend the current route-level reconnect/resume proof to real process-stop
+  owner timing and controller ring-buffer gap-fill without duplicate samples.
 - Promote the live PiXtend config and service layout into deployment-owned
   packaging with explicit site-local/private values separated from public-safe
   examples.

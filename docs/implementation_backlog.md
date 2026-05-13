@@ -109,8 +109,15 @@ duplicating protocol code.
   without duplicate mirrored frame keys, graph-wall tile recovery, post-restart
   service active state, browser-populated UI data, and the JSON discovery
   aliases consumed by the Loom gateway. The gate still avoids TEC writes;
-  physical power-loss, owner-disconnect/takeover, and bus-congestion checks
-  remain separate hardening work.
+  physical power-loss, real process-stop owner timing, end-to-end leased write
+  acceptance, and bus-congestion checks remain separate hardening work.
+- Added `deploy/verify_pixtend_owner_takeover.sh` as a non-invasive route-level
+  owner reconnect gate. It verifies that the PiXtend edge keeps advancing while
+  the gateway/owner is idle, that the Loom/operator gateway reattaches and
+  catches up to the direct edge sequence, that merged RAM/flash CAN readout
+  stays deduplicated, that decoded and graph-wall data stay populated after
+  reattach, and that writable targets remain lease-gated. The top-level MVP gate
+  now runs this verifier by default.
 - Reran the default non-invasive MVP gate after the plain `/health` edge alias
   was deployed. It passed the direct PiXtend route, Loom/operator gateway
   route, PiXtend edge autonomy gate, direct browser UI smoke, targeted
@@ -142,13 +149,13 @@ duplicating protocol code.
   already proves live: source-catalogue ownership metadata, remote read/write
   routes, polling freshness, target-read availability, RAM/flash ring merge,
   graph-wall data, Arrow/NDJSON export, import review, and gateway-side
-  no-lease write rejection. Remaining work is now focused on real
-  owner-disconnect/takeover timing and leased write acceptance, not basic
-  catalogue plumbing.
+  no-lease write rejection. Remaining work is now focused on real process-stop
+  owner timing and leased write acceptance, not basic catalogue plumbing.
 
 Remaining route-hardening work is tracked below as reusable packaging,
-owner-disconnect and power-interruption recovery tests, measured bus budgeting,
-and exact live validation of the controller ring-buffer primitive limits.
+real process-stop owner timing, power-interruption recovery tests, measured bus
+budgeting, and exact live validation of the controller ring-buffer primitive
+limits.
 
 ## P1 Library Completeness
 
@@ -191,9 +198,10 @@ and exact live validation of the controller ring-buffer primitive limits.
   smart TM mux, TC demux, and reconnect behavior.
 - Add reconnect/resume helpers using ring sequence numbers. The edge route now
   has a tested RAM-plus-flash merge primitive plus decoder-service and
-  ring-worker restart recovery verifiers; remaining work is owner disconnect,
-  owner takeover, power-interruption recovery, and controller-ring gap-fill
-  regression coverage.
+  ring-worker restart recovery verifiers plus route-level owner reconnect and
+  catch-up coverage; remaining work is real process-stop owner timing,
+  power-interruption recovery, end-to-end leased write acceptance, and
+  controller-ring gap-fill regression coverage.
 - Added a conservative `mecom` bus-capacity estimator for 4, 8, and 16
   controller cases. It derives the ring-slot budget, overflow into the
   round-robin queue, queue cycle time, and estimated CAN utilization from the
