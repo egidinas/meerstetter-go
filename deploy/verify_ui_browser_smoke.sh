@@ -12,6 +12,8 @@ WINDOW_SIZE=${WINDOW_SIZE:-1440,1000}
 VIRTUAL_TIME_BUDGET_MS=${VIRTUAL_TIME_BUDGET_MS:-10000}
 MIN_SCREENSHOT_BYTES=${MIN_SCREENSHOT_BYTES:-50000}
 MIN_SCREENSHOT_SD=${MIN_SCREENSHOT_SD:-1000}
+MIN_PROVENANCE_TARGETS=${MIN_PROVENANCE_TARGETS:-160}
+MIN_WRITABLE_TARGETS=${MIN_WRITABLE_TARGETS:-16}
 KEEP_UI_SMOKE=${KEEP_UI_SMOKE:-0}
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
@@ -99,6 +101,18 @@ require_dom() {
     grep -Fq "$needle" "$dom" || fail "browser DOM missing $description ($needle)"
 }
 
+require_dom_count() {
+    local needle=$1
+    local description=$2
+    local minimum=$3
+    local count
+    count=$( (grep -Fo "$needle" "$dom" || true) | wc -l | tr -d ' ')
+    if (( count < minimum )); then
+        fail "browser DOM $description count too low: $count < $minimum ($needle)"
+    fi
+    ok "browser DOM $description count: $count"
+}
+
 require_dom "Project" "project side panel"
 require_dom "Signal Tree" "signal tree link"
 require_dom "Graph Wall" "graph wall link"
@@ -112,12 +126,28 @@ require_dom "output_current_a" "output current signal"
 require_dom "output_voltage_v" "output voltage signal"
 require_dom "Actual Output Current" "output-current display label"
 require_dom "Output Voltage" "output-voltage display label"
+require_dom "Primary path" "primary-path status row"
+require_dom "PiXtend SocketCAN" "primary SocketCAN provenance"
+require_dom "Fallbacks" "fallback status row"
+require_dom "RAM ring" "RAM ring status"
+require_dom "flash ring" "flash ring status"
 
 IFS=',' read -r -a devices <<< "$EXPECTED_DEVICES"
 for device in "${devices[@]}"; do
     require_dom "$device (TEC controller)" "$device tree section"
     require_dom "device:$device:" "$device target IDs"
 done
+
+require_dom_count 'class="target-provenance"' "rendered provenance rows" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip device"' "device provenance chips" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip instance"' "instance provenance chips" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip parameter"' "parameter provenance chips" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip transport"' "transport provenance chips" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip readout"' "readout provenance chips" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'class="chip write"' "writable target chips" "$MIN_WRITABLE_TARGETS"
+require_dom_count 'Active transport:' "active-transport detail rows" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'Read path:' "read-path detail rows" "$MIN_PROVENANCE_TARGETS"
+require_dom_count 'Write path:' "write-path detail rows" "$MIN_PROVENANCE_TARGETS"
 
 if grep -Fq "loading..." "$dom"; then
     fail "browser DOM still contains loading placeholder"

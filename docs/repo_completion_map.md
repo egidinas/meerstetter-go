@@ -105,7 +105,9 @@ Safe default gates:
 - `deploy/verify_loom_gateway_route.sh`: Loom/operator gateway route.
 - `deploy/verify_pixtend_owner_takeover.sh`: route-level owner idle and
   reattach proof.
-- `deploy/verify_ui_browser_smoke.sh`: browser DOM/screenshot population check.
+- `deploy/verify_ui_browser_smoke.sh`: browser DOM/screenshot population check
+  plus rendered provenance checks for device, instance, parameter, transport,
+  readout, and writable target chips.
 - `deploy/verify_mvp_completion.sh`: wrapper for the safe default set.
 
 Bounded but disruptive gates:

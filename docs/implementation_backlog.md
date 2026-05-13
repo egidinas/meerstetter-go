@@ -151,6 +151,11 @@ duplicating protocol code.
   graph-wall data, Arrow/NDJSON export, import review, and gateway-side
   no-lease write rejection. Remaining work is now focused on real process-stop
   owner timing and leased write acceptance, not basic catalogue plumbing.
+- Tightened the browser smoke gate so a passing UI run now proves not only that
+  the graph wall and 220-target signal tree render, but also that the rendered
+  target rows expose parsable device, instance, parameter, active transport,
+  readout, and writable/read-only provenance for the four-controller PiXtend
+  route.
 
 Remaining route-hardening work is tracked below as reusable packaging,
 real process-stop owner timing, power-interruption recovery tests, measured bus
