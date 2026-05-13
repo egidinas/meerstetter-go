@@ -61,6 +61,8 @@ serial-device-server targets typically use TCP port `50000`.
 
 - [`docs/README.md`](docs/README.md): repository-local MeCom, CANopen, TMTC,
   logging, graph-wall, and utility architecture guide.
+- [`docs/repo_completion_map.md`](docs/repo_completion_map.md): canonical repo
+  surfaces, live data-path contract, verification gates, and cleanup rules.
 - [`docs/source_inventory.md`](docs/source_inventory.md): local source-material
   inventory used while deriving the implementation, including which files stay
   outside this public-safe repo.

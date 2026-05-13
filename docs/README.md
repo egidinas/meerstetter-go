@@ -5,6 +5,12 @@ communication. It is deliberately smaller than an application: it should be
 safe to share, easy to test, and independent from Loom, Gossamer, or any lab
 deployment.
 
+For the current completion boundary, canonical runtime surfaces, live data-path
+contract, and verification gates, start with
+[`repo_completion_map.md`](repo_completion_map.md). The map is intentionally
+shorter than this implementation guide and should be kept aligned with the MVP
+audit and backlog.
+
 ## Protocol Layers
 
 ### MeCom
