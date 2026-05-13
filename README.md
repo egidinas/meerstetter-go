@@ -14,9 +14,10 @@ Protocol definitions and tests use small synthetic fixtures. Vendor PDFs,
 site-specific endpoints, and lab captures are not vendored here.
 
 Reference vectors cover the captured MeComAPI CRC-16-CCITT frame example
-`#0015AB?VR03E801C21A\r`. Serial endpoints default to `57600` baud when no
-explicit rate is supplied. Ethernet serial-device-server targets typically use
-TCP port `50000`.
+`#0015AB?VR03E801C21A\r`. The MeCom endpoint parser defaults to `115200` baud
+when no explicit serial rate is supplied; lab deployments should pin
+controller-specific rates such as `@57600` in config. Ethernet
+serial-device-server targets typically use TCP port `50000`.
 
 ## Packages
 
@@ -26,28 +27,35 @@ TCP port `50000`.
 - `canopen`: minimal CANopen frame and SDO request primitives.
 - `canring`: fixed-size chunked CAN receive ring files for flash-conscious
   edge capture.
-- `mecom`: MeCom framing, numeric encoding/decoding, response parsing, and a
-  small synchronous client over `io.ReadWriter`.
+- `mecom`: MeCom framing, numeric encoding/decoding, response parsing,
+  endpoint parsing/opening through shared transport helpers, and a small
+  synchronous client over `io.ReadWriter`.
+- `mecomdict`: seeded Meerstetter TEC parameter catalogue, including readable
+  and writable target metadata.
 - `mecomserver`: MeCom device server pattern for sharing one TCP or serial
   downstream device across multiple clients while preserving serialized access;
   the hub config models many transparent Ethernet, serial, and CAN targets with
   per-device passthrough, queue, and ring-retention defaults.
-- `transport`: endpoint parsing plus TCP and serial dial helpers.
-- `discovery`: BusMaster-style collapsible TM/TC target tree with explicit
-  ownership, protocol, dictionary entry, and graph assignment metadata.
+- `canadapter`: adapter-neutral CAN frame contracts used by SocketCAN and other
+  host-specific backends.
+- `socketcan`: Linux SocketCAN helpers for PiXtend and other SocketCAN hosts.
 - `tmtc`: shared rich telemetry and telecommand primitives with idempotent
   command keys, ACK/result events, and transport-neutral publisher interfaces.
-- `tmtclog`: bounded loop buffer for TM/TC troubleshooting and later export.
+- `control`: leased write ownership and command authority primitives.
+- `mecomautomation`: LUT/program helpers for Meerstetter automation workflows.
 - `export`: shared export interface, including HDF5 as a first-class target
   without forcing a CGO dependency into this core library.
-- `graphwall`: graph-wall assignment contracts for wiring discovery targets to
-  UI tiles.
 - `sequencer`: script/step/result contracts that can be executed over the same
   TMTC command primitives.
 - `utility`: reusable standalone server wiring for discovery, graph-wall,
-  ring-log, event swimlane, and per-device passthrough.
+  ring-log, event swimlane, source catalogue, and per-device passthrough. It
+  consumes shared SignalForge/Loom-compatible graph-wall and ring-log contracts
+  without making them local packages.
 - `cmd/meerstetterd`: small local utility binary exposing the `utility` server
   through HTTP and a minimal browser UI.
+- `cmd/teccanprobe`: bounded SocketCAN/CANopen probe for live TEC discovery.
+- `cmd/mod-mecom-server`: TCP device-server bridge for one downstream MeCom
+  target.
 
 ## Documentation
 
@@ -66,17 +74,17 @@ TCP port `50000`.
 ## Example
 
 ```go
-ep, ok := transport.ParseEndpoint("serial:/dev/ttyUSB0@57600")
+ep, ok := mecom.ParseEndpoint("serial:/dev/ttyUSB0@57600")
 if !ok {
     panic("invalid endpoint")
 }
-conn, err := transport.Dial(context.Background(), ep, 2*time.Second)
+conn, err := mecom.Open(ep, 2*time.Second)
 if err != nil {
     panic(err)
 }
 defer conn.Close()
 
-client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x50})
+client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x50, Timeout: 2*time.Second})
 value, err := client.ReadFloat32(context.Background(), 1000, 1)
 ```
 
@@ -240,12 +248,14 @@ ownership, polling cadence, command authority, and UI behavior. The default
 device model should scale to any number of TEC controllers with transparent
 Ethernet, serial, or CAN attachment, one serialized owner per downstream, and a
 TCP passthrough path where the original Meerstetter software needs access.
-Telemetry readout should default to `tmtclog.NewRecorder`, which commits TM/TC
-events to the local ring before forwarding live updates. Consumer sessions can
-use latest-value reads by default and opt key targets into
+Telemetry readout should default to the shared ring-first recorder contract,
+which commits TM/TC events to the local ring before forwarding live updates.
+Consumer sessions can use latest-value reads by default and opt key targets into
 `ring_since_last_read` for zero-loss catch-up within the configured retention
 window; raw live-only streaming is a compatibility mode.
 
 Loom and Gossamer should consume these packages as shared contracts. Product
-code should add only app-specific adapters: NATS, REST, HTTP, SSH fallback,
-SocketCAN, Kvaser CANlib, HDF5 writer implementation, and UI rendering.
+code should add only app-specific adapters and deployment wiring such as NATS,
+SSH fallback, Kvaser CANlib ownership, and HDF5 writer implementation. This
+repo keeps the neutral Meerstetter HTTP/UI utility, SocketCAN/PiXtend helpers,
+and source-catalogue contracts reusable and testable.

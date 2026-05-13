@@ -44,11 +44,14 @@ multiplexed and demultiplexed deterministically. CAN endpoints use the same
 device model, but the concrete adapter belongs in the application because
 SocketCAN, Kvaser, and remote CAN bridges have different ownership rules.
 
-### Transport
+### Transport Helpers
 
-Package: `transport`
+Package surface: `mecom.ParseEndpoint`, `mecom.Open`
 
-The transport package parses and dials:
+The MeCom package exposes endpoint parsing and opening while delegating the
+generic TCP/serial mechanics to the shared `loom-gossamer-shared/go/transport`
+helpers. This keeps Meerstetter-specific code here without copying a second
+transport stack. Supported endpoint shapes are:
 
 - `tcp:host:port`
 - bare `host:port`
@@ -56,11 +59,13 @@ The transport package parses and dials:
 - `COM3@57600`
 - `can:can0/0x23`
 
-Serial defaults to `57600` baud when no rate is supplied. TCP serial-device
-servers commonly expose port `50000`, but applications should keep that as
+The MeCom parser defaults serial endpoints to `115200` baud when no rate is
+supplied. Lab configs should still pin controller-specific rates explicitly,
+for example `@57600` for the known FTDI path. TCP serial-device servers
+commonly expose port `50000`, but deployments should keep that as
 configuration rather than hardcoding one topology. CAN endpoints are parsed as
-first-class transparent targets; dialing them is intentionally delegated to an
-application adapter.
+first-class transparent targets; the concrete bus owner is selected by the
+utility/device config.
 
 ### CANopen
 
@@ -76,12 +81,13 @@ as SocketCAN, Kvaser CANlib, or a remote NATS bridge belong in applications.
 
 ## Default Runtime Pattern
 
-### Discovery
+### Discovery and Signal Catalogue
 
-Package: `discovery`
+Package surface: `utility`, `objectdict`, `mecomdict`
 
-Discovery produces BusMaster-style trees of `Target` values. A target is a
-telemetry source, telecommand destination, or both. It carries:
+The standalone utility produces BusMaster-style trees of targets from the
+object dictionary and Meerstetter catalogue. A target is a telemetry source,
+telecommand destination, or both. It carries:
 
 - semantic group path,
 - protocol,
@@ -117,7 +123,8 @@ or a local device-server connection.
 
 ### Ring-First Readout
 
-Package: `tmtclog`
+Package surface: `utility.Config.ReadPolicy` plus the shared
+`loom-gossamer-shared/go/tmtclog` recorder
 
 Telemetry, telecommands, and command events should be appended to the local ring
 before live forwarding.
@@ -132,12 +139,13 @@ Live-only streaming should be treated as a legacy or diagnostic fallback.
 
 ### Graph Wall and Sequencer
 
-Packages: `graphwall`, `sequencer`
+Package surface: `utility` plus local `sequencer`
 
-Discovery targets can be assigned to graph-wall tiles without coupling the
-library to any web framework. Sequencer steps reference the same target and
-TMTC command primitives, so a supervisor or command center can drive devices
-without a second command contract.
+Discovery targets can be assigned to graph-wall tiles through the shared
+SignalForge/Loom-compatible graph-wall contracts without coupling protocol
+primitives to a specific web framework. Sequencer steps reference the same
+target and TMTC command primitives, so a supervisor or command center can drive
+devices without a second command contract.
 
 The standalone utility baseline graph wall is generated from discovery. For
 each configured TEC controller it includes catalogue-derived object, sink, and
@@ -154,10 +162,12 @@ Keep these pieces outside this repository:
 - lab endpoint lists,
 - hardware captures,
 - NATS subject naming,
-- REST route handlers,
 - HDF5 writer implementation details,
-- SocketCAN or Kvaser process ownership,
-- web UI rendering.
+- Kvaser process ownership and driver-specific recovery policy,
+- product-specific REST/UI surfaces beyond the neutral Meerstetter utility.
 
-Those application layers can depend on this library while keeping this repo
-small, testable, and shareable.
+This repository does own the reusable Meerstetter utility, its neutral HTTP
+routes, source catalogue, graph wall, ring/readout logic, SocketCAN/PiXtend
+helpers, and bounded live probes. Application layers can depend on those
+surfaces while keeping site-specific deployment, brokers, and proprietary data
+outside this repo.
