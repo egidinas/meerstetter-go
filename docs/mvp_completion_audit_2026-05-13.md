@@ -7,8 +7,9 @@ four-controller PiXtend CAN setup. It is not yet a production closeout. The
 current route is good enough for live graph-wall use, source-catalogue
 integration, round-trip log review, and sequencer-facing target metadata.
 
-Do not mark the broader objective complete until the remaining hardening items
-below are closed or explicitly deferred.
+The remaining hardening items below are explicitly deferred from MVP completion
+and should stay tracked as production-readiness work. They are not blockers for
+the current functional MVP closeout.
 
 ## Latest Live Verification
 
@@ -233,6 +234,35 @@ rows, 16 writable controls, graph-wall focus mode, graph-wall filters, the
 in-page import review tool, and a nonblank interaction screenshot. The
 top-level MVP gate now includes this interaction check by default whenever
 `RUN_UI=1`; set `RUN_UI_INTERACTIONS=0` only for a faster route-only run.
+
+2026-05-13 21:51 UTC: reran the canonical non-invasive MVP gate after promoting
+the browser interaction verifier into the default UI path:
+
+```sh
+PI_BASE_URL=http://192.168.6.229:18080 \
+LOOM_BASE_URL=http://127.0.0.1:18087 \
+RUN_RECOVERY=0 GO_BIN=/home/svc_pmg_testbed_b/.local/go/bin/go \
+./deploy/verify_mvp_completion.sh
+```
+
+Result: `PASS Meerstetter-Go MVP gate`. The run verified the direct PiXtend
+SocketCAN edge route, Loom/operator gateway route, PiXtend edge autonomy,
+route-level owner reconnect/takeover, direct browser UI DOM smoke, direct
+browser UI interactions, targeted Meerstetter-Go tests, and targeted Loom
+adapter tests. It confirmed four live devices, telemetry and raw-CAN ring
+sequence advancement, 208 decoded targets in the log tail, 80 fresh
+high-priority values, 220 discovery targets, 16 writable paths, 144
+source-catalogue entries, 10 remote routes, RAM primary CAN-ring records, flash
+fallback CAN-ring records, merged RAM/flash CAN-ring readout without duplicate
+mirrored frame keys, graph-wall tile data, Arrow IPC export, NDJSON
+export/import review, graph-wall focus mode, graph-wall filters, route links,
+in-page import review, and visually parsable provenance/writable controls.
+
+Repository-wide Go tests also passed:
+
+```sh
+/home/svc_pmg_testbed_b/.local/go/bin/go test ./...
+```
 
 These checks prove a late or idle owner can reconnect to a still-running edge
 and catch up through the same backend/UI route. They do not stop the real

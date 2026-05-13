@@ -160,6 +160,14 @@ duplicating protocol code.
   canonical run now exercises graph-wall focus mode, graph-wall filters, exposed
   route links, in-page import review, writable controls, and visual provenance
   chip prefixes in addition to the DOM/screenshot population smoke.
+- Reran the canonical non-invasive MVP gate after that promotion. It passed the
+  direct PiXtend edge route, Loom/operator gateway route, edge autonomy,
+  owner-reconnect/takeover, browser DOM smoke, browser interactions, targeted
+  Meerstetter-Go tests, and targeted Loom adapter tests. A repository-wide
+  `/home/svc_pmg_testbed_b/.local/go/bin/go test ./...` also passed. The
+  remaining physical power-loss, real process-stop owner timing, leased-write,
+  bus-congestion, and controller-ring gap-fill checks are explicitly tracked as
+  production hardening rather than MVP blockers.
 
 Remaining route-hardening work is tracked below as reusable packaging,
 real process-stop owner timing, power-interruption recovery tests, measured bus
