@@ -14,8 +14,8 @@ func TestDecodeBinaryCANFrame(t *testing.T) {
 		ID:  0x401, // Response from address 1
 		DLC: 8,
 		Data: [8]byte{
-			0x81, // Control: Response bit set, Seq=1
-			0x01, // Address 1
+			0x81,       // Control: Response bit set, Seq=1
+			0x01,       // Address 1
 			0x00, 0x01, // Command: !VR
 			0x41, 0xCC, 0x00, 0x00, // Value: 25.5
 		},

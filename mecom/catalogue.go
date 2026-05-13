@@ -41,7 +41,7 @@ type mecomTECParameter struct {
 	sourceParameterName string
 	priority            string
 	preferredReadout    string
-	vawcComponent       string
+	priorityComponent   string
 	aliases             []string
 }
 
@@ -110,14 +110,14 @@ func DefaultTECUnits() []string {
 }
 
 var mecomTECParameters = []mecomTECParameter{
-	{id: 1000, suffix: "object_temp_c", rawName: "ObjectTemp", display: "object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "test_spot_temperature", sourceParameterName: "Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "celsius"},
-	{id: 1001, suffix: "sink_temp_c", rawName: "SinkTemp", display: "sink temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "tec_sink_temperature", sourceParameterName: "Sink Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "celsius"},
-	{id: 52200, suffix: "cascade_temp_c", rawName: "CascadeTemp", display: "cascade temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "cascade_temperature", sourceParameterName: "External Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "celsius", aliases: []string{"external_object_temp_c"}},
-	{id: 3000, suffix: "target_object_temp_c", rawName: "TargetObjectTemp", display: "target object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "target_object_temperature", sourceParameterName: "Target Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "celsius"},
-	{id: 1011, suffix: "ramp_object_temp_c", rawName: "RampObjectTemp", display: "ramp object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "ramp_object_temperature", sourceParameterName: "Ramp Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "celsius"},
-	{id: 1020, suffix: "output_current_a", rawName: "OutputCurrent", display: "output current", unit: "A", category: graphsem.CategoryElectrical, role: graphsem.RoleMonitor, semanticRole: "vawc_current", sourceParameterName: "Actual Output Current", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "ampere"},
-	{id: 1021, suffix: "vawc_voltage_v", rawName: "VAWCVoltage", display: "VAWC voltage", unit: "V", category: graphsem.CategoryElectrical, role: graphsem.RoleMonitor, semanticRole: "vawc_voltage", sourceParameterName: "Actual Output Voltage", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "voltage", aliases: []string{"output_voltage_v"}},
-	{id: 1022, suffix: "output_power_w", rawName: "OutputPower", display: "output power", unit: "W", category: graphsem.CategoryPower, role: graphsem.RoleMonitor, semanticRole: "vawc_power", sourceParameterName: "Actual Output Power", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, vawcComponent: "watt"},
+	{id: 1000, suffix: "object_temp_c", rawName: "ObjectTemp", display: "object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "test_spot_temperature", sourceParameterName: "Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "celsius"},
+	{id: 1001, suffix: "sink_temp_c", rawName: "SinkTemp", display: "sink temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "tec_sink_temperature", sourceParameterName: "Sink Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "celsius"},
+	{id: 52200, suffix: "cascade_temp_c", rawName: "CascadeTemp", display: "cascade temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "cascade_temperature", sourceParameterName: "External Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "celsius", aliases: []string{"external_object_temp_c"}},
+	{id: 3000, suffix: "target_object_temp_c", rawName: "TargetObjectTemp", display: "target object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "target_object_temperature", sourceParameterName: "Target Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "celsius"},
+	{id: 1011, suffix: "ramp_object_temp_c", rawName: "RampObjectTemp", display: "ramp object temperature", unit: "degC", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "ramp_object_temperature", sourceParameterName: "Ramp Object Temperature", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "celsius"},
+	{id: 1020, suffix: "output_current_a", rawName: "OutputCurrent", display: "output current", unit: "A", category: graphsem.CategoryElectrical, role: graphsem.RoleMonitor, semanticRole: "drive_current", sourceParameterName: "Actual Output Current", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "ampere"},
+	{id: 1021, suffix: "output_voltage_v", rawName: "OutputVoltage", display: "output voltage", unit: "V", category: graphsem.CategoryElectrical, role: graphsem.RoleMonitor, semanticRole: "drive_voltage", sourceParameterName: "Actual Output Voltage", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "voltage"},
+	{id: 1022, suffix: "output_power_w", rawName: "OutputPower", display: "output power", unit: "W", category: graphsem.CategoryPower, role: graphsem.RoleMonitor, semanticRole: "drive_power", sourceParameterName: "Actual Output Power", priority: mecomReadoutPriorityHigh, preferredReadout: mecomRingReadout, priorityComponent: "watt"},
 	{id: 1200, suffix: "temperature_stable", rawName: "TemperatureStable", display: "temperature stable", valueType: "int", category: graphsem.CategoryThermal, role: graphsem.RoleMonitor, semanticRole: "temperature_stable", sourceParameterName: "Temperature is Stable", priority: mecomReadoutPriorityBackground, preferredReadout: mecomBackgroundReadout},
 }
 
@@ -237,9 +237,9 @@ func mecomTECRow(cfg MeComTECCatalogueConfig, ch int, param mecomTECParameter) g
 	} else {
 		metadata["consumer_rate_policy"] = "publish_latest_when_round_robin_queue_updates"
 	}
-	if param.vawcComponent != "" {
-		metadata["priority_group"] = "vawc"
-		metadata["vawc_component"] = param.vawcComponent
+	if param.priorityComponent != "" {
+		metadata["priority_group"] = "drive_telemetry"
+		metadata["drive_component"] = param.priorityComponent
 	}
 	if len(param.aliases) > 0 {
 		metadata["aliases"] = strings.Join(param.aliases, ",")

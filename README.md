@@ -24,6 +24,8 @@ TCP port `50000`.
   discovery output.
 - `canopen/eds`: EDS parser that builds an `objectdict.Dictionary`.
 - `canopen`: minimal CANopen frame and SDO request primitives.
+- `canring`: fixed-size chunked CAN receive ring files for flash-conscious
+  edge capture.
 - `mecom`: MeCom framing, numeric encoding/decoding, response parsing, and a
   small synchronous client over `io.ReadWriter`.
 - `mecomserver`: MeCom device server pattern for sharing one TCP or serial
@@ -92,17 +94,43 @@ go run ./cmd/meerstetterd -config meerstetterd.json
 
 The default HTTP UI listens on `127.0.0.1:18080`. It exposes a BusMaster-style
 discovery tree, a baseline graph wall, and command/status/error swimlanes. The
-baseline graph wall includes HR temperature, LR temperature, output power,
-target value, and device status for every configured controller.
+baseline graph wall is catalogue-driven and includes object, sink, and cascade
+temperatures, target/ramp values, output power, heat-flow estimates, and device
+status for every configured controller instance.
 
 REST endpoints:
 
+- `GET /health`
 - `GET /api/health`
 - `GET /api/devices`
+- `GET /api/tec/catalogue`
+- `GET /api/loom/source-catalogue`
+- `GET /api/operator/meerstettergo/source-catalogue`
 - `GET /api/discovery/tree`
 - `GET /api/graph-wall`
-- `GET /api/log/ring?after_seq=<n>`
+- `GET /api/tiles?tile_id=<id>&tail=true&limit=<n>`
+- `GET /api/log/ring?tail=true&limit=<n>`
+- `GET /api/log/ring?after_seq=<n>&limit=<n>`
+- `GET /api/log/export?tail=true&limit=<n>`
+- `GET /api/log/archive/manifest`
+- `GET /api/operator/meerstettergo/log/archive/manifest`
+- `POST /api/log/import/review`
+- `GET /api/log/review?tail=true&limit=<n>`
+- `GET /api/can/ring?limit=<n>`
+- `GET /api/can/ring?source=fallback_flash&limit=<n>`
+- `GET /api/can/ring?source=merged&limit=<n>`
 - `GET /api/events/swimlane?after_seq=<n>`
+- `GET /api/target/read?id=<target_id>`
+- `POST /api/target/write`
+- `GET /api/operator/meerstettergo/target/read?id=<target_id>`
+- `POST /api/operator/meerstettergo/target/write`
+
+The operator routes intentionally mirror the standalone routes so Loom,
+SignalForge, sequencer code, and the browser UI see the same source catalogue,
+read targets, write targets, freshness, and active/redundant transport metadata.
+Writable catalogue entries expose their write path and require an explicit
+sequencer `lease_id` on every write request. Calls without a lease are rejected
+before a hardware transport is selected.
 
 The repository default is topology-neutral: it demonstrates one configurable
 device, while real deployments provide their own device list. See
@@ -111,10 +139,81 @@ for the local test environment with four TEC controllers on FTDI USB serial
 (`/dev/ttyUSB0` through `/dev/ttyUSB3` at `57600` baud). On Windows the same
 shape uses targets such as `COM3@57600`, `COM4@57600`, and so on.
 
-TCP serial-device-server endpoints and CAN endpoints are still supported by the
-same config model. CAN endpoints are parsed and carried through discovery today;
-a concrete SocketCAN, Kvaser, or remote-CAN adapter still belongs at the
-application boundary.
+TCP serial-device-server endpoints and SocketCAN endpoints use the same config
+model. SocketCAN read targets are supported with `socketcan:<if>?addr=<addr>`;
+for example,
+[`examples/meerstetterd.pixtend-can-four-tec.json`](examples/meerstetterd.pixtend-can-four-tec.json)
+defines four PiXtend-attached TEC controllers on `can0`. Kvaser, USB-CAN, and
+remote-CAN adapters still belong behind adapter implementations until each path
+is proven with live hardware.
+
+### PiXtend SocketCAN capture ring
+
+`cmd/teccanprobe` can write received SocketCAN frames into a bounded ring file.
+On PiXtend, the production service uses a RAM-backed ring as the primary hot
+path and mirrors the same frames into a flash fallback ring:
+
+```sh
+sudo ./teccanprobe \
+  -if can0 \
+  -listen 30s \
+  -active \
+  -ring-path /run/meerstettergo/pixtend-can0.ring \
+  -ring-size 256MiB \
+  -ring-chunk 4MiB \
+  -fallback-ring-path /var/lib/meerstettergo/pixtend-can0.ring \
+  -fallback-ring-size 8GiB \
+  -fallback-ring-chunk 4MiB
+```
+
+The ring file is pre-sized, written at deterministic chunk offsets, and synced
+only when a chunk is committed. The systemd wrapper in
+[`deploy/systemd`](deploy/systemd) seeds the RAM ring from the flash fallback at
+startup, then captures to both rings during normal operation.
+
+The routing rule is intentionally strict to avoid duplicates:
+
+1. Consumers read the Pi RAM ring first. This is the low-latency owner handoff
+   and graph-wall replay path.
+2. If the RAM ring is unavailable after reboot, late owner connection, or
+   service restart, consumers read the Pi flash ring as a degraded fallback.
+   The flash ring is a recovery copy, not an additional live stream.
+3. If host-side history still has a gap and the active transport exposes the
+   Meerstetter controller ring/buffer primitive, the controller buffer is polled
+   for high-priority values and merged by device address, parameter, instance,
+   and sample time/sequence when available. Direct SocketCAN currently uses the
+   decoded live queue plus Pi RAM/flash rings until the controller-ring mapping
+   is characterized on that transport.
+
+`/api/can/ring` follows the same policy by default: primary RAM first, flash
+only on primary failure. `source=fallback_flash` reads the flash fallback
+explicitly for bootstrap/recovery inspection while RAM is healthy.
+`source=merged` returns a reconciled RAM-plus-flash tail and collapses mirrored
+frames by timestamp, CAN ID, DLC, payload, and interface so a late owner can
+gap-fill without double-counting the same raw frame. `/api/health` reports the
+active capture state under `can_ring` without replaying raw records; `/health`
+is the same lightweight edge-health alias for service managers and route
+probes. If one ring fails during capture, the probe prints a `ring-error` for
+that role and keeps the remaining ring plus CAN receive path running.
+
+Live deployment checks use the full MVP gate by default, with split route and
+bounded recovery gates available for focused operator checks:
+
+```sh
+PI_BASE_URL=http://192.168.6.229:18080 \
+LOOM_BASE_URL=http://127.0.0.1:18087 \
+./deploy/verify_mvp_completion.sh
+```
+
+```sh
+BASE_URL=http://192.168.6.229:18080 ./deploy/verify_pixtend_route.sh
+BASE_URL=http://192.168.6.229:18080 ./deploy/verify_pixtend_recovery.sh
+```
+
+The recovery gate restarts only `meerstettergo.service`; it does not write to
+TEC controllers. It verifies that `pixtend-can-ring.service` remains active,
+telemetry sequence numbers advance again, RAM/flash ring counters do not
+regress, and the merged CAN ring plus graph-wall temperature tile recover.
 
 ## Scope
 

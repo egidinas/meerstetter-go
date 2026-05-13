@@ -1,6 +1,7 @@
 package mecom
 
 import (
+	"math"
 	"testing"
 	"time"
 )
@@ -51,5 +52,21 @@ func TestPollQueueLatestReturnsValueWhenItComesAround(t *testing.T) {
 	}
 	if got.Value != 12.5 || !got.ObservedAt.Equal(observedAt) {
 		t.Fatalf("latest = %#v", got)
+	}
+}
+
+func TestPollQueueInitializesLatestForAllRoundRobinParameters(t *testing.T) {
+	p1 := Parameter{ID: 1000, Instance: 1, Type: DataTypeFloat32}
+	p2 := Parameter{ID: 3000, Instance: 4, Type: DataTypeFloat32}
+	q := NewPollQueue([]Parameter{p1, p2})
+
+	for _, param := range []Parameter{p1, p2} {
+		got, ok := q.Latest(param)
+		if !ok {
+			t.Fatalf("missing initialized latest result for %#v", param)
+		}
+		if !math.IsNaN(got.Value) || got.Error != "not_sampled" {
+			t.Fatalf("initialized latest = %#v, want NaN/not_sampled", got)
+		}
 	}
 }

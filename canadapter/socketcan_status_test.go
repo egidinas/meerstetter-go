@@ -60,4 +60,3 @@ func TestValidateSocketCANStatusReportsDriverMismatchAndBusOff(t *testing.T) {
 		t.Fatalf("first finding should be error: %+v", findings)
 	}
 }
-

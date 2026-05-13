@@ -44,13 +44,13 @@ func TestMeComSourceOfferDeclaresChannelCatalogueAndDisabledWrites(t *testing.T)
 		t.Fatalf("readout metadata = %#v", offer.Metadata)
 	}
 	if !strings.Contains(offer.Metadata["semantic_roles"], "cascade_temperature") ||
-		!strings.Contains(offer.Metadata["semantic_roles"], "vawc_voltage") ||
-		!strings.Contains(offer.Metadata["semantic_roles"], "vawc_power") ||
+		!strings.Contains(offer.Metadata["semantic_roles"], "drive_voltage") ||
+		!strings.Contains(offer.Metadata["semantic_roles"], "drive_power") ||
 		!strings.Contains(offer.Metadata["semantic_roles"], "heat_pumped_from_item") ||
 		!strings.Contains(offer.Metadata["semantic_roles"], "hot_side_dissipated_heat") {
 		t.Fatalf("semantic_roles missing required measured/derived roles: %q", offer.Metadata["semantic_roles"])
 	}
-	if offer.Metadata["priority_groups"] != "vawc,cascade,key_temperatures" {
+	if offer.Metadata["priority_groups"] != "drive_telemetry,cascade,key_temperatures" {
 		t.Fatalf("priority_groups = %q", offer.Metadata["priority_groups"])
 	}
 
@@ -67,8 +67,8 @@ func TestMeComSourceOfferDeclaresChannelCatalogueAndDisabledWrites(t *testing.T)
 	if !containsString(catalogueOffer.SemanticModel.Properties, "mecom.tec_02.cascade_temp_c") {
 		t.Fatalf("properties missing cascade signal: %#v", catalogueOffer.SemanticModel.Properties)
 	}
-	if !containsString(catalogueOffer.SemanticModel.Properties, "mecom.tec_02.vawc_voltage_v") {
-		t.Fatalf("properties missing VAWC voltage signal: %#v", catalogueOffer.SemanticModel.Properties)
+	if !containsString(catalogueOffer.SemanticModel.Properties, "mecom.tec_02.output_voltage_v") {
+		t.Fatalf("properties missing output voltage signal: %#v", catalogueOffer.SemanticModel.Properties)
 	}
 	if !containsString(catalogueOffer.SemanticModel.Properties, "mecom.tec_02.hot_side_dissipated_w") {
 		t.Fatalf("properties missing derived hot-side dissipated heat signal: %#v", catalogueOffer.SemanticModel.Properties)

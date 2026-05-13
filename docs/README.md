@@ -140,10 +140,11 @@ TMTC command primitives, so a supervisor or command center can drive devices
 without a second command contract.
 
 The standalone utility baseline graph wall is generated from discovery. For
-each configured TEC controller it includes HR temperature, LR temperature,
-output power, target value, and device status. Event/status/error rendering is
-kept separate as a swimlane timeline derived from the TM/TC ring so labels and
-faults do not overlap the trend area.
+each configured TEC controller it includes catalogue-derived object, sink, and
+cascade temperatures, target/ramp values, output power, heat-flow estimates,
+and device status. Event/status/error rendering is kept separate as a swimlane
+timeline derived from the TM/TC ring so labels and faults do not overlap the
+trend area.
 
 ## Application Boundary
 

@@ -578,6 +578,8 @@ func NewClient(rw io.ReadWriter, cfg ClientConfig) *Client {
 	return &Client{rw: rw, address: cfg.Address, timeout: timeout}
 }
 
+func (c *Client) SupportsRingReadout() bool { return true }
+
 // ReadFloat32 reads one float32 parameter.
 func (c *Client) ReadFloat32(ctx context.Context, paramID, instance int) (float64, error) {
 	return c.readNumeric(ctx, paramID, instance, DataTypeFloat32)

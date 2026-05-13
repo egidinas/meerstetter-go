@@ -77,9 +77,6 @@ func (d *derivedReadout) Append(observedAt time.Time, batch *ReadoutBatch) {
 		default:
 			continue
 		}
-		if math.IsNaN(value.Value) {
-			continue
-		}
 		channel := value.Parameter.Instance
 		input := inputs[channel]
 		if input == nil {
@@ -95,7 +92,8 @@ func (d *derivedReadout) Append(observedAt time.Time, batch *ReadoutBatch) {
 		}
 		current, hasCurrent := input.values[TECParamOutputCurrent]
 		voltage, hasVoltage := input.values[TECParamOutputVoltage]
-		if !hasCurrent || !hasVoltage {
+		if !hasCurrent || !hasVoltage || math.IsNaN(current) || math.IsNaN(voltage) {
+			d.appendUnavailableValues(observedAt, batch, channel)
 			continue
 		}
 		estimate := d.estimator.EstimateChannel(PeltierChannelInput{
@@ -124,15 +122,23 @@ func maxDerivedChannel(inputs map[int]*derivedChannelInputs) int {
 
 func (d *derivedReadout) appendEstimateValues(observedAt time.Time, batch *ReadoutBatch, estimate PeltierChannelEstimate) {
 	d.appendValue(observedAt, batch, estimate.Channel, derivedElectricalInputOffset, derivedElectricalInputName, estimate.ElectricalInputWatt)
-	if estimate.HeatPumpedFromItemWatt.Valid {
-		d.appendValue(observedAt, batch, estimate.Channel, derivedHeatPumpedFromItemOffset, derivedHeatPumpedFromItemName, estimate.HeatPumpedFromItemWatt.Value)
+	d.appendValue(observedAt, batch, estimate.Channel, derivedHeatPumpedFromItemOffset, derivedHeatPumpedFromItemName, optionalDerivedValue(estimate.HeatPumpedFromItemWatt))
+	d.appendValue(observedAt, batch, estimate.Channel, derivedResistiveHeatOffset, derivedResistiveHeatName, optionalDerivedValue(estimate.ResistiveHeatWatt))
+	d.appendValue(observedAt, batch, estimate.Channel, derivedHotSideDissipatedOffset, derivedHotSideDissipatedName, optionalDerivedValue(estimate.HotSideDissipatedWatt))
+}
+
+func (d *derivedReadout) appendUnavailableValues(observedAt time.Time, batch *ReadoutBatch, channel int) {
+	d.appendValue(observedAt, batch, channel, derivedElectricalInputOffset, derivedElectricalInputName, math.NaN())
+	d.appendValue(observedAt, batch, channel, derivedHeatPumpedFromItemOffset, derivedHeatPumpedFromItemName, math.NaN())
+	d.appendValue(observedAt, batch, channel, derivedResistiveHeatOffset, derivedResistiveHeatName, math.NaN())
+	d.appendValue(observedAt, batch, channel, derivedHotSideDissipatedOffset, derivedHotSideDissipatedName, math.NaN())
+}
+
+func optionalDerivedValue(value DerivedValue) float64 {
+	if value.Valid {
+		return value.Value
 	}
-	if estimate.ResistiveHeatWatt.Valid {
-		d.appendValue(observedAt, batch, estimate.Channel, derivedResistiveHeatOffset, derivedResistiveHeatName, estimate.ResistiveHeatWatt.Value)
-	}
-	if estimate.HotSideDissipatedWatt.Valid {
-		d.appendValue(observedAt, batch, estimate.Channel, derivedHotSideDissipatedOffset, derivedHotSideDissipatedName, estimate.HotSideDissipatedWatt.Value)
-	}
+	return math.NaN()
 }
 
 func (d *derivedReadout) appendValue(observedAt time.Time, batch *ReadoutBatch, channel int, offset int, name string, value float64) {

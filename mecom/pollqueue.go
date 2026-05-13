@@ -2,6 +2,7 @@ package mecom
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"time"
 )
@@ -45,6 +46,7 @@ func (q *PollQueue) Enqueue(p Parameter) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	key := ParameterKey(p)
+	q.seedLatestLocked(p)
 	if _, ok := q.normalSet[key]; ok {
 		return
 	}
@@ -56,11 +58,24 @@ func (q *PollQueue) EnqueueFront(p Parameter) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	key := ParameterKey(p)
+	q.seedLatestLocked(p)
 	if _, ok := q.frontSet[key]; ok {
 		return
 	}
 	q.frontSet[key] = struct{}{}
 	q.front = append(q.front, p)
+}
+
+func (q *PollQueue) seedLatestLocked(p Parameter) {
+	key := ParameterKey(p)
+	if _, ok := q.latest[key]; ok {
+		return
+	}
+	q.latest[key] = PollResult{
+		Parameter: p,
+		Value:     math.NaN(),
+		Error:     "not_sampled",
+	}
 }
 
 func (q *PollQueue) NextChunk(max int) []Parameter {

@@ -14,8 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/loom-gossamer-shared/go/transport"
+	"github.com/egidinas/meerstetter-go/mecom"
+	"github.com/egidinas/meerstetter-go/mecomdict"
 )
 
 type parameterDef struct {
@@ -38,7 +39,7 @@ func main() {
 		targetsFlag   = flag.String("targets", "", "comma-separated targets, for example serial:/dev/ttyUSB0@57600,tcp:127.0.0.1:50000")
 		addressFlag   = flag.Int("address", 0, "MeCom device address; 0 is broadcast and works for one device per link")
 		instancesFlag = flag.String("instances", "1", "comma-separated parameter instances")
-		paramsPath    = flag.String("params", "/home/svc_pmg_testbed_b/loom/docs/meerstetter/code_reference/pyMeCom_parameters.go", "Go parameter registry to scan")
+		paramsPath    = flag.String("params", mecomdict.DefaultParameterRegistryPath(), "Go parameter registry to scan; defaults to MECOM_PARAMETER_REGISTRY")
 		limitFlag     = flag.Int("limit", 0, "maximum number of unique parameters to read; 0 reads all parsed parameters")
 		modeFlag      = flag.String("mode", "bulk", "read mode: bulk uses ?VX round-robin chunks; single keeps legacy ?VR reads")
 		chunkFlag     = flag.Int("chunk", 8, "maximum parameters per ?VX bulk chunk")

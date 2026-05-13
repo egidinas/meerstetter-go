@@ -2,10 +2,11 @@ package utility
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/egidinas/loom-gossamer-shared/go/telemetrytiles"
 	"github.com/egidinas/loom-gossamer-shared/go/discovery"
+	"github.com/egidinas/loom-gossamer-shared/go/telemetrytiles"
 )
 
 func (s *Server) handleTiles(w http.ResponseWriter, r *http.Request) {
@@ -26,12 +27,16 @@ func (s *Server) handleTiles(w http.ResponseWriter, r *http.Request) {
 func (s *Server) tileTargets(r *http.Request) []discovery.Target {
 	targetID := r.URL.Query().Get("target_id")
 	aggregate := r.URL.Query().Get("aggregate")
+	exactTargetID := targetID
+	if strings.HasPrefix(exactTargetID, "aggregate:") {
+		exactTargetID = ""
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	out := make([]discovery.Target, 0, len(s.targets))
 	for _, target := range s.targets {
-		if targetID != "" {
-			if target.ID == targetID {
+		if exactTargetID != "" {
+			if target.ID == exactTargetID {
 				return []discovery.Target{target}
 			}
 			continue

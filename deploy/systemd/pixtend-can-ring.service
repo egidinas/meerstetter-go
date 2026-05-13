@@ -1,0 +1,40 @@
+[Unit]
+Description=Meerstetter PiXtend SocketCAN receive ring
+After=local-fs.target systemd-udev-settle.service
+Wants=systemd-udev-settle.service
+StartLimitIntervalSec=0
+ConditionPathExists=/usr/local/bin/teccanprobe
+ConditionPathExists=/usr/local/bin/pixtend-can-ring-start
+
+[Service]
+Type=simple
+Environment=CAN_IF=can0
+Environment=CAN_OVERLAY=mcp2515-can1
+Environment=BITRATE=1000000
+Environment=OSC=20000000
+Environment=INTPIN=4
+Environment=SPIMAX=1000000
+Environment="PIXTEND_CAN_ENABLE_GPIOS=24 27"
+Environment=RING_PATH=/run/meerstettergo-ring/pixtend-can0.ring
+Environment=RING_SIZE=64MiB
+Environment=RING_CHUNK=64KiB
+Environment=FALLBACK_RING_PATH=/var/lib/meerstettergo/pixtend-can0.ring
+Environment=FALLBACK_RING_SIZE=8GiB
+Environment=FALLBACK_RING_CHUNK=4MiB
+Environment=FALLBACK_RING_SYNC=1
+Environment=BOOTSTRAP_RING_PATH=/var/lib/meerstettergo/pixtend-can0.bootstrap.ring
+Environment=BOOTSTRAP_ON_START=0
+Environment=CHECKPOINT_ON_EXIT=0
+Environment=LISTEN_WINDOW=24h
+EnvironmentFile=-/etc/default/pixtend-can-ring
+ExecStart=/usr/local/bin/pixtend-can-ring-start
+Restart=always
+RestartSec=10
+TimeoutStartSec=30
+RuntimeDirectory=meerstettergo-ring
+Nice=-5
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+
+[Install]
+WantedBy=multi-user.target

@@ -76,24 +76,49 @@ func (c *Conn) Send(f canopen.Frame) error {
 }
 
 func (c *Conn) Recv(timeout time.Duration) (canopen.Frame, error) {
-	ms := int(timeout / time.Millisecond)
-	if timeout < 0 {
-		ms = -1
-	} else if timeout > 0 && ms == 0 {
-		ms = 1
+	deadline := time.Time{}
+	if timeout > 0 {
+		deadline = time.Now().Add(timeout)
 	}
 	poll := []unix.PollFd{{Fd: int32(c.fd), Events: unix.POLLIN}}
-	n, err := unix.Poll(poll, ms)
-	if err != nil {
-		return canopen.Frame{}, fmt.Errorf("socketcan: poll %s: %w", c.iface, err)
-	}
-	if n == 0 {
-		return canopen.Frame{}, ErrTimeout
+	for {
+		ms := int(timeout / time.Millisecond)
+		if timeout < 0 {
+			ms = -1
+		} else if timeout > 0 {
+			remaining := time.Until(deadline)
+			if remaining <= 0 {
+				return canopen.Frame{}, ErrTimeout
+			}
+			ms = int(remaining / time.Millisecond)
+			if ms == 0 {
+				ms = 1
+			}
+		}
+		n, err := unix.Poll(poll, ms)
+		if errors.Is(err, unix.EINTR) {
+			continue
+		}
+		if err != nil {
+			return canopen.Frame{}, fmt.Errorf("socketcan: poll %s: %w", c.iface, err)
+		}
+		if n == 0 {
+			return canopen.Frame{}, ErrTimeout
+		}
+		break
 	}
 	var raw [canFrameSize]byte
-	read, err := unix.Read(c.fd, raw[:])
-	if err != nil {
-		return canopen.Frame{}, fmt.Errorf("socketcan: read %s: %w", c.iface, err)
+	read := 0
+	for {
+		n, err := unix.Read(c.fd, raw[:])
+		if errors.Is(err, unix.EINTR) {
+			continue
+		}
+		if err != nil {
+			return canopen.Frame{}, fmt.Errorf("socketcan: read %s: %w", c.iface, err)
+		}
+		read = n
+		break
 	}
 	if read < canFrameSize {
 		return canopen.Frame{}, fmt.Errorf("socketcan: short read on %s: %d/%d", c.iface, read, canFrameSize)

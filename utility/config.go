@@ -6,9 +6,9 @@ import (
 	"os"
 
 	graphwall "github.com/egidinas/loom-gossamer-shared/go/graphwall"
+	"github.com/egidinas/loom-gossamer-shared/go/tmtclog"
 	"github.com/egidinas/meerstetter-go/mecomdict"
 	"github.com/egidinas/meerstetter-go/mecomserver"
-	"github.com/egidinas/loom-gossamer-shared/go/tmtclog"
 )
 
 const (
@@ -29,6 +29,9 @@ type Config struct {
 	DiscoverInstances     bool                     `json:"discover_instances,omitempty"`
 	InstanceScanMax       int                      `json:"instance_scan_max,omitempty"`
 	GraphWall             []GraphTileConfig        `json:"graph_wall,omitempty"`
+	CANRingPath           string                   `json:"can_ring_path,omitempty"`
+	CANRingFallbackPath   string                   `json:"can_ring_fallback_path,omitempty"`
+	CANRingReplayLimit    int                      `json:"can_ring_replay_limit,omitempty"`
 }
 
 type GraphTileConfig = graphwall.TileConfig
@@ -38,7 +41,7 @@ func DefaultConfig() Config {
 		HTTPListen:            DefaultHTTPListen,
 		ListenHost:            mecomserver.DefaultListenHost,
 		PassthroughBasePort:   DefaultPassthroughBasePort,
-		ParameterRegistryPath: mecomdict.DefaultParameterRegistryPath,
+		ParameterRegistryPath: mecomdict.DefaultParameterRegistryPath(),
 		DiscoverInstances:     true,
 		InstanceScanMax:       16,
 		ReadPolicy: tmtclog.ReadPolicy{
@@ -86,6 +89,9 @@ func (c Config) Validate() error {
 	}
 	if c.InstanceScanMax < 0 || c.InstanceScanMax > 255 {
 		return fmt.Errorf("utility: instance_scan_max %d outside MeCom range 0..255", c.InstanceScanMax)
+	}
+	if c.CANRingReplayLimit < 0 {
+		return fmt.Errorf("utility: can_ring_replay_limit must be >= 0")
 	}
 	_, err := mecomserver.NewHubConfig(c.ListenHost, c.PassthroughBasePort, c.Devices)
 	return err

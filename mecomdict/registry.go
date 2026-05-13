@@ -11,7 +11,11 @@ import (
 	"github.com/egidinas/meerstetter-go/objectdict"
 )
 
-const DefaultParameterRegistryPath = "/home/svc_pmg_testbed_b/loom/docs/meerstetter/code_reference/pyMeCom_parameters.go"
+const DefaultParameterRegistryEnv = "MECOM_PARAMETER_REGISTRY"
+
+func DefaultParameterRegistryPath() string {
+	return strings.TrimSpace(os.Getenv(DefaultParameterRegistryEnv))
+}
 
 // ParameterDef is the compact MeCom parameter shape extracted from the
 // official pyMeCom parameter registry.

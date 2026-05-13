@@ -3,6 +3,7 @@ package utility
 import (
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func parseUintQuery(r *http.Request, key string) uint64 {
@@ -39,4 +40,9 @@ func parseInt64Query(r *http.Request, key string) int64 {
 		return 0
 	}
 	return v
+}
+
+func parseBoolQuery(r *http.Request, key string) bool {
+	raw := strings.TrimSpace(strings.ToLower(r.URL.Query().Get(key)))
+	return raw == "1" || raw == "true" || raw == "yes" || raw == "on"
 }

@@ -23,22 +23,22 @@
   "read_policy": {
     "default_mode": "single",
     "targets": {
-      "device:tec-01:temperature:hr": "ring_since_last_read",
-      "device:tec-01:temperature:lr": "ring_since_last_read",
-      "device:tec-01:power:hr": "ring_since_last_read",
-      "device:tec-01:power:lr": "ring_since_last_read",
-      "device:tec-02:temperature:hr": "ring_since_last_read",
-      "device:tec-02:temperature:lr": "ring_since_last_read",
-      "device:tec-02:power:hr": "ring_since_last_read",
-      "device:tec-02:power:lr": "ring_since_last_read",
-      "device:tec-03:temperature:hr": "ring_since_last_read",
-      "device:tec-03:temperature:lr": "ring_since_last_read",
-      "device:tec-03:power:hr": "ring_since_last_read",
-      "device:tec-03:power:lr": "ring_since_last_read",
-      "device:tec-04:temperature:hr": "ring_since_last_read",
-      "device:tec-04:temperature:lr": "ring_since_last_read",
-      "device:tec-04:power:hr": "ring_since_last_read",
-      "device:tec-04:power:lr": "ring_since_last_read"
+      "device:tec-01:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer"
     }
   }
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/egidinas/meerstetter-go/canadapter"
 	"github.com/egidinas/meerstetter-go/canopen"
+	"github.com/egidinas/meerstetter-go/canring"
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/socketcan"
 )
@@ -51,6 +52,14 @@ func main() {
 	paramID := flag.Int("param", 1000, "MeCom parameter ID for read-only value probe")
 	instance := flag.Int("instance", 1, "MeCom parameter instance")
 	active := flag.Bool("active", false, "send bounded read-only SDO/MeCom probes after passive listen")
+	ringPath := flag.String("ring-path", "", "optional fixed-size CAN receive ring file on durable storage")
+	ringSize := flag.String("ring-size", "512MiB", "CAN ring file size when -ring-path is set")
+	ringChunk := flag.String("ring-chunk", "4MiB", "CAN ring chunk size; disk writes happen on chunk boundaries")
+	ringSync := flag.Bool("ring-sync", true, "fsync completed CAN ring chunks and metadata")
+	fallbackRingPath := flag.String("fallback-ring-path", "", "optional second fixed-size CAN receive ring used as a mirrored fallback")
+	fallbackRingSize := flag.String("fallback-ring-size", "2GiB", "fallback CAN ring file size when -fallback-ring-path is set")
+	fallbackRingChunk := flag.String("fallback-ring-chunk", "4MiB", "fallback CAN ring chunk size")
+	fallbackRingSync := flag.Bool("fallback-ring-sync", true, "fsync completed fallback CAN ring chunks and metadata")
 	flag.Parse()
 
 	if *listProfiles {
@@ -75,6 +84,30 @@ func main() {
 	}
 	defer conn.Close()
 
+	var sink *ringSink
+	if *ringPath != "" {
+		writer, err := openRingWriter("primary", *ringPath, *ringSize, *ringChunk, *iface, *ringSync)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "open primary CAN ring: %v\n", err)
+			os.Exit(1)
+		}
+		sink = &ringSink{writers: []ringWriterSink{writer}}
+	}
+	if *fallbackRingPath != "" {
+		writer, err := openRingWriter("fallback", *fallbackRingPath, *fallbackRingSize, *fallbackRingChunk, *iface, *fallbackRingSync)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "open fallback CAN ring: %v\n", err)
+			os.Exit(1)
+		}
+		if sink == nil {
+			sink = &ringSink{}
+		}
+		sink.writers = append(sink.writers, writer)
+	}
+	if sink != nil {
+		defer sink.Close()
+	}
+
 	res := result{
 		heartbeats:   make(map[byte]bool),
 		canopenSDO:   make(map[byte][]sdoValue),
@@ -82,7 +115,7 @@ func main() {
 	}
 
 	fmt.Printf("probe iface=%s profile=%s transport=%s listen=%s active=%v\n", *iface, profile.ID, profile.Transport, *listen, *active)
-	listenFor(conn, *listen, &res, 12)
+	listenFor(conn, *listen, &res, 12, sink)
 
 	nodes, err := parseIDs(*nodesArg)
 	if err != nil {
@@ -110,11 +143,11 @@ func main() {
 	if *active {
 		for _, node := range nodes {
 			for _, probe := range sdoReads {
-				probeCANopenSDO(conn, node, probe, *timeout, &res)
+				probeCANopenSDO(conn, node, probe, *timeout, &res, sink)
 			}
 		}
 		for _, addr := range addrs {
-			probeMeComValue(conn, addr, *paramID, *instance, *timeout, &res)
+			probeMeComValue(conn, addr, *paramID, *instance, *timeout, &res, sink)
 		}
 	}
 
@@ -138,7 +171,81 @@ func printProfiles() {
 	}
 }
 
-func listenFor(conn *socketcan.Conn, window time.Duration, res *result, maxPrint int) {
+type frameSink interface {
+	Record(canopen.Frame)
+}
+
+type ringSink struct {
+	writers []ringWriterSink
+}
+
+type ringWriterSink struct {
+	role     string
+	sync     bool
+	writer   *canring.Writer
+	disabled bool
+}
+
+func openRingWriter(role, path, sizeArg, chunkArg, iface string, sync bool) (ringWriterSink, error) {
+	sizeBytes, err := parseByteSize(sizeArg)
+	if err != nil {
+		return ringWriterSink{}, fmt.Errorf("parse %s ring size: %w", role, err)
+	}
+	chunkBytes, err := parseByteSize(chunkArg)
+	if err != nil {
+		return ringWriterSink{}, fmt.Errorf("parse %s ring chunk: %w", role, err)
+	}
+	writer, err := canring.OpenWriter(canring.Config{
+		Path:        path,
+		SizeBytes:   sizeBytes,
+		ChunkBytes:  chunkBytes,
+		Interface:   iface,
+		SyncOnChunk: sync,
+	})
+	if err != nil {
+		return ringWriterSink{}, err
+	}
+	stats := writer.Stats()
+	fmt.Printf("ring role=%s path=%s size=%d chunk=%d chunks=%d sync=%v\n", role, stats.Path, stats.SizeBytes, stats.ChunkBytes, stats.ChunkCount, sync)
+	return ringWriterSink{role: role, sync: sync, writer: writer}, nil
+}
+
+func (s *ringSink) Record(f canopen.Frame) {
+	if s == nil {
+		return
+	}
+	now := time.Now()
+	for i := range s.writers {
+		w := &s.writers[i]
+		if w.disabled || w.writer == nil {
+			continue
+		}
+		if err := w.writer.Append(f, now); err != nil {
+			stats := w.writer.Stats()
+			fmt.Printf("ring-error role=%s path=%s err=%v; disabling this ring\n", w.role, stats.Path, err)
+			w.disabled = true
+			_ = w.writer.Close()
+		}
+	}
+}
+
+func (s *ringSink) Close() {
+	if s == nil {
+		return
+	}
+	for i := range s.writers {
+		w := &s.writers[i]
+		if w.disabled || w.writer == nil {
+			continue
+		}
+		stats := w.writer.Stats()
+		if err := w.writer.Close(); err != nil {
+			fmt.Printf("ring-close-error role=%s path=%s err=%v\n", w.role, stats.Path, err)
+		}
+	}
+}
+
+func listenFor(conn *socketcan.Conn, window time.Duration, res *result, maxPrint int, sink frameSink) {
 	deadline := time.Now().Add(window)
 	printed := 0
 	for {
@@ -155,6 +262,9 @@ func listenFor(conn *socketcan.Conn, window time.Duration, res *result, maxPrint
 			continue
 		}
 		res.frames++
+		if sink != nil {
+			sink.Record(f)
+		}
 		observe(f, res)
 		if printed < maxPrint {
 			fmt.Printf("rx %s\n", formatFrame(f))
@@ -163,7 +273,7 @@ func listenFor(conn *socketcan.Conn, window time.Duration, res *result, maxPrint
 	}
 }
 
-func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout time.Duration, res *result) {
+func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout time.Duration, res *result, sink frameSink) {
 	req := canopen.SDOUploadRequest(node, probe.Index, probe.SubIndex)
 	fmt.Printf("tx sdo node=0x%02X %s 0x%04X:%02X %s\n", node, probe.Label, probe.Index, probe.SubIndex, formatFrame(req))
 	if err := conn.Send(req); err != nil {
@@ -172,7 +282,7 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 	}
 	deadline := time.Now().Add(timeout)
 	for {
-		f, ok := recvUntil(conn, deadline, res)
+		f, ok := recvUntil(conn, deadline, res, sink)
 		if !ok {
 			fmt.Printf("no-reply sdo node=0x%02X 0x%04X:%02X\n", node, probe.Index, probe.SubIndex)
 			return
@@ -195,7 +305,7 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 	}
 }
 
-func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, timeout time.Duration, res *result) {
+func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, timeout time.Duration, res *result, sink frameSink) {
 	payload := mecom.BuildBinarySingleGetFrame(int(addr), 1, paramID, instance)
 	var data [8]byte
 	copy(data[:], payload)
@@ -207,7 +317,7 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, tim
 	}
 	deadline := time.Now().Add(timeout)
 	for {
-		f, ok := recvUntil(conn, deadline, res)
+		f, ok := recvUntil(conn, deadline, res, sink)
 		if !ok {
 			fmt.Printf("no-reply mecom addr=0x%02X\n", addr)
 			return
@@ -225,7 +335,7 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, tim
 	}
 }
 
-func recvUntil(conn *socketcan.Conn, deadline time.Time, res *result) (canopen.Frame, bool) {
+func recvUntil(conn *socketcan.Conn, deadline time.Time, res *result, sink frameSink) (canopen.Frame, bool) {
 	left := time.Until(deadline)
 	if left <= 0 {
 		return canopen.Frame{}, false
@@ -239,6 +349,9 @@ func recvUntil(conn *socketcan.Conn, deadline time.Time, res *result) (canopen.F
 		return canopen.Frame{}, false
 	}
 	res.frames++
+	if sink != nil {
+		sink.Record(f)
+	}
 	observe(f, res)
 	fmt.Printf("rx %s\n", formatFrame(f))
 	return f, true
@@ -314,6 +427,44 @@ func parseID(v string) (byte, error) {
 		return 0, fmt.Errorf("id %q outside 1..127", v)
 	}
 	return byte(n), nil
+}
+
+func parseByteSize(v string) (int64, error) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return 0, errors.New("empty size")
+	}
+	lower := strings.ToLower(v)
+	multiplier := int64(1)
+	for _, suffix := range []struct {
+		text string
+		mul  int64
+	}{
+		{"gib", 1024 * 1024 * 1024},
+		{"gb", 1000 * 1000 * 1000},
+		{"g", 1024 * 1024 * 1024},
+		{"mib", 1024 * 1024},
+		{"mb", 1000 * 1000},
+		{"m", 1024 * 1024},
+		{"kib", 1024},
+		{"kb", 1000},
+		{"k", 1024},
+		{"b", 1},
+	} {
+		if strings.HasSuffix(lower, suffix.text) {
+			multiplier = suffix.mul
+			v = strings.TrimSpace(v[:len(v)-len(suffix.text)])
+			break
+		}
+	}
+	n, err := strconv.ParseInt(v, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	if n <= 0 {
+		return 0, errors.New("size must be positive")
+	}
+	return n * multiplier, nil
 }
 
 func parseSDOProbes(v string) ([]sdoProbe, error) {

@@ -31,6 +31,13 @@ type ReadClient interface {
 	ReadRingBuffer(context.Context, uint32, uint16) (RingReadResponse, error)
 }
 
+// RingReadoutCapability lets transport adapters report whether the controller
+// CRTVStream ring-buffer primitive is actually available on that transport.
+// Older test clients and serial/TCP clients default to true for compatibility.
+type RingReadoutCapability interface {
+	SupportsRingReadout() bool
+}
+
 // ReadoutParameter describes one signal in a reusable polling plan.
 type ReadoutParameter struct {
 	Parameter    Parameter
@@ -202,6 +209,9 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 	if len(r.ringConfig) == 0 {
 		return
 	}
+	if !supportsRingReadout(client) {
+		return
+	}
 	reqCtx, cancel := context.WithTimeout(ctx, r.requestTimeout)
 	defer cancel()
 	if !r.ringConfigured {
@@ -268,6 +278,11 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 	}
 }
 
+func supportsRingReadout(client ReadClient) bool {
+	capable, ok := client.(RingReadoutCapability)
+	return !ok || capable.SupportsRingReadout()
+}
+
 func (r *Readout) tuneRingReadWindow(resp RingReadResponse) {
 	if resp.Status == RingStatusHasMoreData || int(resp.BytesAdded) >= int(r.ringMaxBytes)*3/4 {
 		if r.ringMaxBytes < r.ringMaxLimit {
@@ -304,17 +319,18 @@ func (r *Readout) pollBackground(ctx context.Context, client ReadClient, observe
 	}
 	r.background.RecordBulk(params, values, observedAt, nil)
 	for i, param := range params {
-		if i >= len(values) || math.IsNaN(values[i]) {
-			continue
-		}
 		spec, ok := r.backgroundItems[ParameterKey(param)]
 		if !ok {
 			continue
 		}
+		sample := math.NaN()
+		if i < len(values) {
+			sample = values[i]
+		}
 		value := ReadoutValue{
 			Parameter:  spec.Parameter,
 			Sensor:     spec.Sensor,
-			Value:      values[i],
+			Value:      sample,
 			ObservedAt: observedAt,
 			Readout:    ReadoutVXRoundRobinQueue,
 		}

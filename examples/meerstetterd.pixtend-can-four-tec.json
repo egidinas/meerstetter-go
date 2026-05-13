@@ -1,0 +1,64 @@
+{
+  "http_listen": "0.0.0.0:18080",
+  "listen_host": "127.0.0.1",
+  "passthrough_base_port": 15000,
+  "can_ring_path": "/run/meerstettergo-ring/pixtend-can0.ring",
+  "can_ring_fallback_path": "/var/lib/meerstettergo/pixtend-can0.ring",
+  "can_ring_replay_limit": 5000,
+  "instances": [0, 1, 2, 3, 4],
+  "discover_instances": true,
+  "instance_scan_max": 4,
+  "devices": [
+    {
+      "id": "tec-75",
+      "target": "canopen:can0?node=0x4b",
+      "redundant_targets": [
+        "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01GVYX-if00-port0@57600"
+      ],
+      "metadata": {
+        "serial_number": "75",
+        "canopen_node": "0x4b",
+        "preferred_transport": "canopen"
+      }
+    },
+    {
+      "id": "tec-76",
+      "target": "canopen:can0?node=0x4c",
+      "redundant_targets": [
+        "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01GW7L-if00-port0@57600"
+      ],
+      "metadata": {
+        "serial_number": "76",
+        "canopen_node": "0x4c",
+        "preferred_transport": "canopen"
+      }
+    },
+    {
+      "id": "tec-81",
+      "target": "canopen:can0?node=0x51",
+      "redundant_targets": [
+        "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01FKRM-if00-port0@57600"
+      ],
+      "metadata": {
+        "serial_number": "81",
+        "canopen_node": "0x51",
+        "preferred_transport": "canopen"
+      }
+    },
+    {
+      "id": "tec-84",
+      "target": "canopen:can0?node=0x54",
+      "redundant_targets": [
+        "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01FSW6-if00-port0@57600"
+      ],
+      "metadata": {
+        "serial_number": "84",
+        "canopen_node": "0x54",
+        "preferred_transport": "canopen"
+      }
+    }
+  ],
+  "read_policy": {
+    "default_mode": "mecom_vx_round_robin_queue"
+  }
+}

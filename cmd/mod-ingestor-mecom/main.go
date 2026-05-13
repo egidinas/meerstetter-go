@@ -17,7 +17,7 @@
 //	3000  Target Object Temperature   (°C)
 //	1011  Ramp Object Temperature     (°C)
 //	1020  Output Current              (A)
-//	1021  VAWC Voltage                (V)
+//	1021  Output Voltage              (V)
 //	1022  Output Power                (W)
 //	1200  Temperature Stable          (int)
 package main
@@ -320,7 +320,7 @@ func mecomSourceOffer(getenv func(string) string, channels int, subject string, 
 		"control_lease":       "originator_lease_required_before_any_mecom_write",
 		"control_surface":     "planned_channel_setpoint_write_requires_lease_and_receipt",
 		"semantic_mapping":    "graphsem_mecom_tec_catalogue",
-		"semantic_roles":      "test_spot_temperature,tec_sink_temperature,cascade_temperature,target_object_temperature,ramp_object_temperature,vawc_current,vawc_voltage,vawc_power,temperature_stable,electrical_input_power,heat_pumped_from_item,resistive_heat,hot_side_dissipated_heat",
+		"semantic_roles":      "test_spot_temperature,tec_sink_temperature,cascade_temperature,target_object_temperature,ramp_object_temperature,drive_current,drive_voltage,drive_power,temperature_stable,electrical_input_power,heat_pumped_from_item,resistive_heat,hot_side_dissipated_heat",
 		"catalogue_entries":   strconv.Itoa(len(catalogue.Entries)),
 		"history_binding":     "arrow_tiles_when_archived",
 		"poll_interval_ms":    strconv.Itoa(pollMs),
@@ -329,7 +329,7 @@ func mecomSourceOffer(getenv func(string) string, channels int, subject string, 
 		"derived_readout":     "mecom_derived_channel_model",
 		"channel_mode_policy": "explicit_channel_modes_no_thermal_inference_for_power_supply",
 		"readout_policy":      "ring_buffer_high_priority_reduced_to_consumer_rate_background_vx_round_robin",
-		"priority_groups":     "vawc,cascade,key_temperatures",
+		"priority_groups":     "drive_telemetry,cascade,key_temperatures",
 		"high_priority_signals": strings.Join([]string{
 			"object_temp_c",
 			"sink_temp_c",
@@ -337,7 +337,7 @@ func mecomSourceOffer(getenv func(string) string, channels int, subject string, 
 			"target_object_temp_c",
 			"ramp_object_temp_c",
 			"output_current_a",
-			"vawc_voltage_v",
+			"output_voltage_v",
 			"output_power_w",
 		}, ","),
 		"high_priority":      "mecom_crtvstream_ring_buffer",

@@ -82,6 +82,68 @@ func TestReadoutWidensRingReadWindowUnderBacklog(t *testing.T) {
 	}
 }
 
+func TestReadoutSkipsRingForUnsupportedTransport(t *testing.T) {
+	ringSupported := false
+	params := DefaultTECReadoutParameters(1)
+	fallbacks := make([]ReadoutParameter, 0, 8)
+	for _, param := range params {
+		if !param.HighPriority {
+			continue
+		}
+		param.HighPriority = false
+		fallbacks = append(fallbacks, param)
+	}
+	readout := NewReadout(ReadoutConfig{
+		Parameters: append(params, fallbacks...),
+		BulkChunk:  8,
+	})
+	client := &fakeReadoutClient{
+		ringSupported: &ringSupported,
+		bulkValues:    []float64{1, 2, 3, 4, 5, 6, 7, 8},
+	}
+
+	batch := readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(12, 0))
+
+	if len(client.configured) != 0 {
+		t.Fatalf("ring capture configured on unsupported transport: %#v", client.configured)
+	}
+	if client.ringReads != 0 {
+		t.Fatalf("ring reads = %d, want 0", client.ringReads)
+	}
+	if len(batch.Errors) != 0 {
+		t.Fatalf("unsupported ring transport should degrade without soft errors: %#v", batch.Errors)
+	}
+	if got, want := len(batch.BackgroundValues), 8; got != want {
+		t.Fatalf("background values = %d, want duplicated high-priority fallback chunk %d", got, want)
+	}
+	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.object_temp_c"); value == nil || value.Value != 2 {
+		t.Fatalf("missing first fallback value from background queue: %#v", batch.Values)
+	}
+}
+
+func TestReadoutEmitsUnavailableBackgroundValues(t *testing.T) {
+	params := []ReadoutParameter{
+		{Parameter: Parameter{ID: 52200, Instance: 1, Name: "cascade_temp_c", Unit: "degC", Type: DataTypeFloat32}, Sensor: "mecom.tec_01.cascade_temp_c"},
+	}
+	readout := NewReadout(ReadoutConfig{
+		Parameters: params,
+		BulkChunk:  len(params),
+	})
+	client := &fakeReadoutClient{
+		bulkValues: []float64{math.NaN()},
+	}
+
+	batch := readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(13, 0))
+
+	value := readoutValueBySensor(batch.Values, "mecom.tec_01.cascade_temp_c")
+	if value == nil || !math.IsNaN(value.Value) {
+		t.Fatalf("missing explicit unavailable cascade value: %#v", batch.Values)
+	}
+	if len(batch.BackgroundValues) != 1 {
+		t.Fatalf("background values = %d, want explicit unavailable sample", len(batch.BackgroundValues))
+	}
+}
+
 func TestReadoutAddsChannelModeAwareDerivedValues(t *testing.T) {
 	params := []ReadoutParameter{
 		{Parameter: Parameter{ID: 1000, Instance: 1, Name: "object_temp_c", Unit: "degC", Type: DataTypeFloat32}, Sensor: "mecom.tec_01.object_temp_c"},
@@ -148,19 +210,27 @@ func TestReadoutDoesNotInferPeltierThermalValuesForPowerSupplyMode(t *testing.T)
 	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.electrical_input_w"); value == nil || math.Abs(value.Value-15) > 0.0001 {
 		t.Fatalf("missing derived electrical input 15 W: %#v", batch.Values)
 	}
-	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.heat_pumped_from_item_w"); value != nil {
-		t.Fatalf("power supply mode must not infer peltier thermal output: %#v", value)
+	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.heat_pumped_from_item_w"); value == nil || !math.IsNaN(value.Value) {
+		t.Fatalf("power supply mode must mark peltier thermal output unavailable: %#v", value)
 	}
 }
 
 type fakeReadoutClient struct {
 	configured    [][]RingCaptureParameter
+	ringSupported *bool
 	pointer       uint32
 	ringResponse  RingReadResponse
 	ringReads     int
 	lastRingStart uint32
 	bulkParams    [][]Parameter
 	bulkValues    []float64
+}
+
+func (f *fakeReadoutClient) SupportsRingReadout() bool {
+	if f.ringSupported == nil {
+		return true
+	}
+	return *f.ringSupported
 }
 
 func (f *fakeReadoutClient) ReadBulk(_ context.Context, params []Parameter) ([]float64, error) {

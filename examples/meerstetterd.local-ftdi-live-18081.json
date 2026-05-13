@@ -1,0 +1,44 @@
+{
+  "http_listen": "0.0.0.0:18081",
+  "listen_host": "0.0.0.0",
+  "passthrough_base_port": 15100,
+  "devices": [
+    {
+      "id": "tec-01",
+      "target": "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01GVYX-if00-port0@57600"
+    },
+    {
+      "id": "tec-02",
+      "target": "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01GW7L-if00-port0@57600"
+    },
+    {
+      "id": "tec-03",
+      "target": "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01FKRM-if00-port0@57600"
+    },
+    {
+      "id": "tec-04",
+      "target": "serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DQ01FSW6-if00-port0@57600"
+    }
+  ],
+  "read_policy": {
+    "default_mode": "single",
+    "targets": {
+      "device:tec-01:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-01:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-02:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-03:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.object_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.sink_temp_c": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.output_power_w": "mecom_crtvstream_ring_buffer",
+      "device:tec-04:mecom.tec_01.hot_side_dissipated_w": "mecom_crtvstream_ring_buffer"
+    }
+  }
+}

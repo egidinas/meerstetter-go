@@ -67,82 +67,82 @@ require (
 	golang.org/x/sys v0.44.0 // indirect
 )
 
-replace github.com/egidinas/loom-gossamer-shared/go/graphwallui => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/graphwallui
+replace github.com/egidinas/loom-gossamer-shared/go/graphwallui => ../shared/loom-gossamer-shared/go/graphwallui
 
-replace github.com/egidinas/loom-gossamer-shared/go/contracts => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/contracts
+replace github.com/egidinas/loom-gossamer-shared/go/contracts => ../shared/loom-gossamer-shared/go/contracts
 
-replace github.com/egidinas/loom-gossamer-shared/go/graphwall => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/graphwall
+replace github.com/egidinas/loom-gossamer-shared/go/graphwall => ../shared/loom-gossamer-shared/go/graphwall
 
-replace github.com/egidinas/loom-gossamer-shared/go/discovery => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/discovery
+replace github.com/egidinas/loom-gossamer-shared/go/discovery => ../shared/loom-gossamer-shared/go/discovery
 
-replace github.com/egidinas/loom-gossamer-shared/go/mathutil => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/mathutil
+replace github.com/egidinas/loom-gossamer-shared/go/mathutil => ../shared/loom-gossamer-shared/go/mathutil
 
-replace github.com/egidinas/loom-gossamer-shared/go/livebus => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/livebus
+replace github.com/egidinas/loom-gossamer-shared/go/livebus => ../shared/loom-gossamer-shared/go/livebus
 
-replace github.com/egidinas/loom-gossamer-shared/go/mesh => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/mesh
+replace github.com/egidinas/loom-gossamer-shared/go/mesh => ../shared/loom-gossamer-shared/go/mesh
 
-replace github.com/egidinas/loom-gossamer-shared/go/tmtc => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/tmtc
+replace github.com/egidinas/loom-gossamer-shared/go/tmtc => ../shared/loom-gossamer-shared/go/tmtc
 
-replace github.com/egidinas/loom-gossamer-shared/go/tmtclog => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/tmtclog
+replace github.com/egidinas/loom-gossamer-shared/go/tmtclog => ../shared/loom-gossamer-shared/go/tmtclog
 
-replace github.com/egidinas/loom-gossamer-shared/go/telemetrytiles => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/telemetrytiles
+replace github.com/egidinas/loom-gossamer-shared/go/telemetrytiles => ../shared/loom-gossamer-shared/go/telemetrytiles
 
-replace github.com/egidinas/loom-gossamer-shared/go/transport => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/transport
+replace github.com/egidinas/loom-gossamer-shared/go/transport => ../shared/loom-gossamer-shared/go/transport
 
-replace github.com/egidinas/loom-gossamer-shared/go/arrowutil => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/arrowutil
+replace github.com/egidinas/loom-gossamer-shared/go/arrowutil => ../shared/loom-gossamer-shared/go/arrowutil
 
-replace github.com/egidinas/loom-gossamer-shared/go/schema => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/schema
+replace github.com/egidinas/loom-gossamer-shared/go/schema => ../shared/loom-gossamer-shared/go/schema
 
-replace github.com/egidinas/loom-gossamer-shared/go/dbc => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/dbc
+replace github.com/egidinas/loom-gossamer-shared/go/dbc => ../shared/loom-gossamer-shared/go/dbc
 
-replace github.com/egidinas/loom-gossamer-shared/go/commandsession => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/commandsession
+replace github.com/egidinas/loom-gossamer-shared/go/commandsession => ../shared/loom-gossamer-shared/go/commandsession
 
-replace github.com/egidinas/loom-gossamer-shared/go/metrics => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/metrics
+replace github.com/egidinas/loom-gossamer-shared/go/metrics => ../shared/loom-gossamer-shared/go/metrics
 
-replace github.com/egidinas/loom-gossamer-shared/go/modulekit => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/modulekit
+replace github.com/egidinas/loom-gossamer-shared/go/modulekit => ../shared/loom-gossamer-shared/go/modulekit
 
-replace github.com/egidinas/loom-gossamer-shared/go/edgepub => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/edgepub
+replace github.com/egidinas/loom-gossamer-shared/go/edgepub => ../shared/loom-gossamer-shared/go/edgepub
 
-replace github.com/egidinas/loom-gossamer-shared/go/graphcompose => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/graphcompose
+replace github.com/egidinas/loom-gossamer-shared/go/graphcompose => ../shared/loom-gossamer-shared/go/graphcompose
 
-replace github.com/egidinas/loom-gossamer-shared/go/ipc => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/ipc
+replace github.com/egidinas/loom-gossamer-shared/go/ipc => ../shared/loom-gossamer-shared/go/ipc
 
-replace github.com/egidinas/loom-gossamer-shared/go/lifecycle => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/lifecycle
+replace github.com/egidinas/loom-gossamer-shared/go/lifecycle => ../shared/loom-gossamer-shared/go/lifecycle
 
-replace github.com/egidinas/loom-gossamer-shared/go/otelutil => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/otelutil
+replace github.com/egidinas/loom-gossamer-shared/go/otelutil => ../shared/loom-gossamer-shared/go/otelutil
 
-replace github.com/egidinas/loom-gossamer-shared/go/graphsem => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/graphsem
+replace github.com/egidinas/loom-gossamer-shared/go/graphsem => ../shared/loom-gossamer-shared/go/graphsem
 
-replace github.com/egidinas/loom-gossamer-shared/go/canroute => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/canroute
+replace github.com/egidinas/loom-gossamer-shared/go/canroute => ../shared/loom-gossamer-shared/go/canroute
 
-replace github.com/egidinas/loom-gossamer-shared/go/nodetransport => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/nodetransport
+replace github.com/egidinas/loom-gossamer-shared/go/nodetransport => ../shared/loom-gossamer-shared/go/nodetransport
 
-replace github.com/egidinas/loom-gossamer-shared/go/receipts => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/receipts
+replace github.com/egidinas/loom-gossamer-shared/go/receipts => ../shared/loom-gossamer-shared/go/receipts
 
-replace github.com/egidinas/loom-gossamer-shared/go/envelope => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/envelope
+replace github.com/egidinas/loom-gossamer-shared/go/envelope => ../shared/loom-gossamer-shared/go/envelope
 
-replace github.com/egidinas/loom-gossamer-shared/go/safego => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/safego
+replace github.com/egidinas/loom-gossamer-shared/go/safego => ../shared/loom-gossamer-shared/go/safego
 
-replace github.com/egidinas/loom-gossamer-shared/go/contractcheck => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/contractcheck
+replace github.com/egidinas/loom-gossamer-shared/go/contractcheck => ../shared/loom-gossamer-shared/go/contractcheck
 
-replace github.com/egidinas/loom-gossamer-shared/go/errorsx => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/errorsx
+replace github.com/egidinas/loom-gossamer-shared/go/errorsx => ../shared/loom-gossamer-shared/go/errorsx
 
-replace github.com/egidinas/loom-gossamer-shared/go/envutil => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/envutil
+replace github.com/egidinas/loom-gossamer-shared/go/envutil => ../shared/loom-gossamer-shared/go/envutil
 
-replace github.com/egidinas/loom-gossamer-shared/go/jsonfile => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/jsonfile
+replace github.com/egidinas/loom-gossamer-shared/go/jsonfile => ../shared/loom-gossamer-shared/go/jsonfile
 
-replace github.com/egidinas/loom-gossamer-shared/go/safepath => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/safepath
+replace github.com/egidinas/loom-gossamer-shared/go/safepath => ../shared/loom-gossamer-shared/go/safepath
 
-replace github.com/egidinas/loom-gossamer-shared/go/fixturefallback => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/fixturefallback
+replace github.com/egidinas/loom-gossamer-shared/go/fixturefallback => ../shared/loom-gossamer-shared/go/fixturefallback
 
-replace github.com/egidinas/loom-gossamer-shared/go/sequencer => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/sequencer
+replace github.com/egidinas/loom-gossamer-shared/go/sequencer => ../shared/loom-gossamer-shared/go/sequencer
 
-replace github.com/egidinas/loom-gossamer-shared/go/capabilitycatalog => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/capabilitycatalog
+replace github.com/egidinas/loom-gossamer-shared/go/capabilitycatalog => ../shared/loom-gossamer-shared/go/capabilitycatalog
 
-replace github.com/egidinas/loom-gossamer-shared/go/arrowtelemetry => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/arrowtelemetry
+replace github.com/egidinas/loom-gossamer-shared/go/arrowtelemetry => ../shared/loom-gossamer-shared/go/arrowtelemetry
 
-replace github.com/egidinas/loom-gossamer-shared/go/tilebundle => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/tilebundle
+replace github.com/egidinas/loom-gossamer-shared/go/tilebundle => ../shared/loom-gossamer-shared/go/tilebundle
 
-replace github.com/egidinas/loom-gossamer-shared/go/telemetrytiles/arrow => /home/svc_pmg_testbed_b/shared/loom-gossamer-shared/go/telemetrytiles/arrow
+replace github.com/egidinas/loom-gossamer-shared/go/telemetrytiles/arrow => ../shared/loom-gossamer-shared/go/telemetrytiles/arrow
 
-replace github.com/egidinas/signalforge => /home/svc_pmg_testbed_b/signalforge
+replace github.com/egidinas/signalforge => ../signalforge

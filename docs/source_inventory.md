@@ -6,9 +6,11 @@ are small implementation fixtures or synthetic tests.
 
 ## Local Extracted Material
 
-The current working copy has Meerstetter material under:
-
-`/home/svc_pmg_testbed_b/loom/docs/meerstetter/`
+The current working copy expects Meerstetter source material outside this repo.
+Set `MECOM_SOURCE_DIR` to the local extraction directory when regenerating
+derived references. In the lab workspace this usually points at the adjacent
+Loom checkout, for example `../loom/docs/meerstetter/` when both repositories
+share the same parent directory.
 
 Important derived references:
 

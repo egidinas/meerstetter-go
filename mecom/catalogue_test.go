@@ -63,7 +63,7 @@ func TestBuildMeComTECCatalogueIncludesDerivedThermalPowerRows(t *testing.T) {
 	}
 }
 
-func TestBuildMeComTECCatalogueDescribesVAWCCascadeAndReadoutSemantics(t *testing.T) {
+func TestBuildMeComTECCatalogueDescribesDriveCascadeAndReadoutSemantics(t *testing.T) {
 	catalogue := BuildMeComTECCatalogue(MeComTECCatalogueConfig{
 		ChannelCount:      8,
 		ControllerAddress: 80,
@@ -98,20 +98,19 @@ func TestBuildMeComTECCatalogueDescribesVAWCCascadeAndReadoutSemantics(t *testin
 		t.Fatalf("cascade raw fallback = %q", cascade.Metadata["raw_numeric_fallback"])
 	}
 
-	vawcVoltage := findCatalogueEntry(t, catalogue, "mecom.tec_07.vawc_voltage_v")
-	if vawcVoltage.Metadata["semantic_role"] != "vawc_voltage" ||
-		vawcVoltage.Metadata["vawc_component"] != "voltage" ||
-		vawcVoltage.Metadata["priority_group"] != "vawc" ||
-		vawcVoltage.Metadata["aliases"] != "output_voltage_v" {
-		t.Fatalf("VAWC voltage metadata = %#v", vawcVoltage.Metadata)
+	outputVoltage := findCatalogueEntry(t, catalogue, "mecom.tec_07.output_voltage_v")
+	if outputVoltage.Metadata["semantic_role"] != "drive_voltage" ||
+		outputVoltage.Metadata["drive_component"] != "voltage" ||
+		outputVoltage.Metadata["priority_group"] != "drive_telemetry" {
+		t.Fatalf("output voltage metadata = %#v", outputVoltage.Metadata)
 	}
 
 	power := findCatalogueEntry(t, catalogue, "mecom.tec_07.output_power_w")
 	if power.Category != graphsem.CategoryPower || power.Unit != "W" {
 		t.Fatalf("OH power row category/unit = %q/%q", power.Category, power.Unit)
 	}
-	if power.Metadata["semantic_role"] != "vawc_power" ||
-		power.Metadata["vawc_component"] != "watt" ||
+	if power.Metadata["semantic_role"] != "drive_power" ||
+		power.Metadata["drive_component"] != "watt" ||
 		power.Metadata["preferred_readout"] != "mecom_crtvstream_ring_buffer" {
 		t.Fatalf("power semantic_role = %q", power.Metadata["semantic_role"])
 	}

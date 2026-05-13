@@ -2,5 +2,7 @@
 /.vscode/
 /bin/
 /dist/
+/.ui-smoke.*/
+/.ui-interact.*/
 *.test
 *.out
