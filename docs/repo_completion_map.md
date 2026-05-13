@@ -108,6 +108,9 @@ Safe default gates:
 - `deploy/verify_ui_browser_smoke.sh`: browser DOM/screenshot population check
   plus rendered provenance checks for device, instance, parameter, transport,
   readout, and writable target chips.
+- `deploy/verify_ui_browser_interactions.sh`: browser interaction check for the
+  graph-wall focus mode, graph-wall filters, exposed route links, in-page import
+  review tool, writable controls, and visually parseable provenance chips.
 - `deploy/verify_mvp_completion.sh`: wrapper for the safe default set.
 
 Bounded but disruptive gates:

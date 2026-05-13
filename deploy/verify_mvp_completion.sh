@@ -13,6 +13,7 @@ PI_BASE_URL=${PI_BASE_URL:-http://192.168.6.229:18080}
 LOOM_BASE_URL=${LOOM_BASE_URL:-http://127.0.0.1:18087}
 
 RUN_UI=${RUN_UI:-1}
+RUN_UI_INTERACTIONS=${RUN_UI_INTERACTIONS:-1}
 RUN_TESTS=${RUN_TESTS:-1}
 RUN_RECOVERY=${RUN_RECOVERY:-0}
 RUN_AUTONOMY=${RUN_AUTONOMY:-1}
@@ -49,6 +50,9 @@ fi
 
 if [[ "$RUN_UI" == "1" ]]; then
     require_file "$ROOT/deploy/verify_ui_browser_smoke.sh"
+    if [[ "$RUN_UI_INTERACTIONS" == "1" ]]; then
+        require_file "$ROOT/deploy/verify_ui_browser_interactions.sh"
+    fi
 fi
 
 if [[ "$RUN_RECOVERY" == "1" ]]; then
@@ -79,6 +83,12 @@ fi
 if [[ "$RUN_UI" == "1" ]]; then
     step "Direct edge browser UI"
     BASE_URL="$PI_BASE_URL" "$ROOT/deploy/verify_ui_browser_smoke.sh"
+    if [[ "$RUN_UI_INTERACTIONS" == "1" ]]; then
+        step "Direct edge browser UI interactions"
+        BASE_URL="$PI_BASE_URL" "$ROOT/deploy/verify_ui_browser_interactions.sh"
+    else
+        ok "browser UI interaction gate skipped (RUN_UI_INTERACTIONS=0)"
+    fi
 else
     ok "browser UI smoke skipped (RUN_UI=0)"
 fi
@@ -128,7 +138,11 @@ else
 fi
 
 if [[ "$RUN_UI" == "1" ]]; then
-    ui_line="- direct browser UI data population"
+    if [[ "$RUN_UI_INTERACTIONS" == "1" ]]; then
+        ui_line="- direct browser UI data population, provenance rendering, graph-wall controls, and import-review interaction"
+    else
+        ui_line="- direct browser UI data population; interaction gate skipped with RUN_UI_INTERACTIONS=0"
+    fi
 else
     ui_line="- direct browser UI data population skipped; set RUN_UI=1 to include it"
 fi

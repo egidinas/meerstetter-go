@@ -219,6 +219,21 @@ browser UI smoke, targeted Meerstetter-Go tests, and targeted Loom adapter
 tests. The browser smoke captured a nonblank 1440x1000 screenshot and confirmed
 220 targets plus the graph-wall tiles in the live DOM.
 
+2026-05-13 21:42 UTC: ran the live browser interaction verifier before wiring
+it into the default MVP gate:
+
+```sh
+BASE_URL=http://192.168.6.229:18080 \
+UI_WAIT_MS=6500 \
+./deploy/verify_ui_browser_interactions.sh
+```
+
+Result: pass. The verifier confirmed 220 populated targets, 220 provenance
+rows, 16 writable controls, graph-wall focus mode, graph-wall filters, the
+in-page import review tool, and a nonblank interaction screenshot. The
+top-level MVP gate now includes this interaction check by default whenever
+`RUN_UI=1`; set `RUN_UI_INTERACTIONS=0` only for a faster route-only run.
+
 These checks prove a late or idle owner can reconnect to a still-running edge
 and catch up through the same backend/UI route. They do not stop the real
 gateway process, stop a dedicated owner process, simulate Pi power loss,
@@ -233,13 +248,13 @@ simulate CAN congestion, or exercise controller-internal ring-buffer gap-fill.
 | Decoded telemetry | Working with freshness gate | The live direct and Loom gateway verifiers require `object_temp_c`, `sink_temp_c`, `target_object_temp_c`, `output_current_a`, and `output_voltage_v` to be fresh across all live instanced TEC targets within `MAX_SAMPLE_AGE_SECONDS=30`; the latest gateway run passed with 80 fresh high-priority target values and the polling-status route reported 208/208 targets fresh. | Define tier-specific freshness budgets for lower-priority catalogue variables and add congestion/power-cycle freshness regressions. |
 | Signal tree | Working | `/api/discovery/tree`, `/api/loom/discovery-tree`, `/api/loom/discovery/tree`, and `/api/operator/meerstettergo/discovery/tree` expose the JSON discovery contract with 220 targets and 16 writable target paths. | Continue classifying undocumented parameters before making them active writes. |
 | SignalForge/Loom catalogue | Working for catalogue, read freshness, write guards, and route-level owner reconnect | `/api/loom/source-catalogue` exposes 144 entries, command metadata, target read routes, and lease-required write routes. `deploy/verify_loom_gateway_route.sh` verifies the running Loom/operator gateway contract: `selection_owner=loom.operator`, remote read/write route metadata, live polling freshness, target-read route availability, and safe gateway rejection for writes without a sequencer lease. `deploy/verify_pixtend_owner_takeover.sh` verifies the gateway can reattach after an idle owner window and catch up to the direct edge sequence. | Prove real process-stop owner timing and end-to-end leased write acceptance before routine writes. |
-| Graph wall | Working at API, served UI, and browser-rendered level | `/api/graph-wall` returns temperature, target, power, and event tiles; `/` loads the shared graph-wall renderer and live API routes; the aggregate pseudo-target tile route returns live device series; `deploy/verify_ui_browser_smoke.sh` uses headless Chromium to confirm live plots, graph-wall assignment controls, target controls, and all four TEC nodes instead of `loading...`. | Add richer browser layout regression checks if this becomes a CI/deployment gate. |
+| Graph wall | Working at API, served UI, browser-rendered, and browser-interactive level | `/api/graph-wall` returns temperature, target, power, and event tiles; `/` loads the shared graph-wall renderer and live API routes; the aggregate pseudo-target tile route returns live device series; `deploy/verify_ui_browser_smoke.sh` uses headless Chromium to confirm live plots, graph-wall assignment controls, target controls, and all four TEC nodes instead of `loading...`; `deploy/verify_ui_browser_interactions.sh` verifies graph-wall focus mode, filters, exposed route links, writable controls, and in-page import review. | Add richer pixel/layout regression checks if this becomes a CI/deployment gate. |
 | Temporary logging | Working | `/api/log/ring` serves decoded telemetry from the in-memory log ring; `/api/can/ring` serves raw CAN records from the primary RAM ring. | Add pressure tests for ring sizing and dropped-frame accounting. |
 | Flash fallback | Configured, exposed, and reconciled with RAM | `/api/health` reports RAM as primary and flash as fallback/bootstrap; `/api/can/ring?source=fallback_flash` reads the fallback explicitly; `/api/can/ring?source=merged` returns a RAM-plus-flash tail without duplicate frame keys in the live route and recovery verifiers; `deploy/verify_pixtend_ring_recovery.sh` proves bounded `pixtend-can-ring.service` restart recovery; `deploy/verify_pixtend_edge_autonomy.sh` proves the fallback remains readable and non-regressing while the primary RAM ring advances; `deploy/verify_pixtend_owner_takeover.sh` proves a gateway reattach keeps the merged RAM/flash view deduplicated. | Prove physical power-interruption recovery, bus-congestion behavior, real process-stop owner timing, and controller-ring gap-fill under scripted fault tests. |
 | Permanent export and review | MVP working with durable archive contract | `/api/log/export` emits NDJSON, `/api/log/export?format=arrow_ipc` emits a binary Arrow IPC telemetry stream, `/api/log/import/review` reviews NDJSON without committing, and `/api/log/archive/manifest` exposes the stable NDJSON/Arrow/HDF5 stream contract for telemetry, raw CAN, command events, object dictionary snapshots, and graph-wall assignments. | HDF5 remains a planned archive contract if required for final production. |
 | Redundant transports | Metadata path present | CAN is active/preferred; serial FTDI and Kvaser-compatible routes are exposed through the same target model. | Validate live FTDI fallback arbitration and TCP device-server sharing under load. |
 | Write path | Present and guarded | Writable targets are initialized with current values and expose sequencer write metadata requiring a lease. Direct no-lease probes are rejected at the edge with HTTP 428, and gateway no-lease probes are rejected with `X-Loom-Sequencer-Lease` enforcement before forwarding. | Add end-to-end command receipt tests against live hardware before routine writes. |
-| One-command MVP gate | Working, with bounded recovery and route-level reconnect coverage verified | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, PiXtend owner reconnect verifier, browser UI smoke, targeted Go tests, and optional bounded service-restart checks. The default run, fast no-UI/no-test route run, post-route-fix `RUN_RECOVERY=1` run, post-`/health`-alias default run, current clean-state `RUN_RECOVERY=1` run, post-owner-verifier fast route run, and post-owner-verifier full non-restart run all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss, real process-stop owner timing, or end-to-end leased write acceptance. |
+| One-command MVP gate | Working, with bounded recovery, route-level reconnect, and browser-interaction coverage verified | `deploy/verify_mvp_completion.sh` ties together the direct PiXtend route verifier, Loom gateway verifier, PiXtend edge autonomy verifier, PiXtend owner reconnect verifier, browser UI smoke, browser UI interaction verifier, targeted Go tests, and optional bounded service-restart checks. The default run, fast no-UI/no-test route run, post-route-fix `RUN_RECOVERY=1` run, post-`/health`-alias default run, current clean-state `RUN_RECOVERY=1` run, post-owner-verifier fast route run, post-owner-verifier full non-restart run, and live interaction verifier all passed against `.229` and the local Loom gateway. | The gate still does not simulate Pi power loss, real process-stop owner timing, or end-to-end leased write acceptance. |
 
 ## Prompt-to-Artifact Checklist
 
@@ -250,7 +265,7 @@ simulate CAN congestion, or exercise controller-internal ring-buffer gap-fill.
 | Same backend/UI contract for all paths | `/api/loom/source-catalogue`, `/api/operator/meerstettergo/*`, target read/write routes | Live gateway verified; write path is lease guarded. |
 | In-RAM primary ring plus flash fallback | `/api/can/ring`, `/api/can/ring?source=fallback_flash`, `/api/can/ring?source=merged` | Live verified with deduped RAM/flash merge. |
 | Edge worker independent of owner | `deploy/verify_pixtend_edge_autonomy.sh`, `deploy/verify_pixtend_owner_takeover.sh` | Live verified for gateway-idle edge advancement and gateway reattach/catch-up; real process-stop owner outage still pending. |
-| Four-controller graph wall | `/api/graph-wall`, `/api/tiles`, `deploy/verify_ui_browser_smoke.sh` | API and browser smoke verified. |
+| Four-controller graph wall | `/api/graph-wall`, `/api/tiles`, `deploy/verify_ui_browser_smoke.sh`, `deploy/verify_ui_browser_interactions.sh` | API, browser smoke, and browser interactions verified. |
 | Full signal catalogue and writable paths | `/api/discovery/tree`, `/api/loom/source-catalogue`, write-guard probes | 220 targets and 16 initialized writable paths verified. |
 | Export and reimport/review | `/api/log/export`, `/api/log/export?format=arrow_ipc`, `/api/log/import/review`, archive manifest | NDJSON and Arrow IPC verified; HDF5 remains manifest-only. |
 | Conservative reliability gate | `deploy/verify_mvp_completion.sh`, recovery verifiers, owner reconnect verifier | Functional MVP verified; physical fault injection and real process-stop owner timing remain open. |
@@ -387,7 +402,7 @@ cd /home/svc_pmg_testbed_b/loom
   ownership metadata, read freshness, gateway reattach after an idle owner
   window, and no-lease write rejection. Real process-stop owner timing and
   leased write acceptance still need scripted proof before routine writes.
-- Browser visual smoke is now automated with headless Chromium; the route
-  verifier also covers the aggregate pseudo-target tile query that previously
-  left the graph wall empty. Richer pixel/layout regression remains optional
-  hardening.
+- Browser visual smoke and browser interaction checks are now automated with
+  headless Chromium; the route verifier also covers the aggregate pseudo-target
+  tile query that previously left the graph wall empty. Richer pixel/layout
+  regression remains optional hardening.

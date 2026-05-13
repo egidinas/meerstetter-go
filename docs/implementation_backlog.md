@@ -156,6 +156,10 @@ duplicating protocol code.
   target rows expose parsable device, instance, parameter, active transport,
   readout, and writable/read-only provenance for the four-controller PiXtend
   route.
+- Promoted the browser interaction verifier into the default MVP gate. The
+  canonical run now exercises graph-wall focus mode, graph-wall filters, exposed
+  route links, in-page import review, writable controls, and visual provenance
+  chip prefixes in addition to the DOM/screenshot population smoke.
 
 Remaining route-hardening work is tracked below as reusable packaging,
 real process-stop owner timing, power-interruption recovery tests, measured bus
