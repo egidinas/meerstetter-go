@@ -63,6 +63,17 @@ expedited SDO upload/download request construction. Host-specific adapters such
 as SocketCAN, Kvaser CANlib, or a remote bridge belong at the application
 boundary.
 
+## Raspberry Pi / PiXtend V2-L
+
+For complete bring-up instructions — OS prerequisites, device-tree overlays,
+SocketCAN interface configuration, passive bus verification, and `teccanprobe`
+usage — see [rpi_pixtend_bootstrap.md](rpi_pixtend_bootstrap.md).
+
+The PiXtend V2-L profile (`pixtend-v2l`) is the default adapter profile in
+`teccanprobe` and includes preflight checks for SPI, the `pixtendv2l` kernel
+overlay, and MCP2515 driver binding. Run `teccanprobe -checklist` to confirm
+hardware state before opening the CAN socket.
+
 ## Runtime Contracts
 
 ### Telemetry and Telecommand

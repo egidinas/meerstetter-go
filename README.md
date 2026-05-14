@@ -7,6 +7,10 @@ contains protocol code, deterministic fixtures, and small diagnostic commands.
 It does not vendor site-specific endpoints, private captures, service units, or
 operator UI assets.
 
+For browser-based public review, open `docs/public_review.html`. It documents
+the package map, command-authority boundary, SignalForge dependency, and
+verification gates without adding an operator UI to this library repository.
+
 ## Packages
 
 - `mecom`: MeCom framing, CRC handling, typed reads/writes, response parsing,
