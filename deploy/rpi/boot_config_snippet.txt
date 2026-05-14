@@ -1,0 +1,27 @@
+# ============================================================
+# PiXtend V2-L CAN configuration — append to /boot/firmware/config.txt
+# (Raspberry Pi OS Bookworm) or /boot/config.txt (Bullseye and earlier)
+#
+# BEFORE APPLYING:
+#   1. Set the CAN/analog jumper on the PiXtend V2-L board to the CAN
+#      position (see PiXtend V2-L hardware manual, jumper block near the
+#      CAN terminal). The board will not enumerate CAN interfaces with the
+#      jumper in the analog position.
+#   2. Ensure the SD card filesystem is read-write (default on Raspberry
+#      Pi OS; overlay-filesystem installs may be read-only).
+#
+# PREFERRED — single pixtendv2l overlay (sets both MCP2515 at 16 MHz,
+# GPIO25/GPIO24 interrupts, SPI CE0/CE1):
+# ============================================================
+
+dtparam=spi=on
+dtoverlay=pixtendv2l
+
+# ============================================================
+# FALLBACK — explicit per-controller stanzas if pixtendv2l.dtbo is not
+# present in /boot/firmware/overlays/ (check with: ls /boot/firmware/overlays/pixtendv2l.dtbo)
+# Uncomment and remove the dtoverlay=pixtendv2l line above if using this.
+# ============================================================
+# dtparam=spi=on
+# dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25,spimaxfrequency=1000000
+# dtoverlay=mcp2515-can1,oscillator=16000000,interrupt=24,spimaxfrequency=1000000

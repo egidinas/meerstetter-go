@@ -1,0 +1,16 @@
+# systemd-networkd unit for the PiXtend V2-L primary CAN interface.
+#
+# Install:
+#   sudo cp can0.network /etc/systemd/network/80-can0.network
+#   sudo systemctl enable --now systemd-networkd
+#
+# Verify after reboot:
+#   networkctl status can0
+#   ip -details link show can0
+
+[Match]
+Name=can0
+
+[CAN]
+BitRate=1M
+RestartSec=100ms

@@ -1,0 +1,14 @@
+# systemd-networkd unit for the PiXtend V2-L secondary CAN interface.
+#
+# Install:
+#   sudo cp can1.network /etc/systemd/network/80-can1.network
+#   sudo systemctl enable --now systemd-networkd
+#
+# Only needed if using both CAN ports. Most TEC setups use can0 only.
+
+[Match]
+Name=can1
+
+[CAN]
+BitRate=1M
+RestartSec=100ms
