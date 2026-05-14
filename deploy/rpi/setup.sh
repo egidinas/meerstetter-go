@@ -21,11 +21,30 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+TEC_NODES="${TEC_NODES:-30-39}"
 
 # ------------------------------------------------------------------ deps
-echo "==> Installing can-utils..."
-apt-get update -qq
-apt-get install -y --no-install-recommends can-utils
+missing_can_tools=()
+for tool in candump cansend; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        missing_can_tools+=("$tool")
+    fi
+done
+
+if ((${#missing_can_tools[@]} == 0)); then
+    echo "==> can-utils already available."
+elif [[ "${SKIP_APT:-0}" == "1" ]]; then
+    echo "WARN: SKIP_APT=1 and missing CAN tools: ${missing_can_tools[*]}"
+elif command -v apt-get >/dev/null 2>&1; then
+    echo "==> Installing can-utils..."
+    if apt-get update -qq && apt-get install -y --no-install-recommends can-utils; then
+        echo "    can-utils installed."
+    else
+        echo "WARN: can-utils install failed; continuing with existing tools."
+    fi
+else
+    echo "WARN: apt-get not available; missing CAN tools: ${missing_can_tools[*]}"
+fi
 
 # ------------------------------------------------------------------ boot config
 BOOT_CONFIG=""
@@ -66,18 +85,50 @@ systemctl start systemd-networkd || true
 echo "    can0.network and can1.network installed."
 
 # ------------------------------------------------------------------ teccanprobe
-if command -v go &>/dev/null; then
+ARCH="$(uname -m)"
+PREBUILT=""
+GOARCH_TARGET=""
+GOARM_TARGET=""
+case "$ARCH" in
+    aarch64|arm64)
+        PREBUILT="$SCRIPT_DIR/bin/teccanprobe_linux_arm64"
+        GOARCH_TARGET="arm64"
+        ;;
+    armv7l|armv6l|armhf)
+        PREBUILT="$SCRIPT_DIR/bin/teccanprobe_linux_arm7"
+        GOARCH_TARGET="arm"
+        GOARM_TARGET="7"
+        ;;
+    *)
+        GOARCH_TARGET="$(go env GOARCH 2>/dev/null || true)"
+        ;;
+esac
+
+install_prebuilt() {
+    if [[ -n "$PREBUILT" && -x "$PREBUILT" ]]; then
+        echo "==> Installing prebuilt teccanprobe for $ARCH..."
+        install -m 755 "$PREBUILT" /usr/local/bin/teccanprobe
+        return 0
+    fi
+    return 1
+}
+
+if [[ "${BUILD_FROM_SOURCE:-0}" != "1" ]] && install_prebuilt; then
+    echo "    Installed: /usr/local/bin/teccanprobe"
+elif command -v go >/dev/null 2>&1; then
+    [[ -z "$GOARCH_TARGET" ]] && GOARCH_TARGET="$(go env GOARCH)"
+    build_env=(GOOS=linux GOARCH="$GOARCH_TARGET")
+    [[ -n "$GOARM_TARGET" ]] && build_env+=(GOARM="$GOARM_TARGET")
     GO_VERSION=$(go version | awk '{print $3}')
-    echo "==> Found Go $GO_VERSION — building teccanprobe..."
-    (cd "$REPO_ROOT" && GOOS=linux GOARCH=arm64 go build -o /usr/local/bin/teccanprobe ./cmd/teccanprobe)
+    echo "==> Found Go $GO_VERSION — building teccanprobe for linux/$GOARCH_TARGET${GOARM_TARGET:+ GOARM=$GOARM_TARGET}..."
+    (cd "$REPO_ROOT" && env "${build_env[@]}" go build -o /usr/local/bin/teccanprobe ./cmd/teccanprobe)
     echo "    Installed: /usr/local/bin/teccanprobe"
 else
-    echo "==> Go not found. Install Go 1.21+ then run:"
-    echo "      cd $REPO_ROOT && go build -o /usr/local/bin/teccanprobe ./cmd/teccanprobe"
+    echo "WARN: teccanprobe was not installed. Copy deploy/rpi/bin/teccanprobe_linux_arm64 or _arm7 to /usr/local/bin/teccanprobe."
 fi
 
 # ------------------------------------------------------------------ summary
-cat <<'DONE'
+cat <<DONE
 
 ==> Setup complete. Next steps:
 
@@ -98,8 +149,8 @@ cat <<'DONE'
   5. PREFLIGHT CHECKLIST:
        teccanprobe -if can0 -profile pixtend-v2l -checklist
 
-  6. ACTIVE PROBE (nodes 1–16):
-       teccanprobe -if can0 -profile pixtend-v2l -active -nodes 1-16
+  6. ACTIVE PROBE (nodes ${TEC_NODES}):
+       teccanprobe -if can0 -profile pixtend-v2l -active -nodes ${TEC_NODES}
 
   Full guide: docs/rpi_pixtend_bootstrap.md
 DONE

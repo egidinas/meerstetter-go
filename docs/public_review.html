@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meerstetter-Go Public Review Surface</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17212b;
+      --muted: #5c6a76;
+      --line: #d8e0e8;
+      --panel: #f7f9fb;
+      --accent: #0f6f68;
+      --warn: #9b5a00;
+      --ok: #1d6d3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #ffffff;
+    }
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    header {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+      align-items: start;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin-bottom: 12px;
+      font-size: 1.35rem;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin-bottom: 6px;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+    p { color: var(--muted); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+      background: #eef3f6;
+      padding: 0.12rem 0.28rem;
+      border-radius: 4px;
+      overflow-wrap: anywhere;
+    }
+    .summary {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .summary div {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 10px;
+    }
+    .summary strong { color: var(--ink); }
+    section {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .item {
+      min-width: 0;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .item p { margin-bottom: 0; }
+    .lane {
+      display: grid;
+      gap: 10px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.4fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 13px 0;
+      border-top: 1px solid var(--line);
+    }
+    .row:first-child { border-top: 0; }
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      min-height: 26px;
+      padding: 2px 8px;
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .badge.warn { background: var(--warn); }
+    .badge.ok { background: var(--ok); }
+    ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+    }
+    li + li { margin-top: 6px; }
+    .checks {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .check {
+      padding: 12px 14px;
+      border-left: 4px solid var(--ok);
+      background: #f1f8f4;
+    }
+    @media (max-width: 800px) {
+      main { width: min(100% - 24px, 1120px); padding-top: 18px; }
+      header, .grid, .checks { grid-template-columns: 1fr; }
+      .row, .summary div { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <span class="badge">public baseline</span>
+        <h1>Meerstetter-Go Public Review Surface</h1>
+        <p>
+          This page is the browser-checkable summary for the public Go module.
+          The repository is a protocol and tooling baseline for Meerstetter
+          TEC/LDD communication, not an operator dashboard.
+        </p>
+      </div>
+      <div class="summary" aria-label="repository summary">
+        <div><strong>Module</strong><span><code>github.com/egidinas/meerstetter-go</code></span></div>
+        <div><strong>SignalForge</strong><span><code>github.com/egidinas/signalforge v0.2.0</code></span></div>
+        <div><strong>Runtime role</strong><span>Library, fixtures, and bounded diagnostics</span></div>
+        <div><strong>UI policy</strong><span>No operator UI or site-specific route wiring</span></div>
+      </div>
+    </header>
+
+    <section aria-labelledby="package-map">
+      <h2 id="package-map">Package Map</h2>
+      <div class="grid">
+        <article class="item">
+          <h3>MeCom Core</h3>
+          <p><code>mecom</code>, <code>mecomdict</code>, and <code>mecomserver</code> own framing, dictionaries, and serialized downstream sharing.</p>
+        </article>
+        <article class="item">
+          <h3>CAN and CANopen</h3>
+          <p><code>canopen</code>, <code>canopen/eds</code>, <code>objectdict</code>, <code>canadapter</code>, and <code>socketcan</code> keep bus ownership adapter-neutral.</p>
+        </article>
+        <article class="item">
+          <h3>TM/TC Contracts</h3>
+          <p><code>control</code>, <code>tmtc</code>, <code>sequencer</code>, and <code>export</code> expose reusable command, telemetry, and export contracts.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="command-boundary">
+      <h2 id="command-boundary">Command Boundary</h2>
+      <div class="lane">
+        <div class="row">
+          <div><span class="badge ok">read</span> <code>cmd/mecomprobe</code></div>
+          <p>Bounded MeCom read probe for TCP or serial endpoints. It is suitable for public protocol validation and does not encode lab routes.</p>
+        </div>
+        <div class="row">
+          <div><span class="badge warn">write</span> <code>cmd/mecomset</code></div>
+          <p>Bounded write probe for explicit operator-approved targets. Applications own lease policy, safety interlocks, and real procedure authority.</p>
+        </div>
+        <div class="row">
+          <div><span class="badge">adapter</span> <code>cmd/teccanprobe</code></div>
+          <p>SocketCAN/CANopen discovery and optional local CAN ring capture. Kvaser ownership, remote bridge recovery, and product routes stay outside this module.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="signalforge">
+      <h2 id="signalforge">SignalForge Interaction</h2>
+      <div class="row">
+        <div><strong>Reusable core</strong></div>
+        <p>Meerstetter-Go consumes public SignalForge contracts for control-program and automation shape where the concepts are product-neutral.</p>
+      </div>
+      <div class="row">
+        <div><strong>Private boundary</strong></div>
+        <p>Loom owns private command authority, controller ownership, lab host routing, deployment, and operator workflow composition.</p>
+      </div>
+      <div class="row">
+        <div><strong>Gossamer relationship</strong></div>
+        <p>Gossamer is the public browser/demo consumer of SignalForge patterns. Meerstetter-Go remains the public MeCom/CAN protocol consumer.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="verification">
+      <h2 id="verification">Verification Gates</h2>
+      <div class="checks">
+        <div class="check"><code>go test ./...</code></div>
+        <div class="check">No committed local <code>replace</code> directives</div>
+        <div class="check">Public SignalForge dependency only</div>
+        <div class="check">No private endpoints, captures, credentials, or operator UI assets</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
