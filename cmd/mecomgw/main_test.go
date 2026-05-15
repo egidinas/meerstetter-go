@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -131,6 +132,75 @@ func TestAuthorizeRequiresMatchingLeaseToken(t *testing.T) {
 	}
 	if err := s.authorize("tec-76", tmtc.Telecommand{Metadata: map[string]string{"lease_token": lease.Token}}); !errors.Is(err, writelease.ErrUnknownDevice) {
 		t.Fatalf("authorize wrong device err = %v, want ErrUnknownDevice", err)
+	}
+}
+
+func TestGatewayServesStaticUI(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/index.html", []byte("<!doctype html><title>MeCom Gateway</title>"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.uiDir = dir
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/ui/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /ui/ status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(body, []byte("MeCom Gateway")) {
+		t.Fatalf("GET /ui/ body did not contain demo title: %q", string(body))
+	}
+}
+
+func TestGatewayCORSAllowsConfiguredOrigin(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.allowedOrigins = []string{"https://claude.ai"}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	req, err := http.NewRequest(http.MethodOptions, ts.URL+"/api/healthz", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Origin", "https://claude.ai")
+	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("OPTIONS status = %d, want %d", resp.StatusCode, http.StatusNoContent)
+	}
+	if got := resp.Header.Get("Access-Control-Allow-Origin"); got != "https://claude.ai" {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want claude origin", got)
+	}
+	if got := resp.Header.Get("Access-Control-Allow-Headers"); !strings.Contains(got, "X-Lease-Token") {
+		t.Fatalf("Access-Control-Allow-Headers = %q, want X-Lease-Token", got)
+	}
+
+	req, err = http.NewRequest(http.MethodGet, ts.URL+"/api/healthz", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Origin", "https://not-allowed.example")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if got := resp.Header.Get("Access-Control-Allow-Origin"); got != "" {
+		t.Fatalf("unconfigured origin received CORS header %q", got)
 	}
 }
 

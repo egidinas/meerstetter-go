@@ -23,7 +23,17 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("/api/catalogue", s.handleCatalogue)
 	mux.HandleFunc("/api/leases", s.handleLeasesList)
 	mux.HandleFunc("/api/devices/", s.handleDeviceRoot)
-	return logRequests(s.logger, mux)
+	if s.uiDir != "" {
+		mux.Handle("/ui/", http.StripPrefix("/ui/", http.FileServer(http.Dir(s.uiDir))))
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				http.Redirect(w, r, "/ui/", http.StatusFound)
+				return
+			}
+			http.NotFound(w, r)
+		})
+	}
+	return logRequests(s.logger, s.withCORS(mux))
 }
 
 // --- top-level handlers ---
@@ -196,8 +206,8 @@ func (s *server) handleLeaseRelease(w http.ResponseWriter, r *http.Request, _ st
 // --- write ---
 
 type writeRequest struct {
-	Name      string         `json:"name"`
-	Arguments map[string]any `json:"arguments"`
+	Name      string            `json:"name"`
+	Arguments map[string]any    `json:"arguments"`
 	Metadata  map[string]string `json:"metadata,omitempty"`
 }
 
@@ -389,4 +399,35 @@ func logRequests(logger *log.Logger, next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		logger.Printf("%s %s %s", r.Method, r.URL.Path, time.Since(start))
 	})
+}
+
+func (s *server) withCORS(next http.Handler) http.Handler {
+	if len(s.allowedOrigins) == 0 {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); s.originAllowed(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Lease-Token")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		}
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *server) originAllowed(origin string) bool {
+	if origin == "" {
+		return false
+	}
+	for _, allowed := range s.allowedOrigins {
+		if allowed == "*" || allowed == origin {
+			return true
+		}
+	}
+	return false
 }

@@ -38,6 +38,8 @@ func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "HTTP listen address")
 	configPath := flag.String("config", "", "JSON config file with devices")
 	defaultLeaseTTL := flag.Duration("default-lease-ttl", 5*time.Minute, "default lease TTL")
+	uiDir := flag.String("ui-dir", "", "optional static UI directory served at /ui/")
+	allowOrigin := flag.String("allow-origin", "", "comma-separated CORS origins for browser clients; use * only for isolated test gateways")
 	flag.Parse()
 
 	cfg, err := loadConfig(*configPath)
@@ -55,6 +57,8 @@ func main() {
 	defer cancel()
 
 	srv := newServer(cfg, *defaultLeaseTTL, logger)
+	srv.uiDir = *uiDir
+	srv.allowedOrigins = parseCSV(*allowOrigin)
 
 	httpSrv := &http.Server{
 		Addr:              *listen,
@@ -113,6 +117,8 @@ type server struct {
 	leases          *writelease.Registry
 	defaultLeaseTTL time.Duration
 	logger          *log.Logger
+	uiDir           string
+	allowedOrigins  []string
 }
 
 type deviceBinding struct {
@@ -177,4 +183,15 @@ func (s *server) authorize(targetID string, tc tmtc.Telecommand) error {
 		return fmt.Errorf("write requires Metadata[\"lease_token\"]")
 	}
 	return s.leases.Validate(targetID, token)
+}
+
+func parseCSV(raw string) []string {
+	var out []string
+	for _, part := range strings.Split(raw, ",") {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }
