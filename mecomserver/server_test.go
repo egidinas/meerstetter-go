@@ -252,6 +252,13 @@ func TestHandleClientTimesOutIdleConnection(t *testing.T) {
 	}
 }
 
+func TestReadBoundedFrameRejectsOversizedUnterminatedFrame(t *testing.T) {
+	reader := bufio.NewReaderSize(strings.NewReader(strings.Repeat("x", maxClientFrameBytes+1)), 32)
+	if _, err := readBoundedFrame(reader, maxClientFrameBytes); err == nil {
+		t.Fatal("readBoundedFrame accepted oversized unterminated frame")
+	}
+}
+
 func TestServeRouterStatsTrackFramesAndErrors(t *testing.T) {
 	routeClient, routeServer := net.Pipe()
 	defer routeClient.Close()

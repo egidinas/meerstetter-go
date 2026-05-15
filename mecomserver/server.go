@@ -17,6 +17,7 @@ const (
 	defaultRequestTimeout    = 2 * time.Second
 	defaultReconnectDelay    = 500 * time.Millisecond
 	defaultClientIdleTimeout = 30 * time.Second
+	maxClientFrameBytes      = 4096
 )
 
 // DownstreamDial opens the single owned connection to a MeCom device.
@@ -151,7 +152,7 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 		if idleTimeout > 0 {
 			_ = conn.SetReadDeadline(time.Now().Add(idleTimeout))
 		}
-		frame, err := reader.ReadBytes(mecom.FrameTerminator)
+		frame, err := readBoundedFrame(reader, maxClientFrameBytes)
 		if err != nil {
 			return
 		}
@@ -178,6 +179,26 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 			writeClientFrame(conn, res.frame, idleTimeout)
 		case <-ctx.Done():
 			return
+		}
+	}
+}
+
+func readBoundedFrame(reader *bufio.Reader, maxBytes int) ([]byte, error) {
+	if maxBytes <= 0 {
+		return nil, fmt.Errorf("mecomserver: max frame size must be positive")
+	}
+	var frame []byte
+	for {
+		part, err := reader.ReadSlice(mecom.FrameTerminator)
+		frame = append(frame, part...)
+		if len(frame) > maxBytes {
+			return nil, fmt.Errorf("mecomserver: client frame exceeds %d bytes", maxBytes)
+		}
+		if err == nil {
+			return frame, nil
+		}
+		if !errors.Is(err, bufio.ErrBufferFull) {
+			return nil, err
 		}
 	}
 }

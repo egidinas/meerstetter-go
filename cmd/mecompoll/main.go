@@ -69,6 +69,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
+	if err := validateRuntimeFlags(*interval, *once); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -204,10 +208,49 @@ func parseTargets(v string) ([]deviceTarget, error) {
 		if !ok {
 			return nil, fmt.Errorf("invalid endpoint %q", targetStr)
 		}
+		if err := validateTargetAddress(ep, byte(n), part); err != nil {
+			return nil, err
+		}
 		devices = append(devices, deviceTarget{raw: targetStr, endpoint: ep, address: byte(n)})
 	}
 	if len(devices) == 0 {
 		return nil, fmt.Errorf("no targets specified; use -targets TARGET=ADDRESS,...")
 	}
 	return devices, nil
+}
+
+func validateRuntimeFlags(interval time.Duration, once bool) error {
+	if !once && interval <= 0 {
+		return fmt.Errorf("interval must be positive in continuous mode")
+	}
+	return nil
+}
+
+func validateTargetAddress(ep mecom.Endpoint, address byte, raw string) error {
+	if ep.Network != "can" {
+		return nil
+	}
+	if address == 0 || address > 127 {
+		return fmt.Errorf("invalid CANopen node ID %d in %q; expected 1..127", address, raw)
+	}
+	node, err := canEndpointNode(ep.Address)
+	if err != nil {
+		return fmt.Errorf("invalid CAN endpoint %q in %q: %w", ep.Address, raw, err)
+	}
+	if node != address {
+		return fmt.Errorf("CAN target %q has endpoint node 0x%02X but suffix address 0x%02X", raw, node, address)
+	}
+	return nil
+}
+
+func canEndpointNode(address string) (byte, error) {
+	slash := strings.LastIndex(address, "/")
+	if slash < 0 || slash == len(address)-1 {
+		return 0, fmt.Errorf("must be IFACE/NODE")
+	}
+	n, err := strconv.ParseUint(strings.TrimSpace(address[slash+1:]), 0, 8)
+	if err != nil || n == 0 || n > 127 {
+		return 0, fmt.Errorf("node must be 1..127")
+	}
+	return byte(n), nil
 }

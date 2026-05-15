@@ -295,6 +295,9 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 				fmt.Printf("reply sdo node=0x%02X 0x%04X:%02X decode-error=%v %s\n", node, probe.Index, probe.SubIndex, err, formatFrame(f))
 				return
 			}
+			if !sdoResponseMatchesProbe(resp, probe) {
+				continue
+			}
 			value, err := formatSDOValue(resp, probe.Kind)
 			if err != nil {
 				fmt.Printf("reply sdo node=0x%02X 0x%04X:%02X value-error=%v %s\n", node, probe.Index, probe.SubIndex, err, formatFrame(f))
@@ -324,7 +327,7 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, tim
 			fmt.Printf("no-reply mecom addr=0x%02X\n", addr)
 			return
 		}
-		if f.ID == 0x400+uint32(addr) {
+		if f.ID == 0x400+uint32(addr) && mecomResponseMatchesRequest(f, addr, 1) {
 			value, err := mecom.DecodeBinaryCANFrame(f, mecom.DataTypeFloat32)
 			if err != nil {
 				fmt.Printf("reply mecom addr=0x%02X decode-error=%v %s\n", addr, err, formatFrame(f))
@@ -335,6 +338,23 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, tim
 			return
 		}
 	}
+}
+
+func sdoResponseMatchesProbe(resp canopen.SDOUploadResponse, probe sdoProbe) bool {
+	return resp.Index == probe.Index && resp.SubIndex == probe.SubIndex
+}
+
+func mecomResponseMatchesRequest(f canopen.Frame, addr byte, seq uint16) bool {
+	if f.DLC < 8 {
+		return false
+	}
+	if f.Data[1] != addr {
+		return false
+	}
+	if f.Data[0]&0x80 == 0 {
+		return false
+	}
+	return uint16(f.Data[0]&0x7f) == seq&0x7f
 }
 
 func recvUntil(conn *socketcan.Conn, deadline time.Time, res *result, sink frameSink) (canopen.Frame, bool) {

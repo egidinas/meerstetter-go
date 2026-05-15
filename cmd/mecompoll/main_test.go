@@ -33,6 +33,24 @@ func TestParseTargetsRejectsInvalidAddress(t *testing.T) {
 	}
 }
 
+func TestParseTargetsRejectsMismatchedCANEndpointAndSuffix(t *testing.T) {
+	if _, err := parseTargets("can:can0/0x4b=76"); err == nil {
+		t.Fatal("parseTargets accepted mismatched CAN endpoint node and suffix")
+	}
+}
+
+func TestValidateRuntimeFlagsRejectsNonPositiveContinuousInterval(t *testing.T) {
+	if err := validateRuntimeFlags(0, false); err == nil {
+		t.Fatal("validateRuntimeFlags accepted zero continuous interval")
+	}
+	if err := validateRuntimeFlags(-time.Second, false); err == nil {
+		t.Fatal("validateRuntimeFlags accepted negative continuous interval")
+	}
+	if err := validateRuntimeFlags(0, true); err != nil {
+		t.Fatalf("validateRuntimeFlags rejected zero interval in once mode: %v", err)
+	}
+}
+
 func TestPrintTableIncludesVoltageColumnsAndValues(t *testing.T) {
 	out := captureStdout(t, func() {
 		printTable([]cycleResult{{
