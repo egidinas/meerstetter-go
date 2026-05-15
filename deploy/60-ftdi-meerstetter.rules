@@ -1,0 +1,4 @@
+# Grant the logged-in console user access to all FT230X USB-serial adapters
+# (Meerstetter TEC controller backup links) without requiring dialout group.
+# Deploy to /etc/udev/rules.d/ then: udevadm control --reload-rules && udevadm trigger
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", TAG+="uaccess", GROUP="dialout", MODE="0660"
