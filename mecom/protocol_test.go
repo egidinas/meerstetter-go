@@ -3,11 +3,16 @@ package mecom
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math"
 	"strings"
 	"testing"
 	"time"
 )
+
+func responseFrame(prefix string) []byte {
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, CRC16([]byte(prefix)), FrameTerminator))
+}
 
 func TestBuildSingleGetFrameFormat(t *testing.T) {
 	frame := BuildSingleGetFrame(0x50, 1, 1000, 1)
@@ -58,7 +63,7 @@ func TestBuildResetFrameReferenceVector(t *testing.T) {
 }
 
 func TestParseSingleResponseFloat(t *testing.T) {
-	got, err := ParseSingleResponse([]byte("!500001+41CC0000ABCD\r"), DataTypeFloat32)
+	got, err := ParseSingleResponse(responseFrame("!500001+41CC0000"), DataTypeFloat32)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +73,7 @@ func TestParseSingleResponseFloat(t *testing.T) {
 }
 
 func TestParseSingleResponseInt(t *testing.T) {
-	got, err := ParseSingleResponse([]byte("!500001+FFFFFFFEABCD\r"), DataTypeInt32)
+	got, err := ParseSingleResponse(responseFrame("!500001+FFFFFFFE"), DataTypeInt32)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,14 +83,21 @@ func TestParseSingleResponseInt(t *testing.T) {
 }
 
 func TestParseNACK(t *testing.T) {
-	_, err := ParseSingleResponse([]byte("!500001-05ABCD\r"), DataTypeFloat32)
+	_, err := ParseSingleResponse(responseFrame("!500001-05"), DataTypeFloat32)
 	if err == nil || !strings.Contains(err.Error(), "PAR_NOT_AVAILABLE") {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
+func TestParseRejectsBadCRC(t *testing.T) {
+	_, err := ParseSingleResponse([]byte("!500001+41CC0000ABCD\r"), DataTypeFloat32)
+	if err == nil || !strings.Contains(strings.ToLower(err.Error()), "crc") {
+		t.Fatalf("ParseSingleResponse accepted bad CRC, err=%v", err)
+	}
+}
+
 func TestClientReadFloat32(t *testing.T) {
-	rw := &scriptedReadWriter{read: bytes.NewBufferString("!500001+41CC0000ABCD\r")}
+	rw := &scriptedReadWriter{read: bytes.NewBuffer(responseFrame("!500001+41CC0000"))}
 	client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})
 	got, err := client.ReadFloat32(context.Background(), 1000, 1)
 	if err != nil {
@@ -110,7 +122,7 @@ func TestBuildBulkGetFrameFormat(t *testing.T) {
 }
 
 func TestClientReadBulk(t *testing.T) {
-	rw := &scriptedReadWriter{read: bytes.NewBufferString("!50000141CC00000000002AABCD\r")}
+	rw := &scriptedReadWriter{read: bytes.NewBuffer(responseFrame("!50000141CC00000000002A"))}
 	client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})
 	got, err := client.ReadBulk(context.Background(), []Parameter{
 		{ID: 1000, Instance: 1, Type: DataTypeFloat32},
@@ -144,7 +156,7 @@ func TestBuildRingReadFrameReferenceVector(t *testing.T) {
 }
 
 func TestParseRingPointerResponse(t *testing.T) {
-	got, err := ParseRingPointerResponse([]byte("!00853200000180110C\r"))
+	got, err := ParseRingPointerResponse(responseFrame("!00853200000180"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +166,7 @@ func TestParseRingPointerResponse(t *testing.T) {
 }
 
 func TestParseRingReadResponseAndFrames(t *testing.T) {
-	resp, err := ParseRingReadResponse([]byte("!0085640006008800EF3E8810F58E\r"))
+	resp, err := ParseRingReadResponse(responseFrame("!0085640006008800EF3E8810"))
 	if err != nil {
 		t.Fatal(err)
 	}

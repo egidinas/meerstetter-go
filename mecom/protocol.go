@@ -466,6 +466,9 @@ func parsePayload(raw []byte) (string, error) {
 	if len(frame) < 7 || frame[0] != '!' {
 		return "", fmt.Errorf("mecom: invalid response %q", string(frame))
 	}
+	if err := verifyCRC(frame); err != nil {
+		return "", err
+	}
 	payloadStart := 7
 	if len(frame) > 7 {
 		switch frame[7] {
@@ -491,6 +494,22 @@ func parsePayload(raw []byte) (string, error) {
 		return "", nil
 	}
 	return string(frame[payloadStart:payloadEnd]), nil
+}
+
+func verifyCRC(frame []byte) error {
+	if len(frame) < 5 {
+		return fmt.Errorf("mecom: response too short for CRC %q", string(frame))
+	}
+	payloadEnd := len(frame) - 4
+	got, err := strconv.ParseUint(string(frame[payloadEnd:]), 16, 16)
+	if err != nil {
+		return fmt.Errorf("mecom: invalid CRC %q: %w", string(frame[payloadEnd:]), err)
+	}
+	want := CRC16(frame[:payloadEnd])
+	if uint16(got) != want {
+		return fmt.Errorf("mecom: CRC mismatch got %04X want %04X", got, want)
+	}
+	return nil
 }
 
 func hexOnly(v string) string {

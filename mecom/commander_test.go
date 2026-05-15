@@ -2,6 +2,7 @@ package mecom
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -84,6 +85,39 @@ func TestCommanderRoutesWriteInt32WithStringArgs(t *testing.T) {
 	}
 	if got := fw.int32Calls; len(got) != 1 || got[0].paramID != 2010 || got[0].instance != 2 || got[0].value != 1 {
 		t.Fatalf("int32 calls=%+v, want one {2010,2,1}", got)
+	}
+}
+
+func TestCommanderRoutesWriteInt32WithJSONNumberArgs(t *testing.T) {
+	fw := &fakeWriteClient{}
+	cmdr := NewCommander(fw, time.Second)
+	_, err := cmdr.Send(tmtc.Telecommand{
+		Name:      "set_int32",
+		Arguments: map[string]any{"param": json.Number("2010"), "instance": json.Number("1"), "value": json.Number("5")},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := fw.int32Calls[0]; got != (writeInt32Call{paramID: 2010, instance: 1, value: 5}) {
+		t.Fatalf("int32 call = %+v", got)
+	}
+}
+
+func TestCommanderRejectsFractionalIntArg(t *testing.T) {
+	fw := &fakeWriteClient{}
+	cmdr := NewCommander(fw, time.Second)
+	ev, err := cmdr.Send(tmtc.Telecommand{
+		Name:      "set_int32",
+		Arguments: map[string]any{"param": 2010.5, "instance": 1, "value": 5},
+	})
+	if err == nil {
+		t.Fatal("Send accepted fractional integer argument")
+	}
+	if ev.Status != tmtc.CommandFailed {
+		t.Fatalf("status=%v, want failed", ev.Status)
+	}
+	if got := len(fw.int32Calls); got != 0 {
+		t.Fatalf("int32 calls=%d, want 0", got)
 	}
 }
 

@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -110,8 +111,8 @@ func loadConfig(path string) (Config, error) {
 	return cfg, nil
 }
 
-// server holds gateway runtime state. One DeviceClient per device is opened
-// lazily on first use and kept for the process lifetime.
+// server holds gateway runtime state. Device clients are opened lazily and
+// reset after transport failures so the next request can reconnect.
 type server struct {
 	devices         map[string]*deviceBinding
 	leases          *writelease.Registry
@@ -172,6 +173,39 @@ func (s *server) bind(id string) (*deviceBinding, error) {
 		b.commander = cmdr
 	}
 	return b, nil
+}
+
+func (s *server) resetDeviceBinding(id string, cause error) {
+	b, ok := s.devices[id]
+	if !ok {
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.client != nil {
+		_ = b.client.Close()
+	}
+	b.client = nil
+	b.commander = nil
+	b.lastErr = cause
+}
+
+func shouldResetDeviceBinding(err error) bool {
+	switch {
+	case err == nil:
+		return false
+	case errors.Is(err, mecom.ErrUnreachable), errors.Is(err, mecom.ErrTimeout):
+		return true
+	case errors.Is(err, mecom.ErrUnknownParameter),
+		errors.Is(err, mecom.ErrParameterReadOnly),
+		errors.Is(err, mecom.ErrWriteRejected),
+		errors.Is(err, mecom.ErrTransportNotSupported),
+		errors.Is(err, mecom.ErrBadAddress),
+		errors.Is(err, mecom.ErrInvalidArgument):
+		return false
+	default:
+		return true
+	}
 }
 
 func (s *server) authorize(targetID string, tc tmtc.Telecommand) error {

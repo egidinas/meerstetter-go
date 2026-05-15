@@ -2,8 +2,10 @@ package mecom
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -207,11 +209,17 @@ func intArg(args map[string]any, key string) (int, error) {
 	case int32:
 		return int(v), nil
 	case int64:
-		return int(v), nil
+		return checkedInt64Arg(key, v)
 	case float32:
-		return int(v), nil
+		return checkedFloatIntArg(key, float64(v))
 	case float64:
-		return int(v), nil
+		return checkedFloatIntArg(key, v)
+	case json.Number:
+		n, err := v.Int64()
+		if err != nil {
+			return 0, fmt.Errorf("invalid %q: %v", key, err)
+		}
+		return checkedInt64Arg(key, n)
 	case string:
 		n, err := strconv.Atoi(v)
 		if err != nil {
@@ -221,6 +229,27 @@ func intArg(args map[string]any, key string) (int, error) {
 	default:
 		return 0, fmt.Errorf("invalid %q type %T", key, raw)
 	}
+}
+
+func checkedInt64Arg(key string, v int64) (int, error) {
+	const maxInt = int64(^uint(0) >> 1)
+	const minInt = -maxInt - 1
+	if v < minInt || v > maxInt {
+		return 0, fmt.Errorf("invalid %q: %d overflows int", key, v)
+	}
+	return int(v), nil
+}
+
+func checkedFloatIntArg(key string, v float64) (int, error) {
+	if math.IsNaN(v) || math.IsInf(v, 0) || math.Trunc(v) != v {
+		return 0, fmt.Errorf("invalid %q: %v is not an integer", key, v)
+	}
+	const maxInt = int64(^uint(0) >> 1)
+	const minInt = -maxInt - 1
+	if v < float64(minInt) || v > float64(maxInt) {
+		return 0, fmt.Errorf("invalid %q: %v overflows int", key, v)
+	}
+	return checkedInt64Arg(key, int64(v))
 }
 
 func floatArg(args map[string]any, key string) (float64, error) {
@@ -237,6 +266,12 @@ func floatArg(args map[string]any, key string) (float64, error) {
 		return float64(v), nil
 	case int64:
 		return float64(v), nil
+	case json.Number:
+		f, err := v.Float64()
+		if err != nil {
+			return 0, fmt.Errorf("invalid %q: %v", key, err)
+		}
+		return f, nil
 	case string:
 		f, err := strconv.ParseFloat(v, 64)
 		if err != nil {

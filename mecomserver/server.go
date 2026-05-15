@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	defaultRequestTimeout = 2 * time.Second
-	defaultReconnectDelay = 500 * time.Millisecond
+	defaultRequestTimeout    = 2 * time.Second
+	defaultReconnectDelay    = 500 * time.Millisecond
+	defaultClientIdleTimeout = 30 * time.Second
 )
 
 // DownstreamDial opens the single owned connection to a MeCom device.
@@ -24,11 +25,12 @@ type DownstreamDial func(context.Context) (net.Conn, string, error)
 // Config configures a TCP MeCom device server. The server accepts many TCP
 // clients and serializes requests through one downstream TCP or serial target.
 type Config struct {
-	Target         string
-	Downstream     DownstreamDial
-	RequestTimeout time.Duration
-	ReconnectDelay time.Duration
-	Logger         *log.Logger
+	Target            string
+	Downstream        DownstreamDial
+	RequestTimeout    time.Duration
+	ReconnectDelay    time.Duration
+	ClientIdleTimeout time.Duration
+	Logger            *log.Logger
 
 	// statsRecorder is set by RouterConfig/HubConfig wrappers to surface
 	// per-broker state. Direct callers of Serve do not need to set it.
@@ -75,6 +77,9 @@ func Serve(ctx context.Context, ln net.Listener, cfg Config) error {
 	if cfg.ReconnectDelay <= 0 {
 		cfg.ReconnectDelay = defaultReconnectDelay
 	}
+	if cfg.ClientIdleTimeout <= 0 {
+		cfg.ClientIdleTimeout = defaultClientIdleTimeout
+	}
 
 	requests := make(chan request, 256)
 	go runBroker(ctx, cfg, requests)
@@ -117,13 +122,25 @@ func DialTarget(target string) (DownstreamDial, error) {
 }
 
 func handleClient(ctx context.Context, conn net.Conn, requests chan<- request, cfg Config) {
-	handleClientWithSelector(ctx, conn, cfg.Logger, func([]byte) (chan<- request, error) {
+	if cfg.ClientIdleTimeout <= 0 {
+		cfg.ClientIdleTimeout = defaultClientIdleTimeout
+	}
+	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, func([]byte) (chan<- request, error) {
 		return requests, nil
 	})
 }
 
-func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Logger, selectRequests func([]byte) (chan<- request, error)) {
+func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Logger, idleTimeout time.Duration, selectRequests func([]byte) (chan<- request, error)) {
 	defer conn.Close()
+	done := make(chan struct{})
+	defer close(done)
+	go func() {
+		select {
+		case <-ctx.Done():
+			_ = conn.Close()
+		case <-done:
+		}
+	}()
 	if logger != nil {
 		logger.Printf("client connected remote=%s", conn.RemoteAddr())
 		defer logger.Printf("client disconnected remote=%s", conn.RemoteAddr())
@@ -131,6 +148,9 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 
 	reader := bufio.NewReader(conn)
 	for {
+		if idleTimeout > 0 {
+			_ = conn.SetReadDeadline(time.Now().Add(idleTimeout))
+		}
 		frame, err := reader.ReadBytes(mecom.FrameTerminator)
 		if err != nil {
 			return
@@ -140,7 +160,7 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 		}
 		requests, err := selectRequests(frame)
 		if err != nil {
-			_, _ = conn.Write(deviceServerError(err))
+			writeClientFrame(conn, deviceServerError(frame, err), idleTimeout)
 			continue
 		}
 		result := make(chan response, 1)
@@ -152,14 +172,21 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 		select {
 		case res := <-result:
 			if res.err != nil {
-				_, _ = conn.Write(deviceServerError(res.err))
+				writeClientFrame(conn, deviceServerError(frame, res.err), idleTimeout)
 				continue
 			}
-			_, _ = conn.Write(res.frame)
+			writeClientFrame(conn, res.frame, idleTimeout)
 		case <-ctx.Done():
 			return
 		}
 	}
+}
+
+func writeClientFrame(conn net.Conn, frame []byte, timeout time.Duration) {
+	if timeout > 0 {
+		_ = conn.SetWriteDeadline(time.Now().Add(timeout))
+	}
+	_, _ = conn.Write(frame)
 }
 
 func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
@@ -240,8 +267,14 @@ func sleepOrDone(ctx context.Context, d time.Duration) {
 	}
 }
 
-func deviceServerError(err error) []byte {
-	message := strings.ReplaceAll(err.Error(), "\r", " ")
-	message = strings.ReplaceAll(message, "\n", " ")
-	return []byte("ME-Device-Server-Error: " + message + "\r")
+func deviceServerError(requestFrame []byte, err error) []byte {
+	frame := []byte(strings.TrimSpace(string(requestFrame)))
+	addr := "00"
+	seq := "0000"
+	if len(frame) >= 7 && frame[0] == '#' {
+		addr = string(frame[1:3])
+		seq = string(frame[3:7])
+	}
+	prefix := fmt.Sprintf("!%s%s-03", addr, seq)
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
 }

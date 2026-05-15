@@ -299,6 +299,9 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 	tc.EnsureIdempotencyKey()
 	ev, err := b.commander.Send(tc)
 	if err != nil {
+		if errors.Is(err, mecom.ErrUnreachable) || errors.Is(err, mecom.ErrTimeout) {
+			s.resetDeviceBinding(deviceID, err)
+		}
 		if errors.Is(err, writelease.ErrInvalidToken) || errors.Is(err, writelease.ErrUnknownDevice) || errors.Is(err, writelease.ErrExpired) {
 			writeJSON(w, http.StatusLocked, map[string]any{"error": err.Error(), "event": ev})
 			return
@@ -326,6 +329,9 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	defer cancel()
 	values, err := b.client.ReadBulk(ctx, params)
 	if err != nil {
+		if shouldResetDeviceBinding(err) {
+			s.resetDeviceBinding(deviceID, err)
+		}
 		http.Error(w, err.Error(), httpStatusForError(err))
 		return
 	}

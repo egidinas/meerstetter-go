@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/egidinas/meerstetter-go/mecom"
 )
 
 func TestServeSerializesFramesFromMultipleClients(t *testing.T) {
@@ -187,9 +189,66 @@ func TestServeRouterRejectsUnknownAddress(t *testing.T) {
 	if _, err := client.Write([]byte("#520001?VR03E8010000\r")); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	reply := string(readFrame(t, client))
-	if !strings.Contains(reply, "no downstream route for MeCom address 0x52") {
+	reply := readFrame(t, client)
+	if !bytes.HasPrefix(reply, []byte("!520001-")) {
 		t.Fatalf("unexpected reply: %q", reply)
+	}
+}
+
+func TestServeRouterRejectsUnknownAddressWithMeComNACK(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, &RouterConfig{
+			Routes: []Route{
+				{Address: 0x50, Downstream: func(context.Context) (net.Conn, string, error) {
+					client, _ := net.Pipe()
+					return client, "unused", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	client := dialClient(t, ln.Addr().String())
+	defer client.Close()
+	if _, err := client.Write([]byte("#520001?VR03E8010000\r")); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	reply := readFrame(t, client)
+	if !bytes.HasPrefix(reply, []byte("!520001-")) {
+		t.Fatalf("reply is not addressed MeCom NACK: %q", reply)
+	}
+	if err := mecom.ParseWriteResponse(reply); err == nil || !strings.Contains(err.Error(), "GENERAL_COM") {
+		t.Fatalf("reply is not parseable GENERAL_COM NACK, err=%v frame=%q", err, reply)
+	}
+}
+
+func TestHandleClientTimesOutIdleConnection(t *testing.T) {
+	client, server := net.Pipe()
+	defer client.Close()
+	requests := make(chan request)
+	done := make(chan struct{})
+	go func() {
+		handleClient(context.Background(), server, requests, Config{ClientIdleTimeout: 20 * time.Millisecond})
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("idle client handler did not return after configured timeout")
 	}
 }
 
@@ -245,7 +304,7 @@ func TestServeRouterStatsTrackFramesAndErrors(t *testing.T) {
 	if _, err := client.Write(reqFail); err != nil {
 		t.Fatalf("write fail: %v", err)
 	}
-	if reply := string(readFrame(t, client)); !strings.Contains(reply, "dial down") {
+	if reply := readFrame(t, client); !bytes.HasPrefix(reply, []byte("!520001-")) {
 		t.Fatalf("unexpected error reply: %q", reply)
 	}
 

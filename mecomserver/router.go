@@ -21,10 +21,11 @@ type Route struct {
 // RouterConfig configures a single TCP listener that routes addressed MeCom
 // request frames to per-device downstream brokers.
 type RouterConfig struct {
-	Routes         []Route
-	RequestTimeout time.Duration
-	ReconnectDelay time.Duration
-	Logger         *log.Logger
+	Routes            []Route
+	RequestTimeout    time.Duration
+	ReconnectDelay    time.Duration
+	ClientIdleTimeout time.Duration
+	Logger            *log.Logger
 
 	// stats is filled in by prepareRoutes so callers can retrieve a
 	// connection-state snapshot per route via Stats().
@@ -76,6 +77,9 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 	}
 	if cfg.ReconnectDelay <= 0 {
 		cfg.ReconnectDelay = defaultReconnectDelay
+	}
+	if cfg.ClientIdleTimeout <= 0 {
+		cfg.ClientIdleTimeout = defaultClientIdleTimeout
 	}
 
 	routes, err := prepareRoutes(ctx, cfg)
@@ -143,11 +147,12 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (map[byte]chan reques
 		recorder := newBrokerStatsRecorder(route.Address, route.Target)
 		cfg.stats[route.Address] = recorder
 		routeCfg := Config{
-			Downstream:     route.Downstream,
-			RequestTimeout: cfg.RequestTimeout,
-			ReconnectDelay: cfg.ReconnectDelay,
-			Logger:         cfg.Logger,
-			statsRecorder:  recorder,
+			Downstream:        route.Downstream,
+			RequestTimeout:    cfg.RequestTimeout,
+			ReconnectDelay:    cfg.ReconnectDelay,
+			ClientIdleTimeout: cfg.ClientIdleTimeout,
+			Logger:            cfg.Logger,
+			statsRecorder:     recorder,
 		}
 		go runBroker(ctx, routeCfg, requests)
 	}
@@ -155,7 +160,10 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (map[byte]chan reques
 }
 
 func handleRoutedClient(ctx context.Context, conn net.Conn, routes map[byte]chan request, cfg RouterConfig) {
-	handleClientWithSelector(ctx, conn, cfg.Logger, func(frame []byte) (chan<- request, error) {
+	if cfg.ClientIdleTimeout <= 0 {
+		cfg.ClientIdleTimeout = defaultClientIdleTimeout
+	}
+	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, func(frame []byte) (chan<- request, error) {
 		addr, err := RequestAddress(frame)
 		if err != nil {
 			return nil, err
