@@ -1,0 +1,3 @@
+# Dependency lockfiles are versioned for reproducibility, but review tools do
+# not need to ingest their full generated diff by default.
+web/package-lock.json linguist-generated=true -diff
