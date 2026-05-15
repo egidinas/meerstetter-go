@@ -15,6 +15,7 @@ tar czf "$out" \
   docs/gateway/HANDOFF.md \
   docs/gateway/UI_GRAPH_WALL_CONTRACT.md \
   docs/gateway/demo/index.html \
+  docs/gateway/console \
   docs/gateway/openapi.yaml \
   docs/gateway/types.d.ts
 

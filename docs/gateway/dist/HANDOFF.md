@@ -80,6 +80,22 @@ go run ./cmd/mecomgw \
 Use `-allow-origin '*'` only for an isolated local test gateway, never for a
 shared hardware-facing deployment.
 
+## Rich operator-console prototype
+
+The Claude Design operator console is preserved under
+`docs/gateway/console/`. Serve it through the gateway when you want the dense
+graph-wall, signal-dictionary, and bottom telemetry/telecommand accordion view:
+
+```sh
+go run ./cmd/mecomgw \
+  -config deploy/example-gateway.json \
+  -listen 127.0.0.1:18080 \
+  -ui-dir docs/gateway/console
+```
+
+Open `http://127.0.0.1:18080/ui/`. The older `docs/gateway/demo/` surface is
+the minimal API smoke console.
+
 ## What the UI needs to cover
 
 Pick from these; mark "out of scope" if you choose not to do something:
