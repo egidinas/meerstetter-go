@@ -11,7 +11,8 @@ Three consumers want the same operator surface:
 - **meerstetter-go** — `docs/gateway/console/` served by `mecomgw -ui-dir`. In-browser
   Babel JSX, React 18 from unpkg, no build step.
 - **gossamer/web** — Vite + TypeScript + React 19 + uPlot, full npm pipeline.
-- **loom/web** — Vite + TypeScript + React + uPlot. Already imports uPlot
+- **loom/web** — Vite + TypeScript + React + uPlot. The premium parent of
+  gossamer (gossamer is the junior derivative). Already imports uPlot
   directly; ships its own `HeroGraph`, `OperatorGraphPrimitives`,
   `operatorGraphCanvas`, source-catalogue contract tests. No dict/wall
   primitive yet but the rest of the operator vocabulary is fully present.
@@ -20,8 +21,16 @@ The directive: extract a shared SignalForge UI module so all three apps consume
 the same **signal dictionary**, **wall-management**, **uPlot tile renderer**,
 and **tile-pyramid client** code. Today no app has a build-time link to the
 others; dict and renderer are copy-paste candidates that will drift the moment
-we stop watching. Loom and gossamer are on the same stack so adoption is
-mechanical there; meerstetter-go is the toolchain outlier and gates Phase 1.
+we stop watching.
+
+**Lineage and starting points:** Loom is the premium parent; gossamer is the
+junior derivative carrying a working implementation of the graph contract.
+For the shared graph primitives, **gossamer is the chosen baseline** — its
+`uPlotAdapter.ts`, `markers.ts`, `decimation.ts`, `timeAxis.tsx`,
+`visualPolicy.ts` are the extraction source. Loom-specific features beyond
+gossamer's contract (testbed view, librarian, capability-module browser, etc.)
+remain loom-local and are not in this plan's scope. Meerstetter-go is the
+toolchain outlier and gates Phase 1.
 
 History on the meerstetter side is also currently capped:
 
