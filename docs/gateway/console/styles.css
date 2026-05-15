@@ -47,7 +47,7 @@
   --s7: #ef7ab7;
   --s8: #f0c84d;
 
-  /* SignalForge series-by-role palette (gossamer-aligned, brightened) */
+  /* SignalForge series-by-role palette (brightened) */
   --series-cmd:    #ffd84a;
   --series-actual: #5fe0e8;
   --series-dut:    #ff8db4;
@@ -1287,7 +1287,7 @@ hr.sep {
 }
 
 /* ========================================================
-   Hero graph (fleet-wide overlay) — gossamer-style
+   Hero graph (fleet-wide overlay)
    ======================================================== */
 .hero {
   background: var(--panel);
@@ -1939,7 +1939,7 @@ hr.sep {
 }
 .ch-cell {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: baseline;
   gap: 4px;
   padding: 3px 6px;
@@ -1977,6 +1977,42 @@ hr.sep {
 .ch-cell .q.nan       { background: var(--q-nan); }
 .ch-cell .q.missing   { background: var(--muted-2); }
 .ch-cell .q.unreachable { background: var(--bad); }
+
+.role-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.role-source {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 5px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: #0b111a;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.role-source.warn {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 48%, var(--hairline));
+  background: color-mix(in srgb, var(--warn) 11%, transparent);
+}
+.role-source.ok {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--hairline));
+  background: color-mix(in srgb, var(--ok) 8%, transparent);
+}
+.ch-cell .role-source {
+  justify-self: start;
+}
 
 /* Control / telecommand grid */
 .cmd-block {
@@ -2031,6 +2067,9 @@ hr.sep {
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
+}
+.cmd-cell .head .role-source {
+  margin-left: 0;
 }
 .cmd-cell .head .ch-id { color: var(--text); font-weight: 600; }
 .cmd-cell .head .ch-role {
@@ -2162,4 +2201,15 @@ hr.sep {
   font-size: 10.5px;
   padding: 2px 5px;
   border-radius: 2px;
+}
+
+.planned-note {
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--hairline));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
 }

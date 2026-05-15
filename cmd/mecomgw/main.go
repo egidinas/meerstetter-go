@@ -60,6 +60,10 @@ func main() {
 	srv := newServer(cfg, *defaultLeaseTTL, logger)
 	srv.uiDir = *uiDir
 	srv.allowedOrigins = parseCSV(*allowOrigin)
+	srv.accessToken = strings.TrimSpace(os.Getenv("MECOMGW_ACCESS_TOKEN"))
+	if srv.accessToken != "" {
+		logger.Printf("access token gate enabled")
+	}
 
 	httpSrv := &http.Server{
 		Addr:              *listen,
@@ -120,6 +124,7 @@ type server struct {
 	logger          *log.Logger
 	uiDir           string
 	allowedOrigins  []string
+	accessToken     string
 }
 
 type deviceBinding struct {

@@ -566,7 +566,347 @@
     return `device=${deviceId} param=${paramId} instance=${instance || 1}` +
            (dev ? ` endpoint=${dev.endpoint}` : "");
   };
+  API.roleConfidence = function (channel) {
+    if (!channel) {
+      return {
+        kind: "warn",
+        label: "unconfirmed",
+        detail: "Channel role is not available from the current gateway response.",
+      };
+    }
+    if (channel.role_source === "live") {
+      return {
+        kind: "ok",
+        label: "live",
+        detail: "Channel role was read from live device mode.",
+      };
+    }
+    if (channel.role_source === "config") {
+      return {
+        kind: "ok",
+        label: "config",
+        detail: "Channel role comes from configured channel metadata.",
+      };
+    }
+    return {
+      kind: "warn",
+      label: "unconfirmed",
+      detail: "Channel role is a local assumption; confirm against the MeCom operating mode before relying on it.",
+    };
+  };
   API.errorCategoryFromStatus = categorizeStatus;
+
+  /* ---------- Live gateway adapter ----------
+     Blank Gateway URL means same-origin /api when served over HTTP(S).
+     The synthetic mock remains the fallback for file:// previews and for
+     temporarily unreachable gateways. */
+  const mockAPI = {
+    catalogue: API.catalogue.bind(API),
+    devices: API.devices.bind(API),
+    leases: API.leases.bind(API),
+    brokerStats: API.brokerStats.bind(API),
+    readValue: API.readValue.bind(API),
+    setpoint: API.setpoint.bind(API),
+    write: API.write.bind(API),
+    acquireLease: API.acquireLease.bind(API),
+    releaseLease: API.releaseLease.bind(API),
+    subscribe: API.subscribe.bind(API),
+    roleConfidence: API.roleConfidence.bind(API),
+  };
+
+  const live = {
+    active: false,
+    checked: false,
+    refreshing: false,
+    base: "",
+    lastError: "",
+    devices: null,
+    leases: null,
+    values: Object.create(null),
+    timer: null,
+  };
+
+  function configuredBase() {
+    const raw = (loadSettings().gateway || "").trim();
+    if (raw) return raw.replace(/\/+$/, "");
+    if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+      return window.location.origin;
+    }
+    return "";
+  }
+
+  function explicitBase() {
+    return !!(loadSettings().gateway || "").trim();
+  }
+
+  function hostedSameOrigin() {
+    return !explicitBase() && (window.location.protocol === "http:" || window.location.protocol === "https:");
+  }
+
+  function notify() {
+    mock.listeners.forEach((fn) => {
+      try { fn(); } catch (_) {}
+    });
+  }
+
+  async function fetchJSON(path, opts) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    const request = opts || {};
+    try {
+      const res = await fetch(configuredBase() + path, {
+        credentials: "include",
+        ...request,
+        headers: {
+          Accept: "application/json",
+          ...(request.headers || {}),
+        },
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      let body = null;
+      if (text) {
+        try { body = JSON.parse(text); } catch (_) { body = null; }
+      }
+      if (!res.ok) {
+        const bodyError = body && typeof body.error === "string" ? body.error.trim() : "";
+        const err = new Error(bodyError || `HTTP ${res.status}`);
+        err.status = res.status;
+        err.body = body;
+        throw err;
+      }
+      return body || {};
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function liveKey(deviceId, paramId, instance) {
+    return `${deviceId}:${paramId}:${instance || 1}`;
+  }
+
+  function storeLiveValue(deviceId, entry) {
+    const instance = entry.instance || 1;
+    const value = entry.value;
+    const quality = entry.quality || (value === null || value === undefined ? "missing" : "ok");
+    live.values[liveKey(deviceId, entry.id, instance)] = {
+      value,
+      quality,
+      at: Date.now(),
+    };
+    if (typeof window.recordTelemetry === "function") {
+      window.recordTelemetry(deviceId, entry.id, value, quality, instance);
+    }
+  }
+
+  function paramsForChannel(role, instance) {
+    const ids = role === "supply"
+      ? [1020, 1021, 1022]
+      : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022];
+    return ids.map((id) => `${id}:${instance || 1}`).join(",");
+  }
+
+  async function refreshLiveReads(devices) {
+    const channels = mock.channels.slice();
+    await Promise.all(devices.map(async (dev) => {
+      const devChannels = channels.filter((c) => c.device_id === dev.id);
+      for (const ch of devChannels) {
+        try {
+          const body = await fetchJSON(`/api/devices/${encodeURIComponent(dev.id)}/read?params=${encodeURIComponent(paramsForChannel(ch.role, ch.instance))}`);
+          (body && body.values || []).forEach((entry) => storeLiveValue(dev.id, entry));
+        } catch (err) {
+          if ((err.status || 0) >= 400) {
+            live.values[liveKey(dev.id, 104, ch.instance)] = { value: null, quality: "unreachable", at: Date.now() };
+          }
+        }
+      }
+    }));
+  }
+
+  async function refreshLiveOnce() {
+    const base = configuredBase();
+    if (!base || live.refreshing) return;
+    live.refreshing = true;
+    live.base = base;
+    try {
+      const devicesBody = await fetchJSON("/api/devices");
+      const leasesBody = await fetchJSON("/api/leases").catch(() => ({ leases: [] }));
+      const devices = (devicesBody && devicesBody.devices) || [];
+      live.devices = devices.map((d) => ({
+        ...d,
+        bound: d.bound !== false,
+        last_error: d.last_error || "",
+      }));
+      live.leases = (leasesBody && leasesBody.leases) || [];
+      await refreshLiveReads(live.devices);
+      live.active = true;
+      live.checked = true;
+      live.lastError = "";
+    } catch (err) {
+      live.active = false;
+      live.checked = true;
+      live.lastError = err.message || String(err);
+    } finally {
+      live.refreshing = false;
+      notify();
+    }
+  }
+
+  function ensureLivePolling() {
+    const base = configuredBase();
+    if (!base) return;
+    if (live.base !== base) {
+      live.active = false;
+      live.checked = false;
+      live.lastError = "";
+      live.devices = null;
+      live.leases = null;
+      live.values = Object.create(null);
+      live.base = base;
+    }
+    if (!live.timer) {
+      refreshLiveOnce();
+      live.timer = setInterval(refreshLiveOnce, 2500);
+    }
+  }
+
+  function liveDeviceById(deviceId) {
+    return (live.devices || []).find((d) => d.id === deviceId) || DEVICES_BASE.find((d) => d.id === deviceId);
+  }
+
+  API.isLive = function () {
+    ensureLivePolling();
+    return live.active;
+  };
+  API.liveBase = function () {
+    return live.base || configuredBase();
+  };
+  API.liveError = function () {
+    ensureLivePolling();
+    return live.lastError;
+  };
+  API.devices = function () {
+    ensureLivePolling();
+    return live.active && live.devices ? live.devices : mockAPI.devices();
+  };
+  API.leases = function () {
+    ensureLivePolling();
+    return live.active && live.leases ? live.leases.slice() : mockAPI.leases();
+  };
+  API.brokerStats = function (deviceId) {
+    ensureLivePolling();
+    const dev = liveDeviceById(deviceId);
+    const base = mockAPI.brokerStats(deviceId);
+    if (!live.active) return base;
+    return {
+      ...base,
+      address: dev && dev.address,
+      target: dev && dev.endpoint,
+      connected: dev && dev.bound !== false,
+      last_error: dev && dev.last_error || "",
+    };
+  };
+  API.readValue = function (deviceId, paramId, instance) {
+    ensureLivePolling();
+    if (live.active) {
+      const v = live.values[liveKey(deviceId, paramId, instance)];
+      if (v) return { value: v.value, quality: v.quality || "ok" };
+      return { value: null, quality: "missing" };
+    }
+    return mockAPI.readValue(deviceId, paramId, instance);
+  };
+  API.setpoint = function (deviceId, paramId, instance) {
+    ensureLivePolling();
+    if (live.active) {
+      const v = API.readValue(deviceId, paramId, instance);
+      return v.quality === "ok" ? v.value : null;
+    }
+    return mockAPI.setpoint(deviceId, paramId, instance);
+  };
+  API.write = async function (deviceId, req, leaseToken) {
+    ensureLivePolling();
+    if (!live.active && hostedSameOrigin()) {
+      const err = new Error("live gateway unavailable");
+      err.status = 503;
+      throw err;
+    }
+    if (!live.active && !explicitBase()) return mockAPI.write(deviceId, req, leaseToken);
+    const inst = (req.arguments && req.arguments.instance) || 1;
+    const param = req.arguments && req.arguments.param;
+    const prev = API.readValue(deviceId, param, inst).value;
+    try {
+      const body = await fetchJSON(`/api/devices/${encodeURIComponent(deviceId)}/write`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Lease-Token": leaseToken || "",
+        },
+        body: JSON.stringify(req),
+      });
+      const lease = API.leases().find((l) => l.device_id === deviceId);
+      recordCommand({
+        deviceId,
+        instance: inst,
+        paramId: param,
+        value: req.arguments && req.arguments.value,
+        prev,
+        status: (body && body.status) || "completed",
+        leaseHolder: lease && lease.holder,
+      });
+      refreshLiveOnce();
+      return body;
+    } catch (err) {
+      const lease = API.leases().find((l) => l.device_id === deviceId);
+      recordCommand({
+        deviceId,
+        instance: inst,
+        paramId: param,
+        value: req.arguments && req.arguments.value,
+        prev,
+        status: (err.status === 423 || err.status === 409) ? "rejected" : "failed",
+        leaseHolder: lease && lease.holder,
+        errMessage: err.message,
+        httpStatus: err.status,
+      });
+      throw err;
+    }
+  };
+  API.acquireLease = async function (deviceId, holder, ttl) {
+    ensureLivePolling();
+    if (!live.active && hostedSameOrigin()) {
+      const err = new Error("live gateway unavailable");
+      err.status = 503;
+      throw err;
+    }
+    if (!live.active && !explicitBase()) return mockAPI.acquireLease(deviceId, holder, ttl);
+    const lease = await fetchJSON(`/api/devices/${encodeURIComponent(deviceId)}/lease`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ holder: holder || loadSettings().holder, ttl: ttl || "5m" }),
+    });
+    live.leases = (live.leases || []).filter((l) => l.device_id !== deviceId).concat(lease);
+    notify();
+    return lease;
+  };
+  API.releaseLease = async function (deviceId, token) {
+    ensureLivePolling();
+    if (!live.active && hostedSameOrigin()) {
+      const err = new Error("live gateway unavailable");
+      err.status = 503;
+      throw err;
+    }
+    if (!live.active && !explicitBase()) return mockAPI.releaseLease(deviceId, token);
+    await fetchJSON(`/api/devices/${encodeURIComponent(deviceId)}/lease`, {
+      method: "DELETE",
+      headers: { "X-Lease-Token": token || "" },
+    });
+    live.leases = (live.leases || []).filter((l) => l.device_id !== deviceId || l.token !== token);
+    notify();
+  };
+  API.subscribe = function (fn) {
+    ensureLivePolling();
+    return mockAPI.subscribe(fn);
+  };
 
   window.MecomAPI = API;
 })();

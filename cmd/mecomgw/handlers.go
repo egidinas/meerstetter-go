@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,9 +18,12 @@ import (
 	"github.com/egidinas/meerstetter-go/tmtc"
 )
 
+const gatewayAccessCookie = "mecomgw_access"
+
 func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/healthz", s.handleHealth)
+	mux.HandleFunc("/api/health", s.handleHealth)
 	mux.HandleFunc("/api/devices", s.handleDevices)
 	mux.HandleFunc("/api/catalogue", s.handleCatalogue)
 	mux.HandleFunc("/api/leases", s.handleLeasesList)
@@ -33,7 +38,7 @@ func (s *server) routes() http.Handler {
 			http.NotFound(w, r)
 		})
 	}
-	return logRequests(s.logger, s.withCORS(mux))
+	return logRequests(s.logger, s.withCORS(s.withAccessToken(mux)))
 }
 
 // --- top-level handlers ---
@@ -109,6 +114,13 @@ type gatewayCatalogueEntry struct {
 	Sensor   string `json:"sensor,omitempty"`
 	HighPri  bool   `json:"high_priority"`
 	Writable bool   `json:"writable"`
+}
+
+type gatewayReadValue struct {
+	ID       int      `json:"id"`
+	Instance int      `json:"instance"`
+	Value    *float64 `json:"value"`
+	Quality  string   `json:"quality"`
 }
 
 func gatewayCatalogueKey(id, instance int) string {
@@ -327,7 +339,7 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	values, err := b.client.ReadBulk(ctx, params)
+	out, err := readGatewayValues(ctx, b.client, params)
 	if err != nil {
 		if shouldResetDeviceBinding(err) {
 			s.resetDeviceBinding(deviceID, err)
@@ -335,11 +347,59 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 		http.Error(w, err.Error(), httpStatusForError(err))
 		return
 	}
-	out := make([]map[string]any, len(params))
-	for i, p := range params {
-		out[i] = map[string]any{"id": p.ID, "instance": p.Instance, "value": values[i]}
-	}
 	writeJSON(w, http.StatusOK, map[string]any{"values": out})
+}
+
+func readGatewayValues(ctx context.Context, client mecom.ReadClient, params []mecom.Parameter) ([]gatewayReadValue, error) {
+	values, err := client.ReadBulk(ctx, params)
+	if err == nil && len(values) == len(params) {
+		return gatewayValuesFromFloats(params, values), nil
+	}
+	bulkErr := err
+	if bulkErr == nil {
+		bulkErr = fmt.Errorf("read returned %d values for %d parameters", len(values), len(params))
+	}
+	if shouldResetDeviceBinding(bulkErr) {
+		return nil, bulkErr
+	}
+
+	out := make([]gatewayReadValue, len(params))
+	okCount := 0
+	for i, p := range params {
+		out[i] = gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: "missing"}
+		single, singleErr := client.ReadBulk(ctx, []mecom.Parameter{p})
+		if singleErr != nil || len(single) != 1 {
+			continue
+		}
+		out[i] = gatewayValueFromFloat(p, single[0])
+		okCount++
+	}
+	if okCount == 0 {
+		return nil, bulkErr
+	}
+	return out, nil
+}
+
+func gatewayValuesFromFloats(params []mecom.Parameter, values []float64) []gatewayReadValue {
+	if len(values) != len(params) {
+		return nil
+	}
+	out := make([]gatewayReadValue, len(params))
+	for i, p := range params {
+		out[i] = gatewayValueFromFloat(p, values[i])
+	}
+	return out
+}
+
+func gatewayValueFromFloat(p mecom.Parameter, value float64) gatewayReadValue {
+	out := gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: "ok"}
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		out.Quality = "nan"
+		return out
+	}
+	v := value
+	out.Value = &v
+	return out
 }
 
 // --- poll (SSE) ---
@@ -450,9 +510,14 @@ func httpStatusForError(err error) int {
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {
+	raw, err := json.Marshal(body)
+	if err != nil {
+		status = http.StatusInternalServerError
+		raw, _ = json.Marshal(map[string]string{"error": "JSON encode failed: " + err.Error()})
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(body)
+	_, _ = w.Write(append(raw, '\n'))
 }
 
 func logRequests(logger *log.Logger, next http.Handler) http.Handler {
@@ -460,6 +525,86 @@ func logRequests(logger *log.Logger, next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 		logger.Printf("%s %s %s", r.Method, r.URL.Path, time.Since(start))
+	})
+}
+
+func (s *server) withAccessToken(next http.Handler) http.Handler {
+	if s.accessToken == "" {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions || !gatewayAccessRequired(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if token := gatewayAccessTokenFromQuery(r); token != "" {
+			if s.validAccessToken(token) {
+				s.setAccessCookie(w, r, token)
+				if shouldCleanGatewayAccessToken(r) {
+					http.Redirect(w, r, cleanGatewayAccessURL(r), http.StatusFound)
+					return
+				}
+				next.ServeHTTP(w, r)
+				return
+			}
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid gateway access token"})
+			return
+		}
+		if s.validAccessToken(r.Header.Get("X-Gateway-Token")) || s.validAccessCookie(r) {
+			next.ServeHTTP(w, r)
+			return
+		}
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "gateway access token required"})
+	})
+}
+
+func gatewayAccessRequired(path string) bool {
+	return path == "/" || strings.HasPrefix(path, "/ui/") || strings.HasPrefix(path, "/api/")
+}
+
+func gatewayAccessTokenFromQuery(r *http.Request) string {
+	if token := strings.TrimSpace(r.URL.Query().Get("access_token")); token != "" {
+		return token
+	}
+	return strings.TrimSpace(r.URL.Query().Get("t"))
+}
+
+func shouldCleanGatewayAccessToken(r *http.Request) bool {
+	return r.Method == http.MethodGet && (r.URL.Path == "/" || strings.HasPrefix(r.URL.Path, "/ui/"))
+}
+
+func cleanGatewayAccessURL(r *http.Request) string {
+	u := *r.URL
+	q := u.Query()
+	q.Del("access_token")
+	q.Del("t")
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func (s *server) validAccessToken(token string) bool {
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(token), []byte(s.accessToken)) == 1
+}
+
+func (s *server) validAccessCookie(r *http.Request) bool {
+	cookie, err := r.Cookie(gatewayAccessCookie)
+	return err == nil && s.validAccessToken(cookie.Value)
+}
+
+func (s *server) setAccessCookie(w http.ResponseWriter, r *http.Request, token string) {
+	secure := r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https")
+	http.SetCookie(w, &http.Cookie{
+		Name:     gatewayAccessCookie,
+		Value:    token,
+		Path:     "/",
+		MaxAge:   int((12 * time.Hour).Seconds()),
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   secure,
 	})
 }
 
@@ -471,7 +616,7 @@ func (s *server) withCORS(next http.Handler) http.Handler {
 		if origin := r.Header.Get("Origin"); s.originAllowed(origin) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Lease-Token")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Lease-Token, X-Gateway-Token")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 		}
 		if r.Method == http.MethodOptions {

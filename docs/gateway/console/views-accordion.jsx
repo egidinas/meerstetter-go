@@ -56,6 +56,17 @@ function applicableChannels(signal, channels) {
   return channels.filter((c) => signal.applicableModes.includes(c.role));
 }
 
+function RoleSourceBadge({ channel }) {
+  const confidence = MecomAPI.roleConfidence
+    ? MecomAPI.roleConfidence(channel)
+    : { kind: "warn", label: "unconfirmed", detail: "Channel role source is not available." };
+  return (
+    <span className={"role-source " + confidence.kind} title={confidence.detail}>
+      {confidence.label}
+    </span>
+  );
+}
+
 /* ============================================================
    Monitor signal block — compact row of channel readouts
    ============================================================ */
@@ -89,6 +100,7 @@ function MonitorCell({ signal, channel }) {
          title={MecomAPI.provenance(channel.device_id, signal.id, channel.instance)}>
       <span className="swatch" style={{ background: channelColor(channel.device_id, channel.instance) }}></span>
       <span className="id">{channel.device_id}<span style={{opacity:0.6}}>/{channel.instance}</span></span>
+      <RoleSourceBadge channel={channel} />
       <span className={"v " + colorClass}>
         {MecomAPI.formatValue(value, signal.unit, signal.id)}
         {signal.unit && <span className="u">{signal.unit === "degC" ? "°C" : " " + signal.unit}</span>}
@@ -192,6 +204,7 @@ function ControlCell({ signal, channel, holderId }) {
         <span className="swatch" style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: channelColor(channel.device_id, channel.instance) }}></span>
         <span className="ch-id">{channel.device_id}/{channel.instance}</span>
         <span className="ch-role">{channel.role}</span>
+        <RoleSourceBadge channel={channel} />
         {lease ? (
           <span className={"lease-mini " + (youHold ? "you" : "other")}>{youHold ? "lease·you" : "lease·" + lease.holder}</span>
         ) : <span className="lease-mini">lease·free</span>}

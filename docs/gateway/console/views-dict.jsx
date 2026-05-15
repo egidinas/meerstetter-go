@@ -226,6 +226,26 @@ function SignalAssignmentRow({ signal, wall, channels, assigns }) {
   );
 }
 
+function RoleSourceBadge({ channel }) {
+  const confidence = MecomAPI.roleConfidence
+    ? MecomAPI.roleConfidence(channel)
+    : { kind: "warn", label: "unconfirmed", detail: "Channel role source is not available." };
+  return (
+    <span className={"role-source " + confidence.kind} title={confidence.detail}>
+      {confidence.label}
+    </span>
+  );
+}
+
+function RoleCell({ channel }) {
+  return (
+    <span className="role-cell">
+      <span className={"role-pill " + channel.role}>{channel.role === "temp" ? "temp ctrl" : "supply"}</span>
+      <RoleSourceBadge channel={channel} />
+    </span>
+  );
+}
+
 function MonitorRows({ signal, channels }) {
   return (
     <table className="dict-table">
@@ -257,7 +277,7 @@ function MonitorRow({ signal, channel }) {
         <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: channelColor(channel.device_id, channel.instance), marginRight: 6 }}></span>
         {channel.device_id} <span style={{ color: "var(--muted)" }}>· {channel.label}</span>
       </td>
-      <td><span className={"role-pill " + channel.role}>{channel.role === "temp" ? "temp ctrl" : "supply"}</span></td>
+      <td><RoleCell channel={channel} /></td>
       <td>{channel.instance}</td>
       <td><b style={{ color: "var(--text)" }}>{MecomAPI.formatValue(v.value, signal.unit, signal.id)}</b>{signal.unit && <span style={{ color: "var(--muted)", marginLeft: 4 }}>{signal.unit}</span>}</td>
       <td><span className={"q " + v.quality}></span><span style={{ color: "var(--muted)" }}>{v.quality}</span></td>
@@ -329,7 +349,7 @@ function CommandRow({ signal, channel, holderId }) {
         <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: channelColor(channel.device_id, channel.instance), marginRight: 6 }}></span>
         {channel.device_id} <span style={{ color: "var(--muted)" }}>· {channel.label}</span>
       </td>
-      <td><span className={"role-pill " + channel.role}>{channel.role === "temp" ? "temp ctrl" : "supply"}</span></td>
+      <td><RoleCell channel={channel} /></td>
       <td>{channel.instance}</td>
       <td><span style={{ color: "var(--series-actual)", fontWeight: 600 }}>{MecomAPI.formatValue(v.value, signal.unit, signal.id)}</span>{signal.unit && <span style={{ color: "var(--muted)", marginLeft: 4 }}>{signal.unit}</span>}</td>
       <td style={{ color: "var(--muted)" }}>
@@ -396,6 +416,7 @@ function ChannelsEditor() {
                   <button className={"supply " + (channel && channel.role === "supply" ? "on" : "")}
                           onClick={() => setRole(device.id, instance, "supply")}>Supply</button>
                 </div>
+                {channel && <div style={{ marginTop: 4 }}><RoleSourceBadge channel={channel} /></div>}
               </td>
               <td style={{ color: "var(--muted)" }}>{channel ? channel.label : "—"}</td>
             </tr>

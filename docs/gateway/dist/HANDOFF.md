@@ -80,6 +80,23 @@ go run ./cmd/mecomgw \
 Use `-allow-origin '*'` only for an isolated local test gateway, never for a
 shared hardware-facing deployment.
 
+For a temporary shared tunnel, the gateway can also enforce a coarse access
+token before serving `/ui/` or `/api/`:
+
+```sh
+MECOMGW_ACCESS_TOKEN='replace-with-shared-token' \
+go run ./cmd/mecomgw \
+  -config deploy/example-gateway.json \
+  -listen 127.0.0.1:18080 \
+  -ui-dir docs/gateway/console
+```
+
+Open `http://127.0.0.1:18080/ui/?t=replace-with-shared-token` once. The
+gateway stores a short-lived HttpOnly cookie and redirects to `/ui/`; API
+clients can instead send `X-Gateway-Token`. This is still not per-user
+authorization, so keep Cloudflare Zero Trust or an equivalent identity gate in
+front of any internet-facing deployment.
+
 ## Rich operator-console prototype
 
 The Claude Design operator console is preserved under
@@ -128,9 +145,10 @@ Pick from these; mark "out of scope" if you choose not to do something:
 
 ## Constraints and out-of-scope
 
-- **No auth / no users yet.** The lease `holder` is a free-form string. Assume
-  the frontend supplies a stable client identifier (browser session ID, or
-  prompt-the-user once). Real authn/authz is a later wave.
+- **No user model yet.** `MECOMGW_ACCESS_TOKEN` is coarse gateway access
+  control only. The lease `holder` is a free-form string. Assume the frontend
+  supplies a stable client identifier (browser session ID, or prompt-the-user
+  once). Real per-user authn/authz is a later wave.
 - **No historical storage.** The gateway only serves live values. The bundled
   demo keeps a small client-side log only. If you need a chart, buffer SSE
   events in the client; do not ask the gateway for history.

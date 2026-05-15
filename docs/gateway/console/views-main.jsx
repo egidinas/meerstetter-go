@@ -5,10 +5,18 @@
    MetricTile, DiscoveryTree, InputCard, useLiveValue, useGatewayTick,
    useToast, categorizeError, getTelemetry,
    useAssignments, WALLS, wallForDevice, signalAddress,
-   buildSeriesFromAssignments, channelColor,
+   normalizeAssignment, buildGraphTileFromAssignments, renderSeriesFromGraphTile,
+   channelColor,
    HeroGraph, TempSettingsTable, SupplySettingsTable */
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+function compactGatewayError(message) {
+  const text = String(message || "").replace(/\s+/g, " ").trim();
+  if (!text) return "waiting for gateway";
+  if (text.startsWith("<")) return "gateway unavailable";
+  return text.length > 96 ? `${text.slice(0, 93)}...` : text;
+}
 
 /* ============================================================
    FLEET VIEW — hero-graph centric
@@ -21,16 +29,28 @@ function FleetView({ onOpenDevice }) {
   const leases = MecomAPI.leases();
   const events = MecomAPI.commandEvents();
   const settings = MecomAPI.settings();
+  const isLive = MecomAPI.isLive();
+  const liveError = MecomAPI.liveError && MecomAPI.liveError();
 
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
 
-  // Build series for each hero based on assignments
-  const tempSeries = useMemo(() =>
-    buildSeriesFromAssignments(assigns.forWall(WALLS.fleetTemp.wall_id), { colorByChannel: false }),
+  // Build SignalForge graph tiles directly from graph-wall assignments.
+  const tempTile = useMemo(() =>
+    buildGraphTileFromAssignments(assigns.forWall(WALLS.fleetTemp.wall_id), {
+      tile_id: WALLS.fleetTemp.wall_id,
+      title: WALLS.fleetTemp.label,
+      colorByChannel: false,
+      timeWindowMs: 90_000,
+    }),
     [assigns.list]);
-  const supplySeries = useMemo(() =>
-    buildSeriesFromAssignments(assigns.forWall(WALLS.fleetSupply.wall_id), { colorByChannel: false }),
+  const supplyTile = useMemo(() =>
+    buildGraphTileFromAssignments(assigns.forWall(WALLS.fleetSupply.wall_id), {
+      tile_id: WALLS.fleetSupply.wall_id,
+      title: WALLS.fleetSupply.label,
+      colorByChannel: false,
+      timeWindowMs: 90_000,
+    }),
     [assigns.list]);
 
   // Stats
@@ -49,8 +69,10 @@ function FleetView({ onOpenDevice }) {
       <div className="stat-strip">
         <div className="stat">
           <div className="label">Gateway</div>
-          <div className="value ok">healthy</div>
-          <div className="sub">{settings.gateway || "mock · synthetic gateway"}</div>
+          <div className={`value ${isLive ? "ok" : liveError ? "warn" : ""}`}>
+            {isLive ? "live" : liveError ? "fallback" : "checking"}
+          </div>
+          <div className="sub">{isLive ? (settings.gateway || "same-origin /api") : compactGatewayError(liveError)}</div>
         </div>
         <div className="stat">
           <div className="label">Devices</div>
@@ -81,10 +103,10 @@ function FleetView({ onOpenDevice }) {
 
       {/* Two hero graphs */}
       <div className="fleet-heroes">
-        <HeroGraph wall={WALLS.fleetTemp} role="temp" series={tempSeries} height={260}>
+        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={260}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
         </HeroGraph>
-        <HeroGraph wall={WALLS.fleetSupply} role="supply" series={supplySeries} height={260}>
+        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={260}>
           {supplyChannels.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
               No supply-mode channels configured. Set a channel role under Signal Dictionary → Metadata.
@@ -251,6 +273,21 @@ function DeviceWorkspace({ deviceId, onOpenSequencer }) {
 
   // Default pins per channel role
   const deviceWallId = wallForDevice(deviceId).wall_id + "-" + (activeChannel?.instance || 1);
+  const pins = assigns.forWall(deviceWallId);
+  const graphTile = useMemo(() => buildGraphTileFromAssignments(device && activeChannel ? pins : [], {
+    tile_id: deviceWallId,
+    title: `${device ? device.label : deviceId} · channel ${activeChannel ? activeChannel.instance : activeChannelInst}`,
+    colorByChannel: false,
+    timeWindowMs: 90_000,
+  }), [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannelInst]);
+  const series = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
+
+  // Adapter pin shape for DiscoveryTree. Graph assignments stay the source of truth.
+  const pinShape = useMemo(() => pins.map((p) => {
+    const a = normalizeAssignment(p);
+    const paramId = a.options.param_id;
+    return { id: paramId, color: MecomAPI.colorForRole(MecomAPI.roleForParam(paramId)) };
+  }), [assigns.list, deviceWallId]);
 
   // Seed default pins if empty for this channel
   useEffect(() => {
@@ -289,10 +326,6 @@ function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   // Catalogue applicable to current channel's role
   const applicableCatalogue = catalogue.filter((p) => !p.applicableModes || p.applicableModes.includes(activeChannel.role));
 
-  // Pins are derived from assignments for the deviceWallId
-  const pins = assigns.forWall(deviceWallId);
-  const series = buildSeriesFromAssignments(pins);
-
   function togglePin(param) {
     if (assigns.hasAssignment(deviceWallId, param.id, deviceId, activeChannel.instance)) {
       assigns.remove(deviceWallId, param.id, deviceId, activeChannel.instance);
@@ -321,9 +354,6 @@ function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   }
 
   const bs = MecomAPI.brokerStats(deviceId);
-
-  // Adapter pin-shape for DiscoveryTree (it expects {id, color} but we just need id)
-  const pinShape = pins.map((p) => ({ id: p.param_id, color: MecomAPI.colorForRole(MecomAPI.roleForParam(p.param_id)) }));
 
   return (
     <div className="ws">
@@ -410,7 +440,7 @@ function DeviceWorkspace({ deviceId, onOpenSequencer }) {
           <div className="body">
             {series.length === 0
               ? <div className="empty">Pin parameters from the discovery tree on the left.<br />Click a parameter to add it; star highlights pinned signals.</div>
-              : <MultiChart series={series} height={360} />}
+              : <MultiChart tile={graphTile} height={360} />}
           </div>
         </div>
 

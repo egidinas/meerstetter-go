@@ -4,7 +4,8 @@
 /* global React, ReactDOM, MecomAPI,
    ToastProvider, FleetView, DeviceWorkspace, SequencerView,
    PIDAdvisor, ArchiveView, SettingsView, Pill, Chip,
-   TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakColor */
+   TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakColor,
+   useGatewayTick */
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
@@ -30,6 +31,7 @@ function useHashRoute() {
 function App() {
   const [route, go] = useHashRoute();
   const [t, setT] = useTweaks(TWEAK_DEFAULTS);
+  useGatewayTick();
 
   // Apply density to root
   useEffect(() => {
@@ -56,8 +58,10 @@ function App() {
   else if (route === "/archive") view = "archive";
   else if (route === "/settings") view = "settings";
 
-  const devices = MecomAPI.devices();
   const settings = MecomAPI.settings();
+  const isLive = MecomAPI.isLive && MecomAPI.isLive();
+  const liveError = MecomAPI.liveError && MecomAPI.liveError();
+  const devices = MecomAPI.devices();
   const leaseCount = MecomAPI.leases().length;
 
   return (
@@ -84,9 +88,11 @@ function App() {
           </div>
           <div className="spacer"></div>
           <div className="right">
-            <Pill kind="ok">gateway · ok</Pill>
+            <Pill kind={isLive ? "ok" : liveError ? "warn" : "accent"}>
+              gateway · {isLive ? "live" : liveError ? "fallback" : "checking"}
+            </Pill>
             <Chip kind="accent">holder · {settings.holder}</Chip>
-            <Chip>{settings.gateway ? "live" : "mock"}</Chip>
+            <Chip>{isLive ? "same-origin /api" : settings.gateway ? "explicit offline" : "mock fallback"}</Chip>
           </div>
         </header>
 

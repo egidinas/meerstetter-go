@@ -3,7 +3,8 @@
    (signalforge-aligned)
    ============================================================ */
 /* global React, MecomAPI, Pill, Chip, Panel, MultiChart, useToast,
-   useLiveValue, useGatewayTick, getTelemetry, categorizeError */
+   useLiveValue, useGatewayTick, getTelemetry, recordTelemetry, categorizeError,
+   seriesRoleMeta, renderSeriesFromGraphTile */
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
@@ -16,11 +17,16 @@ const ASSIGNMENT_KEY = "mecomgw.assignments";
 
 function loadAssignments() {
   try {
-    return JSON.parse(localStorage.getItem(ASSIGNMENT_KEY) || "[]");
+    const raw = JSON.parse(localStorage.getItem(ASSIGNMENT_KEY) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw.map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
   } catch (_) { return []; }
 }
 function saveAssignments(list) {
-  localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(list));
+  const normalized = (Array.isArray(list) ? list : [])
+    .map(normalizeAssignment)
+    .filter((a) => a.device_id && Number.isFinite(a.param_id));
+  localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(normalized));
   // Notify subscribers
   window.dispatchEvent(new CustomEvent("mecomgw-assignments-changed"));
 }
@@ -36,6 +42,53 @@ function signalAddress(paramId, deviceId, instance) {
   return paramId + "@" + deviceId + "/" + (instance || 1);
 }
 
+function parseSignalAddress(targetId) {
+  const m = String(targetId || "").match(/^(\d+)@([^/]+)\/(\d+)$/);
+  if (!m) return null;
+  return { param_id: parseInt(m[1], 10), device_id: m[2], instance: parseInt(m[3], 10) || 1 };
+}
+
+function firstDefined() {
+  for (let i = 0; i < arguments.length; i++) {
+    if (arguments[i] !== undefined && arguments[i] !== null) return arguments[i];
+  }
+  return undefined;
+}
+
+function normalizeAssignment(a) {
+  const item = a || {};
+  const parsed = parseSignalAddress(item.target_id);
+  const opts = item.options || {};
+  const paramId = Number(firstDefined(item.param_id, opts.param_id, parsed && parsed.param_id));
+  const deviceId = String(firstDefined(item.device_id, opts.device_id, parsed && parsed.device_id, ""));
+  const instance = Number(firstDefined(item.instance, opts.instance, parsed && parsed.instance, 1)) || 1;
+  const wallId = String(firstDefined(item.wall_id, item.wallId, "wall"));
+  const targetId = item.target_id || signalAddress(paramId, deviceId, instance);
+  return {
+    wall_id: wallId,
+    tile_id: firstDefined(item.tile_id, item.tileId, wallId + "-" + targetId),
+    target_id: targetId,
+    kind: item.kind || "trend",
+    options: Object.assign({}, opts, { param_id: paramId, device_id: deviceId, instance }),
+    param_id: paramId,
+    device_id: deviceId,
+    instance,
+  };
+}
+
+function makeAssignment(wallId, paramId, deviceId, instance) {
+  return normalizeAssignment({
+    wall_id: wallId,
+    target_id: signalAddress(paramId, deviceId, instance || 1),
+    kind: "trend",
+  });
+}
+
+function tileSeriesKey(a) {
+  const n = normalizeAssignment(a);
+  return [n.wall_id || "wall", n.tile_id || n.target_id || "target", n.kind || "trend"].join(":");
+}
+
 function useAssignments() {
   const [list, setList] = useState(loadAssignments);
   useEffect(() => {
@@ -47,15 +100,9 @@ function useAssignments() {
     list,
     add: (wallId, paramId, deviceId, instance) => {
       const cur = loadAssignments();
-      const addr = signalAddress(paramId, deviceId, instance);
-      if (cur.find((a) => a.wall_id === wallId && a.target_id === addr)) return;
-      cur.push({
-        wall_id: wallId,
-        tile_id: wallId + "-" + addr,
-        target_id: addr,
-        kind: "trend",
-        param_id: paramId, device_id: deviceId, instance: instance || 1,
-      });
+      const next = makeAssignment(wallId, paramId, deviceId, instance);
+      if (cur.find((a) => a.wall_id === wallId && a.target_id === next.target_id)) return;
+      cur.push(next);
       saveAssignments(cur);
     },
     remove: (wallId, paramId, deviceId, instance) => {
@@ -75,7 +122,7 @@ function useAssignments() {
    Seed default assignments on first run (so the heroes are not empty)
    Versioned key — bump SEED_VERSION when contract IDs change.
    ============================================================ */
-const SEED_VERSION = 3;
+const SEED_VERSION = 5;
 (function seedAssignments() {
   const ver = parseInt(localStorage.getItem("mecomgw.assignments.version") || "0", 10);
   if (ver === SEED_VERSION && loadAssignments().length > 0) return;
@@ -88,25 +135,13 @@ const SEED_VERSION = 3;
       const params = [3000, 1000, 1001];
       if (ch.hasCascade) params.push(52200);
       params.forEach((pid) => {
-        seeds.push({
-          wall_id: WALLS.fleetTemp.wall_id,
-          tile_id: WALLS.fleetTemp.wall_id + "-" + signalAddress(pid, ch.device_id, ch.instance),
-          target_id: signalAddress(pid, ch.device_id, ch.instance),
-          kind: "trend",
-          param_id: pid, device_id: ch.device_id, instance: ch.instance,
-        });
+        seeds.push(makeAssignment(WALLS.fleetTemp.wall_id, pid, ch.device_id, ch.instance));
       });
     } else {
       // Power supply hero: voltage + current + power.
       // 2010 / 2040 are command cards per contract — not graph series.
       [1021, 1020, 1022].forEach((pid) => {
-        seeds.push({
-          wall_id: WALLS.fleetSupply.wall_id,
-          tile_id: WALLS.fleetSupply.wall_id + "-" + signalAddress(pid, ch.device_id, ch.instance),
-          target_id: signalAddress(pid, ch.device_id, ch.instance),
-          kind: "trend",
-          param_id: pid, device_id: ch.device_id, instance: ch.instance,
-        });
+        seeds.push(makeAssignment(WALLS.fleetSupply.wall_id, pid, ch.device_id, ch.instance));
       });
     }
   });
@@ -124,43 +159,107 @@ function channelColor(deviceId, instance) {
   return CHANNEL_COLORS[Math.max(0, idx) % CHANNEL_COLORS.length];
 }
 
-function buildSeriesFromAssignments(assignments, opts = {}) {
+function buildGraphTileFromAssignments(assignments, opts = {}) {
   const catalogue = MecomAPI.catalogue();
-  return assignments.map((a) => {
-    const def = catalogue.find((p) => p.id === a.param_id) || { id: a.param_id, name: "#" + a.param_id, unit: "" };
-    const history = getTelemetry(a.device_id, a.param_id, a.instance);
-    const role = MecomAPI.roleForParam(a.param_id);
+  const normalized = (assignments || []).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
+  const units = [];
+  const now = new Date().toISOString();
+  const tileId = opts.tile_id || opts.tileId || "graph-tile";
+  const series = normalized.map((a) => {
+    const paramId = a.options.param_id;
+    const deviceId = a.options.device_id;
+    const instance = a.options.instance || 1;
+    const def = catalogue.find((p) => p.id === paramId) || { id: paramId, name: "#" + paramId, unit: "" };
+    let history = getTelemetry(deviceId, paramId, instance);
+    if ((!history.v || history.v.length === 0) && typeof MecomAPI.readValue === "function") {
+      const latest = MecomAPI.readValue(deviceId, paramId, instance);
+      if (latest && typeof latest.value === "number" && !Number.isNaN(latest.value)) {
+        recordTelemetry(deviceId, paramId, latest.value, latest.quality || "ok", instance);
+        history = getTelemetry(deviceId, paramId, instance);
+      }
+    }
+    const seriesRole = MecomAPI.roleForParam(paramId);
+    const roleMeta = seriesRoleMeta(seriesRole);
     let color;
     if (opts.colorByChannel) {
-      color = channelColor(a.device_id, a.instance);
+      color = channelColor(deviceId, instance);
     } else {
-      color = MecomAPI.colorForRole(role);
+      color = MecomAPI.colorForRole(seriesRole);
     }
+    const signalPath = [def.group, def.subgroup, def.name].filter(Boolean).join(" / ");
+    const provenance = MecomAPI.provenance(deviceId, paramId, instance);
+    const ch = MecomAPI.channels().find((c) => c.device_id === deviceId && c.instance === instance);
+    const unit = def.unit || "_";
+    if (units.indexOf(unit) === -1) units.push(unit);
+    const sourceRef = `device=${deviceId} param=${paramId} instance=${instance} endpoint=${(ch && ch.endpoint) || ""}`;
     return {
-      key: a.target_id,
-      label: def.name + " · " + a.device_id + (a.instance > 1 ? "/" + a.instance : ""),
+      id: tileSeriesKey(a),
+      series_id: tileSeriesKey(a),
+      target_id: a.target_id,
+      label: def.name + " · " + deviceId + (instance > 1 ? "/" + instance : ""),
+      full_label: signalPath || def.name,
       color,
-      unit: def.unit || "",
+      unit,
       history,
-      paramId: a.param_id,
-      role,
-      deviceId: a.device_id,
-      instance: a.instance,
+      role: seriesRole,
+      role_rank: roleMeta.rank,
+      provenance,
+      source_ref: sourceRef,
+      source: {
+        device_id: deviceId,
+        instance,
+        param_id: paramId,
+        signal_id: def.sid || String(def.id),
+        endpoint: ch && ch.endpoint,
+      },
+      points: (history.ts || []).map((ts, idx) => ({
+        timestamp: new Date(ts).toISOString(),
+        value: (history.v || [])[idx] || 0,
+      })),
     };
+  }).sort((a, b) => {
+    if ((a.role_rank || 0) !== (b.role_rank || 0)) return (a.role_rank || 0) - (b.role_rank || 0);
+    return String(a.series_id || "").localeCompare(String(b.series_id || ""));
   });
+
+  return {
+    schema_version: "signalforge.graph_tile.v1",
+    id: tileId,
+    card_id: tileId,
+    level: "live",
+    generated_at: now,
+    renderer: "signalforge.tile.canvas",
+    kind: "timeseries",
+    tile_id: tileId,
+    title: opts.title || "",
+    time_window_ms: opts.time_window_ms || opts.timeWindowMs || 90_000,
+    axes: units.slice(0, 2).map((unit, idx) => ({ unit, side: idx === 0 ? "left" : "right" })),
+    diagnostics: {
+      status: series.length > 0 ? "ok" : "empty",
+      series_count: series.length,
+      renderer: "signalforge.tile.canvas",
+    },
+    provenance: {
+      source: "meerstetter-go.graphwall.assignments",
+      generated_at: now,
+    },
+    series,
+  };
 }
 
 /* ============================================================
    Hero graph component
    ============================================================ */
-function HeroGraph({ wall, role, series, height = 280, live = true, children }) {
+function HeroGraph({ wall, role, tile, height = 280, live = true, children }) {
+  useGatewayTick();
+  const renderedSeries = renderSeriesFromGraphTile(tile);
   return (
     <div className={"hero" + (live ? " live" : "")}>
       <div className="hero-head">
         <div className="title-grp">
           <span className="live-dot"></span>
           <h2>{wall.label}</h2>
-          <span className="sub">· {series.length} signals · live</span>
+          <span className="sub">· {renderedSeries.length} tile series · live</span>
         </div>
         <div className="badge-row">
           <Chip kind="accent">{role === "temp" ? "temperature_c axis" : "voltage_v / current_a"}</Chip>
@@ -168,12 +267,12 @@ function HeroGraph({ wall, role, series, height = 280, live = true, children }) 
         </div>
       </div>
       <div className="hero-plot">
-        {series.length === 0 ? (
+        {renderedSeries.length === 0 ? (
           <div style={{ padding: 36, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
             No signals assigned. Add from the Signal Dictionary →
           </div>
         ) : (
-          <MultiChart series={series} height={height} />
+          <MultiChart tile={tile} height={height} />
         )}
       </div>
       <div className="hero-legend">
@@ -443,8 +542,9 @@ function SupplySettingsRow({ ch, stagedV, stagedI, setStagedV, setStagedI, busyV
 
 Object.assign(window, {
   WALLS, wallForDevice, signalAddress,
+  parseSignalAddress, normalizeAssignment, makeAssignment,
   useAssignments, loadAssignments, saveAssignments,
-  buildSeriesFromAssignments, channelColor,
+  buildGraphTileFromAssignments, channelColor,
   HeroGraph, TempSettingsTable, SupplySettingsTable,
 });
 

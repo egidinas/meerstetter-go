@@ -85,9 +85,7 @@ const __TWEAKS_STYLE = `
     border:.5px solid rgba(0,0,0,.1);border-radius:7px;
     background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
   .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
-  select.twk-field{padding-right:22px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
-    background-repeat:no-repeat;background-position:right 8px center}
+  select.twk-field{padding-right:22px}
 
   .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
     border-radius:999px;background:rgba(0,0,0,.12);outline:none}
@@ -152,8 +150,12 @@ const __TWEAKS_STYLE = `
     display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
   .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
   .twk-chip>span>i:first-child{box-shadow:none}
-  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+  .twk-check{position:absolute;top:6px;left:6px;width:13px;height:13px;
     filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+  .twk-check::before{content:"";position:absolute;left:3px;top:1px;width:5px;height:9px;
+    border-right:2px solid var(--twk-check-color,#fff);
+    border-bottom:2px solid var(--twk-check-color,#fff);
+    transform:rotate(42deg)}
 `;
 
 // ── useTweaks ───────────────────────────────────────────────────────────────
@@ -498,11 +500,11 @@ function __twkIsLight(hex) {
 }
 
 const __TwkCheck = ({ light }) => (
-  <svg viewBox="0 0 14 14" aria-hidden="true">
-    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
-          strokeLinecap="round" strokeLinejoin="round"
-          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
-  </svg>
+  <span
+    className="twk-check"
+    aria-hidden="true"
+    style={{ "--twk-check-color": light ? "rgba(0,0,0,.78)" : "#fff" }}
+  />
 );
 
 // TweakColor — curated color/palette picker. Each option is either a single

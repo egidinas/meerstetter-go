@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -51,6 +54,7 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	defer ts.Close()
 
 	getJSON(t, ts.URL+"/api/healthz", http.StatusOK, nil)
+	getJSON(t, ts.URL+"/api/health", http.StatusOK, nil)
 
 	var devices struct {
 		Devices []deviceView `json:"devices"`
@@ -174,6 +178,184 @@ func TestGatewayServesStaticUI(t *testing.T) {
 	}
 }
 
+func TestGatewayAccessTokenGateProtectsUIAndAPI(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/index.html", []byte("<!doctype html><title>MeCom Gateway</title>"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.uiDir = dir
+	s.accessToken = "share-token"
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	getJSON(t, ts.URL+"/api/devices", http.StatusUnauthorized, nil)
+
+	resp, err := http.Get(ts.URL + "/ui/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("GET /ui/ without token status = %d, want %d", resp.StatusCode, http.StatusUnauthorized)
+	}
+
+	getJSON(t, ts.URL+"/api/devices?access_token=share-token", http.StatusOK, nil)
+
+	req, err := http.NewRequest(http.MethodGet, ts.URL+"/api/devices", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Gateway-Token", "share-token")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /api/devices with token header status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+
+	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}}
+	req, err = http.NewRequest(http.MethodGet, ts.URL+"/ui/?t=share-token", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Forwarded-Proto", "https")
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusFound {
+		t.Fatalf("GET /ui/?t=token status = %d, want %d", resp.StatusCode, http.StatusFound)
+	}
+	if loc := resp.Header.Get("Location"); loc != "/ui/" {
+		t.Fatalf("redirect Location = %q, want /ui/", loc)
+	}
+	cookies := resp.Cookies()
+	if len(cookies) != 1 || cookies[0].Name != gatewayAccessCookie || cookies[0].Value != "share-token" || !cookies[0].HttpOnly || !cookies[0].Secure {
+		t.Fatalf("unexpected access cookie: %+v", cookies)
+	}
+
+	req, err = http.NewRequest(http.MethodGet, ts.URL+"/ui/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.AddCookie(cookies[0])
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /ui/ with cookie status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+}
+
+type fakeGatewayDevice struct {
+	values []float64
+	byKey  map[string]float64
+}
+
+func (f fakeGatewayDevice) ReadBulk(_ context.Context, params []mecom.Parameter) ([]float64, error) {
+	if f.byKey != nil {
+		values := make([]float64, 0, len(params))
+		for _, p := range params {
+			v, ok := f.byKey[gatewayCatalogueKey(p.ID, p.Instance)]
+			if !ok {
+				return nil, fmt.Errorf("%w: parameter %d instance %d", mecom.ErrUnknownParameter, p.ID, p.Instance)
+			}
+			values = append(values, v)
+		}
+		return values, nil
+	}
+	return f.values, nil
+}
+
+func (f fakeGatewayDevice) ConfigureRingCapture(context.Context, uint16, []mecom.RingCaptureParameter) error {
+	return mecom.ErrTransportNotSupported
+}
+
+func (f fakeGatewayDevice) TriggerRingSync(context.Context) error {
+	return mecom.ErrTransportNotSupported
+}
+
+func (f fakeGatewayDevice) ReadRingPointer(context.Context) (uint32, error) {
+	return 0, mecom.ErrTransportNotSupported
+}
+
+func (f fakeGatewayDevice) ReadRingChunk(context.Context, uint32, uint16) (mecom.RingReadResponse, error) {
+	return mecom.RingReadResponse{}, mecom.ErrTransportNotSupported
+}
+
+func (f fakeGatewayDevice) Close() error {
+	return nil
+}
+
+func TestGatewayReadReportsNaNAsNullQuality(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{values: []float64{25.5, math.NaN()}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Values []gatewayReadValue `json:"values"`
+	}
+	getJSON(t, ts.URL+"/api/devices/tec-75/read?params=1000:1,52200:1", http.StatusOK, &got)
+	if len(got.Values) != 2 {
+		t.Fatalf("values len = %d, want 2", len(got.Values))
+	}
+	if got.Values[0].Value == nil || *got.Values[0].Value != 25.5 || got.Values[0].Quality != "ok" {
+		t.Fatalf("unexpected finite value entry: %+v", got.Values[0])
+	}
+	if got.Values[1].Value != nil || got.Values[1].Quality != "nan" {
+		t.Fatalf("unexpected NaN value entry: %+v", got.Values[1])
+	}
+}
+
+func TestGatewayReadKeepsAvailableValuesWhenOptionalParamFails(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 25.5,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Values []gatewayReadValue `json:"values"`
+	}
+	getJSON(t, ts.URL+"/api/devices/tec-75/read?params=1000:1,52200:1", http.StatusOK, &got)
+	if len(got.Values) != 2 {
+		t.Fatalf("values len = %d, want 2", len(got.Values))
+	}
+	if got.Values[0].Value == nil || *got.Values[0].Value != 25.5 || got.Values[0].Quality != "ok" {
+		t.Fatalf("unexpected available value entry: %+v", got.Values[0])
+	}
+	if got.Values[1].Value != nil || got.Values[1].Quality != "missing" {
+		t.Fatalf("unexpected missing optional value entry: %+v", got.Values[1])
+	}
+}
+
+func TestWriteJSONFallsBackBeforeWritingHeader(t *testing.T) {
+	rr := httptest.NewRecorder()
+	writeJSON(rr, http.StatusOK, map[string]any{"bad": math.NaN()})
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusInternalServerError)
+	}
+	var body struct {
+		Error string `json:"error"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&body); err != nil {
+		t.Fatalf("fallback body is not JSON: %v", err)
+	}
+	if !strings.Contains(body.Error, "JSON encode failed") {
+		t.Fatalf("fallback error = %q", body.Error)
+	}
+}
+
 func TestGatewayCORSAllowsConfiguredOrigin(t *testing.T) {
 	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
 	s.allowedOrigins = []string{"https://claude.ai"}
@@ -199,6 +381,9 @@ func TestGatewayCORSAllowsConfiguredOrigin(t *testing.T) {
 	}
 	if got := resp.Header.Get("Access-Control-Allow-Headers"); !strings.Contains(got, "X-Lease-Token") {
 		t.Fatalf("Access-Control-Allow-Headers = %q, want X-Lease-Token", got)
+	}
+	if got := resp.Header.Get("Access-Control-Allow-Headers"); !strings.Contains(got, "X-Gateway-Token") {
+		t.Fatalf("Access-Control-Allow-Headers = %q, want X-Gateway-Token", got)
 	}
 
 	req, err = http.NewRequest(http.MethodGet, ts.URL+"/api/healthz", nil)

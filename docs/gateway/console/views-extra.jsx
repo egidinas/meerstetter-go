@@ -2,7 +2,8 @@
    Meerstetter Gateway — sequencer / PID / archive / settings
    ======================================================== */
 /* global React, MecomAPI, Pill, Chip, Panel, MultiChart, useToast,
-   useGatewayTick, getTelemetry, recordTelemetry, useLiveValue */
+   useGatewayTick, getTelemetry, recordTelemetry, useLiveValue,
+   seriesRoleMeta */
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
@@ -219,6 +220,7 @@ function SequencerView({ deviceId }) {
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
           <h2 style={{ margin: 0, fontSize: 18 }}>{script.name}</h2>
           <span className="mono dim" style={{ fontSize: 12 }}>{script.id}</span>
+          <Chip kind="warn">execution endpoint planned</Chip>
           <span className="mono dim" style={{ fontSize: 12 }}>· timeout {script.timeout}s · ~{totalDuration.toFixed(1)}s walk-through</span>
         </div>
 
@@ -255,8 +257,11 @@ function SequencerView({ deviceId }) {
       </div>
 
       <div className="run-panel">
-        <Panel title="Run controls" flush>
+        <Panel title="Run controls" right={<Chip kind="warn">planned backend</Chip>} flush>
           <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="planned-note">
+              Gateway execution endpoint is planned; this view currently simulates script flow and exports JSON for cmd/mecomrun.
+            </div>
             <div className="run-controls">
               {!running && (
                 <button className="btn primary" onClick={startRun}>Run</button>
@@ -564,19 +569,103 @@ function StepResponseChart({ response, live, deviceId }) {
     const id = setInterval(() => force((n) => (n + 1) % 1e9), 250);
     return () => clearInterval(id);
   }, [live]);
-  // Build series for MultiChart
-  const series = response ? [
-    { key: "obj", label: "Object T", color: "var(--s1)", unit: "degC",
-      history: { ts: response.ts.map((s) => Date.now() - (response.ts[response.ts.length - 1] - s) * 1000), v: response.obj, q: response.obj.map(() => "ok") }, paramId: 1000 },
-    { key: "tgt", label: "Target T", color: "var(--s3)", unit: "degC",
-      history: { ts: response.ts.map((s) => Date.now() - (response.ts[response.ts.length - 1] - s) * 1000), v: response.target, q: response.target.map(() => "ok") }, paramId: 3000 },
-  ] : [];
+  const tile = useMemo(() => buildStepResponseGraphTile(response, deviceId), [response, deviceId]);
   return (
     <div style={{ paddingTop: 8 }}>
-      {series.length ? <MultiChart series={series} height={260} timeWindowMs={(response.ts[response.ts.length - 1] || 24) * 1000} /> : null}
+      {tile ? <MultiChart tile={tile} height={260} timeWindowMs={tile.time_window_ms} /> : null}
       {live && <div style={{ padding: 8, color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: 11 }}>● capturing…</div>}
     </div>
   );
+}
+
+function buildStepResponseGraphTile(response, deviceId) {
+  if (!response || !response.ts || response.ts.length === 0) return null;
+  const endpoint = "pid-advisor-capture";
+  const idDevice = deviceId || "selected";
+  const lastSec = response.ts[response.ts.length - 1] || 24;
+  const baseMs = Date.now() - lastSec * 1000;
+  const now = new Date().toISOString();
+  const makeHistory = (values) => ({
+    ts: response.ts.map((seconds) => Math.round(baseMs + seconds * 1000)),
+    v: values,
+    q: values.map(() => "ok"),
+  });
+  const makeSeries = ({ paramId, signalId, label, values, role }) => {
+    const history = makeHistory(values);
+    const roleMeta = seriesRoleMeta(role);
+    const provenance = `device=${idDevice} param=${paramId} instance=1 endpoint=${endpoint}`;
+    return {
+      id: `pid-${idDevice}-1-${paramId}`,
+      series_id: `pid-${idDevice}-1-${paramId}`,
+      target_id: `${signalId}@${idDevice}/1`,
+      label,
+      full_label: `Thermal / Step response / ${label}`,
+      color: MecomAPI.colorForRole(role),
+      unit: "degC",
+      role,
+      role_rank: roleMeta.rank,
+      kind: "continuous",
+      provenance,
+      source_ref: provenance,
+      source: {
+        device_id: idDevice,
+        instance: 1,
+        param_id: paramId,
+        signal_id: signalId,
+        endpoint,
+      },
+      history,
+      points: history.ts.map((ts, idx) => ({
+        t: ts,
+        v: history.v[idx],
+        q: "ok",
+        provenance,
+      })),
+    };
+  };
+  return {
+    schema_version: "signalforge.graph_tile.v1",
+    renderer: "signalforge.tile.canvas",
+    kind: "timeseries",
+    id: `pid-step-response-${idDevice}`,
+    tile_id: `pid-step-response-${idDevice}`,
+    card_id: `pid-step-response-${idDevice}`,
+    level: "analysis",
+    title: "PID step response",
+    generated_at: now,
+    time_window_ms: lastSec * 1000,
+    axes: [{ id: "temperature_c", unit: "degC", side: "left", label: "Temperature" }],
+    diagnostics: {
+      status: "ok",
+      renderer: "signalforge.tile.canvas",
+      source: "meerstetter-go.pid-advisor",
+      mode: "capture",
+      series_count: 2,
+      point_count: response.ts.length * 2,
+    },
+    provenance: {
+      source: "meerstetter-go.pid-advisor",
+      source_family: "mecom",
+      generated_at: now,
+      synthetic: true,
+    },
+    series: [
+      makeSeries({
+        paramId: 1000,
+        signalId: "object_temp_c",
+        label: "Object T",
+        values: response.obj,
+        role: "actual",
+      }),
+      makeSeries({
+        paramId: 3000,
+        signalId: "target_temp_c",
+        label: "Target T",
+        values: response.target,
+        role: "cmd",
+      }),
+    ],
+  };
 }
 
 function analyzeStep(response) {
@@ -803,9 +892,10 @@ function SettingsView() {
           <div>
             <label className="lbl">Gateway URL</label>
             <input className="field" value={s.gateway} onChange={(e) => set({ gateway: e.target.value })}
-                   placeholder="http://127.0.0.1:18080 (blank = mock)" />
+                   placeholder="https://mecomgo.jmeyer.space or blank = same-origin" />
             <div className="dim small mono" style={{ marginTop: 4 }}>
-              Leave blank to use the synthetic mock gateway. Real gateway must permit this origin via <code>-allow-origin</code>.
+              Leave blank when served by <code>mecomgw</code>; the console uses same-origin <code>/api</code>.
+              Mock data is only the fallback for local file previews or unavailable explicit gateways.
             </div>
           </div>
           <div>

@@ -27,6 +27,18 @@ function getTelemetry(deviceId, paramId, instance) {
   return TELE_BUF.get(teleKey(deviceId, paramId, instance)) || { ts: [], v: [], q: [] };
 }
 
+const SERIES_ROLE_META = Object.freeze({
+  cmd: { label: "target / command", rank: 10, className: "cmd", dash: "6,4", width: 2.2, opacity: 0.98 },
+  actual: { label: "actual", rank: 20, className: "actual", dash: "", width: 2.2, opacity: 0.98 },
+  ghost: { label: "reference / sink", rank: 30, className: "ghost", dash: "2,4", width: 1.8, opacity: 0.86 },
+  dut: { label: "power / load", rank: 40, className: "dut", dash: "", width: 2.0, opacity: 0.94 },
+  aux: { label: "auxiliary", rank: 50, className: "aux", dash: "8,4", width: 1.8, opacity: 0.86 },
+});
+
+function seriesRoleMeta(role) {
+  return SERIES_ROLE_META[role] || SERIES_ROLE_META.actual;
+}
+
 /* ---------- Hook: latest value for a (device, param, instance) ---------- */
 function useLiveValue(deviceId, paramId, instance) {
   const inst = instance || 1;
@@ -85,187 +97,368 @@ function Panel({ title, meta, right, children, flush, style, className }) {
 }
 
 /* ============================================================
-   Sparkline + multi-overlay chart
+   SignalForge graph tile adapter + canvas renderer
    ============================================================ */
-function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, showAxis = false }) {
-  const path = useMemo(() => {
-    const v = history.v;
-    if (!v || v.length < 2) return null;
-    const valid = v.filter((x) => typeof x === "number" && !Number.isNaN(x));
-    if (valid.length < 2) return null;
-    const min = Math.min(...valid);
-    const max = Math.max(...valid);
+function canvasCssColor(value, fallback = "#58a6ff") {
+  if (!value) return fallback;
+  if (typeof value === "string" && !value.includes("var(")) return value;
+  if (typeof document === "undefined") return fallback;
+  const probe = document.createElement("span");
+  probe.style.color = value;
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  document.body.appendChild(probe);
+  const resolved = getComputedStyle(probe).color || fallback;
+  probe.remove();
+  return resolved;
+}
+
+function seriesRoleColor(role, fallback = "var(--series-actual)") {
+  const meta = seriesRoleMeta(role);
+  const css = meta.className ? `--series-${meta.className}` : "";
+  if (!css || typeof document === "undefined") return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(css).trim() || fallback;
+}
+
+function emptyGraphTile(opts = {}) {
+  const id = opts.tile_id || opts.tileId || "empty";
+  const now = new Date().toISOString();
+  return {
+    schema_version: "signalforge.graph_tile.v1",
+    id,
+    card_id: id,
+    level: "live",
+    generated_at: now,
+    renderer: "signalforge.tile.canvas",
+    kind: "timeseries",
+    tile_id: id,
+    title: opts.title || "",
+    time_window_ms: opts.time_window_ms || opts.timeWindowMs || 90_000,
+    axes: opts.axes || [],
+    diagnostics: {
+      status: "empty",
+      point_count: 0,
+    },
+    provenance: {
+      source: "empty-graph-tile",
+      generated_at: now,
+    },
+    series: [],
+  };
+}
+
+function renderSeriesFromGraphTile(tile) {
+  if (!tile || !Array.isArray(tile.series)) return [];
+  return tile.series.map((s) => {
+    const role = s.role || s.seriesRole || "actual";
+    const source = (s.source && typeof s.source === "object") ? s.source : {};
+    const history = s.history || {
+      ts: (s.points || []).map((p) => Date.parse(p.timestamp)),
+      v: (s.points || []).map((p) => p.value),
+      q: (s.points || []).map(() => "ok"),
+    };
+    return {
+      key: s.series_id || s.id || s.key || s.target_id || s.targetId || s.label,
+      tileId: tile.tile_id || tile.id || tile.tileId,
+      targetId: s.target_id || s.targetId,
+      label: s.label,
+      fullLabel: s.full_label || s.fullLabel || s.label,
+      role,
+      seriesRole: role,
+      roleRank: s.role_rank ?? seriesRoleMeta(role).rank,
+      color: s.color || seriesRoleColor(role),
+      unit: s.unit || "_",
+      provenance: s.provenance || "",
+      source: s.source || null,
+      paramId: s.param_id !== undefined ? s.param_id : source.param_id,
+      deviceId: s.device_id !== undefined ? s.device_id : source.device_id,
+      instance: s.instance !== undefined ? s.instance : source.instance,
+      signalId: s.signal_id !== undefined ? s.signal_id : source.signal_id,
+      history,
+    };
+  }).sort((a, b) => {
+    if (a.roleRank !== b.roleRank) return a.roleRank - b.roleRank;
+    return String(a.tileId || a.key || a.label || "").localeCompare(String(b.tileId || b.key || b.label || ""));
+  });
+}
+
+function chartNumber(v) {
+  if (!Number.isFinite(v)) return "";
+  const abs = Math.abs(v);
+  if (abs >= 1000 || abs < 0.01) return v.toExponential(1).replace("e", "E");
+  return v.toFixed(abs >= 100 ? 0 : abs >= 10 ? 1 : 2);
+}
+
+const droppedAxisWarnings = new Set();
+
+function drawCanvasChart(canvas, orderedSeries, opts = {}) {
+  if (!canvas) return;
+  const width = Math.max(320, opts.width || canvas.clientWidth || 900);
+  const height = Math.max(120, opts.height || 320);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  ctx.font = "10px var(--font-mono)";
+  ctx.textBaseline = "middle";
+  const grid = canvasCssColor("var(--hairline)", "rgba(110,118,129,0.34)");
+  const line = canvasCssColor("var(--line)", "rgba(139,148,158,0.55)");
+  const muted = canvasCssColor("var(--muted)", "#8b949e");
+  const panel = canvasCssColor("var(--panel)", "#0d1117");
+  const padT = 12, padB = 24;
+  const tMax = Date.now();
+  const timeWindowMs = opts.timeWindowMs || opts.time_window_ms || 90_000;
+  const tMin = tMax - timeWindowMs;
+  const units = [];
+  const unitGroups = new Map();
+  orderedSeries.forEach((s) => {
+    const unit = s.unit || "_";
+    if (!unitGroups.has(unit)) {
+      unitGroups.set(unit, []);
+      units.push(unit);
+    }
+    unitGroups.get(unit).push(s);
+  });
+  const scales = new Map();
+  units.forEach((unit) => {
+    let min = Infinity, max = -Infinity;
+    unitGroups.get(unit).forEach((s) => {
+      const values = (s.history && s.history.v) || [];
+      values.forEach((x) => {
+        if (typeof x !== "number" || Number.isNaN(x)) return;
+        min = Math.min(min, x);
+        max = Math.max(max, x);
+      });
+    });
+    if (min === Infinity) { min = 0; max = 1; }
+    if (min === max) { min -= 0.5; max += 0.5; }
     const span = max - min || 1;
-    const pad = 4;
-    const inW = w - pad * 2;
-    const inH = h - pad * 2;
-    return v.map((x, i) => {
-      const px = pad + (i / (v.length - 1)) * inW;
-      const py = pad + inH - ((x - min) / span) * inH;
-      return (i === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1);
-    }).join(" ") + ` L${w - pad} ${h - pad} L${pad} ${h - pad} Z`;
-  }, [history.v.length, history.v[history.v.length - 1]]);
+    scales.set(unit, { min: min - span * 0.1, max: max + span * 0.1 });
+  });
+  // Dynamic axis padding: measure worst-case tick-label width so long labels
+  // (e.g. "1.2E-7 mbar", "-12.34 mA") don't clip the inner plot.
+  function tickLabelsFor(unit) {
+    const sc = scales.get(unit);
+    if (!sc) return [];
+    return [sc.max, sc.min + (sc.max - sc.min) * 0.5, sc.min].map(
+      (lv) => `${chartNumber(lv)}${unit && unit !== "_" ? " " + unit : ""}`,
+    );
+  }
+  function maxLabelWidth(unit) {
+    return tickLabelsFor(unit).reduce((acc, t) => Math.max(acc, ctx.measureText(t).width), 0);
+  }
+  const padL = Math.max(50, Math.ceil((units[0] ? maxLabelWidth(units[0]) : 0) + 12));
+  const padR = Math.max(50, Math.ceil((units[1] ? maxLabelWidth(units[1]) : 0) + 12));
+  const innerW = Math.max(40, width - padL - padR);
+  const innerH = Math.max(40, height - padT - padB);
+  const xOf = (t) => padL + ((t - tMin) / (tMax - tMin)) * innerW;
+  const yOf = (unit, v) => {
+    const sc = scales.get(unit || "_") || { min: 0, max: 1 };
+    return padT + innerH - ((v - sc.min) / (sc.max - sc.min || 1)) * innerH;
+  };
+  ctx.strokeStyle = grid;
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (i / 4) * innerH;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(width - padR, y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = muted;
+  ctx.textAlign = "center";
+  for (let i = 0; i <= 6; i++) {
+    const x = padL + (i / 6) * innerW;
+    const ago = Math.round(((6 - i) / 6) * timeWindowMs / 1000);
+    ctx.strokeStyle = grid;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + innerH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillText(ago === 0 ? "now" : `-${ago}s`, x, height - 9);
+  }
+  units.slice(0, 2).forEach((unit, idx) => {
+    const sc = scales.get(unit);
+    const isLeft = idx === 0;
+    const x = isLeft ? padL : width - padR;
+    ctx.strokeStyle = line;
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + innerH);
+    ctx.stroke();
+    ctx.textAlign = isLeft ? "right" : "left";
+    const tx = isLeft ? padL - 6 : width - padR + 6;
+    [sc.max, sc.min + (sc.max - sc.min) * 0.5, sc.min].forEach((lv, j) => {
+      const y = j === 0 ? padT : j === 1 ? padT + innerH / 2 : padT + innerH;
+      ctx.fillStyle = muted;
+      ctx.fillText(`${chartNumber(lv)}${unit && unit !== "_" ? " " + unit : ""}`, tx, y + 3);
+    });
+  });
+  if (units.length > 2) {
+    const dropped = units.slice(2);
+    const key = dropped.join("|");
+    if (!droppedAxisWarnings.has(key)) {
+      droppedAxisWarnings.add(key);
+      console.warn(`drawCanvasChart: ${dropped.length} unit group(s) not drawn (only 2 axes supported):`, dropped);
+    }
+    ctx.save();
+    ctx.fillStyle = canvasCssColor("var(--warn)", "#d29922");
+    ctx.textAlign = "left";
+    ctx.fillText(`+${dropped.length} axis hidden (${dropped.join(", ")})`, padL + 6, padT + 8);
+    ctx.restore();
+  }
+  if (!orderedSeries.length) {
+    ctx.textAlign = "center";
+    ctx.fillStyle = muted;
+    ctx.fillText("No graph tile series", width / 2, height / 2);
+    return;
+  }
+  orderedSeries.forEach((s) => {
+    const roleMeta = seriesRoleMeta(s.seriesRole || s.role);
+    const unit = s.unit || "_";
+    const values = (s.history && s.history.v) || [];
+    const times = (s.history && s.history.ts) || [];
+    const points = [];
+    let latestNumeric = null;
+    values.forEach((value, i) => {
+      if (typeof value !== "number" || Number.isNaN(value)) return;
+      const rawT = (typeof times[i] === "number" && times[i] > 0) ? times[i] : tMax;
+      latestNumeric = { t: rawT, value };
+      if (rawT < tMin) return;
+      points.push({
+        x: xOf(Math.min(Math.max(rawT, tMin), tMax)),
+        y: yOf(unit, value),
+      });
+    });
+    if (!points.length && latestNumeric) {
+      points.push({ x: width - padR - 4, y: yOf(unit, latestNumeric.value) });
+    }
+    if (!points.length) return;
+    const color = canvasCssColor(s.color, seriesRoleColor(s.seriesRole || s.role, "#58a6ff"));
+    const last = points[points.length - 1];
+    ctx.save();
+    ctx.globalAlpha = roleMeta.opacity;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = roleMeta.width || 2;
+    const dash = roleMeta.dash ? roleMeta.dash.split(",").map((x) => Number(x.trim())).filter(Number.isFinite) : [];
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    if (points.length === 1) {
+      ctx.moveTo(padL, last.y);
+      ctx.lineTo(width - padR, last.y);
+    } else {
+      points.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(points.length === 1 ? width - padR - 4 : last.x, last.y, points.length === 1 ? 3.2 : 2.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = panel;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+function drawSparklineCanvas(canvas, history, color, showAxis) {
+  if (!canvas) return;
+  const w = Math.max(80, canvas.clientWidth || Number(canvas.width) || 320);
+  const h = Math.max(28, canvas.clientHeight || Number(canvas.height) || 56);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (showAxis) {
+    ctx.strokeStyle = canvasCssColor("var(--hairline)", "rgba(110,118,129,0.34)");
+    ctx.beginPath();
+    ctx.moveTo(0, h - 0.5);
+    ctx.lineTo(w, h - 0.5);
+    ctx.stroke();
+  }
+  const values = (history && history.v) || [];
+  const valid = values.filter((x) => typeof x === "number" && !Number.isNaN(x));
+  if (valid.length < 2) return;
+  const min = Math.min(...valid);
+  const max = Math.max(...valid);
+  const span = max - min || 1;
+  const pad = 4;
+  const inW = w - pad * 2;
+  const inH = h - pad * 2;
+  ctx.strokeStyle = canvasCssColor(color, "#58a6ff");
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  values.forEach((x, i) => {
+    if (typeof x !== "number" || Number.isNaN(x)) return;
+    const px = pad + (i / Math.max(1, values.length - 1)) * inW;
+    const py = pad + inH - ((x - min) / span) * inH;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+}
+
+function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, showAxis = false }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    drawSparklineCanvas(canvasRef.current, history, color, showAxis);
+  }, [history && history.v && history.v.length, history && history.v && history.v[history.v.length - 1], color, showAxis, w, h]);
   return (
-    <svg width={w} height={h} preserveAspectRatio="none" viewBox={`0 0 ${w} ${h}`} style={{ width: "100%", display: "block" }}>
-      {showAxis && (
-        <line x1={0} x2={w} y1={h - 0.5} y2={h - 0.5} stroke="var(--hairline)" />
-      )}
-      {path && (
-        <>
-          <defs>
-            <linearGradient id={"spg-" + color.replace(/[^a-z0-9]/gi, "")} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.35" />
-              <stop offset="100%" stopColor={color} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d={path} fill={`url(#spg-${color.replace(/[^a-z0-9]/gi, "")})`} stroke="none" />
-          <path d={path.split(" Z")[0]} fill="none" stroke={color} strokeWidth="1.4" />
-        </>
-      )}
-    </svg>
+    <canvas
+      ref={canvasRef}
+      data-graph-renderer="signalforge.tile.canvas.sparkline"
+      style={{ width: "100%", height: h, display: "block" }}
+      width={w}
+      height={h}
+    />
   );
 }
 
-/* Multi-param overlay chart with separate y-axes by unit family. */
-function MultiChart({ series, height = 320, timeWindowMs = 90_000 }) {
-  /* series: [{ key, label, color, unit, history }] */
+function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
+  useGatewayTick();
   const wrapRef = useRef(null);
+  const canvasRef = useRef(null);
   const [w, setW] = useState(900);
   useEffect(() => {
     if (!wrapRef.current) return;
-    const ro = new ResizeObserver(() => {
-      if (wrapRef.current) setW(wrapRef.current.clientWidth);
-    });
+    const update = () => setW(Math.max(320, wrapRef.current.clientWidth || 900));
+    update();
+    const ro = new ResizeObserver(update);
     ro.observe(wrapRef.current);
     return () => ro.disconnect();
   }, []);
-  const h = height;
-  const padL = 50, padR = 50, padT = 12, padB = 24;
-  const innerW = Math.max(40, w - padL - padR);
-  const innerH = h - padT - padB;
-  const tMax = Date.now();
-  const tMin = tMax - timeWindowMs;
-
-  // Group series by unit family
-  const unitGroups = useMemo(() => {
-    const g = {};
-    series.forEach((s) => {
-      const u = s.unit || "_";
-      if (!g[u]) g[u] = [];
-      g[u].push(s);
+  const graphTile = useMemo(() => tile || emptyGraphTile({ timeWindowMs }), [tile, timeWindowMs]);
+  const orderedSeries = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
+  useEffect(() => {
+    drawCanvasChart(canvasRef.current, orderedSeries, {
+      width: w,
+      height,
+      timeWindowMs: graphTile.time_window_ms || timeWindowMs,
     });
-    return g;
-  }, [series.map((s) => s.key + s.history.v.length).join("|")]);
-
-  const axes = Object.keys(unitGroups);
-  const scales = useMemo(() => {
-    const out = {};
-    axes.forEach((u) => {
-      let min = Infinity, max = -Infinity;
-      unitGroups[u].forEach((s) => {
-        const v = s.history.v;
-        for (let i = 0; i < v.length; i++) {
-          const x = v[i];
-          if (typeof x === "number" && !Number.isNaN(x)) {
-            if (x < min) min = x;
-            if (x > max) max = x;
-          }
-        }
-      });
-      if (min === Infinity) { min = 0; max = 1; }
-      if (min === max) { min -= 0.5; max += 0.5; }
-      const span = max - min;
-      // Pad
-      min -= span * 0.1;
-      max += span * 0.1;
-      out[u] = { min, max };
-    });
-    return out;
-  }, [unitGroups]);
-
-  const xOf = (t) => padL + ((t - tMin) / (tMax - tMin)) * innerW;
-  const yOfFor = (unit) => (v) => {
-    const sc = scales[unit];
-    return padT + innerH - ((v - sc.min) / (sc.max - sc.min)) * innerH;
-  };
-
-  // Time ticks
-  const xTicks = useMemo(() => {
-    const out = [];
-    for (let i = 0; i <= 6; i++) {
-      const tt = tMin + (i / 6) * (tMax - tMin);
-      const ago = Math.round((tMax - tt) / 1000);
-      out.push({ x: padL + (i / 6) * innerW, label: ago === 0 ? "now" : ("-" + ago + "s") });
-    }
-    return out;
-  }, [tMin, tMax, innerW]);
-
+  }, [orderedSeries, w, height, graphTile.time_window_ms, timeWindowMs]);
+  const title = graphTile.title || graphTile.tile_id || graphTile.id || "graph tile";
   return (
-    <div ref={wrapRef} style={{ width: "100%" }}>
-      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
-        {/* gridlines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((g, i) => (
-          <line key={i} x1={padL} x2={w - padR}
-                y1={padT + g * innerH} y2={padT + g * innerH}
-                stroke="var(--hairline)" />
-        ))}
-        {/* x ticks */}
-        {xTicks.map((tk, i) => (
-          <g key={i}>
-            <line x1={tk.x} x2={tk.x} y1={padT} y2={padT + innerH}
-                  stroke="var(--hairline)" strokeDasharray="2,3" opacity="0.5" />
-            <text x={tk.x} y={h - 8} fontSize="10" fill="var(--muted)" textAnchor="middle"
-                  fontFamily="var(--font-mono)">{tk.label}</text>
-          </g>
-        ))}
-        {/* y axes (left = first unit, right = second) */}
-        {axes.slice(0, 2).map((u, idx) => {
-          const sc = scales[u];
-          const isLeft = idx === 0;
-          const x = isLeft ? padL : (w - padR);
-          const align = isLeft ? "end" : "start";
-          const tx = isLeft ? padL - 6 : (w - padR + 6);
-          const labels = [sc.max, sc.min + (sc.max - sc.min) * 0.5, sc.min];
-          return (
-            <g key={u}>
-              <line x1={x} x2={x} y1={padT} y2={padT + innerH} stroke="var(--line)" />
-              {labels.map((lv, j) => {
-                const ny = j === 0 ? padT : j === 1 ? padT + innerH / 2 : padT + innerH;
-                return (
-                  <text key={j} x={tx} y={ny + 3} fontSize="10" fill="var(--muted)" textAnchor={align}
-                        fontFamily="var(--font-mono)">{lv.toFixed(2)}{u && u !== "_" ? " " + u : ""}</text>
-                );
-              })}
-            </g>
-          );
-        })}
-        {/* series */}
-        {series.map((s) => {
-          const yOf = yOfFor(s.unit || "_");
-          const v = s.history.v;
-          const ts = s.history.ts;
-          const q = s.history.q;
-          if (v.length < 2) return null;
-          let d = "";
-          for (let i = 0; i < v.length; i++) {
-            if (typeof v[i] !== "number" || Number.isNaN(v[i])) continue;
-            if (ts[i] < tMin) continue;
-            const x = xOf(ts[i]);
-            const y = yOf(v[i]);
-            d += (d ? " L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
-          }
-          if (!d) return null;
-          const lastIdx = v.length - 1;
-          const lastX = xOf(ts[lastIdx]);
-          const lastY = yOf(v[lastIdx]);
-          return (
-            <g key={s.key}>
-              <path d={d} fill="none" stroke={s.color} strokeWidth="1.4" opacity="0.95" />
-              <circle cx={lastX} cy={lastY} r="2.4" fill={s.color} />
-            </g>
-          );
-        })}
-      </svg>
+    <div
+      ref={wrapRef}
+      style={{ width: "100%" }}
+      data-graph-tile={graphTile.tile_id || graphTile.id || ""}
+      data-graph-renderer={graphTile.renderer || "signalforge.tile.canvas"}
+      title={title}
+    >
+      <canvas ref={canvasRef} style={{ width: "100%", height, display: "block" }} />
     </div>
   );
 }
@@ -552,6 +745,8 @@ function MetricTile({ label, value, unit, kind = "", title }) {
 Object.assign(window, {
   // hooks
   useLiveValue, useGatewayTick, getTelemetry, recordTelemetry,
+  SERIES_ROLE_META, seriesRoleMeta,
+  emptyGraphTile, renderSeriesFromGraphTile,
   // contexts
   ToastProvider, useToast, categorizeError, CategoryFor,
   // atoms
