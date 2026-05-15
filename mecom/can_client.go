@@ -63,19 +63,19 @@ func (c *CANClient) ReadBulk(ctx context.Context, params []Parameter) ([]float64
 }
 
 func (c *CANClient) ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error {
-	return fmt.Errorf("mecom: CAN ring-capture configuration is not implemented")
+	return ErrTransportNotSupported
 }
 
 func (c *CANClient) TriggerRingSync(context.Context) error {
-	return fmt.Errorf("mecom: CAN ring sync is not implemented")
+	return ErrTransportNotSupported
 }
 
 func (c *CANClient) ReadRingPointer(context.Context) (uint32, error) {
-	return 0, fmt.Errorf("mecom: CAN ring pointer read is not implemented")
+	return 0, ErrTransportNotSupported
 }
 
-func (c *CANClient) ReadRingBuffer(context.Context, uint32, uint16) (RingReadResponse, error) {
-	return RingReadResponse{}, fmt.Errorf("mecom: CAN ring-buffer read is not implemented")
+func (c *CANClient) ReadRingChunk(context.Context, uint32, uint16) (RingReadResponse, error) {
+	return RingReadResponse{}, ErrTransportNotSupported
 }
 
 func (c *CANClient) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
@@ -103,7 +103,7 @@ func (c *CANClient) readNumeric(ctx context.Context, paramID, instance int, data
 		}
 		left := time.Until(deadline)
 		if left <= 0 {
-			return 0, fmt.Errorf("mecom: CAN response timeout after %s", c.timeout)
+			return 0, fmt.Errorf("%w: CAN response after %s", ErrTimeout, c.timeout)
 		}
 		f, err := c.rw.Recv(left)
 		if err != nil {

@@ -92,6 +92,20 @@ Use `serial:/dev/serial/by-id/...` rather than raw `ttyUSB[0-3]` paths: the
 by-id name encodes the FT230X serial number, so the route is stable even if
 Linux re-enumerates the ports.
 
+The router itself is a normal Go TCP process. It can also run on Windows with
+COM-port routes, for example:
+
+```sh
+mecomvseriald -listen 0.0.0.0:50000 -route 75=COM3@57600
+```
+
+The files in this `deploy/` directory are Linux deployment helpers only:
+systemd handles restart policy and udev handles serial permissions. On
+Windows, run the binary interactively during commissioning or wrap it with a
+supervisor such as WinSW/NSSM. CAN adapters are intentionally outside this
+serial device server; platform-specific CAN hardware should implement the
+`mecom.CANDialer` boundary instead.
+
 ## Client side
 
 Once the server is up, every client uses the same TCP endpoint and varies the

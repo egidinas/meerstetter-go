@@ -3,6 +3,7 @@ package mecom
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"math"
 	"testing"
 	"time"
@@ -102,10 +103,65 @@ func TestCANopenClientWriteFloat32SetsNominalTarget(t *testing.T) {
 func TestCANopenClientWriteRejectsReadOnlyParam(t *testing.T) {
 	fake := &fakeCANTransceiver{}
 	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
-	if err := client.WriteFloat32(context.Background(), 1000, 1, 25.0); err == nil {
-		t.Fatalf("expected error writing read-only param 1000")
+	err := client.WriteFloat32(context.Background(), 1000, 1, 25.0)
+	if err == nil {
+		t.Fatal("expected error writing read-only param 1000")
+	}
+	if !errors.Is(err, ErrParameterReadOnly) {
+		t.Fatalf("error = %v, want ErrParameterReadOnly", err)
 	}
 	if len(fake.sent) != 0 {
 		t.Fatalf("sent=%d frames; should not transmit for read-only param", len(fake.sent))
+	}
+}
+
+func TestCANopenClientWriteRejectsUnknownParam(t *testing.T) {
+	fake := &fakeCANTransceiver{}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	err := client.WriteFloat32(context.Background(), 999999, 1, 25.0)
+	if err == nil {
+		t.Fatal("expected error writing unmapped param")
+	}
+	if !errors.Is(err, ErrUnknownParameter) {
+		t.Fatalf("error = %v, want ErrUnknownParameter", err)
+	}
+	if len(fake.sent) != 0 {
+		t.Fatalf("sent=%d frames; should not transmit for unmapped param", len(fake.sent))
+	}
+}
+
+func TestCANopenClientWriteWrapsSDOAbort(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x80, 0x00, 0x26, 0x01, 0x00, 0x00, 0x02, 0x06}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	err := client.WriteFloat32(context.Background(), 3000, 1, 25.0)
+	if err == nil {
+		t.Fatal("expected SDO abort")
+	}
+	if !errors.Is(err, ErrWriteRejected) {
+		t.Fatalf("error = %v, want ErrWriteRejected", err)
+	}
+	var abort canopen.SDOAbortError
+	if !errors.As(err, &abort) {
+		t.Fatalf("error = %v, want SDOAbortError", err)
+	}
+}
+
+func TestCANopenClientRingCaptureUnsupported(t *testing.T) {
+	client := NewCANopenClient(&fakeCANTransceiver{}, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if err := client.ConfigureRingCapture(context.Background(), 0, nil); !errors.Is(err, ErrTransportNotSupported) {
+		t.Fatalf("ConfigureRingCapture error = %v, want ErrTransportNotSupported", err)
+	}
+	if err := client.TriggerRingSync(context.Background()); !errors.Is(err, ErrTransportNotSupported) {
+		t.Fatalf("TriggerRingSync error = %v, want ErrTransportNotSupported", err)
+	}
+	if _, err := client.ReadRingPointer(context.Background()); !errors.Is(err, ErrTransportNotSupported) {
+		t.Fatalf("ReadRingPointer error = %v, want ErrTransportNotSupported", err)
+	}
+	if _, err := client.ReadRingChunk(context.Background(), 0, 1); !errors.Is(err, ErrTransportNotSupported) {
+		t.Fatalf("ReadRingChunk error = %v, want ErrTransportNotSupported", err)
 	}
 }

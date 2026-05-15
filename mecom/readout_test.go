@@ -261,7 +261,7 @@ func (f *fakeReadoutClient) ReadRingPointer(context.Context) (uint32, error) {
 	return f.pointer, nil
 }
 
-func (f *fakeReadoutClient) ReadRingBuffer(_ context.Context, start uint32, _ uint16) (RingReadResponse, error) {
+func (f *fakeReadoutClient) ReadRingChunk(_ context.Context, start uint32, _ uint16) (RingReadResponse, error) {
 	f.ringReads++
 	f.lastRingStart = start
 	return f.ringResponse, nil

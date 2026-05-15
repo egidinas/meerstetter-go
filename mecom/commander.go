@@ -2,6 +2,7 @@ package mecom
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -24,6 +25,31 @@ type Commander struct {
 	Writer  WriteClient
 	Control ControlClient
 	Timeout time.Duration
+
+	// TargetID identifies the device this Commander writes to, used by
+	// Authorizer to look up the relevant lease. Optional.
+	TargetID string
+
+	// Authorizer, if set, is consulted before any write or control action.
+	// Returning a non-nil error causes Send to short-circuit with a Rejected
+	// CommandEvent. Reads are never gated.
+	//
+	// Typical wiring: a frontend extracts a lease token from the request,
+	// stores it in tc.Metadata["lease_token"], and an Authorizer wraps a
+	// writelease.Registry to call Validate.
+	Authorizer Authorizer
+}
+
+// Authorizer gates writes before they reach the underlying client.
+type Authorizer interface {
+	Authorize(targetID string, tc tmtc.Telecommand) error
+}
+
+// AuthorizerFunc adapts a function to the Authorizer interface.
+type AuthorizerFunc func(targetID string, tc tmtc.Telecommand) error
+
+func (f AuthorizerFunc) Authorize(targetID string, tc tmtc.Telecommand) error {
+	return f(targetID, tc)
 }
 
 // NewCommander wraps a WriteClient. If the writer is also a ControlClient
@@ -62,7 +88,12 @@ func (c *Commander) Send(tc tmtc.Telecommand) (tmtc.CommandEvent, error) {
 		IdempotencyKey: tc.IdempotencyKey,
 	}
 	if err := c.dispatch(ctx, tc); err != nil {
-		ev.Status = tmtc.CommandFailed
+		var rejected commandRejectedError
+		if errors.As(err, &rejected) {
+			ev.Status = tmtc.CommandRejected
+		} else {
+			ev.Status = tmtc.CommandFailed
+		}
 		ev.Error = err.Error()
 		return ev, err
 	}
@@ -81,6 +112,9 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err != nil {
 			return err
 		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
 		return c.Writer.WriteFloat32(ctx, paramID, instance, float32(value))
 
 	case "write_int32", "set_int32":
@@ -92,11 +126,17 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err != nil {
 			return err
 		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
 		return c.Writer.WriteInt32(ctx, paramID, instance, int32(value))
 
 	case "reset":
 		if c.Control == nil {
 			return fmt.Errorf("reset: underlying client does not support control actions")
+		}
+		if err := c.authorize(tc); err != nil {
+			return err
 		}
 		return c.Control.Reset(ctx)
 
@@ -104,11 +144,40 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if c.Control == nil {
 			return fmt.Errorf("save: underlying client does not support control actions")
 		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
 		return c.Control.SaveToFlash(ctx)
 
 	default:
 		return fmt.Errorf("unknown command %q", tc.Name)
 	}
+}
+
+func (c *Commander) authorize(tc tmtc.Telecommand) error {
+	if c.Authorizer == nil {
+		return nil
+	}
+	targetID := tc.TargetID
+	if targetID == "" {
+		targetID = c.TargetID
+	}
+	if err := c.Authorizer.Authorize(targetID, tc); err != nil {
+		return commandRejectedError{err: err}
+	}
+	return nil
+}
+
+type commandRejectedError struct {
+	err error
+}
+
+func (e commandRejectedError) Error() string {
+	return e.err.Error()
+}
+
+func (e commandRejectedError) Unwrap() error {
+	return e.err
 }
 
 func paramAndInstance(args map[string]any) (int, int, error) {

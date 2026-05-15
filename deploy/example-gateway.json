@@ -1,0 +1,28 @@
+{
+  "devices": [
+    {
+      "id": "tec-75",
+      "label": "Bus A · TEC SN75",
+      "endpoint": "can:can0/0x4b",
+      "address": 75
+    },
+    {
+      "id": "tec-76",
+      "label": "Bus A · TEC SN76",
+      "endpoint": "can:can0/0x4c",
+      "address": 76
+    },
+    {
+      "id": "tec-81",
+      "label": "Bus A · TEC SN81",
+      "endpoint": "can:can0/0x51",
+      "address": 81
+    },
+    {
+      "id": "tec-84",
+      "label": "Bus A · TEC SN84",
+      "endpoint": "can:can0/0x54",
+      "address": 84
+    }
+  ]
+}

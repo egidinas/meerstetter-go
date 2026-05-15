@@ -25,11 +25,32 @@ type RouterConfig struct {
 	RequestTimeout time.Duration
 	ReconnectDelay time.Duration
 	Logger         *log.Logger
+
+	// stats is filled in by prepareRoutes so callers can retrieve a
+	// connection-state snapshot per route via Stats().
+	stats map[byte]*brokerStatsRecorder
+}
+
+// Stats returns a per-route snapshot of the broker connection state.
+// Returns nil before ServeRouter/ListenAndServeRouter has been called.
+func (cfg *RouterConfig) Stats() map[byte]BrokerStats {
+	if cfg == nil || cfg.stats == nil {
+		return nil
+	}
+	out := make(map[byte]BrokerStats, len(cfg.stats))
+	for addr, rec := range cfg.stats {
+		out[addr] = rec.Snapshot()
+	}
+	return out
 }
 
 // ListenAndServeRouter listens on listenAddr and routes MeCom request frames
-// by their device address byte.
-func ListenAndServeRouter(ctx context.Context, listenAddr string, cfg RouterConfig) error {
+// by their device address byte. The cfg pointer is mutated to expose
+// per-route BrokerStats via cfg.Stats() after the call begins.
+func ListenAndServeRouter(ctx context.Context, listenAddr string, cfg *RouterConfig) error {
+	if cfg == nil {
+		return fmt.Errorf("mecomserver: RouterConfig required")
+	}
 	if strings.TrimSpace(listenAddr) == "" {
 		return fmt.Errorf("mecomserver: listen address required")
 	}
@@ -42,7 +63,11 @@ func ListenAndServeRouter(ctx context.Context, listenAddr string, cfg RouterConf
 
 // ServeRouter accepts many TCP clients on one listener and dispatches each
 // addressed request to the configured downstream for that MeCom address.
-func ServeRouter(ctx context.Context, ln net.Listener, cfg RouterConfig) error {
+// cfg is mutated to publish per-route stats via cfg.Stats().
+func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error {
+	if cfg == nil {
+		return fmt.Errorf("mecomserver: RouterConfig required")
+	}
 	if ln == nil {
 		return fmt.Errorf("mecomserver: listener required")
 	}
@@ -73,7 +98,7 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg RouterConfig) error {
 			}
 			continue
 		}
-		go handleRoutedClient(ctx, conn, routes, cfg)
+		go handleRoutedClient(ctx, conn, routes, *cfg)
 	}
 }
 
@@ -93,11 +118,12 @@ func RequestAddress(frame []byte) (byte, error) {
 	return byte(n), nil
 }
 
-func prepareRoutes(ctx context.Context, cfg RouterConfig) (map[byte]chan request, error) {
+func prepareRoutes(ctx context.Context, cfg *RouterConfig) (map[byte]chan request, error) {
 	if len(cfg.Routes) == 0 {
 		return nil, fmt.Errorf("mecomserver: at least one route required")
 	}
 	routes := make(map[byte]chan request, len(cfg.Routes))
+	cfg.stats = make(map[byte]*brokerStatsRecorder, len(cfg.Routes))
 	for _, route := range cfg.Routes {
 		if route.Address == 0 {
 			return nil, fmt.Errorf("mecomserver: route address 0 is reserved")
@@ -114,11 +140,14 @@ func prepareRoutes(ctx context.Context, cfg RouterConfig) (map[byte]chan request
 		}
 		requests := make(chan request, 256)
 		routes[route.Address] = requests
+		recorder := newBrokerStatsRecorder(route.Address, route.Target)
+		cfg.stats[route.Address] = recorder
 		routeCfg := Config{
 			Downstream:     route.Downstream,
 			RequestTimeout: cfg.RequestTimeout,
 			ReconnectDelay: cfg.ReconnectDelay,
 			Logger:         cfg.Logger,
+			statsRecorder:  recorder,
 		}
 		go runBroker(ctx, routeCfg, requests)
 	}

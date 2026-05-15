@@ -79,10 +79,33 @@ belongs to the application adapter. SocketCAN helpers are included for Linux;
 Kvaser, remote CAN, and product-specific bridges should live in applications
 until their ownership and recovery semantics are proven.
 
+## Portability and adapter boundary
+
+The core library is intended to be usable outside the PiXtend/Linux setup. The
+transport boundary is explicit so another host or adapter can provide the same
+MeCom client surface without changing catalogue, sequencer, or command code.
+
+| Surface | Linux | Windows | Notes |
+|---------|-------|---------|-------|
+| `mecom` framing, CRC, reads/writes, endpoint parsing | yes | yes | Pure Go protocol code. |
+| TCP endpoints (`tcp:host:port`, `host:port`) | yes | yes | Recommended cross-platform path for device servers and remote bridges. |
+| Serial endpoints | yes (`/dev/...`) | yes (`COM3@57600`) | Uses Go serial support; stable device naming is host-specific. |
+| `cmd/mecomprobe`, `cmd/mecomset`, `cmd/mecompoll`, `cmd/mecomrun` over TCP/serial | yes | yes | These commands do not require Linux when used with TCP/serial endpoints. |
+| `cmd/mecomvseriald` router logic | yes | yes | Portable as a process; `deploy/` service assets are Linux-specific. |
+| `socketcan` and stock `can:can0/...` binary dialer | yes | no | SocketCAN is Linux-only. |
+| CAN on Windows | adapter required | adapter required | The public API accepts an injected `mecom.CANDialer`; a Kvaser CANlib, PCAN, Vector, SLCAN, Ethernet-CAN, or TCP-CAN bridge adapter can implement it. Such adapters should remain optional until proven. |
+| `deploy/` systemd and udev files | yes | no | Use a Windows service wrapper or run interactively on Windows. |
+
+For Windows hosts today, the proven routes are direct TCP, serial `COMx@baud`,
+or the single-port `mecomvseriald` device-server pattern. Native Windows CAN is
+not blocked by the library design, but it needs a concrete adapter package for
+the selected hardware driver.
+
 ## Verification
 
 ```sh
 go test ./...
+git diff --check
 ```
 
 The public module depends on public SignalForge releases and has no committed

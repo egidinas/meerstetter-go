@@ -92,3 +92,32 @@ func TestParseSDOUploadResponseAbort(t *testing.T) {
 		t.Fatalf("abort code = 0x%08X", abort.Code)
 	}
 }
+
+func TestParseSDODownloadResponseOK(t *testing.T) {
+	resp, err := ParseSDODownloadResponse(Frame{
+		ID:   0x5CB,
+		DLC:  8,
+		Data: [8]byte{0x60, 0x00, 0x30, 0x01, 0, 0, 0, 0},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.NodeID != 0x4B || resp.Index != 0x3000 || resp.SubIndex != 0x01 {
+		t.Fatalf("decoded target = node 0x%02X 0x%04X:%02X", resp.NodeID, resp.Index, resp.SubIndex)
+	}
+}
+
+func TestParseSDODownloadResponseAbort(t *testing.T) {
+	_, err := ParseSDODownloadResponse(Frame{
+		ID:   0x5CB,
+		DLC:  8,
+		Data: [8]byte{0x80, 0x00, 0x30, 0x01, 0x00, 0x00, 0x02, 0x06},
+	})
+	var abort SDOAbortError
+	if !errors.As(err, &abort) {
+		t.Fatalf("err = %v, want SDOAbortError", err)
+	}
+	if abort.Index != 0x3000 || abort.SubIndex != 0x01 || abort.Code != 0x06020000 {
+		t.Fatalf("abort = 0x%04X:%02X 0x%08X", abort.Index, abort.SubIndex, abort.Code)
+	}
+}

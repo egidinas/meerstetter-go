@@ -6,3 +6,4 @@
 /.ui-interact.*/
 *.test
 *.out
+/mecomgw

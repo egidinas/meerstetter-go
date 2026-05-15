@@ -28,7 +28,7 @@ type ReadClient interface {
 	ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error
 	TriggerRingSync(context.Context) error
 	ReadRingPointer(context.Context) (uint32, error)
-	ReadRingBuffer(context.Context, uint32, uint16) (RingReadResponse, error)
+	ReadRingChunk(context.Context, uint32, uint16) (RingReadResponse, error)
 }
 
 // RingReadoutCapability lets transport adapters report whether the controller
@@ -232,7 +232,7 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 		return
 	}
 
-	resp, err := client.ReadRingBuffer(reqCtx, r.ringCursor, r.ringMaxBytes)
+	resp, err := client.ReadRingChunk(reqCtx, r.ringCursor, r.ringMaxBytes)
 	if err != nil {
 		batch.Errors = append(batch.Errors, err)
 		r.ringConfigured = false

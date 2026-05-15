@@ -12,7 +12,9 @@ import (
 	"github.com/egidinas/meerstetter-go/canopen"
 )
 
-var ErrCANopenObjectNotMapped = errors.New("mecom: CANopen object mapping not available")
+// ErrCANopenObjectNotMapped is retained for backward compatibility. Prefer
+// ErrUnknownParameter, which it wraps.
+var ErrCANopenObjectNotMapped = fmt.Errorf("%w: CANopen object mapping not available", ErrUnknownParameter)
 
 // CANopenClient reads the TEC controller's CANopen SDO object dictionary while
 // presenting the same read interface as the MeCom polling scheduler.
@@ -64,11 +66,14 @@ func (c *CANopenClient) ReadBulk(ctx context.Context, params []Parameter) ([]flo
 // mapping and marked writable.
 func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
 	object, ok := canopenSDOObjectForMeCom(paramID, instance)
-	if !ok || !object.writable {
-		return fmt.Errorf("%w: parameter %d instance %d (writable=%v)", ErrCANopenObjectNotMapped, paramID, instance, object.writable)
+	if !ok {
+		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
+	}
+	if !object.writable {
+		return fmt.Errorf("%w: parameter %d instance %d", ErrParameterReadOnly, paramID, instance)
 	}
 	if object.kind != DataTypeFloat32 {
-		return fmt.Errorf("mecom: parameter %d instance %d is not float32", paramID, instance)
+		return fmt.Errorf("%w: parameter %d instance %d is not float32", ErrInvalidArgument, paramID, instance)
 	}
 	var buf [4]byte
 	binary.LittleEndian.PutUint32(buf[:], math.Float32bits(value))
@@ -78,11 +83,14 @@ func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int,
 // WriteInt32 writes a 32-bit signed integer value via an expedited SDO download.
 func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
 	object, ok := canopenSDOObjectForMeCom(paramID, instance)
-	if !ok || !object.writable {
-		return fmt.Errorf("%w: parameter %d instance %d (writable=%v)", ErrCANopenObjectNotMapped, paramID, instance, object.writable)
+	if !ok {
+		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
+	}
+	if !object.writable {
+		return fmt.Errorf("%w: parameter %d instance %d", ErrParameterReadOnly, paramID, instance)
 	}
 	if object.kind != DataTypeInt32 {
-		return fmt.Errorf("mecom: parameter %d instance %d is not int32", paramID, instance)
+		return fmt.Errorf("%w: parameter %d instance %d is not int32", ErrInvalidArgument, paramID, instance)
 	}
 	var buf [4]byte
 	binary.LittleEndian.PutUint32(buf[:], uint32(value))
@@ -108,7 +116,7 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 	for {
 		wait := time.Until(deadline)
 		if wait <= 0 {
-			return context.DeadlineExceeded
+			return fmt.Errorf("%w: write 0x%04X:%02X", ErrTimeout, object.index, object.subIndex)
 		}
 		if err := ctx.Err(); err != nil {
 			return err
@@ -122,7 +130,7 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 		}
 		resp, err := canopen.ParseSDODownloadResponse(frame)
 		if err != nil {
-			return err
+			return errors.Join(ErrWriteRejected, err)
 		}
 		if resp.Index != object.index || resp.SubIndex != object.subIndex {
 			continue
@@ -132,25 +140,25 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 }
 
 func (c *CANopenClient) ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error {
-	return ErrCANopenObjectNotMapped
+	return ErrTransportNotSupported
 }
 
 func (c *CANopenClient) TriggerRingSync(context.Context) error {
-	return ErrCANopenObjectNotMapped
+	return ErrTransportNotSupported
 }
 
 func (c *CANopenClient) ReadRingPointer(context.Context) (uint32, error) {
-	return 0, ErrCANopenObjectNotMapped
+	return 0, ErrTransportNotSupported
 }
 
-func (c *CANopenClient) ReadRingBuffer(context.Context, uint32, uint16) (RingReadResponse, error) {
-	return RingReadResponse{}, ErrCANopenObjectNotMapped
+func (c *CANopenClient) ReadRingChunk(context.Context, uint32, uint16) (RingReadResponse, error) {
+	return RingReadResponse{}, ErrTransportNotSupported
 }
 
 func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) (float64, error) {
 	object, ok := canopenSDOObjectForMeCom(paramID, instance)
 	if !ok {
-		return math.NaN(), fmt.Errorf("%w: parameter %d instance %d", ErrCANopenObjectNotMapped, paramID, instance)
+		return math.NaN(), fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
 	req := canopen.SDOUploadRequest(c.node, object.index, object.subIndex)
 
@@ -167,7 +175,7 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	for {
 		wait := time.Until(deadline)
 		if wait <= 0 {
-			return math.NaN(), context.DeadlineExceeded
+			return math.NaN(), fmt.Errorf("%w: read 0x%04X:%02X", ErrTimeout, object.index, object.subIndex)
 		}
 		if err := ctx.Err(); err != nil {
 			return math.NaN(), err

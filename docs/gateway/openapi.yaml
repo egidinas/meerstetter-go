@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: meerstetter-go gateway (mecomgw)
+  description: |
+    HTTP/SSE facade in front of one or more Meerstetter MeCom devices.
+    Browser UIs and other JSON consumers use this surface; the underlying
+    transport (serial, TCP, CAN, via mecomvseriald) is opaque.
+
+    Authoritative source: cmd/mecomgw/handlers.go in
+    https://github.com/egidinas/meerstetter-go.
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8080
+    description: default local dev binding
+
+paths:
+  /api/healthz:
+    get:
+      summary: Liveness probe.
+      responses:
+        '200':
+          description: gateway is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string, example: ok}
+                  time:   {type: string, format: date-time}
+
+  /api/devices:
+    get:
+      summary: List configured devices with bind status.
+      responses:
+        '200':
+          description: device list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices:
+                    type: array
+                    items: {$ref: '#/components/schemas/DeviceView'}
+
+  /api/catalogue:
+    get:
+      summary: Default TEC parameter catalogue (channels 1 and 2).
+      responses:
+        '200':
+          description: catalogue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  parameters:
+                    type: array
+                    items: {$ref: '#/components/schemas/CatalogueEntry'}
+
+  /api/leases:
+    get:
+      summary: List currently active write leases.
+      responses:
+        '200':
+          description: lease list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leases:
+                    type: array
+                    items: {$ref: '#/components/schemas/Lease'}
+
+  /api/devices/{id}/lease:
+    parameters:
+      - $ref: '#/components/parameters/DeviceID'
+    post:
+      summary: Acquire (or renew) the write lease for a device.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [holder]
+              properties:
+                holder: {type: string, example: alice}
+                ttl:    {type: string, example: 5m, description: Go duration string; defaults to gateway default}
+      responses:
+        '200':
+          description: lease granted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Lease'}
+        '423':
+          description: held by another holder
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+        '400': {description: bad request}
+        '404': {description: unknown device}
+    delete:
+      summary: Release the lease for this device.
+      parameters:
+        - in: header
+          name: X-Lease-Token
+          required: true
+          schema: {type: string}
+      responses:
+        '204': {description: released}
+        '400': {description: missing token}
+        '404': {description: token does not match any lease}
+
+  /api/devices/{id}/write:
+    parameters:
+      - $ref: '#/components/parameters/DeviceID'
+      - in: header
+        name: X-Lease-Token
+        required: true
+        schema: {type: string}
+    post:
+      summary: Send a write/control telecommand. Requires a valid lease token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WriteRequest'}
+      responses:
+        '200':
+          description: command completed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CommandEvent'}
+        '400':
+          description: command failed (bad args, device rejected, etc.)
+        '423':
+          description: lease invalid or expired
+        '422':
+          description: device transport does not support writes
+
+  /api/devices/{id}/read:
+    parameters:
+      - $ref: '#/components/parameters/DeviceID'
+      - in: query
+        name: params
+        required: true
+        schema: {type: string, example: "1000:1,3000:1"}
+        description: Comma-separated PARAMETER_ID:INSTANCE pairs.
+    get:
+      summary: One-shot bulk read.
+      responses:
+        '200':
+          description: values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  values:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:       {type: integer}
+                        instance: {type: integer}
+                        value:    {type: number, nullable: true}
+        '503':
+          description: device unreachable
+        '504':
+          description: device timed out
+
+  /api/devices/{id}/poll:
+    parameters:
+      - $ref: '#/components/parameters/DeviceID'
+      - in: query
+        name: params
+        required: true
+        schema: {type: string, example: "1000:1,1001:1,3000:1"}
+      - in: query
+        name: interval
+        schema: {type: string, example: 2s, default: 2s}
+    get:
+      summary: Server-Sent Events stream of Telemetry objects (one per parameter per cycle).
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Each event has the form `data: <Telemetry JSON>\n\n`.
+                  Telemetry schema below.
+
+components:
+  parameters:
+    DeviceID:
+      in: path
+      name: id
+      required: true
+      schema: {type: string, example: tec-75}
+      description: Stable device ID from the gateway config.
+
+  schemas:
+    DeviceView:
+      type: object
+      properties:
+        id:         {type: string}
+        label:      {type: string}
+        endpoint:   {type: string, example: "tcp:127.0.0.1:50000"}
+        address:    {type: integer, minimum: 1, maximum: 254}
+        bound:      {type: boolean}
+        last_error: {type: string}
+
+    CatalogueEntry:
+      type: object
+      properties:
+        id:            {type: integer}
+        instance:      {type: integer}
+        name:          {type: string}
+        unit:          {type: string}
+        type:          {type: string, enum: [float32, int32]}
+        sensor:        {type: string}
+        high_priority: {type: boolean}
+
+    Lease:
+      type: object
+      properties:
+        device_id:   {type: string}
+        holder:      {type: string}
+        token:       {type: string}
+        acquired_at: {type: string, format: date-time}
+        expires_at:  {type: string, format: date-time}
+
+    WriteRequest:
+      type: object
+      required: [name, arguments]
+      properties:
+        name:
+          type: string
+          enum: [set_float32, write_float32, set_int32, write_int32, reset, save_to_flash, save]
+        arguments:
+          type: object
+          properties:
+            param:    {type: integer}
+            instance: {type: integer, default: 1}
+            value:    {oneOf: [{type: number}, {type: integer}]}
+        metadata:
+          type: object
+          additionalProperties: {type: string}
+
+    CommandEvent:
+      type: object
+      properties:
+        command_id:      {type: string}
+        session_id:      {type: string}
+        time:            {type: string, format: date-time}
+        status:          {type: string, enum: [accepted, sent, acked, completed, rejected, failed]}
+        transport:       {type: string}
+        idempotency_key: {type: string}
+        result:          {}
+        error:           {type: string}
+
+    Telemetry:
+      type: object
+      properties:
+        id:        {type: string}
+        target_id: {type: string}
+        session_id: {type: string}
+        time:      {type: string, format: date-time}
+        name:      {type: string}
+        value:     {nullable: true}
+        unit:      {type: string}
+        quality:   {type: string, enum: [ok, nan, missing, unreachable]}
+        metadata:
+          type: object
+          additionalProperties: {type: string}

@@ -84,17 +84,21 @@ func Dial(ctx context.Context, ep Endpoint, timeout time.Duration) (net.Conn, er
 	case "serial":
 		port, err := serial.Open(ep.Address, &serial.Mode{BaudRate: ep.Baud})
 		if err != nil {
-			return nil, fmt.Errorf("mecom: open serial %s@%d: %w", ep.Address, ep.Baud, err)
+			return nil, fmt.Errorf("%w: open serial %s@%d: %v", ErrUnreachable, ep.Address, ep.Baud, err)
 		}
 		return &serialConn{Port: port, id: ep.String()}, nil
 	case "can":
-		return nil, fmt.Errorf("mecom: CAN endpoints require an application adapter: %s", ep.Address)
+		return nil, fmt.Errorf("%w: CAN endpoints require an application adapter: %s", ErrTransportNotSupported, ep.Address)
 	default:
 		var d net.Dialer
 		if timeout > 0 {
 			d.Timeout = timeout
 		}
-		return d.DialContext(ctx, "tcp", ep.Address)
+		conn, err := d.DialContext(ctx, "tcp", ep.Address)
+		if err != nil {
+			return nil, fmt.Errorf("%w: dial tcp %s: %v", ErrUnreachable, ep.Address, err)
+		}
+		return conn, nil
 	}
 }
 

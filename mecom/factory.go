@@ -35,7 +35,7 @@ func NewForEndpoint(ctx context.Context, ep Endpoint, cfg ClientConfig, dialCAN 
 		return &closingASCII{Client: NewClient(conn, cfg), conn: conn}, nil
 	case "can":
 		if dialCAN == nil {
-			return nil, fmt.Errorf("mecom: can endpoint requires a CANDialer")
+			return nil, fmt.Errorf("%w: can endpoint requires a CANDialer", ErrTransportNotSupported)
 		}
 		iface, node, err := parseCANEndpoint(ep.Address)
 		if err != nil {
@@ -49,7 +49,7 @@ func NewForEndpoint(ctx context.Context, ep Endpoint, cfg ClientConfig, dialCAN 
 		canCfg.Address = node
 		return &closingCAN{CANopenClient: NewCANopenClient(rw, canCfg), closer: closer}, nil
 	default:
-		return nil, fmt.Errorf("mecom: unsupported endpoint network %q", ep.Network)
+		return nil, fmt.Errorf("%w: unsupported endpoint network %q", ErrTransportNotSupported, ep.Network)
 	}
 }
 
@@ -70,7 +70,7 @@ func parseCANEndpoint(addr string) (string, byte, error) {
 			return iface, node, nil
 		}
 	}
-	return "", 0, fmt.Errorf("mecom: can endpoint %q must be IFACE/NODE", addr)
+	return "", 0, fmt.Errorf("%w: can endpoint %q must be IFACE/NODE", ErrBadAddress, addr)
 }
 
 func parseNodeID(s string) (byte, error) {
@@ -79,16 +79,16 @@ func parseNodeID(s string) (byte, error) {
 	case len(s) >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X'):
 		_, err := fmt.Sscanf(s, "0x%x", &n)
 		if err != nil {
-			return 0, fmt.Errorf("mecom: invalid node %q: %w", s, err)
+			return 0, fmt.Errorf("%w: invalid node %q: %v", ErrBadAddress, s, err)
 		}
 	default:
 		_, err := fmt.Sscanf(s, "%d", &n)
 		if err != nil {
-			return 0, fmt.Errorf("mecom: invalid node %q: %w", s, err)
+			return 0, fmt.Errorf("%w: invalid node %q: %v", ErrBadAddress, s, err)
 		}
 	}
 	if n == 0 || n > 127 {
-		return 0, fmt.Errorf("mecom: node %d outside CANopen 1..127", n)
+		return 0, fmt.Errorf("%w: node %d outside CANopen 1..127", ErrBadAddress, n)
 	}
 	return byte(n), nil
 }

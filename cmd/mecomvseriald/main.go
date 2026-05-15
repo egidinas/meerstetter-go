@@ -63,12 +63,13 @@ func main() {
 	defer cancel()
 
 	logger.Printf("listen=%s routes=%s", *listen, routes.String())
-	err := mecomserver.ListenAndServeRouter(ctx, *listen, mecomserver.RouterConfig{
+	cfg := &mecomserver.RouterConfig{
 		Routes:         routes,
 		RequestTimeout: *timeout,
 		ReconnectDelay: *reconnectDelay,
 		Logger:         logger,
-	})
+	}
+	err := mecomserver.ListenAndServeRouter(ctx, *listen, cfg)
 	if err != nil {
 		logger.Printf("server failed: %v", err)
 		os.Exit(1)
@@ -82,6 +83,9 @@ func parseAddress(v string) (byte, error) {
 	}
 	if n == 0 {
 		return 0, fmt.Errorf("address 0 is reserved")
+	}
+	if n > 254 {
+		return 0, fmt.Errorf("address %d outside MeCom 1..254", n)
 	}
 	return byte(n), nil
 }

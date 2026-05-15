@@ -609,7 +609,7 @@ func (c *Client) ReadRingPointer(ctx context.Context) (uint32, error) {
 	return ParseRingPointerResponse(raw)
 }
 
-func (c *Client) ReadRingBuffer(ctx context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
+func (c *Client) ReadRingChunk(ctx context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
 	raw, err := c.roundTrip(ctx, BuildRingReadFrame(int(c.address), c.nextSeq(), start, maxBytes))
 	if err != nil {
 		return RingReadResponse{}, err

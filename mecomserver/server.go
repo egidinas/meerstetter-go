@@ -29,6 +29,10 @@ type Config struct {
 	RequestTimeout time.Duration
 	ReconnectDelay time.Duration
 	Logger         *log.Logger
+
+	// statsRecorder is set by RouterConfig/HubConfig wrappers to surface
+	// per-broker state. Direct callers of Serve do not need to set it.
+	statsRecorder *brokerStatsRecorder
 }
 
 type request struct {
@@ -176,11 +180,13 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 		case <-ctx.Done():
 			return
 		case req := <-requests:
+			cfg.statsRecorder.markFrameIn()
 			if conn == nil {
 				dialCtx, cancel := context.WithTimeout(ctx, cfg.RequestTimeout)
 				nextConn, desc, err := cfg.Downstream(dialCtx)
 				cancel()
 				if err != nil {
+					cfg.statsRecorder.markDisconnected(err)
 					req.result <- response{err: err}
 					sleepOrDone(ctx, cfg.ReconnectDelay)
 					continue
@@ -188,6 +194,7 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 				conn = nextConn
 				reader = bufio.NewReader(conn)
 				description = desc
+				cfg.statsRecorder.markConnected(description)
 				if cfg.Logger != nil {
 					cfg.Logger.Printf("downstream connected target=%s", description)
 				}
@@ -198,9 +205,11 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 					cfg.Logger.Printf("downstream exchange failed target=%s err=%v", description, err)
 				}
 				closeConn()
+				cfg.statsRecorder.markDisconnected(err)
 				req.result <- response{err: err}
 				continue
 			}
+			cfg.statsRecorder.markFrameOut()
 			req.result <- response{frame: resp}
 		}
 	}
