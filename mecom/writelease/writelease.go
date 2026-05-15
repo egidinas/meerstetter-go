@@ -22,20 +22,20 @@ import (
 
 // Errors that consumers can match with errors.Is.
 var (
-	ErrLeaseHeld    = errors.New("writelease: another holder has the lease")
-	ErrInvalidToken = errors.New("writelease: token does not match active lease")
-	ErrExpired      = errors.New("writelease: lease has expired")
+	ErrLeaseHeld     = errors.New("writelease: another holder has the lease")
+	ErrInvalidToken  = errors.New("writelease: token does not match active lease")
+	ErrExpired       = errors.New("writelease: lease has expired")
 	ErrUnknownDevice = errors.New("writelease: device has no active lease")
 )
 
 // Lease describes one active write authorization. The Token is opaque; only
 // equality matters. Holder is informational (user name, session ID, etc.).
 type Lease struct {
-	DeviceID  string    `json:"device_id"`
-	Holder    string    `json:"holder"`
-	Token     string    `json:"token"`
+	DeviceID   string    `json:"device_id"`
+	Holder     string    `json:"holder"`
+	Token      string    `json:"token"`
 	AcquiredAt time.Time `json:"acquired_at"`
-	ExpiresAt time.Time `json:"expires_at"`
+	ExpiresAt  time.Time `json:"expires_at"`
 }
 
 // Active reports whether the lease is currently valid against the provided

@@ -199,8 +199,8 @@ func isSocketCANTargetName(target string) bool {
 // return, whichever comes first. The first non-context error is returned.
 func RunHub(ctx context.Context, cfg HubConfig) error {
 	var (
-		wg      sync.WaitGroup
-		mu      sync.Mutex
+		wg       sync.WaitGroup
+		mu       sync.Mutex
 		firstErr error
 	)
 	started := 0

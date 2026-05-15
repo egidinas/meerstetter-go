@@ -40,7 +40,7 @@ func (f *fakeWriteClient) WriteInt32(_ context.Context, paramID, instance int, v
 	return nil
 }
 
-func (f *fakeWriteClient) Reset(_ context.Context) error  { f.resetCalls++; return nil }
+func (f *fakeWriteClient) Reset(_ context.Context) error       { f.resetCalls++; return nil }
 func (f *fakeWriteClient) SaveToFlash(_ context.Context) error { f.saveCalls++; return nil }
 
 type fakeErr string
