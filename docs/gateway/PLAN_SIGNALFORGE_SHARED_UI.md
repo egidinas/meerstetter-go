@@ -1,8 +1,23 @@
 # Plan — SignalForge shared UI module
 
-Status: **draft, awaiting review**. Author: Claude Opus 4.7 (2026-05-15).
-Related: [`UI_GRAPH_WALL_CONTRACT.md`](./UI_GRAPH_WALL_CONTRACT.md), backlog ids
-8/9/10/11/13 in [`../backlog/frontend_hooks.jsonl`](../backlog/frontend_hooks.jsonl).
+Status: **approved, ready for Phase 1 implementation** (2026-05-15).
+Author: Claude Opus 4.7. Related: [`UI_GRAPH_WALL_CONTRACT.md`](./UI_GRAPH_WALL_CONTRACT.md),
+backlog ids 8/9/10/11/13 in [`../backlog/frontend_hooks.jsonl`](../backlog/frontend_hooks.jsonl).
+
+## TL;DR
+
+1. Build meerstetter-go's console as Vite + TS + React 18 (Phase 1) — no
+   behaviour change, the in-browser Babel pipeline goes away.
+2. Extract the dictionary, walls, uPlot tile renderer, and tile-pyramid
+   client into `signalforge/web/` (Phase 2) — shared module, ESM-only,
+   adapter-injected for device APIs.
+3. Wire all three consumers (meerstetter-go, gossamer, loom) onto the
+   shared module and delete the duplicates (Phase 3).
+
+History becomes uncapped on every consumer (cross-cutting principle below).
+Renderer is uPlot only. SignalForge owns the unified OpenAPI. localStorage
+is namespaced per consumer. Gossamer is the graph-contract baseline; loom is
+the premium parent.
 
 ## Why
 
@@ -70,6 +85,89 @@ backends per consumer:
 **Goal:** the in-browser-Babel console becomes a built bundle, **no behaviour
 change visible to the operator**.
 
+### Pre-flight checklist (before first commit)
+
+- [ ] Working tree clean (`git -C meerstetter-go status` empty).
+- [ ] Branch created from `main` (suggest `phase-1/vite-console`).
+- [ ] Node ≥ 20 available (gossamer uses `^20`; match it).
+- [ ] `mecomgw` binary buildable on the dev machine (`go build ./cmd/mecomgw`).
+- [ ] Snapshot of current `docs/gateway/console/` rendered in a browser, with
+      screenshots of: Heroes view, Signal Dictionary (Telemetry tab), Signal
+      Dictionary (Telecommands tab), Channels editor, Settings panel. These
+      become the reference for "no behaviour change."
+- [ ] Brume2 deploy script located (`deploy/example-scripts/*` and any
+      operator-side wrapper); identify which file currently passes
+      `-ui-dir docs/gateway/console`.
+
+### npm dependencies (mirror gossamer; pin majors)
+
+```jsonc
+// web/package.json — runtime
+"dependencies": {
+  "react": "^18.3.1",
+  "react-dom": "^18.3.1"
+}
+// web/package.json — dev
+"devDependencies": {
+  "@types/react": "^18.3.12",
+  "@types/react-dom": "^18.3.1",
+  "@vitejs/plugin-react": "^4.3.4",
+  "typescript": "^5.6.3",
+  "vite": "^5.4.10"
+}
+```
+
+(React 18, not 19, because the existing console code is React 18 and the
+port should be mechanical. Upgrade to 19 is a separate decision later.)
+
+### Vite + TS config (minimum viable)
+
+```ts
+// web/vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+export default defineConfig({
+  plugins: [react()],
+  base: "./",                       // relative paths so /ui/ subpath serving works
+  build: { outDir: "dist", sourcemap: true, target: "es2022" },
+  server: { port: 5174 }            // avoid clash with gossamer's 5173
+});
+```
+
+```jsonc
+// web/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
+}
+```
+
+### `MecomAPI` global → typed module
+
+The existing console attaches `window.MecomAPI = { … }` from `mock.js` and
+relies on `/* global MecomAPI */` comments in JSX files. Port:
+
+1. `mock.ts` exports `mockMecomAPI` and a `live`-mode factory.
+2. A small `src/api/mecom.ts` module exposes the same shape with a
+   `setMode("mock" | "live")` switch (preserve the existing UI toggle).
+3. JSX files import `mecomAPI` instead of reaching for `window.MecomAPI`.
+4. The window assignment is kept in `src/main.tsx` for any debug use:
+   `(window as any).mecomAPI = mecomAPI`.
+
 ### Files added
 
 | Path | Purpose |
@@ -98,19 +196,77 @@ change visible to the operator**.
 - `docs/gateway/console/*` stays in tree as the rollback target. Removal happens at
   the start of Phase 3 only after `web/dist/` has shipped one stable release.
 
-### Cutover steps
+### First commit — "scaffold builds, dist serves stub"
 
-1. Scaffold `web/` (config + empty `main.tsx` rendering "hello").
-2. Port files in dependency order: `mock` → `components` → `tweaks-panel` →
-   `views-hero` → `views-accordion` → `views-dict` → `views-main` → `app`. Each
-   port keeps the same exports; only changes are JSX → TSX, module imports,
-   removing the Babel-standalone `/* global */` comments, fixing implicit-any.
-3. `npm --prefix web run build` succeeds.
-4. Local manual: launch `mecomgw -ui-dir web/dist`, exercise both heroes, dict
-   view, command cards. Capture before/after screenshots at the same viewport.
-5. Update `scripts/build-gateway-handoff.sh` to bundle `web/dist`.
-6. Update Brume2 RPi deploy script to `npm install && npm run build` before
-   shipping (or pre-build and ship the artefact only).
+The minimum-viable first commit on `phase-1/vite-console`:
+
+- `web/package.json`, `web/tsconfig.json`, `web/vite.config.ts`,
+  `web/index.html` (links `/src/main.tsx` only), `web/src/main.tsx`
+  (renders `<div>SignalForge console — Vite scaffold</div>` and nothing
+  else), `web/.gitignore` (`node_modules/`, `dist/`).
+- Root `.gitignore` patched so `web/node_modules` and `web/dist` aren't
+  tracked.
+- Verify: `npm --prefix web ci && npm --prefix web run build` succeeds;
+  `mecomgw -ui-dir web/dist -listen :8081` serves the stub at
+  `http://localhost:8081/ui/`.
+- Commit message: `Phase 1: scaffold web/ Vite + TS + React 18`.
+
+This commit is reversible by a single `git revert`; everything below builds
+on it.
+
+### Subsequent commits — port files in dependency order
+
+One commit per file (or small group), each green-builds and green-renders:
+
+1. `mock.ts` (no JSX, port first; verify `npm run build` still passes).
+2. `components.tsx` — atoms (`Pill`, `Chip`, `Panel`), `MultiChart`,
+   telemetry buffer. **Note:** `MultiChart` will be deleted in Phase 3, but
+   ports as-is here to keep behaviour identical.
+3. `tweaks-panel.tsx` (depends only on React).
+4. `views-hero.tsx` — `WALLS`, `useAssignments`, `Heroes`. After this commit,
+   `main.tsx` can render `<Heroes>` and verify in-browser.
+5. `views-accordion.tsx`.
+6. `views-dict.tsx` — `SignalDictionaryView`, `SignalBlock`, `MonitorRow`,
+   `CommandRow`, `ChannelsEditor`.
+7. `views-main.tsx`.
+8. `app.tsx` — wires everything together.
+9. `styles.css` — copy verbatim (do **not** rewrite to CSS modules in
+   Phase 1; defer styling refactor).
+10. `main.tsx` — replace stub with `<App/>` mount.
+
+After commit 10, `web/dist/` is functionally equivalent to the legacy console.
+
+### Cutover commits
+
+11. `scripts/build-gateway-handoff.sh:18` — replace bundled directory from
+    `docs/gateway/console` to `web/dist`. Add a build step at the top:
+    `npm --prefix web ci && npm --prefix web run build`.
+12. Brume2 deploy script (path identified in pre-flight) — point `-ui-dir`
+    at `web/dist`. Pre-build locally and ship the artefact tarball; do **not**
+    run npm on the Pi (low memory, no Node assumed).
+13. `docs/gateway/HANDOFF.md` — document `npm run dev` for HMR development
+    and the new build/deploy flow.
+
+### Verification — Phase 1
+
+```bash
+# In meerstetter-go/
+git checkout phase-1/vite-console
+npm --prefix web ci
+npm --prefix web run build                 # must succeed, no TS errors
+go test ./...                              # must stay green
+go build ./cmd/mecomgw
+./mecomgw -ui-dir web/dist -listen :8081 & # serve new bundle
+# Manual: load http://localhost:8081/ui/, compare to pre-flight screenshots
+#         at the same viewport. No visible delta on Heroes, Dict (Telemetry
+#         + Telecommands), Channels editor, Settings.
+./mecomgw -ui-dir docs/gateway/console -listen :8082 &  # legacy still works
+# Tarball
+bash scripts/build-gateway-handoff.sh /tmp/handoff-phase1.tgz
+tar tzf /tmp/handoff-phase1.tgz | grep -E "web/dist/(index\.html|assets/)"
+```
+
+If any step fails, the rollback below applies.
 
 ### Acceptance criteria (Phase 1)
 
@@ -140,22 +296,28 @@ SignalForge so all three apps import them.
 ```
 signalforge/
   web/
-    package.json            (name TBD — see open question 4; version pinned)
+    package.json            (name "signalforge-web", version pinned)
     tsconfig.json
     vite.config.ts          (lib mode → ESM; UMD only if needed)
     src/
-      index.ts              (public exports)
+      index.ts              (see public exports below)
       types/                (graph_tile.v1, wall config, assignment types — re-exported)
+        openapi.d.ts        (generated by openapi-typescript)
+        index.ts            (public type re-exports)
       dict/
         SignalDictionary.tsx
         SignalBlock.tsx
         ChannelsEditor.tsx
-        useAssignments.ts   (load/save/forWall/hasAssignment, localStorage keys configurable)
+        useAssignments.ts   (load/save/forWall/hasAssignment, localStorage namespace required)
       walls/
         WallManager.tsx     (list / create / rename / delete)
-        useWalls.ts         (localStorage-backed)
+        useWalls.ts         (localStorage-backed; namespace required)
       render/
         UPlotTileRenderer.tsx    (port of gossamer uPlotAdapter — sole renderer; meerstetter-go's drawCanvasChart is retired)
+        markers.ts               (port of gossamer markers.ts)
+        decimation.ts            (port of gossamer decimation.ts)
+        timeAxis.tsx             (port of gossamer timeAxis.tsx)
+        visualPolicy.ts          (port of gossamer visualPolicy.ts)
       tiles/
         TileClient.ts       (fetches /api/.../tiles?level=…, picks tier by zoom, caches)
         useTileSeries.ts    (React hook fronting TileClient)
@@ -163,6 +325,43 @@ signalforge/
       signalforge-web.es.js
       signalforge-web.d.ts
 ```
+
+### Public exports (`signalforge/web/src/index.ts`)
+
+```ts
+// React components
+export { SignalDictionary } from "./dict/SignalDictionary";
+export { ChannelsEditor }   from "./dict/ChannelsEditor";
+export { WallManager }      from "./walls/WallManager";
+export { UPlotTileRenderer } from "./render/UPlotTileRenderer";
+
+// React hooks
+export { useAssignments } from "./dict/useAssignments";
+export { useWalls }       from "./walls/useWalls";
+export { useTileSeries }  from "./tiles/useTileSeries";
+
+// Plain TS — for non-React contexts (Node tests, CLI tools)
+export { TileClient } from "./tiles/TileClient";
+
+// Adapter interfaces (consumers implement)
+export type {
+  SignalCatalogueAdapter,
+  TileAdapter,
+  AssignmentsStore,
+} from "./types";
+
+// Contract types (mirrored from Go via openapi-typescript)
+export type {
+  GraphTile,
+  TileSeries,
+  WallConfig,
+  Assignment,
+  SemanticSignal,
+} from "./types";
+```
+
+Anything not in this list is internal to the package and can change without
+a minor-version bump.
 
 ### What's extracted from where
 
@@ -212,21 +411,28 @@ latter wraps backlog id 11's history endpoints). gossamer provides
 
 ### Versioning and consumption
 
-Tag `signalforge-web@0.1.0` once Phase 2 lands. Both consumers pin to the tag.
-Breaking changes require a minor bump and explicit consumer-side upgrade.
+Tag `signalforge-web@0.1.0` once Phase 2 lands. All three consumers pin to
+the tag. Breaking changes require a minor bump and explicit consumer-side
+upgrade.
 
-**Consumption mechanism (decision needed):**
+**Consumption mechanism — defaults for v0.1.x:**
 
-- *npm publish to a registry* (npmjs.com or a private registry) — cleanest, but
-  requires an account and CI pipeline.
-- *git URL in package.json* (`"signalforge-web": "git+https://.../signalforge.git#v0.1.0&path=web"`) —
-  works today, no registry needed, but git+path subdir support is shaky and
-  some lock-file flows misbehave.
-- *git submodule + relative path* — robust but adds submodule overhead to both
-  consumers. Recommended fallback if no registry account is available.
+Use a **git URL with subdirectory** in each consumer's `package.json`:
 
-Default to **git URL** for the v0.1.x line; promote to npm publish once the
-package shape is stable.
+```jsonc
+"dependencies": {
+  "signalforge-web": "github:egidinas/signalforge#v0.1.0"
+}
+```
+
+…and a `package.json` `workspaces` entry pointing into `signalforge/web/` if
+the consumer keeps signalforge as a sibling checkout (preferred during
+active development — edit, no publish needed).
+
+If npm + git URL behaves badly (lockfile churn, subdir resolution), the
+fallback is `npm pack` in `signalforge/web/` and committing the tarball to
+each consumer for v0.1.x; promote to a real npm publish once the API is
+stable.
 
 ### Acceptance criteria (Phase 2)
 
@@ -252,13 +458,17 @@ gossamer, and loom.
 
 ### meerstetter-go
 
-1. `npm --prefix web add @egidinas/signalforge-web@^0.1.0`.
+1. `npm --prefix web add signalforge-web@^0.1.0` (mechanism per Versioning section).
 2. Replace `web/src/views-dict.tsx` with a thin wrapper that constructs the
-   `MecomCatalogueAdapter` and renders `<SignalDictionary adapter={...} />`.
-3. Replace `web/src/components.tsx` `MultiChart` with `<CanvasTileRenderer
-   tileAdapter={mecomgwTileAdapter} wallId={...} />`.
-4. Replace `WALLS` const with `useWalls()` from the shared module + a "+ New
-   wall" button on the main view.
+   `MecomCatalogueAdapter` and renders `<SignalDictionary adapter={...} namespace="mecomgw" />`.
+3. Replace `web/src/components.tsx` `MultiChart` with `<UPlotTileRenderer
+   tileAdapter={mecomgwTileAdapter} wallId={...} />`. Delete the local
+   `drawCanvasChart`, `chartNumber`, `droppedAxisWarnings`, `MultiChart`,
+   `Sparkline`, and the `TELE_BUF`/`recordTelemetry`/`getTelemetry` block
+   (the live tier moves to `MecomCatalogueAdapter`).
+4. Replace `WALLS` const with `useWalls({ namespace: "mecomgw" })` from the
+   shared module + a "+ New wall" button on the main view. `wallForDevice`
+   becomes a fallback factory call against `useWalls`.
 5. Delete `docs/gateway/console/` (one release after Phase 1 cutover proven
    stable).
 
@@ -325,52 +535,81 @@ gossamer, and loom.
 | Phase 1 breaks live console on Brume2 RPi | Keep `docs/gateway/console/` in-tree; rollback is one flag flip. |
 | Vite build adds friction to "edit JSX, refresh browser" workflow | `npm run dev` HMR is faster than current Babel-standalone reload; teach the difference in HANDOFF.md. |
 | Shared module API drift between Phase 2 and Phase 3 | Pin shared module to a tag; consumers upgrade explicitly, not via floating range. |
-| meerstetter-go gains a 50KB uPlot dep it didn't have before | Accepted per resolved open question 1. Net win: one renderer to maintain, gossamer's marker/zoom/log-axis features become free for meerstetter-go. |
+| meerstetter-go gains a 50KB uPlot dep it didn't have before | Accepted per resolved decision 1. Net win: one renderer to maintain, gossamer's marker/zoom/log-axis features become free for meerstetter-go. |
 | meerstetter-go's mecomgw tile API doesn't exist yet (backlog id 11) | Phase 2's `TileAdapter` interface ships first; `MecomgwTileAdapter` is a stub returning live values until id 11 lands. Keeps the contract correct without blocking. |
-| Consolidating three apps' API surfaces into a signalforge-owned OpenAPI is broader than \"port the dict\" | Per resolved open question 2. Phase 2 starts with meerstetter-go's existing `docs/gateway/openapi.yaml` as the seed and folds in gossamer's tile + graph-model routes plus loom's relevant operator/telemetry endpoints. Each consumer keeps its current routes during transition; the unified spec becomes truth at the start of Phase 3. |
+| Consolidating three apps' API surfaces into a signalforge-owned OpenAPI is broader than \"port the dict\" | Per resolved decision 2. Phase 2 starts with meerstetter-go's existing `docs/gateway/openapi.yaml` as the seed and folds in gossamer's tile + graph-model routes plus loom's relevant operator/telemetry endpoints. Each consumer keeps its current routes during transition; the unified spec becomes truth at the start of Phase 3. |
 | Loom has its own evolving operator vocabulary (HeroGraph, OperatorGraphPrimitives, capability-module browser) that may not map cleanly | Phase 3's loom step is deliberately incremental: only the graph + dict primitives migrate. Non-graph operator surfaces stay loom-local until they're ready to share. Loom's existing `validate-*` contract tests are the regression net. |
 
 ## Resolved decisions (2026-05-15)
 
 1. **Renderer:** uPlot only. Meerstetter-go's `drawCanvasChart` is retired
-   in Phase 3; meerstetter-go gains uPlot as a dep. One implementation, two
-   consumers — matches the directive.
+   in Phase 3; meerstetter-go gains uPlot as a dep. One implementation,
+   three consumers — matches the directive.
 2. **OpenAPI ownership:** SignalForge owns the unified OpenAPI. Phase 2 seeds
    it from meerstetter-go's existing `docs/gateway/openapi.yaml` and folds in
-   gossamer's tile + graph-model routes. The TS types in `signalforge/web/src/types/`
-   are generated from this single source. Both consumers' Go and TS code import
-   from there going forward; meerstetter-go's local copy is deleted at the end
-   of Phase 3.
+   gossamer's tile + graph-model routes plus loom's relevant operator
+   endpoints. The TS types in `signalforge/web/src/types/` are generated from
+   this single source. All three consumers' Go and TS code import from there
+   going forward; meerstetter-go's local copy is deleted at the end of
+   Phase 3.
 3. **localStorage namespacing:** the shared `useAssignments`/`useWalls` hooks
    take a required `namespace` config. meerstetter-go passes `"mecomgw"`,
-   gossamer passes `"gossamer"`. No collision risk if both ever co-host.
-
-## Open questions still pending
-
-4. **Package scope name.** `signalforge-web`, `@signalforge/web`,
-   `@egidinas/signalforge-web`, or unscoped? Affects the npm registry account
-   needed (scoped packages on npmjs.com require an org). Defaulting to
-   unscoped `signalforge-web` until decided.
-5. **OpenAPI codegen tool.** `openapi-typescript` (lightweight, ESM-friendly)
-   vs `openapi-typescript-codegen` (richer, generates clients too) vs
-   hand-written types from the YAML. Lean toward `openapi-typescript` for
-   types-only; clients stay hand-written so they can wrap auth/lease logic.
+   gossamer passes `"gossamer"`, loom passes `"loom"`. No collision risk if
+   any of them ever co-host.
+4. **Package name:** unscoped `signalforge-web`. Avoids needing an npm
+   organization. Re-scope to `@egidinas/signalforge-web` later if/when the
+   org exists; consumers update their import paths in one commit.
+5. **OpenAPI codegen tool:** `openapi-typescript` for types-only. Clients
+   stay hand-written (they wrap lease/auth/error-mapping logic that
+   generated clients handle awkwardly). Run as `npm run gen:types` in
+   `signalforge/web/`; output committed to `signalforge/web/src/types/openapi.d.ts`
+   and re-exported via `src/types/index.ts`.
+6. **Lineage:** Loom is the premium parent; gossamer is the junior
+   derivative. Gossamer's graph code is the extraction baseline; loom-only
+   operator features (testbed view, librarian, capability-module browser)
+   stay loom-local.
+7. **History cap:** none. The tile pyramid serves whatever the backend has
+   on each consumer; client-side caps are migration debt to be removed.
 
 ---
 
 ## Verification (end-to-end, after Phase 3)
 
-1. `npm test` in `meerstetter-go/web/`, `gossamer/web/`, and `loom/web/` — green.
-2. `go test ./...` in all relevant repos (meerstetter-go, gossamer, signalforge,
-   loom) — green.
-3. Manual: meerstetter-go gateway shows the existing two heroes plus one
-   user-created wall containing two custom signals from the dict.
-4. Manual: gossamer's tvac_qualification view renders unchanged; new
-   `/operator/wall-config` route lets a user define a custom wall and it
-   persists.
-5. Manual: loom's hero-graph and operator views render unchanged from
+```bash
+# Automated — all four repos
+npm --prefix /home/svc_pmg_testbed_b/signalforge/web test
+npm --prefix /home/svc_pmg_testbed_b/signalforge/web run build
+
+npm --prefix /home/svc_pmg_testbed_b/meerstetter-go/web test
+npm --prefix /home/svc_pmg_testbed_b/meerstetter-go/web run build
+go -C /home/svc_pmg_testbed_b/meerstetter-go test ./...
+
+npm --prefix /home/svc_pmg_testbed_b/gossamer/web run build
+node /home/svc_pmg_testbed_b/gossamer/web/scripts/browser-smoke.mjs
+go -C /home/svc_pmg_testbed_b/gossamer test ./...
+
+npm --prefix /home/svc_pmg_testbed_b/loom/web run build
+# Loom's contract suite — must all pass:
+for t in /home/svc_pmg_testbed_b/loom/web/scripts/validate-*.mjs; do
+  node "$t" || exit 1
+done
+go -C /home/svc_pmg_testbed_b/loom test ./...
+```
+
+Manual checks:
+
+1. meerstetter-go gateway shows the existing two heroes plus one
+   user-created wall containing two custom signals from the dict; the new
+   wall persists across reload.
+2. gossamer's tvac_qualification view renders unchanged from a
+   pre-Phase-3 screenshot baseline; new `/operator/wall-config` route lets
+   a user define a custom wall and it persists.
+3. loom's hero-graph and operator views render unchanged from
    pre-adoption screenshots.
-6. `signalforge/web/demo/` page works in isolation against fixture data.
+4. `signalforge/web/demo/` page works in isolation against fixture data.
+5. Hosted: `gossamer.jmeyer.space` reflects the new bundle after deploy
+   (`bash gossamer/scripts/deploy_brume2_ui.sh`); meerstetter-go gateway
+   on Brume2 reflects new bundle after its deploy script runs.
 
 ## Estimated scope
 
