@@ -1,6 +1,7 @@
 package mecom
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/egidinas/signalforge/graphsem"
@@ -123,6 +124,17 @@ func TestBuildMeComTECCatalogueDescribesDriveCascadeAndReadoutSemantics(t *testi
 		stable.Metadata["readout_priority"] != "background" ||
 		stable.Metadata["preferred_readout"] != "mecom_vx_round_robin_queue" {
 		t.Fatalf("temperature stable row = %#v metadata=%#v", stable, stable.Metadata)
+	}
+}
+
+func TestBuildMeComTECCatalogueUsesPublicGatewayEndpoint(t *testing.T) {
+	catalogue := BuildMeComTECCatalogue(MeComTECCatalogueConfig{})
+	endpoint := catalogue.Capabilities.SubscriptionEndpoint
+	if endpoint != "/api/devices/{device_id}/poll" {
+		t.Fatalf("subscription endpoint = %q, want public gateway poll route", endpoint)
+	}
+	if strings.Contains(strings.ToLower(endpoint), "loom") {
+		t.Fatalf("subscription endpoint leaks private deployment naming: %q", endpoint)
 	}
 }
 

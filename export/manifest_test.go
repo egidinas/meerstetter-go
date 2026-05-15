@@ -1,6 +1,9 @@
 package export
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestDefaultArchiveManifestCoversMVPStreams(t *testing.T) {
 	manifest := DefaultArchiveManifest()
@@ -47,6 +50,18 @@ func TestDefaultArchiveManifestCoversMVPStreams(t *testing.T) {
 	requireField(t, streams["can_frames"], "data_hex")
 	requireField(t, streams["object_dictionary_snapshots"], "write_path")
 	requireField(t, streams["graph_wall_assignments"], "tile_id")
+
+	objectDictionary := streams["object_dictionary_snapshots"]
+	if !hasRoute(objectDictionary, "/api/catalogue") {
+		t.Fatalf("object_dictionary_snapshots routes = %#v, want /api/catalogue", objectDictionary.SourceRoutes)
+	}
+	for _, stream := range manifest.Streams {
+		for _, route := range stream.SourceRoutes {
+			if strings.Contains(strings.ToLower(route), "loom") {
+				t.Fatalf("stream %q route leaks private deployment naming: %q", stream.Name, route)
+			}
+		}
+	}
 }
 
 func requireField(t *testing.T, stream Stream, name string) {
@@ -57,4 +72,13 @@ func requireField(t *testing.T, stream Stream, name string) {
 		}
 	}
 	t.Fatalf("stream %q missing field %q", stream.Name, name)
+}
+
+func hasRoute(stream Stream, route string) bool {
+	for _, got := range stream.SourceRoutes {
+		if got == route {
+			return true
+		}
+	}
+	return false
 }

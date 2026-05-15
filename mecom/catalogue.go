@@ -160,7 +160,7 @@ func BuildMeComTECCatalogue(cfg MeComTECCatalogueConfig) graphsem.SourceCatalogu
 			MaxSignals:            len(entries),
 			DefaultRateHz:         1,
 			RecommendedRateHz:     1,
-			SubscriptionEndpoint:  "/api/loom-native/tmtc-graph/subscription",
+			SubscriptionEndpoint:  "/api/devices/{device_id}/poll",
 			LiveSubjects:          compactStrings([]string{cfg.SourceSubject}),
 			SelectionRequired:     true,
 			PoliteAccessStatement: "MeCom TEC rows prefer CRTVStream ring-buffer readout for high-priority values, reduced by mean/stddev windows to the consumer-requested rate; background values use ?VX round-robin chunks and raw single reads remain compatibility fallback.",

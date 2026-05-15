@@ -2,7 +2,7 @@ package export
 
 // Manifest describes the durable archive shape exposed by meerstetter-go.
 // NDJSON and Arrow IPC are available today. HDF5 writers should target these
-// stream and field names without changing the UI, Loom source catalogue, or
+// stream and field names without changing the UI, source catalogue, or
 // import-review route.
 type Manifest struct {
 	Schema       string       `json:"schema"`
@@ -65,7 +65,7 @@ func DefaultArchiveManifest() Manifest {
 				MediaType: "application/vnd.apache.arrow.stream",
 				Status:    "implemented",
 				Route:     "/api/log/export?format=arrow_ipc",
-				Notes:     "Columnar telemetry_samples stream for SignalForge/Loom consumers.",
+				Notes:     "Columnar telemetry_samples stream for SignalForge and downstream consumers.",
 			},
 			{
 				Name:      "hdf5",
@@ -138,7 +138,7 @@ func DefaultArchiveManifest() Manifest {
 				Grain:        "one row per discovered target/parameter/instance",
 				PrimaryKey:   []string{"target_id"},
 				TimeField:    "generated_at",
-				SourceRoutes: []string{"/api/loom/source-catalogue", "/api/discovery/tree"},
+				SourceRoutes: []string{"/api/catalogue", "/api/discovery/tree"},
 				Fields: []Field{
 					{Name: "generated_at", Type: "timestamp_ns", Required: true},
 					{Name: "target_id", Type: "string", Required: true},
