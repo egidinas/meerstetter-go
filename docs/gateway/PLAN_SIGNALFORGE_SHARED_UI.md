@@ -32,15 +32,24 @@ gossamer's contract (testbed view, librarian, capability-module browser, etc.)
 remain loom-local and are not in this plan's scope. Meerstetter-go is the
 toolchain outlier and gates Phase 1.
 
-History on the meerstetter side is also currently capped:
+**Cross-cutting principle: history is uncapped in principle on every consumer.**
+Whatever the backend can produce — RAM ring, flash ring, HDF5 archive, future
+storage — is what the operator sees, paged through the tile pyramid. No
+arbitrary client-side window or buffer cap. Today's caps are accidents of the
+current implementations:
 
-- `components.jsx:10` `TELE_MAX = 720` (~6 min at 500 ms cadence)
-- `MultiChart` `timeWindowMs = 90_000` (90 s render window)
+- meerstetter-go `components.jsx:10` `TELE_MAX = 720` (~6 min at 500 ms cadence)
+- meerstetter-go `MultiChart` `timeWindowMs = 90_000` (90 s render window)
+- gossamer/loom currently fetch fixed-resolution graph models per campaign
 
-The end state replaces both with the SignalForge tile-pyramid contract
-(`graph_tile.v1`, levels `live`/`minute`/`hour`) so meerstetter-go shows whatever
-the server can produce — initially RAM-ring + flash-ring per backlog id 11, later
-HDF5-backed.
+The end state replaces all three with the SignalForge tile-pyramid contract
+(`graph_tile.v1`, levels `live`/`minute`/`hour`, more added as backends grow)
+and a `TileClient` that picks the right tier for the current zoom. Initial
+backends per consumer:
+
+- meerstetter-go: RAM-ring + flash-ring per backlog id 11, later HDF5.
+- gossamer: existing fixture pyramid + future live data.
+- loom: whatever loom's backend already serves; tile client adapts.
 
 ## End state
 
