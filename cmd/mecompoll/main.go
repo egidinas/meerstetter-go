@@ -30,9 +30,9 @@ import (
 	"github.com/egidinas/meerstetter-go/socketcan"
 )
 
-// polledParams matches the 5 SDO-mapped parameters that both ASCII and
-// CANopen transports can read. The intersection keeps the table consistent
-// across transports.
+// polledParams covers the SDO-mapped values that both ASCII and CANopen
+// transports can read. The intersection keeps the table consistent across
+// transports.
 var polledParams = []mecom.Parameter{
 	{ID: 1000, Instance: 1, Name: "object_ch1", Unit: "°C", Type: mecom.DataTypeFloat32},
 	{ID: 1000, Instance: 2, Name: "object_ch2", Unit: "°C", Type: mecom.DataTypeFloat32},
@@ -47,9 +47,9 @@ var polledParams = []mecom.Parameter{
 }
 
 type deviceTarget struct {
-	raw     string
+	raw      string
 	endpoint mecom.Endpoint
-	address byte
+	address  byte
 }
 
 type cycleResult struct {
@@ -141,12 +141,13 @@ func pollOne(ctx context.Context, dt deviceTarget, timeout time.Duration) cycleR
 }
 
 func printTable(results []cycleResult) {
-	fmt.Printf("\n%-34s  %-6s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %s\n",
+	fmt.Printf("\n%-34s  %-6s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %s\n",
 		"target", "addr",
 		"obj_ch1", "obj_ch2",
 		"sink_ch1", "sink_ch2",
 		"tgt_ch1", "tgt_ch2",
 		"I_ch1(A)", "I_ch2(A)",
+		"U_ch1(V)", "U_ch2(V)",
 		"at")
 	for _, r := range results {
 		addrStr := fmt.Sprintf("0x%02X", r.target.address)
@@ -164,12 +165,13 @@ func printTable(results []cycleResult) {
 			}
 			return fmt.Sprintf("%.3f", v)
 		}
-		fmt.Printf("%-34s  %-6s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %s\n",
+		fmt.Printf("%-34s  %-6s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %-10s  %s\n",
 			r.target.raw, addrStr,
 			fmtF(0), fmtF(1),
 			fmtF(2), fmtF(3),
 			fmtF(4), fmtF(5),
 			fmtF(6), fmtF(7),
+			fmtF(8), fmtF(9),
 			r.at.Format("15:04:05.000"))
 	}
 }
