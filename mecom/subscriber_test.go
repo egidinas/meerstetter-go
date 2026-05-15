@@ -33,8 +33,10 @@ func (s *scriptedReadClient) ReadBulk(_ context.Context, params []Parameter) ([]
 func (s *scriptedReadClient) ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error {
 	return ErrTransportNotSupported
 }
-func (s *scriptedReadClient) TriggerRingSync(context.Context) error              { return ErrTransportNotSupported }
-func (s *scriptedReadClient) ReadRingPointer(context.Context) (uint32, error)    { return 0, ErrTransportNotSupported }
+func (s *scriptedReadClient) TriggerRingSync(context.Context) error { return ErrTransportNotSupported }
+func (s *scriptedReadClient) ReadRingPointer(context.Context) (uint32, error) {
+	return 0, ErrTransportNotSupported
+}
 func (s *scriptedReadClient) ReadRingChunk(context.Context, uint32, uint16) (RingReadResponse, error) {
 	return RingReadResponse{}, ErrTransportNotSupported
 }

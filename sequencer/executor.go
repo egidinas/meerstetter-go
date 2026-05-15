@@ -72,10 +72,16 @@ func runSendCommand(ctx context.Context, step Step, commander tmtc.Commander) St
 	}
 	tc.EnsureIdempotencyKey()
 
-	done := make(chan struct{ ev tmtc.CommandEvent; err error }, 1)
+	done := make(chan struct {
+		ev  tmtc.CommandEvent
+		err error
+	}, 1)
 	go func() {
 		ev, err := commander.Send(tc)
-		done <- struct{ ev tmtc.CommandEvent; err error }{ev, err}
+		done <- struct {
+			ev  tmtc.CommandEvent
+			err error
+		}{ev, err}
 	}()
 	select {
 	case <-ctx.Done():
