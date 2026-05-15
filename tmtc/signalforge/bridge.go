@@ -11,6 +11,7 @@ import (
 	"github.com/egidinas/signalforge/contracts"
 )
 
+// ToContractTelemetry converts local Meerstetter telemetry to the SignalForge contract shape.
 func ToContractTelemetry(tm tmtc.Telemetry) contracts.Telemetry {
 	return contracts.Telemetry{
 		ID:        tm.ID,
@@ -26,6 +27,7 @@ func ToContractTelemetry(tm tmtc.Telemetry) contracts.Telemetry {
 	}
 }
 
+// FromContractTelemetry converts SignalForge contract telemetry to the local Meerstetter shape.
 func FromContractTelemetry(tm contracts.Telemetry) tmtc.Telemetry {
 	return tmtc.Telemetry{
 		ID:        tm.ID,
@@ -41,6 +43,7 @@ func FromContractTelemetry(tm contracts.Telemetry) tmtc.Telemetry {
 	}
 }
 
+// ToContractTelecommand converts a local Meerstetter telecommand to the SignalForge contract shape.
 func ToContractTelecommand(tc tmtc.Telecommand) contracts.Telecommand {
 	return contracts.Telecommand{
 		ID:             tc.ID,
@@ -56,6 +59,7 @@ func ToContractTelecommand(tc tmtc.Telecommand) contracts.Telecommand {
 	}
 }
 
+// FromContractTelecommand converts a SignalForge contract telecommand to the local Meerstetter shape.
 func FromContractTelecommand(tc contracts.Telecommand) tmtc.Telecommand {
 	return tmtc.Telecommand{
 		ID:             tc.ID,
@@ -71,6 +75,7 @@ func FromContractTelecommand(tc contracts.Telecommand) tmtc.Telecommand {
 	}
 }
 
+// ToContractCommandEvent converts a local Meerstetter command event to the SignalForge contract shape.
 func ToContractCommandEvent(ev tmtc.CommandEvent) contracts.CommandEvent {
 	return contracts.CommandEvent{
 		ID:             ev.ID,
@@ -86,6 +91,7 @@ func ToContractCommandEvent(ev tmtc.CommandEvent) contracts.CommandEvent {
 	}
 }
 
+// FromContractCommandEvent converts a SignalForge contract command event to the local Meerstetter shape.
 func FromContractCommandEvent(ev contracts.CommandEvent) tmtc.CommandEvent {
 	return tmtc.CommandEvent{
 		ID:             ev.ID,

@@ -1,12 +1,24 @@
 package signalforge
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"os/exec"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/egidinas/meerstetter-go/tmtc"
 	"github.com/egidinas/signalforge/contracts"
+)
+
+const (
+	localTMTCPackage      = "github.com/egidinas/meerstetter-go/tmtc"
+	adapterPackage        = "github.com/egidinas/meerstetter-go/tmtc/signalforge"
+	contractPackage       = "github.com/egidinas/signalforge/contracts"
+	signalForgeImportRoot = "github.com/egidinas/signalforge"
 )
 
 func TestTelecommandBridgePreservesFieldsAndBoundary(t *testing.T) {
@@ -76,4 +88,56 @@ func TestTelemetryAndCommandEventBridge(t *testing.T) {
 	if got := ToContractCommandEvent(FromContractCommandEvent(ev)); !reflect.DeepEqual(got, ev) {
 		t.Fatalf("command event round trip mismatch: got %#v want %#v", got, ev)
 	}
+}
+
+func TestSignalForgeTMTCImportBoundary(t *testing.T) {
+	packages := goListPackages(t, "./...")
+	contractImporters := make([]string, 0, 1)
+	for _, pkg := range packages {
+		for _, imported := range pkg.Imports {
+			if imported == contractPackage {
+				contractImporters = append(contractImporters, pkg.ImportPath)
+			}
+			if pkg.ImportPath == localTMTCPackage && strings.HasPrefix(imported, signalForgeImportRoot) {
+				t.Fatalf("%s imports %s; keep SignalForge behind %s", localTMTCPackage, imported, adapterPackage)
+			}
+		}
+	}
+	if !reflect.DeepEqual(contractImporters, []string{adapterPackage}) {
+		t.Fatalf("%s importers = %v, want [%s]", contractPackage, contractImporters, adapterPackage)
+	}
+}
+
+type listedPackage struct {
+	ImportPath string
+	Imports    []string
+}
+
+func goListPackages(t *testing.T, pattern string) []listedPackage {
+	t.Helper()
+
+	cmd := exec.Command("go", "list", "-json", pattern)
+	cmd.Dir = "../.."
+	out, err := cmd.Output()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			t.Fatalf("go list %s failed: %v\n%s", pattern, err, exitErr.Stderr)
+		}
+		t.Fatalf("go list %s failed: %v", pattern, err)
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(out))
+	var packages []listedPackage
+	for {
+		var pkg listedPackage
+		err := dec.Decode(&pkg)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatalf("decode go list output: %v", err)
+		}
+		packages = append(packages, pkg)
+	}
+	return packages
 }
