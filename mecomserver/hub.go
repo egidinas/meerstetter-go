@@ -1,9 +1,11 @@
 package mecomserver
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -189,6 +191,49 @@ func localPassthroughMetadataTarget(listen string) string {
 
 func isSocketCANTargetName(target string) bool {
 	return strings.HasPrefix(strings.TrimSpace(strings.ToLower(target)), "socketcan:")
+}
+
+// RunHub starts one TCP passthrough server per device in cfg. Devices whose
+// only transport is SocketCAN are skipped (no byte-stream passthrough is
+// possible on CAN). The call blocks until ctx is cancelled or all servers
+// return, whichever comes first. The first non-context error is returned.
+func RunHub(ctx context.Context, cfg HubConfig) error {
+	var (
+		wg      sync.WaitGroup
+		mu      sync.Mutex
+		firstErr error
+	)
+	started := 0
+	for _, dev := range cfg.Devices {
+		passthrough := dev.PassthroughTarget()
+		if isSocketCANTargetName(passthrough) {
+			continue
+		}
+		if strings.TrimSpace(dev.PassthroughListen) == "" {
+			continue
+		}
+		d := dev
+		wg.Add(1)
+		started++
+		go func() {
+			defer wg.Done()
+			err := ListenAndServe(ctx, d.PassthroughListen, d.ServerConfig())
+			if err != nil && ctx.Err() == nil {
+				mu.Lock()
+				if firstErr == nil {
+					firstErr = fmt.Errorf("mecomserver: device %q: %w", d.ID, err)
+				}
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	if started == 0 {
+		return fmt.Errorf("mecomserver: RunHub started no servers (all devices are CAN-only or have no passthrough address)")
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	return firstErr
 }
 
 // ServerConfig converts a device into the existing single-device TCP proxy
