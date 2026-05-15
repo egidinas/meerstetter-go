@@ -3,6 +3,10 @@ set -euo pipefail
 
 out="${1:-/tmp/meerstetter-go-handoff.tgz}"
 
+if [[ "$out" == docs/gateway/dist/* ]]; then
+  install -m 0644 docs/gateway/HANDOFF.md docs/gateway/dist/HANDOFF.md
+fi
+
 tar czf "$out" \
   README.md \
   deploy/README.md \
