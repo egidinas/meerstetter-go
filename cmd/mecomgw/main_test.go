@@ -61,16 +61,15 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	}
 
 	var catalogue struct {
-		Parameters []struct {
-			ID       int    `json:"id"`
-			Instance int    `json:"instance"`
-			Name     string `json:"name"`
-			Type     string `json:"type"`
-		} `json:"parameters"`
+		Parameters []gatewayCatalogueEntry `json:"parameters"`
 	}
 	getJSON(t, ts.URL+"/api/catalogue", http.StatusOK, &catalogue)
 	if len(catalogue.Parameters) == 0 {
 		t.Fatal("catalogue response had no parameters")
+	}
+	assertCatalogueWritable(t, catalogue.Parameters, 1000, 1, false)
+	for _, id := range []int{1020, 1021, 2010, 2040, 3000} {
+		assertCatalogueWritable(t, catalogue.Parameters, id, 1, true)
 	}
 
 	lease := postLease(t, ts.URL+"/api/devices/tec-75/lease", `{"holder":"operator","ttl":"1m"}`)
@@ -99,6 +98,19 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("DELETE lease status = %d, want %d", resp.StatusCode, http.StatusNoContent)
 	}
+}
+
+func assertCatalogueWritable(t *testing.T, params []gatewayCatalogueEntry, id, instance int, want bool) {
+	t.Helper()
+	for _, p := range params {
+		if p.ID == id && p.Instance == instance {
+			if p.Writable != want {
+				t.Fatalf("catalogue %d:%d writable = %v, want %v", id, instance, p.Writable, want)
+			}
+			return
+		}
+	}
+	t.Fatalf("catalogue missing parameter %d:%d", id, instance)
 }
 
 func TestParseParamsQuery(t *testing.T) {

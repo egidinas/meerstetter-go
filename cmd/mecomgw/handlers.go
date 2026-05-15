@@ -73,18 +73,10 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 
 func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 	params := mecom.DefaultTECReadoutParameters(2)
-	type entry struct {
-		ID       int    `json:"id"`
-		Instance int    `json:"instance"`
-		Name     string `json:"name"`
-		Unit     string `json:"unit,omitempty"`
-		Type     string `json:"type"`
-		Sensor   string `json:"sensor,omitempty"`
-		HighPri  bool   `json:"high_priority"`
-	}
-	out := make([]entry, 0, len(params))
+	seen := make(map[string]struct{}, len(params)+4)
+	out := make([]gatewayCatalogueEntry, 0, len(params)+4)
 	for _, p := range params {
-		out = append(out, entry{
+		e := gatewayCatalogueEntry{
 			ID:       p.Parameter.ID,
 			Instance: p.Parameter.Instance,
 			Name:     p.Parameter.Name,
@@ -92,9 +84,73 @@ func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 			Type:     string(p.Parameter.Type),
 			Sensor:   p.Sensor,
 			HighPri:  p.HighPriority,
-		})
+			Writable: gatewayCatalogueWritable(p.Parameter.ID),
+		}
+		seen[gatewayCatalogueKey(e.ID, e.Instance)] = struct{}{}
+		out = append(out, e)
+	}
+	for _, e := range gatewayWriteOnlyCatalogueEntries(2) {
+		key := gatewayCatalogueKey(e.ID, e.Instance)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, e)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"parameters": out})
+}
+
+type gatewayCatalogueEntry struct {
+	ID       int    `json:"id"`
+	Instance int    `json:"instance"`
+	Name     string `json:"name"`
+	Unit     string `json:"unit,omitempty"`
+	Type     string `json:"type"`
+	Sensor   string `json:"sensor,omitempty"`
+	HighPri  bool   `json:"high_priority"`
+	Writable bool   `json:"writable"`
+}
+
+func gatewayCatalogueKey(id, instance int) string {
+	return fmt.Sprintf("%d:%d", id, instance)
+}
+
+func gatewayCatalogueWritable(id int) bool {
+	switch id {
+	case 1020, 1021, 2010, 2040, 3000:
+		return true
+	default:
+		return false
+	}
+}
+
+func gatewayWriteOnlyCatalogueEntries(channels int) []gatewayCatalogueEntry {
+	if channels <= 0 {
+		channels = 2
+	}
+	type writeOnlyParam struct {
+		id   int
+		name string
+		typ  mecom.DataType
+	}
+	params := []writeOnlyParam{
+		{id: 2010, name: "output_stage_enable", typ: mecom.DataTypeInt32},
+		{id: 2040, name: "operating_mode", typ: mecom.DataTypeInt32},
+	}
+	out := make([]gatewayCatalogueEntry, 0, channels*len(params))
+	for instance := 1; instance <= channels; instance++ {
+		for _, p := range params {
+			out = append(out, gatewayCatalogueEntry{
+				ID:       p.id,
+				Instance: instance,
+				Name:     p.name,
+				Type:     string(p.typ),
+				Sensor:   fmt.Sprintf("mecom.tec_%02d.%s", instance, p.name),
+				Writable: true,
+			})
+		}
+	}
+	return out
 }
 
 func (s *server) handleLeasesList(w http.ResponseWriter, _ *http.Request) {

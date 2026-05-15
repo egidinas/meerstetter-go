@@ -227,6 +227,7 @@ components:
         type:          {type: string, enum: [float32, int32]}
         sensor:        {type: string}
         high_priority: {type: boolean}
+        writable:      {type: boolean}
 
     Lease:
       type: object

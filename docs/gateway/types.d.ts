@@ -28,6 +28,7 @@ export interface CatalogueEntry {
   type: "float32" | "int32";
   sensor?: string;
   high_priority: boolean;
+  writable: boolean;
 }
 
 export type CommandStatus =
