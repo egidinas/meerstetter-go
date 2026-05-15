@@ -13,6 +13,7 @@ tar czf "$out" \
   deploy/example-gateway.json \
   docs/backlog/frontend_hooks.jsonl \
   docs/gateway/HANDOFF.md \
+  docs/gateway/UI_GRAPH_WALL_CONTRACT.md \
   docs/gateway/demo/index.html \
   docs/gateway/openapi.yaml \
   docs/gateway/types.d.ts

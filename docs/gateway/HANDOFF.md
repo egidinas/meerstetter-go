@@ -27,6 +27,8 @@ transport is opaque.
    final visual design.
 7. `docs/backlog/frontend_hooks.jsonl` — what was implemented this wave and
    why. Useful for understanding intent.
+8. `docs/gateway/UI_GRAPH_WALL_CONTRACT.md` — graph-wall, signal dictionary,
+   channel-role, and telecommand-placement rules for the richer UI.
 
 ## What the gateway provides
 
@@ -101,6 +103,12 @@ Pick from these; mark "out of scope" if you choose not to do something:
   human-readable. HTTP status maps to category:
   `423 Locked` = lease problem, `503` = transport unreachable, `504` =
   timeout, `403` = read-only, `409` = device rejected, `501` = not supported.
+- **Signal dictionary and graph-wall assignments** — use
+  `docs/gateway/UI_GRAPH_WALL_CONTRACT.md` for the required hierarchy:
+  signal group, signal subgroup, signal, device, instance. The default
+  temperature graph must include target temperature, object temperature, and
+  sink temperature. Power-supply channels should default to voltage, current,
+  and power.
 
 ## Constraints and out-of-scope
 
@@ -118,6 +126,10 @@ Pick from these; mark "out of scope" if you choose not to do something:
   you which is in use but the UI should not branch on it.
 - **No WebSocket yet.** SSE only. If you'd prefer a single multi-device WS
   stream, that's a wave-2 backlog item; don't assume it exists.
+- **SignalForge/Gossamer boundary.** SignalForge graph/source/catalogue and
+  control-program concepts are the reusable public model. Gossamer is visual
+  and interaction inspiration only; do not depend on Gossamer routes,
+  fixtures, or private deployment details.
 
 ## How to verify your design against the live API
 
@@ -152,6 +164,7 @@ deploy/example-gateway.json              gateway config example
 docs/gateway/openapi.yaml                schema (authoritative)
 docs/gateway/types.d.ts                  TypeScript types
 docs/gateway/HANDOFF.md                  this file
+docs/gateway/UI_GRAPH_WALL_CONTRACT.md   graph wall + signal dictionary rules
 docs/gateway/demo/index.html             dependency-free browser probe
 docs/backlog/frontend_hooks.jsonl        backlog with completion notes
 cmd/mecomgw/                             gateway source
