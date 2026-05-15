@@ -41,7 +41,7 @@ verification gates without adding an operator UI to this library repository.
 - `cmd/mecomvseriald`: address-routed Linux device server. One TCP listener
   fans out addressed MeCom frames to per-device serial/TCP downstreams. See
   `deploy/` for systemd unit + udev rule + deployment walkthrough.
-- `cmd/teccanprobe`: SocketCAN/CANopen probe for live TEC discovery and
+- `cmd/teccanprobe`: Linux SocketCAN/CANopen probe for live TEC discovery and
   optional local CAN ring capture.
 
 ## Example
@@ -105,8 +105,14 @@ the selected hardware driver.
 
 ```sh
 go test ./...
+GOOS=windows GOARCH=amd64 go test -exec=true ./...
 git diff --check
 ```
+
+The Windows command is a compile-and-link gate for Windows packages from a
+non-Windows host. It intentionally skips executing the generated Windows test
+binaries while still catching accidental Linux-only imports in portable
+commands and packages.
 
 The public module depends on public SignalForge releases and has no committed
 local `replace` directives. Private Loom deployment wiring, live route checks,

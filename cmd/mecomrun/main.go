@@ -30,10 +30,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/canopen"
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/sequencer"
-	"github.com/egidinas/meerstetter-go/socketcan"
 )
 
 func main() {
@@ -150,27 +148,4 @@ func readAll(f *os.File) ([]byte, error) {
 		}
 	}
 	return buf, fmt.Errorf("script larger than %d bytes", max)
-}
-
-// socketCANDialer is the default Linux CANDialer wired into mecomrun. The core
-// mecom package stays platform-free; this binary chooses SocketCAN as the
-// transport. Adapter packages (kvaser, usb-can) can supply their own dialer.
-func socketCANDialer(ctx context.Context, iface string) (mecom.CANTransceiver, func() error, error) {
-	conn, err := socketcan.Open(iface)
-	if err != nil {
-		return nil, nil, err
-	}
-	return socketCANTransceiver{conn: conn}, conn.Close, nil
-}
-
-type socketCANTransceiver struct {
-	conn *socketcan.Conn
-}
-
-func (t socketCANTransceiver) Send(f canopen.Frame) error {
-	return t.conn.Send(f)
-}
-
-func (t socketCANTransceiver) Recv(timeout time.Duration) (canopen.Frame, error) {
-	return t.conn.Recv(timeout)
 }

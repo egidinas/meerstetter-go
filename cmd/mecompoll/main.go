@@ -25,9 +25,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/canopen"
 	"github.com/egidinas/meerstetter-go/mecom"
-	"github.com/egidinas/meerstetter-go/socketcan"
 )
 
 // polledParams covers the SDO-mapped values that both ASCII and CANopen
@@ -212,24 +210,4 @@ func parseTargets(v string) ([]deviceTarget, error) {
 		return nil, fmt.Errorf("no targets specified; use -targets TARGET=ADDRESS,...")
 	}
 	return devices, nil
-}
-
-func socketCANDialer(ctx context.Context, iface string) (mecom.CANTransceiver, func() error, error) {
-	conn, err := socketcan.Open(iface)
-	if err != nil {
-		return nil, nil, err
-	}
-	return socketCANTransceiver{conn: conn}, conn.Close, nil
-}
-
-type socketCANTransceiver struct {
-	conn *socketcan.Conn
-}
-
-func (t socketCANTransceiver) Send(f canopen.Frame) error {
-	return t.conn.Send(f)
-}
-
-func (t socketCANTransceiver) Recv(timeout time.Duration) (canopen.Frame, error) {
-	return t.conn.Recv(timeout)
 }
