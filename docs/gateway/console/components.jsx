@@ -190,15 +190,32 @@ function chartNumber(v) {
 }
 
 const droppedAxisWarnings = new Set();
+const CHART_MIN_WIDTH = 160;
+const CHART_DEFAULT_WIDTH = 640;
+
+function measuredElementWidth(el) {
+  if (!el) return 0;
+  const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+  return Math.floor((rect && rect.width) || el.clientWidth || 0);
+}
+
+function chartRenderWidth(canvas, requestedWidth) {
+  const requested = Number(requestedWidth);
+  const measured = Number.isFinite(requested) && requested > 0
+    ? requested
+    : measuredElementWidth(canvas) || measuredElementWidth(canvas && canvas.parentElement) || CHART_DEFAULT_WIDTH;
+  return Math.max(CHART_MIN_WIDTH, Math.floor(measured));
+}
 
 function drawCanvasChart(canvas, orderedSeries, opts = {}) {
   if (!canvas) return;
-  const width = Math.max(320, opts.width || canvas.clientWidth || 900);
+  const width = chartRenderWidth(canvas, opts.width);
   const height = Math.max(120, opts.height || 320);
   const dpr = window.devicePixelRatio || 1;
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
-  canvas.style.width = `${width}px`;
+  canvas.style.width = "100%";
+  canvas.style.maxWidth = "100%";
   canvas.style.height = `${height}px`;
   const ctx = canvas.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -431,20 +448,37 @@ function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
   useGatewayTick();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
-  const [w, setW] = useState(900);
+  const [w, setW] = useState(0);
   useEffect(() => {
-    if (!wrapRef.current) return;
-    const update = () => setW(Math.max(320, wrapRef.current.clientWidth || 900));
+    const target = wrapRef.current;
+    if (!target) return undefined;
+    let raf = 0;
+    const update = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const next = measuredElementWidth(target);
+        if (next > 0) setW((cur) => (cur === next ? cur : next));
+      });
+    };
     update();
-    const ro = new ResizeObserver(update);
-    ro.observe(wrapRef.current);
-    return () => ro.disconnect();
+    let ro;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(update);
+      ro.observe(target);
+    }
+    window.addEventListener("resize", update, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      if (ro) ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
   }, []);
   const graphTile = useMemo(() => tile || emptyGraphTile({ timeWindowMs }), [tile, timeWindowMs]);
   const orderedSeries = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
   useEffect(() => {
+    const measuredWidth = w || measuredElementWidth(wrapRef.current);
     drawCanvasChart(canvasRef.current, orderedSeries, {
-      width: w,
+      width: measuredWidth,
       height,
       timeWindowMs: graphTile.time_window_ms || timeWindowMs,
     });
@@ -453,12 +487,12 @@ function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
   return (
     <div
       ref={wrapRef}
-      style={{ width: "100%" }}
+      style={{ width: "100%", minWidth: 0 }}
       data-graph-tile={graphTile.tile_id || graphTile.id || ""}
       data-graph-renderer={graphTile.renderer || "signalforge.tile.canvas"}
       title={title}
     >
-      <canvas ref={canvasRef} style={{ width: "100%", height, display: "block" }} />
+      <canvas ref={canvasRef} style={{ width: "100%", maxWidth: "100%", height, display: "block" }} />
     </div>
   );
 }

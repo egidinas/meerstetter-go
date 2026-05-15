@@ -343,30 +343,32 @@ function TempSettingsTable({ channels, holderId }) {
     }
   }
   return (
-    <table className="hero-settings">
-      <thead>
-        <tr>
-          <th style={{ width: "22%" }}>Channel</th>
-          <th>Target</th>
-          <th>Object</th>
-          <th>Sink</th>
-          <th>Output</th>
-          <th>Stable</th>
-          <th>Quick-set target T</th>
-        </tr>
-      </thead>
-      <tbody>
-        {channels.map((ch) => <TempSettingsRow
-          key={ch.device_id + "/" + ch.instance}
-          ch={ch}
-          staged={staged[`${ch.device_id}/${ch.instance}`] || ""}
-          setStaged={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}`]: v }))}
-          busy={busy[`${ch.device_id}/${ch.instance}`]}
-          onCommit={commit}
-          onToggleOutput={toggleOutput}
-        />)}
-      </tbody>
-    </table>
+    <div className="hero-settings-wrap">
+      <table className="hero-settings">
+        <thead>
+          <tr>
+            <th style={{ width: "22%" }}>Channel</th>
+            <th>Target</th>
+            <th>Object</th>
+            <th>Sink</th>
+            <th>Output</th>
+            <th>Stable</th>
+            <th>Quick-set target T</th>
+          </tr>
+        </thead>
+        <tbody>
+          {channels.map((ch) => <TempSettingsRow
+            key={ch.device_id + "/" + ch.instance}
+            ch={ch}
+            staged={staged[`${ch.device_id}/${ch.instance}`] || ""}
+            setStaged={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}`]: v }))}
+            busy={busy[`${ch.device_id}/${ch.instance}`]}
+            onCommit={commit}
+            onToggleOutput={toggleOutput}
+          />)}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -456,34 +458,36 @@ function SupplySettingsTable({ channels, holderId }) {
     }
   }
   return (
-    <table className="hero-settings">
-      <thead>
-        <tr>
-          <th style={{ width: "20%" }}>Channel</th>
-          <th>Set V (1021)</th>
-          <th>Actual V</th>
-          <th>Set I (1020)</th>
-          <th>Actual I</th>
-          <th>Power</th>
-          <th>Mode</th>
-          <th>Output</th>
-        </tr>
-      </thead>
-      <tbody>
-        {channels.map((ch) => <SupplySettingsRow
-          key={ch.device_id + "/" + ch.instance}
-          ch={ch}
-          stagedV={staged[`${ch.device_id}/${ch.instance}/1021`] || ""}
-          stagedI={staged[`${ch.device_id}/${ch.instance}/1020`] || ""}
-          setStagedV={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}/1021`]: v }))}
-          setStagedI={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}/1020`]: v }))}
-          busyV={busy[`${ch.device_id}/${ch.instance}/1021`]}
-          busyI={busy[`${ch.device_id}/${ch.instance}/1020`]}
-          onCommitField={commitField}
-          onToggleOutput={toggleOutput}
-        />)}
-      </tbody>
-    </table>
+    <div className="hero-settings-wrap">
+      <table className="hero-settings">
+        <thead>
+          <tr>
+            <th style={{ width: "20%" }}>Channel</th>
+            <th>Set V (1021)</th>
+            <th>Actual V</th>
+            <th>Set I (1020)</th>
+            <th>Actual I</th>
+            <th>Power</th>
+            <th>Mode</th>
+            <th>Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          {channels.map((ch) => <SupplySettingsRow
+            key={ch.device_id + "/" + ch.instance}
+            ch={ch}
+            stagedV={staged[`${ch.device_id}/${ch.instance}/1021`] || ""}
+            stagedI={staged[`${ch.device_id}/${ch.instance}/1020`] || ""}
+            setStagedV={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}/1021`]: v }))}
+            setStagedI={(v) => setStaged((s) => ({ ...s, [`${ch.device_id}/${ch.instance}/1020`]: v }))}
+            busyV={busy[`${ch.device_id}/${ch.instance}/1021`]}
+            busyI={busy[`${ch.device_id}/${ch.instance}/1020`]}
+            onCommitField={commitField}
+            onToggleOutput={toggleOutput}
+          />)}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
