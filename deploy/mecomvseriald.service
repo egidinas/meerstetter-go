@@ -1,0 +1,41 @@
+[Unit]
+Description=Meerstetter MeCom virtual serial device server (mecomvseriald)
+Documentation=https://github.com/egidinas/meerstetter-go/blob/main/deploy/README.md
+After=network-online.target dev-ttyUSB0.device dev-ttyUSB1.device dev-ttyUSB2.device dev-ttyUSB3.device
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust User/Group to whatever account holds dialout (or uaccess via console session)
+# User=meerstetter
+# Group=dialout
+
+# Copy deploy/mecomvseriald.default to /etc/default/mecomvseriald and edit the
+# routes for the local hardware. Keep the routes out of the unit so stable
+# /dev/serial/by-id names can be changed without replacing the service.
+EnvironmentFile=/etc/default/mecomvseriald
+
+ExecStart=/usr/local/bin/mecomvseriald \
+  -listen ${MECOM_LISTEN} \
+  -timeout ${MECOM_TIMEOUT} \
+  -reconnect-delay ${MECOM_RECONNECT_DELAY} \
+  -route ${MECOM_ROUTE_1} \
+  -route ${MECOM_ROUTE_2} \
+  -route ${MECOM_ROUTE_3} \
+  -route ${MECOM_ROUTE_4}
+
+Restart=on-failure
+RestartSec=2s
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=
+DeviceAllow=char-ttyUSB rw
+DevicePolicy=closed
+SupplementaryGroups=dialout
+
+[Install]
+WantedBy=multi-user.target

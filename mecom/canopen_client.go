@@ -2,6 +2,7 @@ package mecom
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math"
@@ -56,6 +57,78 @@ func (c *CANopenClient) ReadBulk(ctx context.Context, params []Parameter) ([]flo
 		values = append(values, value)
 	}
 	return values, nil
+}
+
+// WriteFloat32 writes a float32 value to the mapped CANopen object via an
+// expedited SDO download. The parameter must be present in the MeCom↔CANopen
+// mapping and marked writable.
+func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
+	object, ok := canopenSDOObjectForMeCom(paramID, instance)
+	if !ok || !object.writable {
+		return fmt.Errorf("%w: parameter %d instance %d (writable=%v)", ErrCANopenObjectNotMapped, paramID, instance, object.writable)
+	}
+	if object.kind != DataTypeFloat32 {
+		return fmt.Errorf("mecom: parameter %d instance %d is not float32", paramID, instance)
+	}
+	var buf [4]byte
+	binary.LittleEndian.PutUint32(buf[:], math.Float32bits(value))
+	return c.writeSDO(ctx, object, buf[:])
+}
+
+// WriteInt32 writes a 32-bit signed integer value via an expedited SDO download.
+func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
+	object, ok := canopenSDOObjectForMeCom(paramID, instance)
+	if !ok || !object.writable {
+		return fmt.Errorf("%w: parameter %d instance %d (writable=%v)", ErrCANopenObjectNotMapped, paramID, instance, object.writable)
+	}
+	if object.kind != DataTypeInt32 {
+		return fmt.Errorf("mecom: parameter %d instance %d is not int32", paramID, instance)
+	}
+	var buf [4]byte
+	binary.LittleEndian.PutUint32(buf[:], uint32(value))
+	return c.writeSDO(ctx, object, buf[:])
+}
+
+func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, value []byte) error {
+	req, err := canopen.SDODownloadExpeditedRequest(c.node, object.index, object.subIndex, value)
+	if err != nil {
+		return err
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if err := c.rw.Send(req); err != nil {
+		return err
+	}
+	deadline := time.Now().Add(c.timeout)
+	if ctxDeadline, ok := ctx.Deadline(); ok && ctxDeadline.Before(deadline) {
+		deadline = ctxDeadline
+	}
+	for {
+		wait := time.Until(deadline)
+		if wait <= 0 {
+			return context.DeadlineExceeded
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		frame, err := c.rw.Recv(wait)
+		if err != nil {
+			return err
+		}
+		if frame.ID != 0x580+uint32(c.node) {
+			continue
+		}
+		resp, err := canopen.ParseSDODownloadResponse(frame)
+		if err != nil {
+			return err
+		}
+		if resp.Index != object.index || resp.SubIndex != object.subIndex {
+			continue
+		}
+		return nil
+	}
 }
 
 func (c *CANopenClient) ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error {
@@ -128,6 +201,7 @@ type canopenSDOObject struct {
 	index    uint16
 	subIndex byte
 	kind     DataType
+	writable bool
 }
 
 func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
@@ -139,16 +213,20 @@ func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
 	}
 	sub := byte(instance)
 	switch paramID {
-	case 1000:
+	case 1000: // object temperature (sensor, read-only)
 		return canopenSDOObject{index: 0x2100, subIndex: sub, kind: DataTypeFloat32}, true
-	case 1001:
+	case 1001: // sink temperature (sensor, read-only)
 		return canopenSDOObject{index: 0x2101, subIndex: sub, kind: DataTypeFloat32}, true
-	case 3000:
-		return canopenSDOObject{index: 0x2600, subIndex: sub, kind: DataTypeFloat32}, true
-	case 1020:
-		return canopenSDOObject{index: 0x2420, subIndex: sub, kind: DataTypeFloat32}, true
-	case 1021:
-		return canopenSDOObject{index: 0x2421, subIndex: sub, kind: DataTypeFloat32}, true
+	case 2010: // output stage enable (writable int32)
+		return canopenSDOObject{index: 0x2410, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 2040: // operating mode (writable int32)
+		return canopenSDOObject{index: 0x2440, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 3000: // nominal target temperature (writable float32 setpoint)
+		return canopenSDOObject{index: 0x2600, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 1020: // static current setpoint (writable float32)
+		return canopenSDOObject{index: 0x2420, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 1021: // static voltage setpoint (writable float32)
+		return canopenSDOObject{index: 0x2421, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
 	default:
 		return canopenSDOObject{}, false
 	}

@@ -1,0 +1,16 @@
+# /etc/default/mecomvseriald - environment for the device server unit
+# Copy to /etc/default/mecomvseriald and edit as needed.
+
+# TCP listen address. Use 127.0.0.1:50000 to keep traffic on-host only.
+MECOM_LISTEN=0.0.0.0:50000
+
+# Per-request downstream timeout and reconnect delay.
+MECOM_TIMEOUT=2s
+MECOM_RECONNECT_DELAY=500ms
+
+# Address -> downstream target. Use serial:/dev/serial/by-id/... so cable swaps
+# don't shuffle which device sits on which ttyUSB index.
+MECOM_ROUTE_1=75=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_A-if00-port0@57600
+MECOM_ROUTE_2=76=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_B-if00-port0@57600
+MECOM_ROUTE_3=81=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_C-if00-port0@57600
+MECOM_ROUTE_4=84=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_D-if00-port0@57600

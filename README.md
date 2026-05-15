@@ -30,29 +30,40 @@ verification gates without adding an operator UI to this library repository.
 
 ## Commands
 
-- `cmd/mecomprobe`: bounded MeCom read probe for TCP or serial endpoints.
+- `cmd/mecomprobe`: bounded MeCom read probe for TCP or serial endpoints
+  (registry-driven, supports bulk `?VX` reads).
 - `cmd/mecomset`: bounded MeCom write probe for TCP or serial endpoints.
+- `cmd/mecompoll`: transport-agnostic continuous polling table. Each target
+  is `ENDPOINT=ADDRESS`; `mecom.NewForEndpoint` picks the right concrete
+  client (ASCII or CANopen SDO) per endpoint.
+- `cmd/mecomrun`: executes a `sequencer.Script` JSON via a `tmtc.Commander`
+  built on top of `mecom.Commander`. Reference end-to-end automation loop.
+- `cmd/mecomvseriald`: address-routed Linux device server. One TCP listener
+  fans out addressed MeCom frames to per-device serial/TCP downstreams. See
+  `deploy/` for systemd unit + udev rule + deployment walkthrough.
 - `cmd/teccanprobe`: SocketCAN/CANopen probe for live TEC discovery and
   optional local CAN ring capture.
 
 ## Example
 
 ```go
-ep, ok := mecom.ParseEndpoint("serial:/dev/ttyUSB0@57600")
-if !ok {
-    panic("invalid endpoint")
-}
-conn, err := mecom.Open(ep, 2*time.Second)
-if err != nil {
-    panic(err)
-}
-defer conn.Close()
+// Transport-agnostic: NewForEndpoint picks the right client.
+ep, _ := mecom.ParseEndpoint("serial:/dev/ttyUSB0@57600")
+client, err := mecom.NewForEndpoint(ctx, ep, mecom.ClientConfig{
+    Address: 0x4b, Timeout: 2 * time.Second,
+}, nil) // nil dialer is fine for non-CAN endpoints
+if err != nil { panic(err) }
+defer client.Close()
 
-client := mecom.NewClient(conn, mecom.ClientConfig{
-    Address: 0x50,
-    Timeout: 2 * time.Second,
+value, err := client.ReadFloat32(ctx, 1000, 1)
+
+// Write via a Commander built from any WriteClient.
+writer := client.(mecom.WriteClient)
+cmdr := mecom.NewCommander(writer, 2*time.Second)
+_, err = cmdr.Send(tmtc.Telecommand{
+    Name:      "set_float32",
+    Arguments: map[string]any{"param": 3000, "instance": 1, "value": 25.0},
 })
-value, err := client.ReadFloat32(context.Background(), 1000, 1)
 ```
 
 Supported endpoint forms include:

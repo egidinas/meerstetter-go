@@ -1,0 +1,34 @@
+{
+  "id": "warm-up-and-enable",
+  "name": "Set 25 °C target, settle, then enable output stage on channel 1",
+  "timeout": "60s",
+  "steps": [
+    {
+      "id": "set-target",
+      "kind": "send_command",
+      "command_name": "set_float32",
+      "arguments": {"param": 3000, "instance": 1, "value": 25.0}
+    },
+    {
+      "id": "settle",
+      "kind": "wait",
+      "duration": "10s"
+    },
+    {
+      "id": "enable-output",
+      "kind": "send_command",
+      "command_name": "set_int32",
+      "arguments": {"param": 2010, "instance": 1, "value": 1}
+    },
+    {
+      "id": "soak",
+      "kind": "wait_stable",
+      "duration": "20s"
+    },
+    {
+      "id": "save",
+      "kind": "send_command",
+      "command_name": "save_to_flash"
+    }
+  ]
+}

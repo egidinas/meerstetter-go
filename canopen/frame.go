@@ -145,3 +145,44 @@ func SDODownloadExpeditedRequest(nodeID byte, index uint16, subIndex byte, value
 	copy(frame.Data[4:], value)
 	return frame, nil
 }
+
+// SDODownloadResponse is a decoded SDO download (write) response or abort.
+type SDODownloadResponse struct {
+	NodeID   byte
+	Index    uint16
+	SubIndex byte
+	Frame    Frame
+}
+
+// ParseSDODownloadResponse decodes the server reply to an expedited download
+// request. Successful replies use command byte 0x60; aborts use 0x80.
+func ParseSDODownloadResponse(f Frame) (SDODownloadResponse, error) {
+	if err := f.Validate(); err != nil {
+		return SDODownloadResponse{}, err
+	}
+	if f.DLC != 8 {
+		return SDODownloadResponse{}, fmt.Errorf("canopen: SDO download response DLC = %d, want 8", f.DLC)
+	}
+	if f.ID < 0x580 || f.ID > 0x5ff {
+		return SDODownloadResponse{}, fmt.Errorf("canopen: SDO download response id 0x%03X outside 0x580..0x5ff", f.ID)
+	}
+	index := uint16(f.Data[1]) | uint16(f.Data[2])<<8
+	subIndex := f.Data[3]
+	resp := SDODownloadResponse{
+		NodeID:   byte(f.ID - 0x580),
+		Index:    index,
+		SubIndex: subIndex,
+		Frame:    f,
+	}
+	if f.Data[0] == 0x80 {
+		return resp, SDOAbortError{
+			Index:    index,
+			SubIndex: subIndex,
+			Code:     binary.LittleEndian.Uint32(f.Data[4:8]),
+		}
+	}
+	if f.Data[0] != 0x60 {
+		return resp, fmt.Errorf("canopen: unexpected SDO download response command 0x%02X", f.Data[0])
+	}
+	return resp, nil
+}

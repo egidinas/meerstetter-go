@@ -6,6 +6,7 @@ import (
 	"context"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
 )
@@ -75,6 +76,138 @@ func TestServeSerializesFramesFromMultipleClients(t *testing.T) {
 	if replyB := readFrame(t, clientB); !bytes.Contains(replyB, []byte("510002?VR03E9010000+")) {
 		t.Fatalf("client B got wrong reply: %q", replyB)
 	}
+}
+
+func TestRequestAddress(t *testing.T) {
+	addr, err := RequestAddress([]byte("#4B0001?VR03E8010000\r"))
+	if err != nil {
+		t.Fatalf("RequestAddress returned error: %v", err)
+	}
+	if addr != 0x4B {
+		t.Fatalf("address = 0x%02X, want 0x4B", addr)
+	}
+	if _, err := RequestAddress([]byte("!4B0001+0000\r")); err == nil {
+		t.Fatal("RequestAddress accepted a response frame")
+	}
+}
+
+func TestServeRouterRoutesByMeComAddress(t *testing.T) {
+	routeAClient, routeAServer := net.Pipe()
+	defer routeAClient.Close()
+	defer routeAServer.Close()
+	routeBClient, routeBServer := net.Pipe()
+	defer routeBClient.Close()
+	defer routeBServer.Close()
+
+	seenA := serveDownstreamPipe(t, routeAServer, 1)
+	seenB := serveDownstreamPipe(t, routeBServer, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, RouterConfig{
+			Routes: []Route{
+				{Address: 0x50, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeAClient, "pipe-a", nil
+				}},
+				{Address: 0x51, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeBClient, "pipe-b", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	client := dialClient(t, ln.Addr().String())
+	defer client.Close()
+
+	reqA := []byte("#500001?VR03E8010000\r")
+	reqB := []byte("#510002?VR03E9010000\r")
+	if _, err := client.Write(reqA); err != nil {
+		t.Fatalf("write A: %v", err)
+	}
+	if got := receiveSeen(t, seenA); !bytes.Equal(got, reqA) {
+		t.Fatalf("route A got %q, want %q", got, reqA)
+	}
+	if replyA := readFrame(t, client); !bytes.Contains(replyA, []byte("500001?VR03E8010000+")) {
+		t.Fatalf("client got wrong route A reply: %q", replyA)
+	}
+
+	if _, err := client.Write(reqB); err != nil {
+		t.Fatalf("write B: %v", err)
+	}
+	if got := receiveSeen(t, seenB); !bytes.Equal(got, reqB) {
+		t.Fatalf("route B got %q, want %q", got, reqB)
+	}
+	if replyB := readFrame(t, client); !bytes.Contains(replyB, []byte("510002?VR03E9010000+")) {
+		t.Fatalf("client got wrong route B reply: %q", replyB)
+	}
+}
+
+func TestServeRouterRejectsUnknownAddress(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, RouterConfig{
+			Routes: []Route{
+				{Address: 0x50, Downstream: func(context.Context) (net.Conn, string, error) {
+					client, _ := net.Pipe()
+					return client, "unused", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	client := dialClient(t, ln.Addr().String())
+	defer client.Close()
+	if _, err := client.Write([]byte("#520001?VR03E8010000\r")); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	reply := string(readFrame(t, client))
+	if !strings.Contains(reply, "no downstream route for MeCom address 0x52") {
+		t.Fatalf("unexpected reply: %q", reply)
+	}
+}
+
+func serveDownstreamPipe(t *testing.T, conn net.Conn, count int) <-chan []byte {
+	t.Helper()
+	seen := make(chan []byte, count)
+	go func() {
+		reader := bufio.NewReader(conn)
+		for i := 0; i < count; i++ {
+			frame, err := reader.ReadBytes('\r')
+			if err != nil {
+				return
+			}
+			seen <- append([]byte(nil), frame...)
+			reply := []byte("!" + string(frame[1:len(frame)-1]) + "+0000\r")
+			_, _ = conn.Write(reply)
+		}
+	}()
+	return seen
 }
 
 func dialClient(t *testing.T, addr string) net.Conn {

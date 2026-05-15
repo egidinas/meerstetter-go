@@ -66,3 +66,46 @@ func TestCANopenClientReadBulkKeepsUnsupportedSlots(t *testing.T) {
 		t.Fatalf("values[1]=%f, want NaN for unsupported parameter", values[1])
 	}
 }
+
+func TestCANopenClientWriteFloat32SetsNominalTarget(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x60, 0x00, 0x26, 0x01, 0, 0, 0, 0}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if err := client.WriteFloat32(context.Background(), 3000, 1, 25.0); err != nil {
+		t.Fatalf("WriteFloat32: %v", err)
+	}
+	if len(fake.sent) != 1 {
+		t.Fatalf("sent=%d, want 1", len(fake.sent))
+	}
+	sent := fake.sent[0]
+	if sent.ID != 0x64b {
+		t.Fatalf("sent ID=0x%X, want 0x64B", sent.ID)
+	}
+	if sent.Data[0] != 0x23 {
+		t.Fatalf("cmd byte=0x%02X, want 0x23", sent.Data[0])
+	}
+	if got := uint16(sent.Data[1]) | uint16(sent.Data[2])<<8; got != 0x2600 {
+		t.Fatalf("index=0x%04X, want 0x2600", got)
+	}
+	if sent.Data[3] != 0x01 {
+		t.Fatalf("subIndex=0x%02X, want 0x01", sent.Data[3])
+	}
+	gotValue := math.Float32frombits(binary.LittleEndian.Uint32(sent.Data[4:8]))
+	if math.Abs(float64(gotValue)-25.0) > 0.001 {
+		t.Fatalf("payload=%f, want 25.0", gotValue)
+	}
+}
+
+func TestCANopenClientWriteRejectsReadOnlyParam(t *testing.T) {
+	fake := &fakeCANTransceiver{}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if err := client.WriteFloat32(context.Background(), 1000, 1, 25.0); err == nil {
+		t.Fatalf("expected error writing read-only param 1000")
+	}
+	if len(fake.sent) != 0 {
+		t.Fatalf("sent=%d frames; should not transmit for read-only param", len(fake.sent))
+	}
+}

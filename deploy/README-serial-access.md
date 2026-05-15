@@ -16,7 +16,34 @@ sudo udevadm trigger --subsystem-match=tty
 `TAG+="uaccess"` makes systemd-logind grant access to the currently logged-in
 console user automatically — no group membership change needed.
 
-## After the rule is deployed
+## Preferred: one addressed TCP device server
+
+MeCom serial requests include the destination device address in every frame, so
+multiple FTDI-backed controllers can share one LAN TCP listener when the server
+routes by that address. This is the preferred mode because clients only need one
+endpoint and the server still serializes access per physical serial link.
+
+```bash
+go run ./cmd/mecomvseriald \
+  -listen 0.0.0.0:50000 \
+  -route 75=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_A-if00-port0@57600 \
+  -route 76=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_B-if00-port0@57600 \
+  -route 81=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_C-if00-port0@57600 \
+  -route 84=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_D-if00-port0@57600
+```
+
+Clients then use the same TCP target for each addressed controller:
+
+```bash
+./mecomtcppoll \
+  -targets "tcp:127.0.0.1:50000=75,tcp:127.0.0.1:50000=76,tcp:127.0.0.1:50000=81,tcp:127.0.0.1:50000=84" \
+  -interval 2s
+```
+
+## Compatibility fallback: transparent port-per-device bridge
+
+Use this when an existing raw serial client cannot tolerate a device-server
+router and needs exclusive transparent byte-stream access to one physical link.
 
 Start the socat bridges:
 ```bash

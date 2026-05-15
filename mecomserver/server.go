@@ -113,10 +113,16 @@ func DialTarget(target string) (DownstreamDial, error) {
 }
 
 func handleClient(ctx context.Context, conn net.Conn, requests chan<- request, cfg Config) {
+	handleClientWithSelector(ctx, conn, cfg.Logger, func([]byte) (chan<- request, error) {
+		return requests, nil
+	})
+}
+
+func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Logger, selectRequests func([]byte) (chan<- request, error)) {
 	defer conn.Close()
-	if cfg.Logger != nil {
-		cfg.Logger.Printf("client connected remote=%s", conn.RemoteAddr())
-		defer cfg.Logger.Printf("client disconnected remote=%s", conn.RemoteAddr())
+	if logger != nil {
+		logger.Printf("client connected remote=%s", conn.RemoteAddr())
+		defer logger.Printf("client disconnected remote=%s", conn.RemoteAddr())
 	}
 
 	reader := bufio.NewReader(conn)
@@ -126,6 +132,11 @@ func handleClient(ctx context.Context, conn net.Conn, requests chan<- request, c
 			return
 		}
 		if len(frame) == 0 {
+			continue
+		}
+		requests, err := selectRequests(frame)
+		if err != nil {
+			_, _ = conn.Write(deviceServerError(err))
 			continue
 		}
 		result := make(chan response, 1)
