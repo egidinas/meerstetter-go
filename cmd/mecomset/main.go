@@ -52,6 +52,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, "mecomset: -address must be in range 0..255")
 		os.Exit(2)
 	}
+	if err := validateSetOptions(*timeoutFlag); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
 	specs, err := parseSetSpecs(sets)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -63,67 +67,94 @@ func main() {
 	}
 }
 
+func validateSetOptions(timeout time.Duration) error {
+	if timeout <= 0 {
+		return fmt.Errorf("mecomset: -timeout must be positive")
+	}
+	return nil
+}
+
 func run(ctx context.Context, targets []string, address int, specs []setSpec, timeout time.Duration, verify, save, reset bool) error {
 	var failures int
 	for _, target := range targets {
-		conn, err := dial(ctx, target, timeout)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s connect_error=%q\n", target, err)
-			failures++
-			continue
-		}
-		client := mecom.NewClient(conn, mecom.ClientConfig{Address: byte(address), Timeout: timeout})
-		for _, spec := range specs {
-			reqCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-			err := client.WriteInt32(reqCtx, spec.ParamID, spec.Instance, spec.Value)
-			cancel()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s param=%d instance=%d write_error=%q\n", target, spec.ParamID, spec.Instance, err)
-				failures++
-				continue
-			}
-			if !verify {
-				fmt.Printf("%s param=%d instance=%d wrote=%d\n", target, spec.ParamID, spec.Instance, spec.Value)
-				continue
-			}
-			reqCtx, cancel = context.WithTimeout(ctx, 2*time.Second)
-			got, err := client.ReadInt32(reqCtx, spec.ParamID, spec.Instance)
-			cancel()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s param=%d instance=%d verify_error=%q\n", target, spec.ParamID, spec.Instance, err)
-				failures++
-				continue
-			}
-			fmt.Printf("%s param=%d instance=%d wrote=%d verify=%d\n", target, spec.ParamID, spec.Instance, spec.Value, got)
-		}
-		if save {
-			reqCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := client.SaveToFlash(reqCtx)
-			cancel()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s save_error=%q\n", target, err)
-				failures++
-			} else {
-				fmt.Printf("%s save=ack\n", target)
-			}
-		}
-		if reset {
-			reqCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := client.Reset(reqCtx)
-			cancel()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s reset_error=%q\n", target, err)
-				failures++
-			} else {
-				fmt.Printf("%s reset=ack\n", target)
-			}
-		}
-		_ = conn.Close()
+		failures += runTarget(ctx, target, address, specs, timeout, verify, save, reset)
 	}
 	if failures > 0 {
 		return fmt.Errorf("mecomset: %d operation(s) failed", failures)
 	}
 	return nil
+}
+
+func runTarget(ctx context.Context, target string, address int, specs []setSpec, timeout time.Duration, verify, save, reset bool) (failures int) {
+	targetFailed := false
+	conn, err := dial(ctx, target, timeout)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s connect_error=%q\n", target, err)
+		return 1
+	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "%s close_error=%q\n", target, err)
+			failures++
+		}
+	}()
+
+	client := mecom.NewClient(conn, mecom.ClientConfig{Address: byte(address), Timeout: timeout})
+	for _, spec := range specs {
+		reqCtx, cancel := context.WithTimeout(ctx, timeout)
+		err := client.WriteInt32(reqCtx, spec.ParamID, spec.Instance, spec.Value)
+		cancel()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s param=%d instance=%d write_error=%q\n", target, spec.ParamID, spec.Instance, err)
+			failures++
+			targetFailed = true
+			continue
+		}
+		if !verify {
+			fmt.Printf("%s param=%d instance=%d wrote=%d\n", target, spec.ParamID, spec.Instance, spec.Value)
+			continue
+		}
+		reqCtx, cancel = context.WithTimeout(ctx, timeout)
+		got, err := client.ReadInt32(reqCtx, spec.ParamID, spec.Instance)
+		cancel()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s param=%d instance=%d verify_error=%q\n", target, spec.ParamID, spec.Instance, err)
+			failures++
+			targetFailed = true
+			continue
+		}
+		if got != spec.Value {
+			fmt.Fprintf(os.Stderr, "%s param=%d instance=%d verify_mismatch=%d want=%d\n", target, spec.ParamID, spec.Instance, got, spec.Value)
+			failures++
+			targetFailed = true
+			continue
+		}
+		fmt.Printf("%s param=%d instance=%d wrote=%d verify=%d\n", target, spec.ParamID, spec.Instance, spec.Value, got)
+	}
+	if !targetFailed && save {
+		reqCtx, cancel := context.WithTimeout(ctx, timeout)
+		err := client.SaveToFlash(reqCtx)
+		cancel()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s save_error=%q\n", target, err)
+			failures++
+			targetFailed = true
+		} else {
+			fmt.Printf("%s save=ack\n", target)
+		}
+	}
+	if !targetFailed && reset {
+		reqCtx, cancel := context.WithTimeout(ctx, timeout)
+		err := client.Reset(reqCtx)
+		cancel()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s reset_error=%q\n", target, err)
+			failures++
+		} else {
+			fmt.Printf("%s reset=ack\n", target)
+		}
+	}
+	return failures
 }
 
 func dial(ctx context.Context, target string, timeout time.Duration) (net.Conn, error) {

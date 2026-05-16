@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net"
 	"strings"
 	"testing"
 	"time"
@@ -136,6 +137,44 @@ func TestClientReadBulk(t *testing.T) {
 	}
 	if !strings.Contains(rw.written.String(), "?VX0203E80107D001") {
 		t.Fatalf("request = %q", rw.written.String())
+	}
+}
+
+func TestClientRecoversAfterTimedOutRead(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	defer clientConn.Close()
+	defer serverConn.Close()
+
+	client := NewClient(clientConn, ClientConfig{Address: 0x50, Timeout: 20 * time.Millisecond})
+	firstRead := make(chan struct{})
+	go func() {
+		defer close(firstRead)
+		_, _ = readFrame(serverConn)
+	}()
+	if _, err := client.ReadFloat32(context.Background(), 1000, 1); err == nil {
+		t.Fatal("expected first read to time out")
+	}
+	<-firstRead
+
+	secondDone := make(chan error, 1)
+	go func() {
+		_, err := readFrame(serverConn)
+		if err != nil {
+			secondDone <- err
+			return
+		}
+		_, err = serverConn.Write(responseFrame("!500002+41CC0000"))
+		secondDone <- err
+	}()
+	got, err := client.ReadFloat32(context.Background(), 1000, 1)
+	if err != nil {
+		t.Fatalf("second read failed after timeout: %v", err)
+	}
+	if got != 25.5 {
+		t.Fatalf("second value = %v", got)
+	}
+	if err := <-secondDone; err != nil {
+		t.Fatalf("server side failed: %v", err)
 	}
 }
 

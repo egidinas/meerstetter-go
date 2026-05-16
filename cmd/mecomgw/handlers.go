@@ -258,10 +258,18 @@ func (s *server) handleLeaseAcquire(w http.ResponseWriter, r *http.Request, devi
 	writeJSON(w, http.StatusOK, lease)
 }
 
-func (s *server) handleLeaseRelease(w http.ResponseWriter, r *http.Request, _ string) {
+func (s *server) handleLeaseRelease(w http.ResponseWriter, r *http.Request, deviceID string) {
+	if _, ok := s.devices[deviceID]; !ok {
+		http.Error(w, "unknown device", http.StatusNotFound)
+		return
+	}
 	token := strings.TrimSpace(r.Header.Get("X-Lease-Token"))
 	if token == "" {
 		http.Error(w, "X-Lease-Token header required", http.StatusBadRequest)
+		return
+	}
+	if err := s.leases.Validate(deviceID, token); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	if err := s.leases.Release(token); err != nil {
@@ -280,12 +288,12 @@ type writeRequest struct {
 }
 
 func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID string) {
-	b, err := s.bind(deviceID)
+	bound, err := s.bind(deviceID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	if b.commander == nil {
+	if bound.commander == nil {
 		http.Error(w, "device transport does not support writes", http.StatusUnprocessableEntity)
 		return
 	}
@@ -309,10 +317,10 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 		Metadata:  req.Metadata,
 	}
 	tc.EnsureIdempotencyKey()
-	ev, err := b.commander.Send(tc)
+	ev, err := bound.commander.Send(tc)
 	if err != nil {
-		if errors.Is(err, mecom.ErrUnreachable) || errors.Is(err, mecom.ErrTimeout) {
-			s.resetDeviceBinding(deviceID, err)
+		if shouldResetDeviceBinding(err) {
+			s.resetDeviceBinding(deviceID, bound.client, err)
 		}
 		if errors.Is(err, writelease.ErrInvalidToken) || errors.Is(err, writelease.ErrUnknownDevice) || errors.Is(err, writelease.ErrExpired) {
 			writeJSON(w, http.StatusLocked, map[string]any{"error": err.Error(), "event": ev})
@@ -327,7 +335,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 // --- read ---
 
 func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID string) {
-	b, err := s.bind(deviceID)
+	bound, err := s.bind(deviceID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -339,10 +347,10 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	out, err := readGatewayValues(ctx, b.client, params)
+	out, err := readGatewayValues(ctx, bound.client, params)
 	if err != nil {
 		if shouldResetDeviceBinding(err) {
-			s.resetDeviceBinding(deviceID, err)
+			s.resetDeviceBinding(deviceID, bound.client, err)
 		}
 		http.Error(w, err.Error(), httpStatusForError(err))
 		return
@@ -405,7 +413,7 @@ func gatewayValueFromFloat(p mecom.Parameter, value float64) gatewayReadValue {
 // --- poll (SSE) ---
 
 func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID string) {
-	b, err := s.bind(deviceID)
+	bound, err := s.bind(deviceID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -436,7 +444,11 @@ func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID 
 	w.Header().Set("Connection", "keep-alive")
 	flusher.Flush()
 
-	sub := mecom.NewSubscriber(b.client, mecom.SubscriberConfig{
+	sub := mecom.NewSubscriber(gatewayResetReadClient{
+		server:   s,
+		deviceID: deviceID,
+		client:   bound.client,
+	}, mecom.SubscriberConfig{
 		TargetID:   deviceID,
 		Parameters: params,
 		Interval:   interval,
@@ -453,6 +465,36 @@ func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID 
 		}
 		flusher.Flush()
 	}
+}
+
+type gatewayResetReadClient struct {
+	server   *server
+	deviceID string
+	client   mecom.ReadClient
+}
+
+func (c gatewayResetReadClient) ReadBulk(ctx context.Context, params []mecom.Parameter) ([]float64, error) {
+	values, err := c.client.ReadBulk(ctx, params)
+	if err != nil && shouldResetDeviceBinding(err) {
+		c.server.resetDeviceBinding(c.deviceID, c.client, err)
+	}
+	return values, err
+}
+
+func (c gatewayResetReadClient) ConfigureRingCapture(ctx context.Context, captureID uint16, params []mecom.RingCaptureParameter) error {
+	return c.client.ConfigureRingCapture(ctx, captureID, params)
+}
+
+func (c gatewayResetReadClient) TriggerRingSync(ctx context.Context) error {
+	return c.client.TriggerRingSync(ctx)
+}
+
+func (c gatewayResetReadClient) ReadRingPointer(ctx context.Context) (uint32, error) {
+	return c.client.ReadRingPointer(ctx)
+}
+
+func (c gatewayResetReadClient) ReadRingChunk(ctx context.Context, offset uint32, maxBytes uint16) (mecom.RingReadResponse, error) {
+	return c.client.ReadRingChunk(ctx, offset, maxBytes)
 }
 
 // --- helpers ---
@@ -480,12 +522,30 @@ func parseParamsQuery(raw string) ([]mecom.Parameter, error) {
 		if err != nil {
 			return nil, fmt.Errorf("param %q: invalid instance: %v", part, err)
 		}
-		out = append(out, mecom.Parameter{ID: id, Instance: instance, Type: mecom.DataTypeFloat32})
+		if instance < 1 || instance > 255 {
+			return nil, fmt.Errorf("param %q: instance must be in range 1..255", part)
+		}
+		param, ok := gatewayParameterByID(id)
+		if !ok {
+			return nil, fmt.Errorf("param %q: unknown id", part)
+		}
+		param.Instance = instance
+		out = append(out, param)
 	}
 	if len(out) == 0 {
 		return nil, fmt.Errorf("no params parsed")
 	}
 	return out, nil
+}
+
+func gatewayParameterByID(id int) (mecom.Parameter, bool) {
+	for _, readout := range mecom.DefaultTECReadoutParameters(1) {
+		if readout.Parameter.ID == id {
+			param := readout.Parameter
+			return param, true
+		}
+	}
+	return mecom.Parameter{}, false
 }
 
 func httpStatusForError(err error) int {

@@ -135,6 +135,12 @@ type deviceBinding struct {
 	lastErr   error
 }
 
+type deviceBindingSnapshot struct {
+	binding   *deviceBinding
+	client    mecom.DeviceClient
+	commander *mecom.Commander
+}
+
 func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server {
 	s := &server{
 		devices:         make(map[string]*deviceBinding, len(cfg.Devices)),
@@ -148,19 +154,19 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 	return s
 }
 
-func (s *server) bind(id string) (*deviceBinding, error) {
+func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 	b, ok := s.devices[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown device %q", id)
+		return deviceBindingSnapshot{}, fmt.Errorf("unknown device %q", id)
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.client != nil {
-		return b, nil
+		return deviceBindingSnapshot{binding: b, client: b.client, commander: b.commander}, nil
 	}
 	ep, ok := mecom.ParseEndpoint(b.cfg.Endpoint)
 	if !ok {
-		return nil, fmt.Errorf("device %q: invalid endpoint %q", b.cfg.ID, b.cfg.Endpoint)
+		return deviceBindingSnapshot{}, fmt.Errorf("device %q: invalid endpoint %q", b.cfg.ID, b.cfg.Endpoint)
 	}
 	client, err := mecom.NewForEndpoint(context.Background(), ep, mecom.ClientConfig{
 		Address: b.cfg.Address,
@@ -168,7 +174,7 @@ func (s *server) bind(id string) (*deviceBinding, error) {
 	}, socketCANDialer)
 	if err != nil {
 		b.lastErr = err
-		return nil, err
+		return deviceBindingSnapshot{}, err
 	}
 	b.client = client
 	if writer, ok := client.(mecom.WriteClient); ok {
@@ -177,16 +183,19 @@ func (s *server) bind(id string) (*deviceBinding, error) {
 		cmdr.Authorizer = mecom.AuthorizerFunc(s.authorize)
 		b.commander = cmdr
 	}
-	return b, nil
+	return deviceBindingSnapshot{binding: b, client: b.client, commander: b.commander}, nil
 }
 
-func (s *server) resetDeviceBinding(id string, cause error) {
+func (s *server) resetDeviceBinding(id string, failed mecom.ReadClient, cause error) {
 	b, ok := s.devices[id]
 	if !ok {
 		return
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
+	if failed != nil && b.client != failed {
+		return
+	}
 	if b.client != nil {
 		_ = b.client.Close()
 	}

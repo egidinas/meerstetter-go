@@ -8,7 +8,6 @@ import (
 	"math"
 	"net"
 	"os"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -57,6 +56,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
+	mode := strings.ToLower(strings.TrimSpace(*modeFlag))
+	if err := validateProbeOptions(*addressFlag, mode, *chunkFlag, *timeoutFlag); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
 	params, err := loadParameters(*paramsPath)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -66,12 +70,28 @@ func main() {
 		params = params[:*limitFlag]
 	}
 
-	results := scan(context.Background(), targets, *addressFlag, instances, params, *modeFlag, *chunkFlag, *timeoutFlag)
+	results := scan(context.Background(), targets, *addressFlag, instances, params, mode, *chunkFlag, *timeoutFlag)
 	if err := writeResults(*outPath, results); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	printSummary(results)
+}
+
+func validateProbeOptions(address int, mode string, chunkSize int, timeout time.Duration) error {
+	if address < 0 || address > 255 {
+		return fmt.Errorf("mecomprobe: -address must be in range 0..255")
+	}
+	if mode != "bulk" && mode != "single" {
+		return fmt.Errorf("mecomprobe: -mode must be bulk or single")
+	}
+	if chunkSize <= 0 || chunkSize > 255 {
+		return fmt.Errorf("mecomprobe: -chunk must be in range 1..255")
+	}
+	if timeout <= 0 {
+		return fmt.Errorf("mecomprobe: -timeout must be positive")
+	}
+	return nil
 }
 
 func scan(ctx context.Context, targets []string, address int, instances []int, params []parameterDef, mode string, chunkSize int, timeout time.Duration) []result {
@@ -82,8 +102,10 @@ func scan(ctx context.Context, targets []string, address int, instances []int, p
 	for _, target := range targets {
 		conn, err := dial(ctx, target, timeout)
 		if err != nil {
-			for _, param := range params {
-				results = append(results, result{Target: target, Address: address, Instance: instances[0], Param: param, Error: err.Error()})
+			for _, instance := range instances {
+				for _, param := range params {
+					results = append(results, result{Target: target, Address: address, Instance: instance, Param: param, Error: err.Error()})
+				}
 			}
 			continue
 		}
@@ -91,7 +113,7 @@ func scan(ctx context.Context, targets []string, address int, instances []int, p
 		for _, instance := range instances {
 			if strings.EqualFold(mode, "single") {
 				for _, param := range params {
-					results = append(results, readOne(ctx, client, target, address, instance, param))
+					results = append(results, readOne(ctx, client, target, address, instance, param, timeout))
 				}
 			} else {
 				for start := 0; start < len(params); start += chunkSize {
@@ -99,7 +121,7 @@ func scan(ctx context.Context, targets []string, address int, instances []int, p
 					if end > len(params) {
 						end = len(params)
 					}
-					results = append(results, readChunk(ctx, client, target, address, instance, params[start:end])...)
+					results = append(results, readChunk(ctx, client, target, address, instance, params[start:end], timeout)...)
 				}
 			}
 		}
@@ -108,14 +130,29 @@ func scan(ctx context.Context, targets []string, address int, instances []int, p
 	return results
 }
 
-func readChunk(ctx context.Context, client *mecom.Client, target string, address, instance int, params []parameterDef) []result {
+func readChunk(ctx context.Context, client *mecom.Client, target string, address, instance int, params []parameterDef, timeout time.Duration) []result {
 	out := make([]result, 0, len(params))
 	req := make([]mecom.Parameter, 0, len(params))
+	hasUnsupported := false
 	for _, param := range params {
-		req = append(req, mecom.Parameter{ID: param.ID, Instance: instance, Type: dataTypeForFormat(param.Format)})
 		out = append(out, result{Target: target, Address: address, Instance: instance, Param: param})
+		dataType, ok := dataTypeForFormat(param.Format)
+		if !ok {
+			out[len(out)-1].Error = fmt.Sprintf("unsupported registry format %q", param.Format)
+			hasUnsupported = true
+			continue
+		}
+		req = append(req, mecom.Parameter{ID: param.ID, Instance: instance, Type: dataType})
 	}
-	reqCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	if hasUnsupported {
+		for i := range out {
+			if out[i].Error == "" {
+				out[i].Error = "bulk read skipped because chunk contains unsupported registry format"
+			}
+		}
+		return out
+	}
+	reqCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	values, err := client.ReadBulk(reqCtx, req)
 	if err != nil {
@@ -142,11 +179,15 @@ func dial(ctx context.Context, target string, timeout time.Duration) (net.Conn, 
 	return mecom.Dial(ctx, ep, timeout)
 }
 
-func dataTypeForFormat(format string) mecom.DataType {
-	if strings.EqualFold(format, "INT32") {
-		return mecom.DataTypeInt32
+func dataTypeForFormat(format string) (mecom.DataType, bool) {
+	switch strings.ToUpper(format) {
+	case "INT32":
+		return mecom.DataTypeInt32, true
+	case "FLOAT32":
+		return mecom.DataTypeFloat32, true
+	default:
+		return "", false
 	}
-	return mecom.DataTypeFloat32
 }
 
 func formatValue(value float64, format string) string {
@@ -156,9 +197,9 @@ func formatValue(value float64, format string) string {
 	return strconv.FormatFloat(value, 'g', -1, 64)
 }
 
-func readOne(ctx context.Context, client *mecom.Client, target string, address, instance int, param parameterDef) result {
+func readOne(ctx context.Context, client *mecom.Client, target string, address, instance int, param parameterDef, timeout time.Duration) result {
 	res := result{Target: target, Address: address, Instance: instance, Param: param}
-	reqCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	reqCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	switch strings.ToUpper(param.Format) {
 	case "INT32":
@@ -168,34 +209,33 @@ func readOne(ctx context.Context, client *mecom.Client, target string, address, 
 			return res
 		}
 		res.Value = strconv.FormatInt(int64(v), 10)
-	default:
+	case "FLOAT32":
 		v, err := client.ReadFloat32(reqCtx, param.ID, instance)
 		if err != nil {
 			res.Error = err.Error()
 			return res
 		}
 		res.Value = formatValue(v, param.Format)
+	default:
+		res.Error = fmt.Sprintf("unsupported registry format %q", param.Format)
 	}
 	return res
 }
 
 func loadParameters(path string) ([]parameterDef, error) {
-	raw, err := os.ReadFile(path)
+	defs, err := mecomdict.LoadParameterRegistry(path)
 	if err != nil {
 		return nil, err
 	}
-	re := regexp.MustCompile(`\{ID:\s*([0-9]+),\s*Name:\s*"([^"]+)",\s*Format:\s*"([^"]+)"\}`)
-	matches := re.FindAllStringSubmatch(string(raw), -1)
+	if len(defs) == 0 {
+		return nil, fmt.Errorf("mecomprobe: no parameters parsed from %s", path)
+	}
 	byID := make(map[int]parameterDef)
-	for _, match := range matches {
-		id, err := strconv.Atoi(match[1])
-		if err != nil {
-			return nil, err
-		}
-		if _, ok := byID[id]; ok {
+	for _, def := range defs {
+		if _, ok := byID[def.ID]; ok {
 			continue
 		}
-		byID[id] = parameterDef{ID: id, Name: match[2], Format: match[3]}
+		byID[def.ID] = parameterDef{ID: def.ID, Name: def.Name, Format: def.Format}
 	}
 	params := make([]parameterDef, 0, len(byID))
 	for _, param := range byID {
@@ -234,17 +274,20 @@ func parseInstances(v string) ([]int, error) {
 
 func writeResults(path string, results []result) error {
 	w := os.Stdout
+	var file *os.File
 	if path != "" {
 		f, err := os.Create(path)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		file = f
 		w = f
 	}
 	cw := csv.NewWriter(w)
-	defer cw.Flush()
 	if err := cw.Write([]string{"target", "address", "instance", "parameter_id", "name", "format", "value", "error"}); err != nil {
+		if file != nil {
+			_ = file.Close()
+		}
 		return err
 	}
 	for _, res := range results {
@@ -258,10 +301,23 @@ func writeResults(path string, results []result) error {
 			res.Value,
 			res.Error,
 		}); err != nil {
+			if file != nil {
+				_ = file.Close()
+			}
 			return err
 		}
 	}
-	return cw.Error()
+	cw.Flush()
+	if err := cw.Error(); err != nil {
+		if file != nil {
+			_ = file.Close()
+		}
+		return err
+	}
+	if file != nil {
+		return file.Close()
+	}
+	return nil
 }
 
 func printSummary(results []result) {

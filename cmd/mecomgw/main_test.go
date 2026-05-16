@@ -125,11 +125,60 @@ func TestParseParamsQuery(t *testing.T) {
 	if len(params) != 2 || params[0].ID != 1000 || params[0].Instance != 1 || params[1].ID != 1021 || params[1].Instance != 2 {
 		t.Fatalf("unexpected params: %+v", params)
 	}
+	intParams, err := parseParamsQuery("1200:4")
+	if err != nil {
+		t.Fatalf("parseParamsQuery int param returned error: %v", err)
+	}
+	if intParams[0].Type != mecom.DataTypeInt32 {
+		t.Fatalf("param 1200 type = %s, want %s", intParams[0].Type, mecom.DataTypeInt32)
+	}
 
-	for _, raw := range []string{"", "1000", "x:1", "1000:x"} {
+	for _, raw := range []string{"", "1000", "x:1", "1000:x", "1000:0", "1000:-1", "1000:256", "999999:1"} {
 		if _, err := parseParamsQuery(raw); err == nil {
 			t.Fatalf("parseParamsQuery(%q) returned nil error", raw)
 		}
+	}
+}
+
+func TestLeaseReleaseRequiresPathDeviceMatch(t *testing.T) {
+	cfg := testConfig()
+	cfg.Devices = append(cfg.Devices, DeviceConfig{
+		ID:       "tec-76",
+		Endpoint: "tcp:127.0.0.1:50001",
+		Address:  76,
+		Label:    "TEC 76",
+	})
+	s := newServer(cfg, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	lease := postLease(t, ts.URL+"/api/devices/tec-75/lease", `{"holder":"operator","ttl":"1m"}`)
+	req, err := http.NewRequest(http.MethodDelete, ts.URL+"/api/devices/tec-76/lease", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", lease.Token)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("wrong-device DELETE lease status = %d, want %d", resp.StatusCode, http.StatusNotFound)
+	}
+
+	req, err = http.NewRequest(http.MethodDelete, ts.URL+"/api/devices/tec-75/lease", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", lease.Token)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("matching DELETE lease status = %d, want %d", resp.StatusCode, http.StatusNoContent)
 	}
 }
 

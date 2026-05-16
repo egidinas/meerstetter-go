@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"math"
+	"net"
 	"strconv"
 	"strings"
 	"sync"
@@ -713,27 +715,27 @@ func (c *Client) roundTrip(ctx context.Context, frame []byte) ([]byte, error) {
 	if _, err := c.rw.Write(frame); err != nil {
 		return nil, err
 	}
-	done := make(chan struct {
-		raw []byte
-		err error
-	}, 1)
-	go func() {
-		raw, err := readFrame(c.rw)
-		done <- struct {
-			raw []byte
-			err error
-		}{raw: raw, err: err}
-	}()
-	timer := time.NewTimer(c.timeout)
-	defer timer.Stop()
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case <-timer.C:
-		return nil, fmt.Errorf("mecom: response timeout after %s", c.timeout)
-	case result := <-done:
-		return result.raw, result.err
+	if deadlineRW, ok := c.rw.(interface{ SetReadDeadline(time.Time) error }); ok {
+		deadline := time.Now().Add(c.timeout)
+		if ctxDeadline, ok := ctx.Deadline(); ok && ctxDeadline.Before(deadline) {
+			deadline = ctxDeadline
+		}
+		if err := deadlineRW.SetReadDeadline(deadline); err != nil {
+			return nil, err
+		}
+		defer deadlineRW.SetReadDeadline(time.Time{})
 	}
+	raw, err := readFrame(c.rw)
+	if err != nil {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, ctxErr
+		}
+		var netErr net.Error
+		if errors.As(err, &netErr) && netErr.Timeout() {
+			return nil, fmt.Errorf("%w after %s", ErrTimeout, c.timeout)
+		}
+	}
+	return raw, err
 }
 
 func (c *Client) nextSeq() uint16 {
