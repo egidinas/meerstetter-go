@@ -21,8 +21,18 @@ func (f Frame) Validate() error {
 	return nil
 }
 
+func validateNodeID(nodeID byte) error {
+	if nodeID == 0 || nodeID > 0x7f {
+		return fmt.Errorf("canopen: node id 0x%02X outside 1..127", nodeID)
+	}
+	return nil
+}
+
 // SDOUploadRequest builds an expedited SDO upload request for one object entry.
-func SDOUploadRequest(nodeID byte, index uint16, subIndex byte) Frame {
+func SDOUploadRequest(nodeID byte, index uint16, subIndex byte) (Frame, error) {
+	if err := validateNodeID(nodeID); err != nil {
+		return Frame{}, err
+	}
 	return Frame{
 		ID: 0x600 + uint32(nodeID),
 		Data: [8]byte{
@@ -32,7 +42,7 @@ func SDOUploadRequest(nodeID byte, index uint16, subIndex byte) Frame {
 			subIndex,
 		},
 		DLC: 8,
-	}
+	}, nil
 }
 
 // SDOAbortError reports an SDO abort response from the server.
@@ -127,6 +137,9 @@ func (r SDOUploadResponse) Byte() (byte, error) {
 // SDODownloadExpeditedRequest builds an expedited SDO download request for up to
 // four payload bytes. The value bytes are little-endian CANopen object bytes.
 func SDODownloadExpeditedRequest(nodeID byte, index uint16, subIndex byte, value []byte) (Frame, error) {
+	if err := validateNodeID(nodeID); err != nil {
+		return Frame{}, err
+	}
 	if len(value) == 0 || len(value) > 4 {
 		return Frame{}, fmt.Errorf("canopen: expedited SDO payload must have 1..4 bytes, got %d", len(value))
 	}

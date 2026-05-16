@@ -2,12 +2,16 @@ package canopen
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"testing"
 )
 
 func TestSDOUploadRequest(t *testing.T) {
-	frame := SDOUploadRequest(0x2A, 0x3000, 0x01)
+	frame, err := SDOUploadRequest(0x2A, 0x3000, 0x01)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if frame.ID != 0x62A {
 		t.Fatalf("id = 0x%X", frame.ID)
 	}
@@ -22,6 +26,30 @@ func TestSDOUploadRequest(t *testing.T) {
 	}
 }
 
+func TestSDOUploadRequestRejectsInvalidNodeID(t *testing.T) {
+	for _, nodeID := range []byte{0, 0x80, 0xff} {
+		t.Run(fmt.Sprintf("0x%02X", nodeID), func(t *testing.T) {
+			if _, err := SDOUploadRequest(nodeID, 0x3000, 0x01); err == nil {
+				t.Fatal("expected invalid node id error")
+			}
+		})
+	}
+}
+
+func TestSDOUploadRequestAcceptsBoundaryNodeID(t *testing.T) {
+	for _, nodeID := range []byte{1, 0x7f} {
+		t.Run(fmt.Sprintf("0x%02X", nodeID), func(t *testing.T) {
+			frame, err := SDOUploadRequest(nodeID, 0x3000, 0x01)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if frame.ID != 0x600+uint32(nodeID) {
+				t.Fatalf("id = 0x%X", frame.ID)
+			}
+		})
+	}
+}
+
 func TestSDODownloadExpeditedRequest(t *testing.T) {
 	frame, err := SDODownloadExpeditedRequest(0x2A, 0x3000, 0x01, []byte{0x00, 0x00, 0xCC, 0x41})
 	if err != nil {
@@ -32,6 +60,30 @@ func TestSDODownloadExpeditedRequest(t *testing.T) {
 	}
 	if frame.Data[4] != 0x00 || frame.Data[7] != 0x41 {
 		t.Fatalf("value bytes = % X", frame.Data[4:8])
+	}
+}
+
+func TestSDODownloadExpeditedRequestRejectsInvalidNodeID(t *testing.T) {
+	for _, nodeID := range []byte{0, 0x80, 0xff} {
+		t.Run(fmt.Sprintf("0x%02X", nodeID), func(t *testing.T) {
+			if _, err := SDODownloadExpeditedRequest(nodeID, 0x3000, 0x01, []byte{0x01}); err == nil {
+				t.Fatal("expected invalid node id error")
+			}
+		})
+	}
+}
+
+func TestSDODownloadExpeditedRequestAcceptsBoundaryNodeID(t *testing.T) {
+	for _, nodeID := range []byte{1, 0x7f} {
+		t.Run(fmt.Sprintf("0x%02X", nodeID), func(t *testing.T) {
+			frame, err := SDODownloadExpeditedRequest(nodeID, 0x3000, 0x01, []byte{0x01})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if frame.ID != 0x600+uint32(nodeID) {
+				t.Fatalf("id = 0x%X", frame.ID)
+			}
+		})
 	}
 }
 

@@ -276,7 +276,11 @@ func listenFor(conn *socketcan.Conn, window time.Duration, res *result, maxPrint
 }
 
 func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout time.Duration, res *result, sink frameSink) {
-	req := canopen.SDOUploadRequest(node, probe.Index, probe.SubIndex)
+	req, err := canopen.SDOUploadRequest(node, probe.Index, probe.SubIndex)
+	if err != nil {
+		fmt.Printf("tx-error sdo node=0x%02X 0x%04X:%02X %v\n", node, probe.Index, probe.SubIndex, err)
+		return
+	}
 	fmt.Printf("tx sdo node=0x%02X %s 0x%04X:%02X %s\n", node, probe.Label, probe.Index, probe.SubIndex, formatFrame(req))
 	if err := conn.Send(req); err != nil {
 		fmt.Printf("tx-error sdo node=0x%02X 0x%04X:%02X %v\n", node, probe.Index, probe.SubIndex, err)

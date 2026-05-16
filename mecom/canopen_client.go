@@ -160,7 +160,10 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	if !ok {
 		return math.NaN(), fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
-	req := canopen.SDOUploadRequest(c.node, object.index, object.subIndex)
+	req, err := canopen.SDOUploadRequest(c.node, object.index, object.subIndex)
+	if err != nil {
+		return math.NaN(), err
+	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
