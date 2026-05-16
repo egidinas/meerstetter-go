@@ -129,7 +129,7 @@ func gatewayCatalogueKey(id, instance int) string {
 
 func gatewayCatalogueWritable(id int) bool {
 	switch id {
-	case 1020, 1021, 2010, 2040, 3000:
+	case 2010, 2040, 3000:
 		return true
 	default:
 		return false

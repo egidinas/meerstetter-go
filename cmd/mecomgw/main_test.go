@@ -73,7 +73,10 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 		t.Fatal("catalogue response had no parameters")
 	}
 	assertCatalogueWritable(t, catalogue.Parameters, 1000, 1, false)
-	for _, id := range []int{1020, 1021, 2010, 2040, 3000} {
+	for _, id := range []int{1020, 1021} {
+		assertCatalogueWritable(t, catalogue.Parameters, id, 1, false)
+	}
+	for _, id := range []int{2010, 2040, 3000} {
 		assertCatalogueWritable(t, catalogue.Parameters, id, 1, true)
 	}
 

@@ -31,9 +31,9 @@
     { id: 52200, name: "Cascade Temperature",           sid: "cascade_temp_c",       unit: "degC", type: "float32", kind: "continuous", role: "monitor", group: "Thermal", subgroup: "Cascade",   applicableModes: ["temp"], optional: true },
     { id: 1200,  name: "Temperature Is Stable",         sid: "temperature_stable",   unit: "",     type: "int32",   kind: "boolean",    role: "monitor", group: "Status",  subgroup: "Stability", applicableModes: ["temp"], enum: { 0: "Drifting", 1: "Stable" } },
 
-    /* ── Power · output (writable when exposed by gateway) ────── */
-    { id: 1020,  name: "Output Current",                sid: "output_current_a",     unit: "A",    type: "float32", kind: "continuous", role: "control", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], writable: true, cmd: "write_float32", min: -25, max: 25, high_priority: true },
-    { id: 1021,  name: "Output Voltage",                sid: "output_voltage_v",     unit: "V",    type: "float32", kind: "continuous", role: "control", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], writable: true, cmd: "write_float32", min: 0, max: 24, high_priority: true },
+    /* ── Power · output monitor ───────────────────────────────── */
+    { id: 1020,  name: "Output Current",                sid: "output_current_a",     unit: "A",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], high_priority: true },
+    { id: 1021,  name: "Output Voltage",                sid: "output_voltage_v",     unit: "V",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], high_priority: true },
     { id: 1022,  name: "Output Power",                  sid: "output_power_w",       unit: "W",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"] },
     { id: 1500,  name: "Driver Input Voltage",          sid: "driver_input_v",       unit: "V",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Input",     applicableModes: ["temp", "supply"] },
     { id: 1501,  name: "Driver Input Current",          sid: "driver_input_a",       unit: "A",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Input",     applicableModes: ["temp", "supply"] },
@@ -464,7 +464,8 @@
         if (param === 2020) ch.kp = value;
         if (param === 2021) ch.ti = value;
         if (param === 2022) ch.td = value;
-        // 1020/1021 in temp mode: per gateway contract these are writable
+        // 1020/1021 remain observable monitor values in the catalogue; direct
+        // write handling is kept only for older scripted mock events.
         // when exposed but on a TEC channel they map to clamp limits; we
         // log without changing controller setpoints.
       } else {

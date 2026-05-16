@@ -70,8 +70,8 @@ For channels operating as power supplies, graph and tabulate these together:
 
 | Parameter | Signal ID | Series role | Notes |
 |-----------|-----------|-------------|-------|
-| 1021 | `output_voltage_v` | actual/control | Voltage is writable when exposed by gateway. |
-| 1020 | `output_current_a` | actual/control | Current is writable when exposed by gateway. |
+| 1021 | `output_voltage_v` | actual | Measured output voltage; do not expose as a setpoint editor. |
+| 1020 | `output_current_a` | actual | Measured output current; do not expose as a setpoint editor. |
 | 1022 | `output_power_w` | actual | Derived/read power indicator. |
 | 2010 | `output_stage_enable` | status/control | Command card with explicit confirmation. |
 | 2040 | `operating_mode` | status/control | Command card with explicit confirmation. |

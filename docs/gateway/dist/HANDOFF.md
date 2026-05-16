@@ -124,7 +124,7 @@ Pick from these; mark "out of scope" if you choose not to do something:
   values via SSE `/poll`. Show `quality` (ok/nan/missing/unreachable) as a
   badge, not as the value itself.
 - **Setpoint editor** — for writable parameters (catalogue field
-  `writable: true` — currently `param 3000`, `1020`, `1021`, `2010`, `2040`),
+  `writable: true` — currently `param 3000`, `2010`, `2040`),
   show current value plus a form that calls `/write`. Must:
   1. acquire a lease first (`POST /lease` with a `holder` identifier),
   2. attach `X-Lease-Token` on every write,
