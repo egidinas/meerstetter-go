@@ -48,3 +48,18 @@ func TestParseBuildsObjectDictionary(t *testing.T) {
 		t.Fatalf("min = %#v", entry.Min)
 	}
 }
+
+func TestParseAcceptsLongMetadataValues(t *testing.T) {
+	longDescription := strings.Repeat("calibration", 7000)
+	fixture := "[FileInfo]\nDescription=" + longDescription + "\n\n" +
+		"[DeviceInfo]\nProductName=TEC-Controllers\n\n" +
+		"[2000]\nParameterName=Device Type\nDataType=0x0007\nAccessType=ro\n"
+
+	dict, err := Parse(strings.NewReader(fixture))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dict.Metadata["Description"] != longDescription {
+		t.Fatalf("description length = %d", len(dict.Metadata["Description"]))
+	}
+}

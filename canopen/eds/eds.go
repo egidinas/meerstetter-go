@@ -11,6 +11,8 @@ import (
 	"github.com/egidinas/meerstetter-go/objectdict"
 )
 
+const maxEDSLineBytes = 16 * 1024 * 1024
+
 // Parse reads a CANopen EDS file and returns a semantic object dictionary.
 func Parse(r io.Reader) (*objectdict.Dictionary, error) {
 	sections, order, err := parseINI(r)
@@ -93,6 +95,7 @@ func parseINI(r io.Reader) (map[string]map[string]string, []string, error) {
 	var order []string
 	current := ""
 	scanner := bufio.NewScanner(r)
+	scanner.Buffer(make([]byte, 0, 64*1024), maxEDSLineBytes)
 	lineNo := 0
 	for scanner.Scan() {
 		lineNo++
