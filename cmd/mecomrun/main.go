@@ -36,7 +36,7 @@ import (
 
 func main() {
 	target := flag.String("target", "", "MeCom endpoint (serial:/dev/ttyUSB0@57600 | tcp:host:port | can:can0/0x4b)")
-	addr := flag.Int("address", 0, "MeCom device address for ASCII (ignored for can:); 0 means broadcast")
+	addr := flag.Int("address", 0, "MeCom device address for ASCII; 0 means broadcast; must be omitted for can:")
 	scriptPath := flag.String("script", "", "path to a sequencer.Script JSON file (- for stdin)")
 	timeout := flag.Duration("timeout", 2*time.Second, "per-command timeout")
 	dryRun := flag.Bool("dry-run", false, "parse and print the script, do not execute")
@@ -68,12 +68,17 @@ func main() {
 		fmt.Fprintf(os.Stderr, "mecomrun: invalid -target %q\n", *target)
 		os.Exit(2)
 	}
+	address, err := validateRunAddress(ep, *addr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "mecomrun: %v\n", err)
+		os.Exit(2)
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	client, err := mecom.NewForEndpoint(ctx, ep, mecom.ClientConfig{
-		Address: byte(*addr),
+		Address: address,
 		Timeout: *timeout,
 	}, socketCANDialer)
 	if err != nil {
@@ -108,6 +113,19 @@ func main() {
 	if !result.OK {
 		os.Exit(1)
 	}
+}
+
+func validateRunAddress(ep mecom.Endpoint, address int) (byte, error) {
+	if ep.Network == "can" {
+		if address != 0 {
+			return 0, fmt.Errorf("-address is not used with can: targets; encode the node in -target and leave -address at 0")
+		}
+		return 0, nil
+	}
+	if address < 0 || address > 255 {
+		return 0, fmt.Errorf("-address must be in range 0..255")
+	}
+	return byte(address), nil
 }
 
 func loadScript(path string) (sequencer.Script, error) {
