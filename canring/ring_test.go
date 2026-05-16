@@ -96,6 +96,55 @@ func TestOpenWriterResumesValidRing(t *testing.T) {
 	}
 }
 
+func TestReinitializedRingDoesNotReplayStaleChunks(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "reinit.ring")
+	cfg := Config{
+		Path:       path,
+		SizeBytes:  int64(superblockCount*superblockSize) + 2*minChunkBytes,
+		ChunkBytes: minChunkBytes,
+		Interface:  "can0",
+	}
+	w, err := OpenWriter(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < w.maxRecordsPerChunk(); i++ {
+		frame := canopen.Frame{ID: uint32(0x500 + i), DLC: 1, Data: [8]byte{byte(i)}}
+		if err := w.Append(frame, time.Unix(1700000000, int64(i))); err != nil {
+			t.Fatalf("append %d: %v", i, err)
+		}
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	reinit := cfg
+	reinit.SizeBytes = int64(superblockCount*superblockSize) + 3*minChunkBytes
+	w, err = OpenWriter(reinit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := OpenReader(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	snapshot, err := r.Snapshot(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snapshot.Stats.TotalChunks != 0 {
+		t.Fatalf("total chunks after reinit = %d, want 0", snapshot.Stats.TotalChunks)
+	}
+	if snapshot.ValidChunks != 0 || len(snapshot.Records) != 0 {
+		t.Fatalf("reinitialized ring replayed stale chunks: valid=%d records=%d", snapshot.ValidChunks, len(snapshot.Records))
+	}
+}
+
 func TestReaderSnapshotsCommittedRecordsInSequenceOrder(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "read.ring")
 	cfg := Config{

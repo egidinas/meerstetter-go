@@ -206,15 +206,21 @@ func OpenWriter(cfg Config) (*Writer, error) {
 		start:      time.Now(),
 		buf:        make([]byte, cfg.ChunkBytes),
 	}
-	if h, ok := readLatestHeader(f); ok && h.FileBytes == uint64(fileBytes) && h.ChunkBytes == uint64(cfg.ChunkBytes) && h.ChunkCount == chunkCount {
+	if h, ok := readLatestHeader(f); ok {
 		w.generation = h.Generation
-		w.nextChunk = h.NextChunk % chunkCount
-		w.totalChunks = h.TotalChunks
-		w.totalRecords = h.TotalRecords
-		if w.iface == "" {
-			w.iface = h.Interface
+		if h.FileBytes == uint64(fileBytes) && h.ChunkBytes == uint64(cfg.ChunkBytes) && h.ChunkCount == chunkCount {
+			w.nextChunk = h.NextChunk % chunkCount
+			w.totalChunks = h.TotalChunks
+			w.totalRecords = h.TotalRecords
+			if w.iface == "" {
+				w.iface = h.Interface
+			}
+			return w, nil
 		}
-		return w, nil
+	}
+	if err := clearDataRegion(f, fileBytes); err != nil {
+		_ = f.Close()
+		return nil, err
 	}
 	if err := w.writeHeader(); err != nil {
 		_ = f.Close()
@@ -350,8 +356,12 @@ func (r *Reader) snapshotChunks(limit int) ([]ringChunk, error) {
 }
 
 func (r *Reader) readAllChunks() ([]ringChunk, error) {
-	chunks := make([]ringChunk, 0, r.h.ChunkCount)
-	for i := uint64(0); i < r.h.ChunkCount; i++ {
+	maxChunks := r.h.ChunkCount
+	if r.h.TotalChunks < maxChunks {
+		maxChunks = r.h.TotalChunks
+	}
+	chunks := make([]ringChunk, 0, maxChunks)
+	for i := uint64(0); i < maxChunks; i++ {
 		chunk, ok, err := r.readChunk(i)
 		if err != nil {
 			return nil, err
@@ -361,6 +371,25 @@ func (r *Reader) readAllChunks() ([]ringChunk, error) {
 		}
 	}
 	return chunks, nil
+}
+
+func clearDataRegion(f *os.File, fileBytes int64) error {
+	offset := int64(superblockCount * superblockSize)
+	if fileBytes <= offset {
+		return nil
+	}
+	zeros := make([]byte, minChunkBytes)
+	for offset < fileBytes {
+		n := int64(len(zeros))
+		if remaining := fileBytes - offset; remaining < n {
+			n = remaining
+		}
+		if _, err := f.WriteAt(zeros[:n], offset); err != nil {
+			return err
+		}
+		offset += n
+	}
+	return nil
 }
 
 func (r *Reader) readRecentChunks(limit int) ([]ringChunk, error) {
