@@ -69,7 +69,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	if err := validateRuntimeFlags(*interval, *once); err != nil {
+	if err := validateRuntimeFlags(*interval, *timeout, *once); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
@@ -219,9 +219,12 @@ func parseTargets(v string) ([]deviceTarget, error) {
 	return devices, nil
 }
 
-func validateRuntimeFlags(interval time.Duration, once bool) error {
+func validateRuntimeFlags(interval time.Duration, timeout time.Duration, once bool) error {
 	if !once && interval <= 0 {
 		return fmt.Errorf("interval must be positive in continuous mode")
+	}
+	if timeout <= 0 {
+		return fmt.Errorf("timeout must be positive")
 	}
 	return nil
 }

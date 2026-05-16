@@ -40,14 +40,25 @@ func TestParseTargetsRejectsMismatchedCANEndpointAndSuffix(t *testing.T) {
 }
 
 func TestValidateRuntimeFlagsRejectsNonPositiveContinuousInterval(t *testing.T) {
-	if err := validateRuntimeFlags(0, false); err == nil {
+	if err := validateRuntimeFlags(0, time.Second, false); err == nil {
 		t.Fatal("validateRuntimeFlags accepted zero continuous interval")
 	}
-	if err := validateRuntimeFlags(-time.Second, false); err == nil {
+	if err := validateRuntimeFlags(-time.Second, time.Second, false); err == nil {
 		t.Fatal("validateRuntimeFlags accepted negative continuous interval")
 	}
-	if err := validateRuntimeFlags(0, true); err != nil {
+	if err := validateRuntimeFlags(0, time.Second, true); err != nil {
 		t.Fatalf("validateRuntimeFlags rejected zero interval in once mode: %v", err)
+	}
+}
+
+func TestValidateRuntimeFlagsRejectsNonPositiveTimeout(t *testing.T) {
+	for _, timeout := range []time.Duration{0, -time.Second} {
+		if err := validateRuntimeFlags(time.Second, timeout, false); err == nil {
+			t.Fatalf("validateRuntimeFlags accepted timeout %s in continuous mode", timeout)
+		}
+		if err := validateRuntimeFlags(0, timeout, true); err == nil {
+			t.Fatalf("validateRuntimeFlags accepted timeout %s in once mode", timeout)
+		}
 	}
 }
 
