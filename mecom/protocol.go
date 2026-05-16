@@ -615,7 +615,9 @@ func (c *Client) ReadInt32(ctx context.Context, paramID, instance int) (int32, e
 // ReadBulk reads a chunk of parameters via ?VX. It is the preferred primitive
 // for background round-robin polling.
 func (c *Client) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
-	raw, err := c.roundTrip(ctx, BuildBulkGetFrame(int(c.address), c.nextSeq(), params))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildBulkGetFrame(int(c.address), seq, params), nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -623,7 +625,9 @@ func (c *Client) ReadBulk(ctx context.Context, params []Parameter) ([]float64, e
 }
 
 func (c *Client) ReadRingPointer(ctx context.Context) (uint32, error) {
-	raw, err := c.roundTrip(ctx, BuildRingPointerFrame(int(c.address), c.nextSeq()))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildRingPointerFrame(int(c.address), seq), nil
+	})
 	if err != nil {
 		return 0, err
 	}
@@ -631,7 +635,9 @@ func (c *Client) ReadRingPointer(ctx context.Context) (uint32, error) {
 }
 
 func (c *Client) ReadRingChunk(ctx context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
-	raw, err := c.roundTrip(ctx, BuildRingReadFrame(int(c.address), c.nextSeq(), start, maxBytes))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildRingReadFrame(int(c.address), seq, start, maxBytes), nil
+	})
 	if err != nil {
 		return RingReadResponse{}, err
 	}
@@ -639,11 +645,9 @@ func (c *Client) ReadRingChunk(ctx context.Context, start uint32, maxBytes uint1
 }
 
 func (c *Client) ConfigureRingCapture(ctx context.Context, captureID uint16, params []RingCaptureParameter) error {
-	frame, err := BuildRingCaptureConfigFrame(int(c.address), c.nextSeq(), captureID, params)
-	if err != nil {
-		return err
-	}
-	raw, err := c.roundTrip(ctx, frame)
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildRingCaptureConfigFrame(int(c.address), seq, captureID, params)
+	})
 	if err != nil {
 		return err
 	}
@@ -651,7 +655,9 @@ func (c *Client) ConfigureRingCapture(ctx context.Context, captureID uint16, par
 }
 
 func (c *Client) TriggerRingSync(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, BuildRingTriggerSyncFrame(int(c.address), c.nextSeq()))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildRingTriggerSyncFrame(int(c.address), seq), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -659,7 +665,9 @@ func (c *Client) TriggerRingSync(ctx context.Context) error {
 }
 
 func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
-	raw, err := c.roundTrip(ctx, BuildWriteFloat32Frame(int(c.address), c.nextSeq(), paramID, instance, value))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildWriteFloat32Frame(int(c.address), seq, paramID, instance, value), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -667,7 +675,9 @@ func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value 
 }
 
 func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
-	raw, err := c.roundTrip(ctx, BuildWriteInt32Frame(int(c.address), c.nextSeq(), paramID, instance, value))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildWriteInt32Frame(int(c.address), seq, paramID, instance, value), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -675,7 +685,9 @@ func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value in
 }
 
 func (c *Client) WriteString(ctx context.Context, paramID, instance int, value string) error {
-	raw, err := c.roundTrip(ctx, BuildWriteStringFrame(int(c.address), c.nextSeq(), paramID, instance, value))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildWriteStringFrame(int(c.address), seq, paramID, instance, value), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -683,7 +695,9 @@ func (c *Client) WriteString(ctx context.Context, paramID, instance int, value s
 }
 
 func (c *Client) SaveToFlash(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, BuildSaveToFlashFrame(int(c.address), c.nextSeq()))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildSaveToFlashFrame(int(c.address), seq), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -691,7 +705,9 @@ func (c *Client) SaveToFlash(ctx context.Context) error {
 }
 
 func (c *Client) Reset(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, BuildResetFrame(int(c.address), c.nextSeq()))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildResetFrame(int(c.address), seq), nil
+	})
 	if err != nil {
 		return err
 	}
@@ -699,17 +715,23 @@ func (c *Client) Reset(ctx context.Context) error {
 }
 
 func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
-	raw, err := c.roundTrip(ctx, BuildSingleGetFrame(int(c.address), c.nextSeq(), paramID, instance))
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildSingleGetFrame(int(c.address), seq, paramID, instance), nil
+	})
 	if err != nil {
 		return 0, err
 	}
 	return ParseSingleResponse(raw, dataType)
 }
 
-func (c *Client) roundTrip(ctx context.Context, frame []byte) ([]byte, error) {
+func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]byte, error)) ([]byte, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	frame, err := buildFrame(c.nextSeqLocked())
+	if err != nil {
 		return nil, err
 	}
 	if _, err := c.rw.Write(frame); err != nil {
@@ -738,7 +760,7 @@ func (c *Client) roundTrip(ctx context.Context, frame []byte) ([]byte, error) {
 	return raw, err
 }
 
-func (c *Client) nextSeq() uint16 {
+func (c *Client) nextSeqLocked() uint16 {
 	c.seq++
 	if c.seq == 0 {
 		c.seq = 1

@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -109,6 +110,56 @@ func TestClientReadFloat32(t *testing.T) {
 	}
 	if !strings.Contains(rw.written.String(), "?VR03E801") {
 		t.Fatalf("request = %q", rw.written.String())
+	}
+}
+
+func TestClientConcurrentRequestsAllocateSequenceUnderLock(t *testing.T) {
+	const requests = 32
+	var responses bytes.Buffer
+	for range requests {
+		responses.Write(responseFrame("!500001+41CC0000"))
+	}
+	rw := &scriptedReadWriter{read: &responses}
+	client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})
+
+	var wg sync.WaitGroup
+	errs := make(chan error, requests)
+	for range requests {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := client.ReadFloat32(context.Background(), 1000, 1)
+			errs <- err
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	frames := SplitFrames(rw.written.Bytes())
+	if len(frames) != requests {
+		t.Fatalf("frames = %d, want %d", len(frames), requests)
+	}
+	seen := map[string]bool{}
+	for _, frame := range frames {
+		if len(frame) < 7 {
+			t.Fatalf("short frame %q", frame)
+		}
+		seq := string(frame[3:7])
+		if seen[seq] {
+			t.Fatalf("duplicate sequence %s in %q", seq, rw.written.String())
+		}
+		seen[seq] = true
+	}
+	for i := 1; i <= requests; i++ {
+		seq := fmt.Sprintf("%04X", i)
+		if !seen[seq] {
+			t.Fatalf("missing sequence %s in %q", seq, rw.written.String())
+		}
 	}
 }
 
