@@ -99,10 +99,26 @@ function Panel({ title, meta, right, children, flush, style, className }) {
 /* ============================================================
    SignalForge graph tile adapter + canvas renderer
    ============================================================ */
+const canvasColorCache = new Map();
+
+function canvasThemeKey() {
+  if (typeof document === "undefined") return "ssr";
+  return `${document.documentElement.className}|${document.body ? document.body.className : ""}`;
+}
+
 function canvasCssColor(value, fallback = "#58a6ff") {
   if (!value) return fallback;
   if (typeof value === "string" && !value.includes("var(")) return value;
   if (typeof document === "undefined") return fallback;
+  const cacheKey = `${canvasThemeKey()}|${value}|${fallback}`;
+  if (canvasColorCache.has(cacheKey)) return canvasColorCache.get(cacheKey);
+  const varMatch = typeof value === "string" ? value.match(/^var\(\s*(--[^,\s)]+)/) : null;
+  if (varMatch) {
+    const resolved = getComputedStyle(document.documentElement).getPropertyValue(varMatch[1]).trim();
+    const color = resolved || fallback;
+    canvasColorCache.set(cacheKey, color);
+    return color;
+  }
   const probe = document.createElement("span");
   probe.style.color = value;
   probe.style.position = "absolute";
@@ -110,6 +126,7 @@ function canvasCssColor(value, fallback = "#58a6ff") {
   document.body.appendChild(probe);
   const resolved = getComputedStyle(probe).color || fallback;
   probe.remove();
+  canvasColorCache.set(cacheKey, resolved);
   return resolved;
 }
 
@@ -117,7 +134,7 @@ function seriesRoleColor(role, fallback = "var(--series-actual)") {
   const meta = seriesRoleMeta(role);
   const css = meta.className ? `--series-${meta.className}` : "";
   if (!css || typeof document === "undefined") return fallback;
-  return getComputedStyle(document.documentElement).getPropertyValue(css).trim() || fallback;
+  return canvasCssColor(`var(${css})`, fallback);
 }
 
 function emptyGraphTile(opts = {}) {
@@ -152,11 +169,16 @@ function renderSeriesFromGraphTile(tile) {
   return tile.series.map((s) => {
     const role = s.role || s.seriesRole || "actual";
     const source = (s.source && typeof s.source === "object") ? s.source : {};
-    const history = s.history || {
-      ts: (s.points || []).map((p) => Date.parse(p.timestamp)),
-      v: (s.points || []).map((p) => p.value),
-      q: (s.points || []).map(() => "ok"),
-    };
+    let history = s.history;
+    if (!history) {
+      const points = s.points || [];
+      history = { ts: [], v: [], q: [] };
+      points.forEach((p) => {
+        history.ts.push(Date.parse(p.timestamp));
+        history.v.push(p.value);
+        history.q.push("ok");
+      });
+    }
     return {
       key: s.series_id || s.id || s.key || s.target_id || s.targetId || s.label,
       tileId: tile.tile_id || tile.id || tile.tileId,
@@ -341,24 +363,11 @@ function drawCanvasChart(canvas, orderedSeries, opts = {}) {
     const unit = s.unit || "_";
     const values = (s.history && s.history.v) || [];
     const times = (s.history && s.history.ts) || [];
-    const points = [];
     let latestNumeric = null;
-    values.forEach((value, i) => {
-      if (typeof value !== "number" || Number.isNaN(value)) return;
-      const rawT = (typeof times[i] === "number" && times[i] > 0) ? times[i] : tMax;
-      latestNumeric = { t: rawT, value };
-      if (rawT < tMin) return;
-      points.push({
-        x: xOf(Math.min(Math.max(rawT, tMin), tMax)),
-        y: yOf(unit, value),
-      });
-    });
-    if (!points.length && latestNumeric) {
-      points.push({ x: width - padR - 4, y: yOf(unit, latestNumeric.value) });
-    }
-    if (!points.length) return;
+    let pointCount = 0;
+    let lastX = 0;
+    let lastY = 0;
     const color = canvasCssColor(s.color, seriesRoleColor(s.seriesRole || s.role, "#58a6ff"));
-    const last = points[points.length - 1];
     ctx.save();
     ctx.globalAlpha = roleMeta.opacity;
     ctx.strokeStyle = color;
@@ -367,20 +376,38 @@ function drawCanvasChart(canvas, orderedSeries, opts = {}) {
     const dash = roleMeta.dash ? roleMeta.dash.split(",").map((x) => Number(x.trim())).filter(Number.isFinite) : [];
     ctx.setLineDash(dash);
     ctx.beginPath();
-    if (points.length === 1) {
-      ctx.moveTo(padL, last.y);
-      ctx.lineTo(width - padR, last.y);
-    } else {
-      points.forEach((p, i) => {
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
+    values.forEach((value, i) => {
+      if (typeof value !== "number" || Number.isNaN(value)) return;
+      const rawT = (typeof times[i] === "number" && times[i] > 0) ? times[i] : tMax;
+      latestNumeric = { t: rawT, value };
+      if (rawT < tMin) return;
+      const x = xOf(Math.min(Math.max(rawT, tMin), tMax));
+      const y = yOf(unit, value);
+      if (pointCount === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+      pointCount++;
+      lastX = x;
+      lastY = y;
+    });
+    if (!pointCount && latestNumeric) {
+      lastX = width - padR - 4;
+      lastY = yOf(unit, latestNumeric.value);
+      pointCount = 1;
+    }
+    if (!pointCount) {
+      ctx.restore();
+      return;
+    }
+    if (pointCount === 1) {
+      ctx.beginPath();
+      ctx.moveTo(padL, lastY);
+      ctx.lineTo(width - padR, lastY);
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
     ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.arc(points.length === 1 ? width - padR - 4 : last.x, last.y, points.length === 1 ? 3.2 : 2.8, 0, Math.PI * 2);
+    ctx.arc(pointCount === 1 ? width - padR - 4 : lastX, lastY, pointCount === 1 ? 3.2 : 2.8, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = panel;
     ctx.lineWidth = 1;
@@ -407,10 +434,16 @@ function drawSparklineCanvas(canvas, history, color, showAxis) {
     ctx.stroke();
   }
   const values = (history && history.v) || [];
-  const valid = values.filter((x) => typeof x === "number" && !Number.isNaN(x));
-  if (valid.length < 2) return;
-  const min = Math.min(...valid);
-  const max = Math.max(...valid);
+  let validCount = 0;
+  let min = Infinity;
+  let max = -Infinity;
+  values.forEach((x) => {
+    if (typeof x !== "number" || Number.isNaN(x)) return;
+    validCount++;
+    if (x < min) min = x;
+    if (x > max) max = x;
+  });
+  if (validCount < 2) return;
   const span = max - min || 1;
   const pad = 4;
   const inW = w - pad * 2;
@@ -418,12 +451,17 @@ function drawSparklineCanvas(canvas, history, color, showAxis) {
   ctx.strokeStyle = canvasCssColor(color, "#58a6ff");
   ctx.lineWidth = 1.5;
   ctx.beginPath();
+  let started = false;
   values.forEach((x, i) => {
     if (typeof x !== "number" || Number.isNaN(x)) return;
     const px = pad + (i / Math.max(1, values.length - 1)) * inW;
     const py = pad + inH - ((x - min) / span) * inH;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+    if (!started) {
+      ctx.moveTo(px, py);
+      started = true;
+    } else {
+      ctx.lineTo(px, py);
+    }
   });
   ctx.stroke();
 }
