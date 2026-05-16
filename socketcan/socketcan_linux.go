@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/egidinas/meerstetter-go/canopen"
@@ -24,8 +25,9 @@ const (
 var ErrTimeout = errors.New("socketcan: receive timeout")
 
 type Conn struct {
-	fd    int
-	iface string
+	fd     int
+	iface  string
+	recvMu sync.Mutex
 }
 
 func Open(iface string) (*Conn, error) {
@@ -75,7 +77,12 @@ func (c *Conn) Send(f canopen.Frame) error {
 	return nil
 }
 
+// Recv reads one frame. Concurrent Recv calls on the same Conn are serialized so
+// one caller cannot consume readiness after another caller has returned from poll.
 func (c *Conn) Recv(timeout time.Duration) (canopen.Frame, error) {
+	c.recvMu.Lock()
+	defer c.recvMu.Unlock()
+
 	deadline := time.Time{}
 	if timeout > 0 {
 		deadline = time.Now().Add(timeout)
