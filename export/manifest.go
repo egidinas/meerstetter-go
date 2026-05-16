@@ -136,7 +136,7 @@ func DefaultArchiveManifest() Manifest {
 				Name:         "object_dictionary_snapshots",
 				Purpose:      "Catalogue rows used to interpret telemetry and expose writable paths.",
 				Grain:        "one row per discovered target/parameter/instance",
-				PrimaryKey:   []string{"target_id"},
+				PrimaryKey:   []string{"target_id", "parameter", "instance"},
 				TimeField:    "generated_at",
 				SourceRoutes: []string{"/api/catalogue", "/api/discovery/tree"},
 				Fields: []Field{

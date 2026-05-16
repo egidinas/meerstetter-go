@@ -55,6 +55,9 @@ func TestDefaultArchiveManifestCoversMVPStreams(t *testing.T) {
 	if !hasRoute(objectDictionary, "/api/catalogue") {
 		t.Fatalf("object_dictionary_snapshots routes = %#v, want /api/catalogue", objectDictionary.SourceRoutes)
 	}
+	if got, want := strings.Join(objectDictionary.PrimaryKey, ","), "target_id,parameter,instance"; got != want {
+		t.Fatalf("object_dictionary_snapshots primary key = %q, want %q", got, want)
+	}
 	for _, stream := range manifest.Streams {
 		for _, route := range stream.SourceRoutes {
 			if strings.Contains(strings.ToLower(route), "loom") {

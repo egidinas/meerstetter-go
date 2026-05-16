@@ -762,7 +762,7 @@ const ARCHIVE_MANIFEST = {
       name: "object_dictionary_snapshots",
       purpose: "Catalogue rows used to interpret telemetry and expose writable paths.",
       grain: "one row per discovered target/parameter/instance",
-      primary_key: ["target_id"],
+      primary_key: ["target_id", "parameter", "instance"],
       fields: ["generated_at", "target_id", "device_id", "type", "parameter", "instance", "read_path", "write_path", "writable"],
     },
     {
