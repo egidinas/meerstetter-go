@@ -23,13 +23,19 @@ const (
 
 func TestTelecommandBridgePreservesFieldsAndBoundary(t *testing.T) {
 	local := tmtc.Telecommand{
-		ID:             "cmd-1",
-		TargetID:       "tec-31",
-		SessionID:      "session-1",
-		Time:           time.Date(2026, 5, 15, 12, 0, 0, 0, time.UTC),
-		Name:           "reset",
-		Payload:        []byte{1, 2, 3},
-		Arguments:      map[string]any{"temperature": 25.0},
+		ID:        "cmd-1",
+		TargetID:  "tec-31",
+		SessionID: "session-1",
+		Time:      time.Date(2026, 5, 15, 12, 0, 0, 0, time.UTC),
+		Name:      "reset",
+		Payload:   []byte{1, 2, 3},
+		Arguments: map[string]any{
+			"temperature": 25.0,
+			"profile": map[string]any{
+				"steps": []any{map[string]any{"target": 25.0}},
+				"raw":   []byte{7, 8, 9},
+			},
+		},
 		IdempotencyKey: "stable-key",
 		RequiresAck:    true,
 		Metadata:       map[string]string{"source": "operator"},
@@ -51,8 +57,15 @@ func TestTelecommandBridgePreservesFieldsAndBoundary(t *testing.T) {
 	contract.Payload[0] = 9
 	contract.Metadata["source"] = "mutated"
 	contract.Arguments["temperature"] = 30.0
+	contractProfile := contract.Arguments["profile"].(map[string]any)
+	contractProfile["raw"].([]byte)[0] = 1
+	contractProfile["steps"].([]any)[0].(map[string]any)["target"] = 99.0
+	localProfile := local.Arguments["profile"].(map[string]any)
 	if local.Payload[0] != 1 || local.Metadata["source"] != "operator" || local.Arguments["temperature"] != 25.0 {
 		t.Fatal("contract mutation leaked through bridge boundary")
+	}
+	if localProfile["raw"].([]byte)[0] != 7 || localProfile["steps"].([]any)[0].(map[string]any)["target"] != 25.0 {
+		t.Fatal("nested contract argument mutation leaked through bridge boundary")
 	}
 }
 
