@@ -27,6 +27,23 @@ func (c *recordingCommander) Send(tc tmtc.Telecommand) (tmtc.CommandEvent, error
 	return tmtc.CommandEvent{Status: tmtc.CommandCompleted}, nil
 }
 
+type blockingContextCommander struct {
+	entered  chan struct{}
+	canceled chan error
+}
+
+func (c *blockingContextCommander) Send(tmtc.Telecommand) (tmtc.CommandEvent, error) {
+	return tmtc.CommandEvent{Status: tmtc.CommandCompleted}, nil
+}
+
+func (c *blockingContextCommander) SendContext(ctx context.Context, _ tmtc.Telecommand) (tmtc.CommandEvent, error) {
+	close(c.entered)
+	<-ctx.Done()
+	err := ctx.Err()
+	c.canceled <- err
+	return tmtc.CommandEvent{Status: tmtc.CommandFailed, Error: err.Error()}, err
+}
+
 func TestScriptUnmarshalAcceptsDurationStrings(t *testing.T) {
 	var script Script
 	raw := []byte(`{
@@ -111,6 +128,32 @@ func TestRunReportsCommanderError(t *testing.T) {
 	}
 	if result.OK || result.Steps[0].Error != "offline" {
 		t.Fatalf("result = %+v, want commander error", result)
+	}
+}
+
+func TestRunCancelsContextAwareCommanderOnTimeout(t *testing.T) {
+	cmdr := &blockingContextCommander{
+		entered:  make(chan struct{}),
+		canceled: make(chan error, 1),
+	}
+	result, err := Run(context.Background(), Script{
+		ID:      "cycle",
+		Timeout: 10 * time.Millisecond,
+		Steps:   []Step{{ID: "send", Kind: StepSendCommand, CommandName: "reset"}},
+	}, cmdr)
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if result.OK || len(result.Steps) != 1 || result.Steps[0].Error != context.DeadlineExceeded.Error() {
+		t.Fatalf("result = %+v, want deadline failure", result)
+	}
+	select {
+	case err := <-cmdr.canceled:
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("canceled with %v, want deadline exceeded", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("commander did not observe cancellation")
 	}
 }
 

@@ -67,6 +67,12 @@ func NewCommander(writer WriteClient, timeout time.Duration) *Commander {
 
 // Send dispatches a Telecommand to the underlying client.
 func (c *Commander) Send(tc tmtc.Telecommand) (tmtc.CommandEvent, error) {
+	return c.SendContext(context.Background(), tc)
+}
+
+// SendContext dispatches a Telecommand to the underlying client and binds the
+// write operation to the caller's cancellation scope.
+func (c *Commander) SendContext(ctx context.Context, tc tmtc.Telecommand) (tmtc.CommandEvent, error) {
 	if c == nil || c.Writer == nil {
 		return tmtc.CommandEvent{
 			CommandID: tc.ID,
@@ -80,7 +86,10 @@ func (c *Commander) Send(tc tmtc.Telecommand) (tmtc.CommandEvent, error) {
 	if timeout <= 0 {
 		timeout = 2 * time.Second
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	ev := tmtc.CommandEvent{

@@ -8,6 +8,10 @@ import (
 	"github.com/egidinas/meerstetter-go/tmtc"
 )
 
+type contextCommander interface {
+	SendContext(context.Context, tmtc.Telecommand) (tmtc.CommandEvent, error)
+}
+
 // Run executes script against commander, walking each step in order.
 // Steps of kind wait_stable sleep for their Duration as a conservative
 // approximation (no stability oracle is available at this layer).
@@ -72,33 +76,38 @@ func runSendCommand(ctx context.Context, step Step, commander tmtc.Commander) St
 	}
 	tc.EnsureIdempotencyKey()
 
-	done := make(chan struct {
+	var (
 		ev  tmtc.CommandEvent
 		err error
-	}, 1)
-	go func() {
-		ev, err := commander.Send(tc)
-		done <- struct {
-			ev  tmtc.CommandEvent
-			err error
-		}{ev, err}
-	}()
-	select {
-	case <-ctx.Done():
-		return StepResult{StepID: step.ID, OK: false, Error: ctx.Err().Error()}
-	case r := <-done:
-		if r.err != nil {
-			return StepResult{StepID: step.ID, OK: false, Error: r.err.Error()}
+	)
+	if cancellable, ok := commander.(contextCommander); ok {
+		ev, err = cancellable.SendContext(ctx, tc)
+	} else {
+		if err := ctx.Err(); err != nil {
+			return StepResult{StepID: step.ID, OK: false, Error: err.Error()}
 		}
-		if r.ev.Status == tmtc.CommandRejected || r.ev.Status == tmtc.CommandFailed {
-			msg := r.ev.Error
-			if msg == "" {
-				msg = string(r.ev.Status)
+		ev, err = commander.Send(tc)
+		if err == nil {
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				return StepResult{StepID: step.ID, OK: false, Error: ctxErr.Error()}
 			}
-			return StepResult{StepID: step.ID, OK: false, Error: msg}
 		}
-		return StepResult{StepID: step.ID, OK: true}
 	}
+	return commandStepResult(step.ID, ev, err)
+}
+
+func commandStepResult(stepID string, ev tmtc.CommandEvent, err error) StepResult {
+	if err != nil {
+		return StepResult{StepID: stepID, OK: false, Error: err.Error()}
+	}
+	if ev.Status == tmtc.CommandRejected || ev.Status == tmtc.CommandFailed {
+		msg := ev.Error
+		if msg == "" {
+			msg = string(ev.Status)
+		}
+		return StepResult{StepID: stepID, OK: false, Error: msg}
+	}
+	return StepResult{StepID: stepID, OK: true}
 }
 
 func runWait(ctx context.Context, step Step) StepResult {
