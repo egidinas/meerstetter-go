@@ -8,16 +8,19 @@ backlog ids 8/9/10/11/13 in [`../backlog/frontend_hooks.jsonl`](../backlog/front
 
 1. Build meerstetter-go's console as Vite + TS + React 18 (Phase 1) — no
    behaviour change, the in-browser Babel pipeline goes away.
-2. Extract the dictionary, walls, uPlot tile renderer, and tile-pyramid
-   client into `signalforge/web/` (Phase 2) — shared module, ESM-only,
-   adapter-injected for device APIs.
-3. Wire all three consumers (meerstetter-go, gossamer, loom) onto the
-   shared module and delete the duplicates (Phase 3).
+2. Extract the dictionary/wall/tile **contracts**, adapters, uPlot renderer,
+   and tile-pyramid client into `signalforge/web/` (Phase 2) — shared module,
+   ESM-only, backend-shape driven.
+3. Wire all eligible consumers (meerstetter-go, gossamer, loom) onto the
+   SignalForge-owned module and delete the duplicates (Phase 3).
 
 History becomes uncapped on every consumer (cross-cutting principle below).
-Renderer is uPlot only. SignalForge owns the unified OpenAPI. localStorage
-is namespaced per consumer. Gossamer is the graph-contract baseline; loom is
-the premium parent.
+Renderer is uPlot only. SignalForge owns the neutral catalogue/wall/tile
+contracts and adapter types. localStorage is namespaced per consumer. Gossamer
+is free to consume SignalForge primitives, but it must not consume
+`loom-gossamer-shared` or any Loom-private package. Reusable code migrates
+through SignalForge; private or lab-specific behavior stays in Loom or its
+deprecated compatibility archive until replaced.
 
 ## Why
 
@@ -32,11 +35,14 @@ Three consumers want the same operator surface:
   `operatorGraphCanvas`, source-catalogue contract tests. No dict/wall
   primitive yet but the rest of the operator vocabulary is fully present.
 
-The directive: extract a shared SignalForge UI module so all three apps consume
-the same **signal dictionary**, **wall-management**, **uPlot tile renderer**,
-and **tile-pyramid client** code. Today no app has a build-time link to the
-others; dict and renderer are copy-paste candidates that will drift the moment
-we stop watching.
+The directive: extract a shared SignalForge UI foundation so eligible apps
+consume the same **signal dictionary contract**, **wall-management contract**,
+**uPlot tile renderer**, and **tile-pyramid client** fundamentals. Each backend
+still owns the concrete catalogue, routes, fixture shape, campaign semantics,
+and product-specific content; consumer adapters translate backend responses
+into the SignalForge contracts. Today no app has a build-time link to the
+others; the reusable renderer and contract glue are copy-paste candidates that
+will drift the moment we stop watching.
 
 **Lineage and starting points:** Loom is the premium parent; gossamer is the
 junior derivative carrying a working implementation of the graph contract.
@@ -68,13 +74,17 @@ backends per consumer:
 
 ## End state
 
-- `signalforge/web/` exists, ships ESM as the primary artefact. All three
+- `signalforge/web/` exists, ships ESM as the primary artefact. The eligible
   consumers are ESM by Phase 3, so UMD is not built unless a fourth
   script-tag consumer ever appears.
 - meerstetter-go console is a Vite + TS + React 18 app at `meerstetter-go/web/`,
   serving `web/dist/` via `mecomgw -ui-dir`.
-- All three apps (meerstetter-go, gossamer, loom) import dict view, walls
-  hook, tile renderer, and tile client from `signalforge-web`.
+- Eligible apps (meerstetter-go, gossamer, loom) import contracts, adapter
+  interfaces, shared hooks, tile renderer, and tile client from
+  `signalforge-web`; no consumer imports `loom-gossamer-shared`.
+- Consumer backends remain the authority for content and specifics. The shared
+  web module renders SignalForge-shaped data; it does not encode MeCom,
+  Gossamer campaign, or Loom operator semantics directly.
 - Loom's local `HeroGraph` / `OperatorGraphPrimitives` / `operatorGraphCanvas`
   reduce to thin adapters over the shared primitives.
 - `docs/gateway/console/` deleted after one full release of stability behind
@@ -288,8 +298,10 @@ If any step fails, the rollback below applies.
 
 ## Phase 2 — `signalforge/web/` shared module
 
-**Goal:** extract the dictionary, wall management, and tile renderer/client into
-SignalForge so all three apps import them.
+**Goal:** define backend-driven catalogue/wall/tile contracts and move only the
+thin reusable UI primitives into SignalForge. Consumers implement adapters that
+translate their backend responses into those contracts; product-specific content
+remains owned by each backend.
 
 ### Module layout
 
@@ -325,6 +337,10 @@ signalforge/
       signalforge-web.es.js
       signalforge-web.d.ts
 ```
+
+The shared module is deliberately not a product UI. It must not contain
+consumer-specific signal lists, campaign fixtures, route paths, lease/auth
+policy, or operator vocabulary. Those stay in each backend or consumer adapter.
 
 ### Public exports (`signalforge/web/src/index.ts`)
 
@@ -411,7 +427,7 @@ latter wraps backlog id 11's history endpoints). gossamer provides
 
 ### Versioning and consumption
 
-Tag `signalforge-web@0.1.0` once Phase 2 lands. All three consumers pin to
+Tag `signalforge-web@0.1.0` once Phase 2 lands. Eligible consumers pin to
 the tag. Breaking changes require a minor bump and explicit consumer-side
 upgrade.
 
@@ -450,11 +466,13 @@ consumer is harmed.
 
 ---
 
-## Phase 3 — all three consumers adopt the shared module
+## Phase 3 — eligible consumers adopt SignalForge primitives
 
-**Goal:** delete duplicate code. After this phase, the dict, walls hook, and
-tile renderer live in exactly one place — consumed by meerstetter-go,
-gossamer, and loom.
+**Goal:** delete duplicate generic renderer, assignment, wall, and tile-client
+plumbing without centralizing product-specific UI. After this phase, the shared
+contracts and render fundamentals live in exactly one place — consumed by
+eligible meerstetter-go, gossamer, and loom surfaces through backend-shaped
+adapters.
 
 ### meerstetter-go
 
@@ -477,7 +495,8 @@ gossamer, and loom.
 1. `npm --prefix web add signalforge-web@^0.1.0` (mechanism per Versioning section).
 2. Add a new operator-side route (e.g. `/operator/wall-config`) that hosts
    `<SignalDictionary adapter={campaignAdapter} />` so users can build/edit walls
-   alongside the existing campaign-driven views.
+   alongside the existing campaign-driven views. The Gossamer backend emits or
+   adapts campaign catalogues into the SignalForge catalogue/wall/tile shapes.
 3. Replace `OperatorGraphWall.tsx` internal tile rendering with
    `<UPlotTileRenderer ... />` from the shared module.
 4. Existing campaign-driven walls remain — `useWalls` simply has a "preset"
@@ -494,7 +513,9 @@ gossamer, and loom.
    browser, etc.) remain loom-local.
 4. Add a wall-config surface using `<SignalDictionary adapter={loomAdapter} />`
    if loom wants user-managed walls; otherwise consume `useWalls` in
-   read-only mode for the existing operator views.
+   read-only mode for the existing operator views. Loom's backend remains the
+   authority for lab/operator-specific content; the adapter only maps that
+   content into neutral SignalForge web contracts.
 5. Loom's many `validate-*` contract tests under `web/scripts/` provide a
    strong regression suite — every adoption commit must keep them green.
 
@@ -537,21 +558,20 @@ gossamer, and loom.
 | Shared module API drift between Phase 2 and Phase 3 | Pin shared module to a tag; consumers upgrade explicitly, not via floating range. |
 | meerstetter-go gains a 50KB uPlot dep it didn't have before | Accepted per resolved decision 1. Net win: one renderer to maintain, gossamer's marker/zoom/log-axis features become free for meerstetter-go. |
 | meerstetter-go's mecomgw tile API doesn't exist yet (backlog id 11) | Phase 2's `TileAdapter` interface ships first; `MecomgwTileAdapter` is a stub returning live values until id 11 lands. Keeps the contract correct without blocking. |
-| Consolidating three apps' API surfaces into a signalforge-owned OpenAPI is broader than \"port the dict\" | Per resolved decision 2. Phase 2 starts with meerstetter-go's existing `docs/gateway/openapi.yaml` as the seed and folds in gossamer's tile + graph-model routes plus loom's relevant operator/telemetry endpoints. Each consumer keeps its current routes during transition; the unified spec becomes truth at the start of Phase 3. |
+| Consolidating three apps' API surfaces into a signalforge-owned OpenAPI is broader than \"port the dict\" | Per resolved decision 2. Phase 2 starts with neutral catalogue/wall/tile schemas seeded from meerstetter-go's existing `docs/gateway/openapi.yaml`, then adds adapter-facing shapes for gossamer tiles/graph models and loom operator telemetry. Each consumer keeps its routes and backend ownership; the shared spec defines the adapter contract, not a forced route layout. |
 | Loom has its own evolving operator vocabulary (HeroGraph, OperatorGraphPrimitives, capability-module browser) that may not map cleanly | Phase 3's loom step is deliberately incremental: only the graph + dict primitives migrate. Non-graph operator surfaces stay loom-local until they're ready to share. Loom's existing `validate-*` contract tests are the regression net. |
 
 ## Resolved decisions (2026-05-15)
 
 1. **Renderer:** uPlot only. Meerstetter-go's `drawCanvasChart` is retired
-   in Phase 3; meerstetter-go gains uPlot as a dep. One implementation,
-   three consumers — matches the directive.
-2. **OpenAPI ownership:** SignalForge owns the unified OpenAPI. Phase 2 seeds
-   it from meerstetter-go's existing `docs/gateway/openapi.yaml` and folds in
-   gossamer's tile + graph-model routes plus loom's relevant operator
-   endpoints. The TS types in `signalforge/web/src/types/` are generated from
-   this single source. All three consumers' Go and TS code import from there
-   going forward; meerstetter-go's local copy is deleted at the end of
-   Phase 3.
+   in Phase 3; meerstetter-go gains uPlot as a dep. One renderer
+   implementation serves all eligible consumers.
+2. **Contract ownership:** SignalForge owns the neutral catalogue/wall/tile
+   contracts and generated TS types. Phase 2 seeds them from meerstetter-go's
+   existing `docs/gateway/openapi.yaml`, then folds in adapter-facing shapes
+   for gossamer tiles/graph models and loom operator telemetry. Consumer routes
+   and product-specific backend responses remain local; each consumer imports
+   the generated types and provides an adapter.
 3. **localStorage namespacing:** the shared `useAssignments`/`useWalls` hooks
    take a required `namespace` config. meerstetter-go passes `"mecomgw"`,
    gossamer passes `"gossamer"`, loom passes `"loom"`. No collision risk if
@@ -617,7 +637,7 @@ Manual checks:
   script + Brume2 verification).
 - Phase 2: 4–6 days (extraction, adapter design, OpenAPI consolidation across
   three apps, uPlot tile renderer, tile-pyramid client, demo page, tests).
-- Phase 3: 4–6 days (three consumers wired + visual + contract-test regression
+- Phase 3: 4–6 days (eligible consumers wired + visual + contract-test regression
   checks + delete legacy console + gossamer wall-config route + loom
   HeroGraph/OperatorGraphPrimitives reduction).
 
