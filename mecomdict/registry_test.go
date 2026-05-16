@@ -43,6 +43,14 @@ var LDD_1321_PARAMETERS = []ParameterDef{
 	if hasParameter(ldd112x, 1000, "Object Temperature") {
 		t.Fatalf("LDD-112x registry includes TEC-only parameters: %#v", ldd112x)
 	}
+
+	unknown, err := LoadParameterRegistryForFamily(registry, "UNKNOWN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(unknown) != 0 {
+		t.Fatalf("unknown family returned mixed registry: %#v", unknown)
+	}
 }
 
 func hasParameter(params []ParameterDef, id int, name string) bool {

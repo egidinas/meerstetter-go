@@ -96,7 +96,7 @@ func LoadParameterRegistryForFamily(path, family string) ([]ParameterDef, error)
 		}
 	}
 	if len(filtered) == 0 {
-		return mergeParameterBlocks(blocks), nil
+		return nil, nil
 	}
 	return mergeParameterBlocks(filtered), nil
 }
