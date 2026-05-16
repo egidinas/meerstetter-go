@@ -130,15 +130,18 @@ func (r *Registry) Release(token string) error {
 func (r *Registry) Validate(deviceID, token string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.sweepLocked()
+	now := r.now()
 	lease, ok := r.leases[deviceID]
 	if !ok {
+		r.sweepLockedAt(now)
 		return ErrUnknownDevice
 	}
-	if !lease.Active(r.now()) {
+	if !lease.Active(now) {
 		delete(r.leases, deviceID)
+		r.sweepLockedAt(now)
 		return ErrExpired
 	}
+	r.sweepLockedAt(now)
 	if lease.Token != token {
 		return ErrInvalidToken
 	}
@@ -166,7 +169,10 @@ func (r *Registry) List() []Lease {
 }
 
 func (r *Registry) sweepLocked() {
-	now := r.now()
+	r.sweepLockedAt(r.now())
+}
+
+func (r *Registry) sweepLockedAt(now time.Time) {
 	for id, lease := range r.leases {
 		if !lease.Active(now) {
 			delete(r.leases, id)

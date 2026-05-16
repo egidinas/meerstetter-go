@@ -61,6 +61,24 @@ func TestExpiryReleasesAutomatically(t *testing.T) {
 	}
 }
 
+func TestValidateExpiredLeaseReturnsErrExpired(t *testing.T) {
+	now := time.Unix(1000, 0)
+	clock := &now
+	r := NewRegistry().WithClock(func() time.Time { return *clock })
+
+	lease, err := r.Acquire("tec-75", "alice", time.Second)
+	if err != nil {
+		t.Fatalf("Acquire: %v", err)
+	}
+	*clock = now.Add(2 * time.Second)
+	if err := r.Validate("tec-75", lease.Token); !errors.Is(err, ErrExpired) {
+		t.Fatalf("Validate expired lease = %v, want ErrExpired", err)
+	}
+	if err := r.Validate("tec-75", lease.Token); !errors.Is(err, ErrUnknownDevice) {
+		t.Fatalf("Validate swept lease = %v, want ErrUnknownDevice", err)
+	}
+}
+
 func TestValidateRejectsWrongToken(t *testing.T) {
 	r := NewRegistry()
 	if _, err := r.Acquire("tec-75", "alice", time.Minute); err != nil {
