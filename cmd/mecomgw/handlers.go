@@ -290,7 +290,7 @@ type writeRequest struct {
 func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID string) {
 	bound, err := s.bind(deviceID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, err.Error(), bindStatusForError(err))
 		return
 	}
 	if bound.commander == nil {
@@ -337,7 +337,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID string) {
 	bound, err := s.bind(deviceID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, err.Error(), bindStatusForError(err))
 		return
 	}
 	params, err := parseParamsQuery(r.URL.Query().Get("params"))
@@ -415,7 +415,7 @@ func gatewayValueFromFloat(p mecom.Parameter, value float64) gatewayReadValue {
 func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID string) {
 	bound, err := s.bind(deviceID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, err.Error(), bindStatusForError(err))
 		return
 	}
 	params, err := parseParamsQuery(r.URL.Query().Get("params"))
@@ -567,6 +567,13 @@ func httpStatusForError(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+func bindStatusForError(err error) int {
+	if errors.Is(err, errUnknownGatewayDevice) {
+		return http.StatusNotFound
+	}
+	return httpStatusForError(err)
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {

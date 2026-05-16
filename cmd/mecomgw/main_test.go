@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -102,6 +103,67 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("DELETE lease status = %d, want %d", resp.StatusCode, http.StatusNoContent)
 	}
+}
+
+func TestGatewayBindFailuresUseTransportStatus(t *testing.T) {
+	endpoint := "tcp:" + closedTCPAddress(t)
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-75",
+		Endpoint: endpoint,
+		Address:  75,
+		Label:    "TEC 75",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+		body   string
+	}{
+		{name: "read", method: http.MethodGet, path: "/api/devices/tec-75/read?params=1000:1"},
+		{name: "write", method: http.MethodPost, path: "/api/devices/tec-75/write", body: `{}`},
+		{name: "poll", method: http.MethodGet, path: "/api/devices/tec-75/poll?params=1000:1&interval=1h"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := http.NewRequest(tc.method, ts.URL+tc.path, strings.NewReader(tc.body))
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Body.Close()
+			if resp.StatusCode != http.StatusServiceUnavailable {
+				t.Fatalf("status = %d, want %d", resp.StatusCode, http.StatusServiceUnavailable)
+			}
+		})
+	}
+
+	resp, err := http.Get(ts.URL + "/api/devices/not-configured/read?params=1000:1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("unknown device status = %d, want %d", resp.StatusCode, http.StatusNotFound)
+	}
+}
+
+func closedTCPAddress(t *testing.T) string {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := ln.Addr().String()
+	if err := ln.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return addr
 }
 
 func assertCatalogueWritable(t *testing.T, params []gatewayCatalogueEntry, id, instance int, want bool) {

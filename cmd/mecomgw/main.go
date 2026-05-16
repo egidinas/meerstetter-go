@@ -141,6 +141,8 @@ type deviceBindingSnapshot struct {
 	commander *mecom.Commander
 }
 
+var errUnknownGatewayDevice = errors.New("unknown device")
+
 func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server {
 	s := &server{
 		devices:         make(map[string]*deviceBinding, len(cfg.Devices)),
@@ -157,7 +159,7 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 	b, ok := s.devices[id]
 	if !ok {
-		return deviceBindingSnapshot{}, fmt.Errorf("unknown device %q", id)
+		return deviceBindingSnapshot{}, fmt.Errorf("%w %q", errUnknownGatewayDevice, id)
 	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
