@@ -60,3 +60,23 @@ func TestCANClientReadFloat32SkipsEcho(t *testing.T) {
 		}
 	}
 }
+
+func TestCANClientReadFloat32SkipsUnmatchedBinaryResponses(t *testing.T) {
+	var value [4]byte
+	binary.BigEndian.PutUint32(value[:], math.Float32bits(12.25))
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x41f, DLC: 8, Data: [8]byte{0x82, 0x1f, 0x00, 0x01, value[0], value[1], value[2], value[3]}},
+			{ID: 0x41f, DLC: 8, Data: [8]byte{0x81, 0x1f, 0x00, 0x02, value[0], value[1], value[2], value[3]}},
+			{ID: 0x41f, DLC: 8, Data: [8]byte{0x81, 0x1f, 0x00, 0x01, value[0], value[1], value[2], value[3]}},
+		},
+	}
+	client := NewCANClient(fake, ClientConfig{Address: 0x1f, Timeout: time.Second})
+	got, err := client.ReadFloat32(context.Background(), 1000, 1)
+	if err != nil {
+		t.Fatalf("ReadFloat32 returned error: %v", err)
+	}
+	if math.Abs(got-12.25) > 0.001 {
+		t.Fatalf("ReadFloat32=%f, want 12.25", got)
+	}
+}

@@ -545,6 +545,26 @@ func BuildBinarySingleGetFrame(addr int, seq uint16, paramID, instance int) []by
 	return buf
 }
 
+// BinaryResponseMatchesRequest checks the binary CAN response fields that are
+// echoed from the request envelope. Single-value responses do not carry the
+// requested parameter identity, so callers must use a fresh sequence for each
+// in-flight request to avoid accepting stale responses for another parameter.
+func BinaryResponseMatchesRequest(f canopen.Frame, addr byte, seq, command uint16) bool {
+	if f.DLC < 8 {
+		return false
+	}
+	if f.Data[1] != addr {
+		return false
+	}
+	if f.Data[0]&0x80 == 0 {
+		return false
+	}
+	if uint16(f.Data[0]&0x7f) != seq&0x7f {
+		return false
+	}
+	return binary.BigEndian.Uint16(f.Data[2:4]) == command
+}
+
 // DecodeBinaryCANFrame parses a binary MeCom response frame from CAN.
 // It handles !VR responses (CAN ID 0x400 + address).
 func DecodeBinaryCANFrame(f canopen.Frame, dataType DataType) (float64, error) {
@@ -563,6 +583,9 @@ func DecodeBinaryCANFrame(f canopen.Frame, dataType DataType) (float64, error) {
 			return 0, fmt.Errorf("mecom: binary nack %02X (%s)", code, name)
 		}
 		return 0, fmt.Errorf("mecom: binary nack %02X", code)
+	}
+	if cmd != BinaryCmdQueryValue {
+		return 0, fmt.Errorf("mecom: unexpected binary response command 0x%04X", cmd)
 	}
 
 	// Byte 4-7: Value

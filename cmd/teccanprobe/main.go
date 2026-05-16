@@ -148,8 +148,10 @@ func main() {
 				probeCANopenSDO(conn, node, probe, *timeout, &res, sink)
 			}
 		}
+		var mecomSeq uint16
 		for _, addr := range addrs {
-			probeMeComValue(conn, addr, *paramID, *instance, *timeout, &res, sink)
+			mecomSeq = nextMeComSequence(mecomSeq)
+			probeMeComValue(conn, addr, mecomSeq, *paramID, *instance, *timeout, &res, sink)
 		}
 	}
 
@@ -314,8 +316,8 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 	}
 }
 
-func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, timeout time.Duration, res *result, sink frameSink) {
-	payload := mecom.BuildBinarySingleGetFrame(int(addr), 1, paramID, instance)
+func probeMeComValue(conn *socketcan.Conn, addr byte, seq uint16, paramID, instance int, timeout time.Duration, res *result, sink frameSink) {
+	payload := mecom.BuildBinarySingleGetFrame(int(addr), seq, paramID, instance)
 	var data [8]byte
 	copy(data[:], payload)
 	req := canopen.Frame{ID: 0x300 + uint32(addr), DLC: uint8(len(payload)), Data: data}
@@ -331,7 +333,7 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, paramID, instance int, tim
 			fmt.Printf("no-reply mecom addr=0x%02X\n", addr)
 			return
 		}
-		if f.ID == 0x400+uint32(addr) && mecomResponseMatchesRequest(f, addr, 1) {
+		if f.ID == 0x400+uint32(addr) && mecomResponseMatchesRequest(f, addr, seq, mecom.BinaryCmdQueryValue) {
 			value, err := mecom.DecodeBinaryCANFrame(f, mecom.DataTypeFloat32)
 			if err != nil {
 				fmt.Printf("reply mecom addr=0x%02X decode-error=%v %s\n", addr, err, formatFrame(f))
@@ -348,17 +350,16 @@ func sdoResponseMatchesProbe(resp canopen.SDOUploadResponse, probe sdoProbe) boo
 	return resp.Index == probe.Index && resp.SubIndex == probe.SubIndex
 }
 
-func mecomResponseMatchesRequest(f canopen.Frame, addr byte, seq uint16) bool {
-	if f.DLC < 8 {
-		return false
+func nextMeComSequence(seq uint16) uint16 {
+	seq = (seq + 1) & 0x7f
+	if seq == 0 {
+		return 1
 	}
-	if f.Data[1] != addr {
-		return false
-	}
-	if f.Data[0]&0x80 == 0 {
-		return false
-	}
-	return uint16(f.Data[0]&0x7f) == seq&0x7f
+	return seq
+}
+
+func mecomResponseMatchesRequest(f canopen.Frame, addr byte, seq, command uint16) bool {
+	return mecom.BinaryResponseMatchesRequest(f, addr, seq, command)
 }
 
 func recvUntil(conn *socketcan.Conn, deadline time.Time, res *result, sink frameSink) (canopen.Frame, bool) {

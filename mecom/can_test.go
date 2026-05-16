@@ -52,4 +52,38 @@ func TestDecodeBinaryCANFrame(t *testing.T) {
 	if err.Error() != "mecom: binary nack 05 (PAR_NOT_AVAILABLE)" {
 		t.Errorf("unexpected error message: %v", err)
 	}
+
+	f.Data[2] = 0x00
+	f.Data[3] = byte(BinaryCmdSetValue)
+	_, err = DecodeBinaryCANFrame(f, DataTypeFloat32)
+	if err == nil {
+		t.Fatal("expected unexpected-command error, got nil")
+	}
+	if err.Error() != "mecom: unexpected binary response command 0x0002" {
+		t.Errorf("unexpected error message: %v", err)
+	}
+}
+
+func TestBinaryResponseMatchesRequestRequiresEnvelopeFields(t *testing.T) {
+	f := canopen.Frame{
+		ID:  0x401,
+		DLC: 8,
+		Data: [8]byte{
+			0x81,
+			0x01,
+			0x00, 0x01,
+		},
+	}
+	if !BinaryResponseMatchesRequest(f, 0x01, 1, BinaryCmdQueryValue) {
+		t.Fatal("matching response was rejected")
+	}
+	f.Data[0] = 0x82
+	if BinaryResponseMatchesRequest(f, 0x01, 1, BinaryCmdQueryValue) {
+		t.Fatal("wrong sequence was accepted")
+	}
+	f.Data[0] = 0x81
+	f.Data[3] = byte(BinaryCmdSetValue)
+	if BinaryResponseMatchesRequest(f, 0x01, 1, BinaryCmdQueryValue) {
+		t.Fatal("wrong command was accepted")
+	}
 }

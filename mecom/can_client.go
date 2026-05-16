@@ -115,7 +115,7 @@ func (c *CANClient) readNumeric(ctx context.Context, paramID, instance int, data
 		if f.ID != respID {
 			continue
 		}
-		if f.Data[1] != c.address {
+		if !BinaryResponseMatchesRequest(f, c.address, seq, BinaryCmdQueryValue) {
 			continue
 		}
 		return DecodeBinaryCANFrame(f, dataType)
