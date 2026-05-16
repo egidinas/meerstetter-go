@@ -3,6 +3,7 @@ package tmtc
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"time"
 )
 
@@ -64,6 +65,13 @@ func (tc *Telecommand) EnsureIdempotencyKey() {
 	h.Write([]byte(tc.Name))
 	h.Write([]byte{0})
 	h.Write(tc.Payload)
+	h.Write([]byte{0})
+	if len(tc.Arguments) > 0 {
+		args, err := json.Marshal(tc.Arguments)
+		if err == nil {
+			h.Write(args)
+		}
+	}
 	tc.IdempotencyKey = hex.EncodeToString(h.Sum(nil))
 }
 
