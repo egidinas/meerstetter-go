@@ -110,3 +110,33 @@ func TestPreloadTelecommandsFanOutPerTarget(t *testing.T) {
 		}
 	}
 }
+
+func TestPreloadIdempotencyKeyIncludesProgramContents(t *testing.T) {
+	base := FourCycleSampleProgram("tec-31")
+	changed := FourCycleSampleProgram("tec-31")
+	changed.Steps[0].Setpoints[0].Value = 21
+
+	baseCommands, err := PreloadTelecommands(base, time.Time{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	changedCommands, err := PreloadTelecommands(changed, time.Time{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if baseCommands[0].IdempotencyKey == changedCommands[0].IdempotencyKey {
+		t.Fatalf("changed program contents reused idempotency key %q", baseCommands[0].IdempotencyKey)
+	}
+
+	baseScript, err := PreloadScript(base, "tec-31")
+	if err != nil {
+		t.Fatal(err)
+	}
+	changedScript, err := PreloadScript(changed, "tec-31")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if baseScript.Steps[0].IdempotencyKey == changedScript.Steps[0].IdempotencyKey {
+		t.Fatalf("changed script contents reused idempotency key %q", baseScript.Steps[0].IdempotencyKey)
+	}
+}

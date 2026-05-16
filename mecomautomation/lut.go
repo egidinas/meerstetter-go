@@ -1,6 +1,9 @@
 package mecomautomation
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -67,7 +70,8 @@ func PreloadScript(program controlprogram.Program, targetID string) (sequencer.S
 		return sequencer.Script{}, fmt.Errorf("program %q does not include target %q", program.ID, targetID)
 	}
 
-	key := preloadIdempotencyKey(program.ID, targetID)
+	args := programArguments(program)
+	key := preloadIdempotencyKey(program.ID, targetID, args)
 	return sequencer.Script{
 		ID:      key,
 		Name:    fmt.Sprintf("preload %s on %s", program.ID, targetID),
@@ -77,7 +81,7 @@ func PreloadScript(program controlprogram.Program, targetID string) (sequencer.S
 			Kind:           sequencer.StepSendCommand,
 			TargetID:       targetID,
 			CommandName:    CommandLUTPreload,
-			Arguments:      programArguments(program),
+			Arguments:      args,
 			AwaitAck:       true,
 			IdempotencyKey: key,
 		}},
@@ -91,13 +95,14 @@ func PreloadTelecommands(program controlprogram.Program, at time.Time) ([]tmtc.T
 
 	commands := make([]tmtc.Telecommand, 0, len(program.TargetIDs))
 	for _, targetID := range program.TargetIDs {
-		key := preloadIdempotencyKey(program.ID, targetID)
+		args := programArguments(program)
+		key := preloadIdempotencyKey(program.ID, targetID, args)
 		commands = append(commands, tmtc.Telecommand{
 			ID:             key,
 			TargetID:       targetID,
 			Time:           at,
 			Name:           CommandLUTPreload,
-			Arguments:      programArguments(program),
+			Arguments:      args,
 			IdempotencyKey: key,
 			RequiresAck:    true,
 			Metadata: map[string]string{
@@ -119,8 +124,13 @@ func programTargets(program controlprogram.Program, targetID string) bool {
 	return false
 }
 
-func preloadIdempotencyKey(programID, targetID string) string {
-	return programID + ":" + targetID + ":lut-preload"
+func preloadIdempotencyKey(programID, targetID string, args map[string]any) string {
+	payload, err := json.Marshal(args)
+	if err != nil {
+		payload = []byte(programID)
+	}
+	sum := sha256.Sum256(payload)
+	return programID + ":" + targetID + ":lut-preload:" + hex.EncodeToString(sum[:8])
 }
 
 func programArguments(program controlprogram.Program) map[string]any {
