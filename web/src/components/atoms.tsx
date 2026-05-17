@@ -1,13 +1,15 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } from "react";
+import { UPlotTileRenderer } from "signalforge-web";
+import "uplot/dist/uPlot.min.css";
 import { MecomAPI } from "../api/mecom";
 import { recordTelemetry, getTelemetry } from "../lib/telemetry";
 import {
   seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile,
-  drawCanvasChart, drawSparklineCanvas, measuredElementWidth,
+  normalizeGraphTile, CANONICAL_TILE_RENDERER,
 } from "../lib/series";
 
-export { seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile };
+export { seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile, normalizeGraphTile };
 
 /* ---------- Hook: latest value for a (device, param, instance) ---------- */
 export function useLiveValue(deviceId, paramId, instance?) {
@@ -64,71 +66,42 @@ export function Panel({ title, meta, right, children, flush, style, className })
   );
 }
 
-/* ============================================================ Canvas charts ============================================================ */
+/* ============================================================ Canonical SignalForge/uPlot charts ============================================================ */
 export function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, showAxis = false }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    drawSparklineCanvas(canvasRef.current, history, color, showAxis);
-  }, [history && history.v && history.v.length, history && history.v && history.v[history.v.length - 1], color, showAxis, w, h]);
-  return (
-    <canvas
-      ref={canvasRef}
-      data-graph-renderer="signalforge.tile.canvas.sparkline"
-      style={{ width: "100%", height: h, display: "block" }}
-      width={w}
-      height={h}
-    />
-  );
+  const tile = useMemo(() => normalizeGraphTile({
+    ...emptyGraphTile({ tile_id: "sparkline", timeWindowMs: 90_000 }),
+    series: [{
+      id: "sparkline",
+      label: "sparkline",
+      role: "actual",
+      unit: "_",
+      color,
+      history,
+      points: (history?.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (history?.v || [])[idx] })),
+    }],
+  }), [history, history?.v?.length, history?.v?.[history?.v?.length - 1], color, showAxis, w]);
+  return <UPlotTileRenderer tile={tile} height={h} dataGraphRenderer={CANONICAL_TILE_RENDERER} syncKey="meerstetter-go-sparkline" />;
 }
 
 export function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
   useGatewayTick();
-  const wrapRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [w, setW] = useState(0);
-  useEffect(() => {
-    const target = wrapRef.current;
-    if (!target) return undefined;
-    let raf = 0;
-    const update = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const next = measuredElementWidth(target);
-        if (next > 0) setW((cur) => (cur === next ? cur : next));
-      });
-    };
-    update();
-    let ro;
-    if (typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(update);
-      ro.observe(target);
-    }
-    window.addEventListener("resize", update, { passive: true });
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      if (ro) ro.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-  const graphTile = useMemo(() => tile || emptyGraphTile({ timeWindowMs }), [tile, timeWindowMs]);
+  const graphTile = useMemo(() => normalizeGraphTile(tile || emptyGraphTile({ timeWindowMs }), { timeWindowMs }), [tile, timeWindowMs]);
   const orderedSeries = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
-  useEffect(() => {
-    const measuredWidth = w || measuredElementWidth(wrapRef.current);
-    drawCanvasChart(canvasRef.current, orderedSeries, {
-      width: measuredWidth, height,
-      timeWindowMs: graphTile.time_window_ms || timeWindowMs,
-    });
-  }, [orderedSeries, w, height, graphTile.time_window_ms, timeWindowMs]);
   const title = graphTile.title || graphTile.tile_id || graphTile.id || "graph tile";
   return (
     <div
-      ref={wrapRef}
       style={{ width: "100%", minWidth: 0 }}
       data-graph-tile={graphTile.tile_id || graphTile.id || ""}
-      data-graph-renderer={graphTile.renderer || "signalforge.tile.canvas"}
+      data-graph-renderer={CANONICAL_TILE_RENDERER}
+      data-series-count={orderedSeries.length}
       title={title}
     >
-      <canvas ref={canvasRef} style={{ width: "100%", maxWidth: "100%", height, display: "block" }} />
+      <UPlotTileRenderer
+        tile={graphTile}
+        height={height}
+        dataGraphRenderer={CANONICAL_TILE_RENDERER}
+        syncKey="meerstetter-go-wall"
+      />
     </div>
   );
 }

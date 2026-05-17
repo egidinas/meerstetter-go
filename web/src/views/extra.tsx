@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick } from "../components/atoms";
-import { seriesRoleMeta } from "../lib/series";
+import { CANONICAL_TILE_RENDERER, seriesRoleMeta } from "../lib/series";
 
 const SEQ_LIBRARY = [
   {
@@ -545,22 +545,28 @@ function buildStepResponseGraphTile(response, deviceId) {
       source_ref: provenance,
       source: { device_id: idDevice, instance: 1, param_id: paramId, signal_id: signalId, endpoint },
       history,
-      points: history.ts.map((ts, idx) => ({ t: ts, v: history.v[idx], q: "ok", provenance })),
+      axis_id: "temperature_c",
+      points: history.ts.map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: history.v[idx], quality: "ok", provenance })),
     };
   };
   return {
     schema_version: "signalforge.graph_tile.v1",
-    renderer: "signalforge.tile.canvas",
+    renderer: CANONICAL_TILE_RENDERER,
     kind: "timeseries",
     id: `pid-step-response-${idDevice}`,
     tile_id: `pid-step-response-${idDevice}`,
     card_id: `pid-step-response-${idDevice}`,
     level: "analysis",
+    t0: new Date(baseMs).toISOString(),
+    t1: new Date(baseMs + lastSec * 1000).toISOString(),
     title: "PID step response",
     generated_at: now,
     time_window_ms: lastSec * 1000,
     axes: [{ id: "temperature_c", unit: "degC", side: "left", label: "Temperature" }],
-    diagnostics: { status: "ok", renderer: "signalforge.tile.canvas", source: "meerstetter-go.pid-advisor", mode: "capture", series_count: 2, point_count: response.ts.length * 2 },
+    bands: [],
+    markers: [],
+    events: [],
+    diagnostics: { status: "ok", renderer: CANONICAL_TILE_RENDERER, source: "meerstetter-go.pid-advisor", mode: "capture", series_count: 2, point_count: response.ts.length * 2, decimation: "none" },
     provenance: { source: "meerstetter-go.pid-advisor", source_family: "mecom", generated_at: now, synthetic: true },
     series: [
       makeSeries({ paramId: 1000, signalId: "object_temp_c", label: "Object T", values: response.obj, role: "actual" }),

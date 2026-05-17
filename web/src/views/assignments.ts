@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { MecomAPI } from "../api/mecom";
 import { getTelemetry, recordTelemetry } from "../lib/telemetry";
-import { seriesRoleMeta } from "../lib/series";
+import { CANONICAL_TILE_RENDERER, seriesRoleMeta } from "../lib/series";
 
 const ASSIGNMENT_KEY = "mecomgw.assignments";
 
@@ -136,8 +136,10 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const catalogue = MecomAPI.catalogue();
   const normalized = (assignments || []).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
   const units: string[] = [];
-  const now = new Date().toISOString();
+  const nowMs = Date.now();
+  const now = new Date(nowMs).toISOString();
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
+  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || 90_000;
   const series = normalized.map((a) => {
     const paramId = a.options.param_id;
     const deviceId = a.options.device_id;
@@ -175,6 +177,7 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
       unit,
       history,
       role: seriesRole,
+      axis_id: axisIdForUnit(unit, seriesRole),
       role_rank: roleMeta.rank,
       provenance,
       source_ref: sourceRef,
@@ -188,15 +191,39 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   return {
     schema_version: "signalforge.graph_tile.v1",
     id: tileId, card_id: tileId, level: "live",
+    t0: new Date(nowMs - timeWindowMs).toISOString(),
+    t1: now,
     generated_at: now,
-    renderer: "signalforge.tile.canvas",
+    renderer: CANONICAL_TILE_RENDERER,
     kind: "timeseries",
     tile_id: tileId,
     title: opts.title || "",
-    time_window_ms: opts.time_window_ms || opts.timeWindowMs || 90_000,
+    time_window_ms: timeWindowMs,
     axes: units.slice(0, 2).map((unit, idx) => ({ unit, side: idx === 0 ? "left" : "right" })),
-    diagnostics: { status: series.length > 0 ? "ok" : "empty", series_count: series.length, renderer: "signalforge.tile.canvas" },
+    bands: [],
+    markers: [],
+    events: [],
+    diagnostics: {
+      status: series.length > 0 ? "ok" : "empty",
+      series_count: series.length,
+      point_count: series.reduce((acc, s) => acc + ((s.points && s.points.length) || 0), 0),
+      decimation: "none",
+      renderer: CANONICAL_TILE_RENDERER,
+    },
     provenance: { source: "meerstetter-go.graphwall.assignments", generated_at: now },
     series,
   };
+}
+
+function axisIdForUnit(unit, role) {
+  const u = String(unit || "").trim().toLowerCase();
+  if (u === "a") return "current_a";
+  if (u === "v") return "voltage_v";
+  if (u === "w") return "power_w";
+  if (u === "%" || u === "percent") return "percent";
+  if (u === "ms") return "bus_ms";
+  if (u === "s" || u === "sec" || u === "seconds") return "seconds";
+  if (u.includes("deg") || u === "c" || u === "degc") return "temperature_c";
+  if (role === "counter") return "counter";
+  return "generic_numeric";
 }
