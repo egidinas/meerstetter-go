@@ -2,10 +2,8 @@ github.com/creack/goselect v0.1.2 h1:2DNy14+JPjRBgPzAd1thbQp4BSIihxcBf0IXhQXDRa0
 github.com/creack/goselect v0.1.2/go.mod h1:a/NhLweNvqIYMuxcMOuWY516Cimucms3DglDzQP3hKY=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/egidinas/signalforge v0.2.0 h1:kutu0uekX4Hhx8Y1Qj8q2tudNCbvt/9h2UkQzTahHhg=
-github.com/egidinas/signalforge v0.2.0/go.mod h1:fyAEIcD2H0PWcq7HgGZEBY5bbJxKNj8ihC5q6mhb38o=
-github.com/egidinas/signalforge v0.2.1-0.20260514103852-a983194678c0 h1:60/9zxLLVhRxwb6/UnqsRLHgAI7HLKFtCPleFSg5JSI=
-github.com/egidinas/signalforge v0.2.1-0.20260514103852-a983194678c0/go.mod h1:fyAEIcD2H0PWcq7HgGZEBY5bbJxKNj8ihC5q6mhb38o=
+github.com/egidinas/signalforge v0.2.2 h1:GatPC8idRQguCbXjy5MKW7hmDeoLfQul3s8iFjuPEsk=
+github.com/egidinas/signalforge v0.2.2/go.mod h1:BnVsaUKrHm+3RiTQyAS33MzOccIEDrmEvIhMtqzFkIM=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=

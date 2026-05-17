@@ -48,6 +48,12 @@ The default wall should be useful before the operator customizes anything.
 Use SignalForge `graphwall` semantics for assignment state: `wall_id`,
 `tile_id`, `kind`, `target_id`, `position`, and `options`.
 
+Runtime graph rendering is the SignalForge-owned `graph_tile.v1` plus
+`signalforge.tile.uplot` path. Meerstetter-Go may build TEC/CAN-specific tile
+content from gateway data, but generic tile normalization, rendered-series
+ordering, role metadata, and the canonical renderer constant must come from
+`signalforge-web`, not a local canvas or sparkline fork.
+
 ### Fleet temperature-controller hero graph
 
 For channels operating as temperature controllers, graph these together per
