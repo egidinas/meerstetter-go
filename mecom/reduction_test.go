@@ -38,3 +38,36 @@ func TestReduceRingSamplesReturnsFalseForMissingCaptureIndex(t *testing.T) {
 		t.Fatal("expected no reduced sample")
 	}
 }
+
+func TestReduceRingSamplesForIndicesMatchesSingleIndexReduction(t *testing.T) {
+	frames := []RingFrame{
+		{Timestamp10us: 100, Samples: []RingSample{
+			{ConfigIndex: 0, Type: DataTypeFloat32, Value: 10},
+			{ConfigIndex: 1, Type: DataTypeFloat32, Value: 20},
+			{ConfigIndex: 2, Type: DataTypeFloat32, Value: math.NaN()},
+		}},
+		{Timestamp10us: 200, Samples: []RingSample{
+			{ConfigIndex: 0, Type: DataTypeFloat32, Value: 14},
+			{ConfigIndex: 1, Type: DataTypeFloat32, Value: 22},
+			{ConfigIndex: 99, Type: DataTypeFloat32, Value: 30},
+		}},
+	}
+
+	reduced := ReduceRingSamplesForIndices(frames, []int{0, 1, 2})
+
+	for _, configIndex := range []int{0, 1} {
+		want, ok := ReduceRingSamples(frames, configIndex)
+		if !ok {
+			t.Fatalf("expected single-index reduction for %d", configIndex)
+		}
+		if got := reduced[configIndex]; got != want {
+			t.Fatalf("multi-index reduction for %d = %#v, want %#v", configIndex, got, want)
+		}
+	}
+	if _, ok := reduced[2]; ok {
+		t.Fatalf("NaN-only capture index should not produce a reduced sample: %#v", reduced[2])
+	}
+	if _, ok := reduced[99]; ok {
+		t.Fatalf("unrequested capture index should not produce a reduced sample: %#v", reduced[99])
+	}
+}

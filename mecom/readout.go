@@ -260,8 +260,13 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 	}
 	r.ringTail = tail
 
+	configIndices := make([]int, 0, len(r.ringItems))
 	for _, item := range r.ringItems {
-		reduced, ok := ReduceRingSamples(frames, item.configIndex)
+		configIndices = append(configIndices, item.configIndex)
+	}
+	reducedByIndex := ReduceRingSamplesForIndices(frames, configIndices)
+	for _, item := range r.ringItems {
+		reduced, ok := reducedByIndex[item.configIndex]
 		if !ok {
 			continue
 		}
