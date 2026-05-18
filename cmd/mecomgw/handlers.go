@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,8 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("/api/health", s.handleHealth)
 	mux.HandleFunc("/api/devices", s.handleDevices)
 	mux.HandleFunc("/api/catalogue", s.handleCatalogue)
+	mux.HandleFunc("/api/commands", s.handleCommandsList)
+	mux.HandleFunc("/api/graph/tiles/", s.handleGraphTileRoot)
 	mux.HandleFunc("/api/leases", s.handleLeasesList)
 	mux.HandleFunc("/api/devices/", s.handleDeviceRoot)
 	if s.uiDir != "" {
@@ -48,26 +51,69 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 type deviceView struct {
-	ID           string `json:"id"`
-	Label        string `json:"label,omitempty"`
-	Endpoint     string `json:"endpoint"`
-	Address      byte   `json:"address"`
-	ChannelCount int    `json:"channel_count"`
-	Bound        bool   `json:"bound"`
-	LastErr      string `json:"last_error,omitempty"`
+	ID              string            `json:"id"`
+	Label           string            `json:"label,omitempty"`
+	Endpoint        string            `json:"endpoint"`
+	ActiveRoute     deviceRouteView   `json:"active_route"`
+	RouteCandidates []deviceRouteView `json:"route_candidates,omitempty"`
+	Address         byte              `json:"address"`
+	ChannelCount    int               `json:"channel_count"`
+	Channels        []channelView     `json:"channels,omitempty"`
+	Bound           bool              `json:"bound"`
+	LastErr         string            `json:"last_error,omitempty"`
+}
+
+type deviceRouteView struct {
+	Role      string `json:"role"`
+	Name      string `json:"name,omitempty"`
+	Endpoint  string `json:"endpoint"`
+	Transport string `json:"transport,omitempty"`
+	State     string `json:"state,omitempty"`
+	Active    bool   `json:"active,omitempty"`
+}
+
+type gatewayCommandActivity struct {
+	Time           time.Time `json:"time"`
+	TargetID       string    `json:"target_id"`
+	DeviceID       string    `json:"device_id"`
+	ParamID        int       `json:"param_id,omitempty"`
+	Instance       int       `json:"instance,omitempty"`
+	SignalName     string    `json:"signal_name,omitempty"`
+	SignalUnit     string    `json:"signal_unit,omitempty"`
+	RequestedValue any       `json:"requested_value,omitempty"`
+	Status         string    `json:"status"`
+	Transport      string    `json:"transport,omitempty"`
+	LeaseHolder    string    `json:"lease_holder,omitempty"`
+	Error          string    `json:"error,omitempty"`
+	ErrorCategory  string    `json:"error_category,omitempty"`
+	HTTPStatus     int       `json:"http_status"`
+	IdempotencyKey string    `json:"idempotency_key,omitempty"`
+}
+
+type channelView struct {
+	Instance   int    `json:"instance"`
+	Role       string `json:"role,omitempty"`
+	RoleSource string `json:"role_source,omitempty"`
+	Label      string `json:"label,omitempty"`
+	UserNote   string `json:"user_note,omitempty"`
+	HasCascade bool   `json:"has_cascade,omitempty"`
 }
 
 func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 	views := make([]deviceView, 0, len(s.devices))
-	for _, b := range s.devices {
+	for _, b := range s.orderedDeviceBindings() {
 		b.mu.Lock()
+		channelCount := effectiveChannelCount(b.cfg.ChannelCount, s.channelCount)
 		v := deviceView{
-			ID:           b.cfg.ID,
-			Label:        b.cfg.Label,
-			Endpoint:     b.cfg.Endpoint,
-			Address:      b.cfg.Address,
-			ChannelCount: effectiveChannelCount(b.cfg.ChannelCount, s.channelCount),
-			Bound:        b.client != nil,
+			ID:              b.cfg.ID,
+			Label:           b.cfg.Label,
+			Endpoint:        b.cfg.Endpoint,
+			ActiveRoute:     activeDeviceRouteView(b.cfg),
+			RouteCandidates: deviceRouteCandidatesView(b.cfg),
+			Address:         b.cfg.Address,
+			ChannelCount:    channelCount,
+			Channels:        deviceChannelsView(b.cfg, channelCount),
+			Bound:           b.client != nil,
 		}
 		if b.lastErr != nil {
 			v.LastErr = b.lastErr.Error()
@@ -78,22 +124,155 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"devices": views})
 }
 
+func (s *server) orderedDeviceBindings() []*deviceBinding {
+	views := make([]*deviceBinding, 0, len(s.devices))
+	for _, b := range s.devices {
+		views = append(views, b)
+	}
+	sort.SliceStable(views, func(i, j int) bool {
+		li := deviceSortRank(s.defaultDeviceID, views[i].cfg.ID)
+		lj := deviceSortRank(s.defaultDeviceID, views[j].cfg.ID)
+		if li != lj {
+			return li < lj
+		}
+		return views[i].cfg.ID < views[j].cfg.ID
+	})
+	return views
+}
+
+func deviceSortRank(defaultDeviceID, id string) int {
+	if defaultDeviceID != "" && id == defaultDeviceID {
+		return 0
+	}
+	if defaultDeviceID == "" && id == "tec-76" {
+		return 0
+	}
+	return 1
+}
+
+func deviceChannelsView(cfg DeviceConfig, channelCount int) []channelView {
+	if len(cfg.Channels) == 0 {
+		return nil
+	}
+	out := make([]channelView, 0, len(cfg.Channels))
+	for _, ch := range cfg.Channels {
+		if ch.Instance < 1 || ch.Instance > channelCount {
+			continue
+		}
+		role := strings.ToLower(strings.TrimSpace(ch.Role))
+		v := channelView{
+			Instance:   ch.Instance,
+			Role:       role,
+			Label:      ch.Label,
+			UserNote:   ch.UserNote,
+			HasCascade: ch.HasCascade,
+		}
+		if role != "" {
+			v.RoleSource = "config"
+		}
+		out = append(out, v)
+	}
+	return out
+}
+
+func activeDeviceRouteView(cfg DeviceConfig) deviceRouteView {
+	for _, route := range cfg.Routes {
+		if strings.TrimSpace(route.Endpoint) == strings.TrimSpace(cfg.Endpoint) {
+			return deviceRouteView{
+				Role:      route.Role,
+				Name:      route.Name,
+				Endpoint:  route.Endpoint,
+				Transport: firstNonEmpty(route.Transport, routeTransportFromEndpoint(route.Endpoint)),
+				State:     "active",
+				Active:    true,
+			}
+		}
+	}
+	return deviceRouteView{
+		Role:      "hot",
+		Name:      "configured",
+		Endpoint:  cfg.Endpoint,
+		Transport: routeTransportFromEndpoint(cfg.Endpoint),
+		State:     "active",
+		Active:    true,
+	}
+}
+
+func deviceRouteCandidatesView(cfg DeviceConfig) []deviceRouteView {
+	out := make([]deviceRouteView, 0, len(cfg.Routes)+1)
+	active := activeDeviceRouteView(cfg)
+	seenActive := false
+	for _, route := range cfg.Routes {
+		isActive := strings.TrimSpace(route.Endpoint) == strings.TrimSpace(active.Endpoint)
+		if isActive {
+			seenActive = true
+		}
+		out = append(out, deviceRouteView{
+			Role:      route.Role,
+			Name:      route.Name,
+			Endpoint:  route.Endpoint,
+			Transport: firstNonEmpty(route.Transport, routeTransportFromEndpoint(route.Endpoint)),
+			State:     firstNonEmpty(activeState(isActive), route.State),
+			Active:    isActive,
+		})
+	}
+	if !seenActive {
+		out = append([]deviceRouteView{active}, out...)
+	}
+	return out
+}
+
+func routeTransportFromEndpoint(endpoint string) string {
+	switch {
+	case strings.HasPrefix(endpoint, "tcp:"):
+		return "tcp"
+	case strings.HasPrefix(endpoint, "serial:"):
+		return "serial"
+	case strings.HasPrefix(endpoint, "serial+can:"):
+		return "serial+can"
+	case strings.HasPrefix(endpoint, "can:"):
+		return "can"
+	case strings.HasPrefix(endpoint, "canopen:"):
+		return "canopen"
+	default:
+		return ""
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func activeState(active bool) string {
+	if active {
+		return "active"
+	}
+	return ""
+}
+
 func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 	channels := s.catalogueChannelCount()
-	params := mecom.DefaultTECReadoutParameters(channels)
+	params := mecom.DefaultTECCatalogueEntries(channels)
 	seen := make(map[string]struct{}, len(params)+channels*2)
 	out := make([]gatewayCatalogueEntry, 0, len(params)+channels*2)
 	for _, p := range params {
 		e := gatewayCatalogueEntry{
-			ID:       p.Parameter.ID,
-			Instance: p.Parameter.Instance,
-			Name:     p.Parameter.Name,
-			Unit:     p.Parameter.Unit,
-			Type:     string(p.Parameter.Type),
-			Sensor:   p.Sensor,
-			HighPri:  p.HighPriority,
-			Writable: gatewayCatalogueWritable(p.Parameter.ID),
+			TECCatalogueEntry:       p,
+			Writable:                gatewayCatalogueWritable(p.ID),
+			RouteSupport:            gatewayCatalogueRouteSupport(p.TransportSupport),
+			TelemetryCounterparts:   p.Counterparts,
+			TelecommandCounterparts: p.Counterparts,
+			WriteSemantics:          gatewayCatalogueWriteSemantics(p.Access, p.Command),
 		}
+		if p.ReadoutPriority == "high" {
+			e.HighPri = true
+		}
+		e.Sensor = fmt.Sprintf("mecom.tec_%02d.%s", p.Instance, p.RawName)
 		seen[gatewayCatalogueKey(e.ID, e.Instance)] = struct{}{}
 		out = append(out, e)
 	}
@@ -132,14 +311,14 @@ func effectiveChannelCount(values ...int) int {
 }
 
 type gatewayCatalogueEntry struct {
-	ID       int    `json:"id"`
-	Instance int    `json:"instance"`
-	Name     string `json:"name"`
-	Unit     string `json:"unit,omitempty"`
-	Type     string `json:"type"`
-	Sensor   string `json:"sensor,omitempty"`
-	HighPri  bool   `json:"high_priority"`
-	Writable bool   `json:"writable"`
+	mecom.TECCatalogueEntry
+	Sensor                  string           `json:"sensor,omitempty"`
+	HighPri                 bool             `json:"high_priority"`
+	Writable                bool             `json:"writable"`
+	RouteSupport            []string         `json:"route_support,omitempty"`
+	TelemetryCounterparts   map[string][]int `json:"telemetry_counterparts,omitempty"`
+	TelecommandCounterparts map[string][]int `json:"telecommand_counterparts,omitempty"`
+	WriteSemantics          string           `json:"write_semantics,omitempty"`
 }
 
 type gatewayReadValue struct {
@@ -154,48 +333,93 @@ func gatewayCatalogueKey(id, instance int) string {
 }
 
 func gatewayCatalogueWritable(id int) bool {
-	switch id {
-	case 2010, 2040, 3000:
-		return true
-	default:
-		return false
-	}
+	return mecom.TECParameterWritable(id)
 }
 
 func gatewayWriteOnlyCatalogueEntries(channels int) []gatewayCatalogueEntry {
-	if channels <= 0 {
-		channels = 4
-	}
-	if channels > 255 {
-		channels = 255
-	}
-	type writeOnlyParam struct {
-		id   int
-		name string
-		typ  mecom.DataType
-	}
-	params := []writeOnlyParam{
-		{id: 2010, name: "output_stage_enable", typ: mecom.DataTypeInt32},
-		{id: 2040, name: "operating_mode", typ: mecom.DataTypeInt32},
-	}
-	out := make([]gatewayCatalogueEntry, 0, channels*len(params))
-	for instance := 1; instance <= channels; instance++ {
-		for _, p := range params {
-			out = append(out, gatewayCatalogueEntry{
-				ID:       p.id,
-				Instance: instance,
-				Name:     p.name,
-				Type:     string(p.typ),
-				Sensor:   fmt.Sprintf("mecom.tec_%02d.%s", instance, p.name),
-				Writable: true,
-			})
-		}
+	params := mecom.DefaultTECWriteParameters(channels)
+	out := make([]gatewayCatalogueEntry, 0, len(params))
+	for _, p := range params {
+		out = append(out, gatewayCatalogueEntry{
+			TECCatalogueEntry: mecom.TECCatalogueEntry{
+				ID:               p.ID,
+				Instance:         p.Instance,
+				DisplayName:      p.Name,
+				RawName:          p.Name,
+				Unit:             p.Unit,
+				Type:             string(p.Type),
+				Kind:             "continuous",
+				Access:           "write",
+				ReadoutPriority:  "background",
+				PreferredReadout: "mecom_vx_round_robin_queue",
+			},
+			Sensor:         fmt.Sprintf("mecom.tec_%02d.%s", p.Instance, p.Name),
+			Writable:       p.Writable,
+			RouteSupport:   []string{"serial", "can", "serial+can", "canopen", "tcp"},
+			WriteSemantics: "write",
+		})
 	}
 	return out
 }
 
+func gatewayCatalogueRouteSupport(transportSupport []string) []string {
+	if len(transportSupport) == 0 {
+		return []string{"serial", "can", "serial+can", "canopen", "tcp"}
+	}
+	out := make([]string, 0, len(transportSupport))
+	for _, support := range transportSupport {
+		switch support {
+		case "mecom_serial":
+			out = append(out, "serial")
+		case "mecom_can":
+			out = append(out, "can")
+		case "mecom_serial_can":
+			out = append(out, "serial+can")
+		case "mecom_tcp":
+			out = append(out, "tcp")
+		case "canopen":
+			out = append(out, "canopen")
+		}
+	}
+	if len(out) == 0 {
+		return []string{"serial", "can", "serial+can", "canopen", "tcp"}
+	}
+	return out
+}
+
+func gatewayCatalogueWriteSemantics(access, command string) string {
+	if access == "write" {
+		if command != "" {
+			return command
+		}
+		return "write"
+	}
+	return "read_only"
+}
+
 func (s *server) handleLeasesList(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"leases": s.leases.List()})
+}
+
+func (s *server) handleCommandsList(w http.ResponseWriter, r *http.Request) {
+	limit := 100
+	if raw := strings.TrimSpace(r.URL.Query().Get("limit")); raw != "" {
+		if parsed, err := strconv.Atoi(raw); err == nil && parsed > 0 {
+			if parsed > 100 {
+				parsed = 100
+			}
+			limit = parsed
+		}
+	}
+	s.commandLogMu.Lock()
+	defer s.commandLogMu.Unlock()
+	start := len(s.commandLog) - limit
+	if start < 0 {
+		start = 0
+	}
+	out := make([]gatewayCommandActivity, len(s.commandLog[start:]))
+	copy(out, s.commandLog[start:])
+	writeJSON(w, http.StatusOK, map[string]any{"commands": out})
 }
 
 // --- /api/devices/{id}/* dispatcher ---
@@ -240,6 +464,23 @@ func (s *server) handleDeviceRoot(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.handlePollSSE(w, r, deviceID)
+	case "graph":
+		s.handleDeviceGraphRoot(w, r, deviceID)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *server) handleDeviceGraphRoot(w http.ResponseWriter, r *http.Request, deviceID string) {
+	rest := strings.TrimPrefix(r.URL.Path, "/api/devices/"+deviceID+"/graph/")
+	if rest == "" {
+		http.NotFound(w, r)
+		return
+	}
+	parts := strings.SplitN(rest, "/", 2)
+	switch parts[0] {
+	case "tiles":
+		s.handleGraphTileRoot(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -317,18 +558,37 @@ type writeRequest struct {
 }
 
 func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID string) {
+	activity := gatewayCommandActivity{
+		Time:     time.Now(),
+		DeviceID: deviceID,
+		TargetID: deviceID,
+		Status:   "failed",
+	}
 	bound, err := s.bind(deviceID)
 	if err != nil {
-		http.Error(w, err.Error(), bindStatusForError(err))
+		activity.Error = err.Error()
+		activity.ErrorCategory = gatewayCommandErrorCategory(err)
+		activity.HTTPStatus = bindStatusForError(err)
+		s.recordCommandActivity(activity)
+		http.Error(w, err.Error(), activity.HTTPStatus)
 		return
 	}
 	if bound.commander == nil {
-		http.Error(w, "device transport does not support writes", http.StatusUnprocessableEntity)
+		activity.Error = "device transport does not support writes"
+		activity.ErrorCategory = "transport"
+		activity.HTTPStatus = http.StatusUnprocessableEntity
+		activity.Transport = "unsupported"
+		s.recordCommandActivity(activity)
+		http.Error(w, activity.Error, activity.HTTPStatus)
 		return
 	}
 	var req writeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
+		activity.Error = "invalid JSON: " + err.Error()
+		activity.ErrorCategory = "request"
+		activity.HTTPStatus = http.StatusBadRequest
+		s.recordCommandActivity(activity)
+		http.Error(w, activity.Error, activity.HTTPStatus)
 		return
 	}
 	token := strings.TrimSpace(r.Header.Get("X-Lease-Token"))
@@ -346,19 +606,146 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 		Metadata:  req.Metadata,
 	}
 	tc.EnsureIdempotencyKey()
+	activity.Transport = commanderTransportName(bound.commander)
+	activity.IdempotencyKey = tc.IdempotencyKey
+	activity.LeaseHolder = s.leaseHolderForToken(token)
+	activity.ParamID, activity.Instance, activity.SignalName, activity.SignalUnit, activity.RequestedValue = gatewayCommandTargetFromTelecommand(req)
 	ev, err := bound.commander.Send(tc)
+	activity.HTTPStatus = http.StatusOK
+	activity.Status = string(ev.Status)
+	if ev.Error != "" {
+		activity.Error = ev.Error
+	}
+	if ev.Status == tmtc.CommandCompleted {
+		activity.HTTPStatus = http.StatusOK
+		s.recordCommandActivity(activity)
+		writeJSON(w, http.StatusOK, ev)
+		return
+	}
+	activity.HTTPStatus = gatewayCommandHTTPStatus(ev.Status, err)
+	activity.ErrorCategory = gatewayCommandErrorCategory(err)
 	if err != nil {
 		if shouldResetDeviceBinding(err) {
 			s.resetDeviceBinding(deviceID, bound.client, err)
 		}
 		if errors.Is(err, writelease.ErrInvalidToken) || errors.Is(err, writelease.ErrUnknownDevice) || errors.Is(err, writelease.ErrExpired) {
+			activity.HTTPStatus = http.StatusLocked
+			s.recordCommandActivity(activity)
 			writeJSON(w, http.StatusLocked, map[string]any{"error": err.Error(), "event": ev})
 			return
 		}
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": err.Error(), "event": ev})
+		s.recordCommandActivity(activity)
+		writeJSON(w, activity.HTTPStatus, map[string]any{"error": err.Error(), "event": ev})
 		return
 	}
+	s.recordCommandActivity(activity)
 	writeJSON(w, http.StatusOK, ev)
+}
+
+func (s *server) recordCommandActivity(activity gatewayCommandActivity) {
+	s.commandLogMu.Lock()
+	defer s.commandLogMu.Unlock()
+	s.commandLog = append(s.commandLog, activity)
+	if len(s.commandLog) > 100 {
+		s.commandLog = append([]gatewayCommandActivity(nil), s.commandLog[len(s.commandLog)-100:]...)
+	}
+}
+
+func commanderTransportName(cmdr *mecom.Commander) string {
+	if cmdr == nil {
+		return ""
+	}
+	if cmdr.StringWriter != nil {
+		return "string"
+	}
+	if cmdr.Writer != nil {
+		return "mecom"
+	}
+	return ""
+}
+
+func gatewayCommandHTTPStatus(status tmtc.CommandStatus, err error) int {
+	switch status {
+	case tmtc.CommandCompleted:
+		return http.StatusOK
+	case tmtc.CommandRejected:
+		if errors.Is(err, writelease.ErrInvalidToken) || errors.Is(err, writelease.ErrUnknownDevice) || errors.Is(err, writelease.ErrExpired) {
+			return http.StatusLocked
+		}
+		return http.StatusBadRequest
+	case tmtc.CommandFailed:
+		return http.StatusBadRequest
+	default:
+		return http.StatusBadRequest
+	}
+}
+
+func gatewayCommandErrorCategory(err error) string {
+	switch {
+	case err == nil:
+		return ""
+	case errors.Is(err, writelease.ErrInvalidToken), errors.Is(err, writelease.ErrUnknownDevice), errors.Is(err, writelease.ErrExpired):
+		return "lease"
+	case errors.Is(err, mecom.ErrUnreachable), errors.Is(err, mecom.ErrTimeout):
+		return "transport"
+	case errors.Is(err, mecom.ErrUnknownParameter), errors.Is(err, mecom.ErrParameterReadOnly), errors.Is(err, mecom.ErrWriteRejected), errors.Is(err, mecom.ErrTransportNotSupported), errors.Is(err, mecom.ErrBadAddress), errors.Is(err, mecom.ErrInvalidArgument):
+		return "mecom"
+	default:
+		return "gateway"
+	}
+}
+
+func (s *server) leaseHolderForToken(token string) string {
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return ""
+	}
+	for _, lease := range s.leases.List() {
+		if lease.Token == token {
+			return lease.Holder
+		}
+	}
+	return ""
+}
+
+func gatewayCommandTargetFromTelecommand(req writeRequest) (int, int, string, string, any) {
+	paramID := 0
+	instance := 0
+	if req.Arguments != nil {
+		if v, ok := req.Arguments["param"]; ok {
+			paramID = intFromAny(v)
+		}
+		if v, ok := req.Arguments["instance"]; ok {
+			instance = intFromAny(v)
+		}
+	}
+	signalName, signalUnit := "", ""
+	if param, ok := gatewayParameterByID(paramID); ok {
+		signalName = param.Name
+		signalUnit = param.Unit
+	}
+	return paramID, instance, signalName, signalUnit, req.Arguments["value"]
+}
+
+func intFromAny(v any) int {
+	switch x := v.(type) {
+	case float64:
+		return int(x)
+	case float32:
+		return int(x)
+	case int:
+		return x
+	case int64:
+		return int(x)
+	case json.Number:
+		i, _ := x.Int64()
+		return int(i)
+	case string:
+		i, _ := strconv.Atoi(strings.TrimSpace(x))
+		return i
+	default:
+		return 0
+	}
 }
 
 // --- read ---
@@ -376,7 +763,7 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	out, err := readGatewayValues(ctx, bound.client, params)
+	out, err := s.readGatewayValues(deviceID, ctx, bound.client, params)
 	if err != nil {
 		if shouldResetDeviceBinding(err) {
 			s.resetDeviceBinding(deviceID, bound.client, err)
@@ -387,10 +774,12 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	writeJSON(w, http.StatusOK, map[string]any{"values": out})
 }
 
-func readGatewayValues(ctx context.Context, client mecom.ReadClient, params []mecom.Parameter) ([]gatewayReadValue, error) {
+func (s *server) readGatewayValues(deviceID string, ctx context.Context, client mecom.ReadClient, params []mecom.Parameter) ([]gatewayReadValue, error) {
 	values, err := client.ReadBulk(ctx, params)
 	if err == nil && len(values) == len(params) {
-		return gatewayValuesFromFloats(params, values), nil
+		out := gatewayValuesFromFloats(params, values)
+		s.recordGatewayReadSamples(deviceID, out, time.Now().UTC())
+		return out, nil
 	}
 	bulkErr := err
 	if bulkErr == nil {
@@ -414,7 +803,17 @@ func readGatewayValues(ctx context.Context, client mecom.ReadClient, params []me
 	if okCount == 0 {
 		return nil, bulkErr
 	}
+	s.recordGatewayReadSamples(deviceID, out, time.Now().UTC())
 	return out, nil
+}
+
+func (s *server) recordGatewayReadSamples(deviceID string, values []gatewayReadValue, at time.Time) {
+	for _, value := range values {
+		if value.Value == nil || value.Quality != "ok" {
+			continue
+		}
+		s.recordGraphSample(deviceID, value.ID, value.Instance, *value.Value, value.Quality, at)
+	}
 }
 
 func gatewayValuesFromFloats(params []mecom.Parameter, values []float64) []gatewayReadValue {
@@ -574,15 +973,9 @@ func gatewayParameterByID(id int) (mecom.Parameter, bool) {
 			return param, true
 		}
 	}
-	for _, entry := range gatewayWriteOnlyCatalogueEntries(1) {
-		if entry.ID == id {
-			return mecom.Parameter{
-				ID:       entry.ID,
-				Instance: entry.Instance,
-				Name:     entry.Name,
-				Unit:     entry.Unit,
-				Type:     mecom.DataType(entry.Type),
-			}, true
+	for _, param := range mecom.DefaultTECWriteParameters(1) {
+		if param.ID == id {
+			return param, true
 		}
 	}
 	return mecom.Parameter{}, false

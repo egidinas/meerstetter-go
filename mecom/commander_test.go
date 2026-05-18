@@ -13,6 +13,8 @@ import (
 type fakeWriteClient struct {
 	float32Calls []writeFloat32Call
 	int32Calls   []writeInt32Call
+	stringCalls  []writeStringCall
+	bigDataCalls []writeStringCall
 	resetCalls   int
 	saveCalls    int
 	failNext     bool
@@ -26,6 +28,10 @@ type writeInt32Call struct {
 	paramID, instance int
 	value             int32
 }
+type writeStringCall struct {
+	paramID, instance int
+	value             string
+}
 
 func (f *fakeWriteClient) WriteFloat32(_ context.Context, paramID, instance int, value float32) error {
 	f.float32Calls = append(f.float32Calls, writeFloat32Call{paramID, instance, value})
@@ -38,6 +44,16 @@ func (f *fakeWriteClient) WriteFloat32(_ context.Context, paramID, instance int,
 
 func (f *fakeWriteClient) WriteInt32(_ context.Context, paramID, instance int, value int32) error {
 	f.int32Calls = append(f.int32Calls, writeInt32Call{paramID, instance, value})
+	return nil
+}
+
+func (f *fakeWriteClient) WriteString(_ context.Context, paramID, instance int, value string) error {
+	f.stringCalls = append(f.stringCalls, writeStringCall{paramID, instance, value})
+	return nil
+}
+
+func (f *fakeWriteClient) WriteBigDataString(_ context.Context, paramID, instance int, value string) error {
+	f.bigDataCalls = append(f.bigDataCalls, writeStringCall{paramID, instance, value})
 	return nil
 }
 
@@ -100,6 +116,54 @@ func TestCommanderRoutesWriteInt32WithJSONNumberArgs(t *testing.T) {
 	}
 	if got := fw.int32Calls[0]; got != (writeInt32Call{paramID: 2010, instance: 1, value: 5}) {
 		t.Fatalf("int32 call = %+v", got)
+	}
+}
+
+func TestCommanderRoutesWriteString(t *testing.T) {
+	fw := &fakeWriteClient{}
+	cmdr := NewCommander(fw, time.Second)
+	ev, err := cmdr.Send(tmtc.Telecommand{
+		Name:      "write_string",
+		Arguments: map[string]any{"param": 6024, "instance": 1, "value": "Line 1"},
+	})
+	if err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	if ev.Status != tmtc.CommandCompleted {
+		t.Fatalf("status=%v, want completed", ev.Status)
+	}
+	if got := fw.stringCalls; len(got) != 1 || got[0] != (writeStringCall{paramID: 6024, instance: 1, value: "Line 1"}) {
+		t.Fatalf("string calls=%+v", got)
+	}
+}
+
+func TestCommanderRoutesWriteBigDataString(t *testing.T) {
+	fw := &fakeWriteClient{}
+	cmdr := NewCommander(fw, time.Second)
+	_, err := cmdr.Send(tmtc.Telecommand{
+		Name:      "write_big_data_string",
+		Arguments: map[string]any{"param": 120, "instance": 1, "value": "SN76 note"},
+	})
+	if err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	if got := fw.bigDataCalls; len(got) != 1 || got[0] != (writeStringCall{paramID: 120, instance: 1, value: "SN76 note"}) {
+		t.Fatalf("big-data calls=%+v", got)
+	}
+}
+
+func TestCommanderRoutesWriteUserNoteToParam120(t *testing.T) {
+	fw := &fakeWriteClient{}
+	cmdr := NewCommander(fw, time.Second)
+	_, err := cmdr.Send(tmtc.Telecommand{
+		Name:      "write_user_note",
+		Arguments: map[string]any{"instance": 3, "value": "Back zone"},
+	})
+	if err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	if got := fw.bigDataCalls; len(got) != 1 || got[0] != (writeStringCall{paramID: 120, instance: 3, value: "Back zone"}) {
+		t.Fatalf("user-note calls=%+v", got)
 	}
 }
 

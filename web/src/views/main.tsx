@@ -2,36 +2,62 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick, categorizeError, DiscoveryTree, SignalValueCard } from "../components/atoms";
-import { renderSeriesFromGraphTile, pickTileLevel } from "../lib/series";
-import { useAssignments, WALLS, wallForDevice, normalizeAssignment, buildGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam } from "./assignments";
+import { DEFAULT_TILE_LEVELS, renderSeriesFromGraphTile } from "../lib/series";
+import { useAssignments, WALLS, wallForDevice, normalizeAssignment, useGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam, GRAPH_ORIGIN_DEVICE_ID } from "./assignments";
 import { HeroGraph, TempSettingsTable, SupplySettingsTable } from "./hero";
+
+function formatRouteLabel(route) {
+  const kind = String(route?.kind || route?.role || "").toLowerCase();
+  const label = String(route?.label || route?.name || "").trim();
+  const detail = String(route?.detail || "").trim();
+  const routeText = kind === "hot"
+    ? "hot CAN path"
+    : kind === "warm"
+      ? "warm serial/FTDI"
+      : kind === "fallback"
+        ? "warm fallback route"
+        : "route";
+  const title = label || routeText;
+  const suffix = detail ? ` · ${detail}` : "";
+  return { title, text: `${title} · ${routeText}${suffix}` };
+}
+
+const GRAPH_TILE_WINDOW_OPTIONS = DEFAULT_TILE_LEVELS;
+
+function graphTileWindowForLevel(level) {
+  return GRAPH_TILE_WINDOW_OPTIONS.find((option) => option.level === level) || GRAPH_TILE_WINDOW_OPTIONS[0];
+}
 
 export function FleetView({ onOpenDevice }) {
   useGatewayTick();
   const assigns = useAssignments();
-  const devices = MecomAPI.devices();
   const channels = MecomAPI.channels();
   const settings = MecomAPI.settings();
-  const events = MecomAPI.commandEvents();
-  const leases = MecomAPI.leases();
 
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
+  const originDeviceId = (typeof MecomAPI.primaryDeviceId === "function" && MecomAPI.primaryDeviceId()) || GRAPH_ORIGIN_DEVICE_ID;
+  const originTempChannels = tempChannels.filter((c) => c.device_id === originDeviceId);
+  const originSupplyChannels = supplyChannels.filter((c) => c.device_id === originDeviceId);
+  const originTempStored = assigns.forWall(WALLS.fleetTemp.wall_id).filter((a) => normalizeAssignment(a).device_id === originDeviceId);
+  const originSupplyStored = assigns.forWall(WALLS.fleetSupply.wall_id).filter((a) => normalizeAssignment(a).device_id === originDeviceId);
 
-  const fleetTempAssignments = assignmentsWithPriorityDefaults(assigns.forWall(WALLS.fleetTemp.wall_id), WALLS.fleetTemp.wall_id, tempChannels);
-  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(assigns.forWall(WALLS.fleetSupply.wall_id), WALLS.fleetSupply.wall_id, supplyChannels);
+  const fleetTempAssignments = assignmentsWithPriorityDefaults(originTempStored, WALLS.fleetTemp.wall_id, originTempChannels);
+  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(originSupplyStored, WALLS.fleetSupply.wall_id, originSupplyChannels);
 
-  const tempTile = buildGraphTileFromAssignments(fleetTempAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "thermal"), {
+  const tempTile = useGraphTileFromAssignments(fleetTempAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "thermal"), {
     tile_id: WALLS.fleetTemp.wall_id,
     title: WALLS.fleetTemp.label,
     colorByChannel: false,
     timeWindowMs: 90_000,
+    level: "live",
   });
-  const supplyTile = buildGraphTileFromAssignments(fleetSupplyAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "power"), {
+  const supplyTile = useGraphTileFromAssignments(fleetSupplyAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "power"), {
     tile_id: WALLS.fleetSupply.wall_id,
     title: WALLS.fleetSupply.label,
     colorByChannel: false,
     timeWindowMs: 90_000,
+    level: "live",
   });
 
   return (
@@ -50,33 +76,16 @@ export function FleetView({ onOpenDevice }) {
           )}
         </HeroGraph>
       </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px, 1fr)", gap: 8 }}>
-        <Panel title="Devices" meta={`${devices.length} configured`} flush>
-          <div className="fleet-strip" style={{ padding: 8 }}>
-            {devices.map((d) => (
-              <DeviceMini key={d.id} device={d} onOpen={() => onOpenDevice(d.id)} />
-            ))}
-          </div>
-        </Panel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <Panel title="Command activity" meta={`${events.length} recent`} flush>
-            <CommandFeed events={events} />
-          </Panel>
-          <Panel title="Lease ownership" right={<Chip>{leases.length} active</Chip>} flush>
-            <LeaseSummary leases={leases} holder={settings.holder} />
-          </Panel>
-        </div>
-      </div>
     </div>
   );
 }
 
-function DeviceMini({ device, onOpen }) {
+export function DeviceMini({ device, onOpen }) {
   const channels = MecomAPI.channels().filter((c) => c.device_id === device.id);
   const leases = MecomAPI.leases();
   const lease = leases.find((l) => l.device_id === device.id);
   const bs = MecomAPI.brokerStats(device.id);
+  const routes = Array.isArray(device.routes) ? device.routes : [];
   return (
     <div className={"dev-mini" + (device.last_error ? " bad" : "")} onClick={onOpen}>
       <div className="top">
@@ -89,17 +98,25 @@ function DeviceMini({ device, onOpen }) {
       <div className="chans">
         {channels.map((c) => (
           <Chip key={c.instance} kind={c.role === "supply" ? "warn" : "accent"}>
-            ch{c.instance} · {c.role === "supply" ? "supply" : "temp"}
+            channel {c.instance} · {c.role === "supply" ? "supply" : "temperature"}
           </Chip>
         ))}
         {channels.length === 0 && <Chip>no channels</Chip>}
         {lease && <Chip kind={lease.holder === MecomAPI.settings().holder ? "accent" : "warn"} title={lease.holder}>{lease.holder === MecomAPI.settings().holder ? "you hold" : lease.holder}</Chip>}
       </div>
+      <div className="routes" title="Connection redundancy">
+        {routes.map((route) => (
+          <Chip key={`${device.id}:${route.label}`} kind={route.kind === "hot" ? "accent" : "warn"} title={route.detail || route.label}>
+            {formatRouteLabel(route).text}
+          </Chip>
+        ))}
+        {routes.length === 0 && <Chip kind="warn">no redundancy data</Chip>}
+      </div>
       <div className="stats">
-        <span>{bs.frames_in.toLocaleString()} ↓</span>
-        <span>{bs.frames_out.toLocaleString()} ↑</span>
-        {bs.error_count > 0 && <span style={{ color: "var(--warn)" }}>{bs.error_count} err</span>}
-        <span style={{ marginLeft: "auto" }}>{device.endpoint}</span>
+        <span title="CAN receive frames counted by the gateway since connection">{bs.frames_in.toLocaleString()} CAN RX frames</span>
+        <span title="CAN transmit frames counted by the gateway since connection">{bs.frames_out.toLocaleString()} CAN TX frames</span>
+        {bs.error_count > 0 && <span style={{ color: "var(--warn)" }} title="CAN bus or gateway transport errors">{bs.error_count} bus errors</span>}
+        <span className="endpoint" title={device.endpoint}>{device.endpoint}</span>
       </div>
     </div>
   );
@@ -108,7 +125,7 @@ function DeviceMini({ device, onOpen }) {
 export function CommandFeed({ events }) {
   return (
     <div className="feed">
-      {events.length === 0 && <div style={{ padding: 14, color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>No recent commands.</div>}
+      {events.length === 0 && <div style={{ padding: 14, color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>No gateway command attempts recorded yet.</div>}
       {events.slice(0, 16).map((e) => {
         const t = new Date(e.time);
         const hh = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") + ":" + String(t.getSeconds()).padStart(2, "0");
@@ -119,10 +136,10 @@ export function CommandFeed({ events }) {
         if (e.error) {
           msg = e.error_category ? `[${e.error_category}] ${e.error}` : e.error;
         } else if (e.signal_name !== undefined) {
-          const prev = e.prev_value === null || e.prev_value === undefined ? "—" :
-                       (typeof e.prev_value === "number" ? e.prev_value.toFixed(3) : String(e.prev_value));
-          const req = typeof e.requested_value === "number" ? e.requested_value.toFixed(3) : String(e.requested_value);
-          msg = `${e.signal_name} ${prev} → ${req}${e.unit ? " " + e.unit : ""}`;
+          const unit = e.unit ?? e.signal_unit ?? "";
+          const prev = e.prev_value === null || e.prev_value === undefined ? "—" : MecomAPI.formatWithUnit(e.prev_value, unit, e.param_id);
+          const req = e.requested_value === null || e.requested_value === undefined ? "—" : MecomAPI.formatWithUnit(e.requested_value, unit, e.param_id);
+          msg = `${e.signal_name} ${prev} → ${req}`;
         } else if (e.result && e.result.arguments) {
           msg = `${e.result.name || "write"} param=${e.result.arguments.param}` +
                 (e.result.arguments.instance !== undefined ? `/${e.result.arguments.instance}` : "") +
@@ -136,7 +153,7 @@ export function CommandFeed({ events }) {
           e.instance !== undefined && e.param_id !== undefined && `param=${e.param_id} instance=${e.instance}`,
         ].filter(Boolean).join(" ");
         return (
-          <div key={e.command_id} className="ev">
+          <div key={e.command_id || `${e.time}:${e.target_id}:${e.param_id}:${e.instance}`} className="ev">
             <span className="t">{hh}</span>
             <span className="dev">{e.target_id || "—"}{e.instance !== undefined ? "/" + e.instance : ""}</span>
             <span className="msg" title={tooltip}>{msg}</span>
@@ -148,7 +165,7 @@ export function CommandFeed({ events }) {
   );
 }
 
-function LeaseSummary({ leases, holder }) {
+export function LeaseSummary({ leases, holder }) {
   if (!leases.length) {
     return <div style={{ padding: 14, color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>No active leases.</div>;
   }
@@ -175,7 +192,7 @@ function LeaseSummary({ leases, holder }) {
 
 export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   useGatewayTick();
-  const catalogue = useMemo(() => MecomAPI.catalogue(), []);
+  const catalogue = MecomAPI.catalogue();
   const device = MecomAPI.devices().find((d) => d.id === deviceId);
   const allChannels = MecomAPI.channels();
   const channels = allChannels.filter((c) => c.device_id === deviceId);
@@ -187,10 +204,12 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   const lease = leases.find((l) => l.device_id === deviceId);
   const youHold = lease && lease.holder === settings.holder;
   const assigns = useAssignments();
-  const [tileWindowMs, setTileWindowMs] = useState(90_000);
-  const tileLevel = pickTileLevel(tileWindowMs);
+  const [tileLevel, setTileLevel] = useState("live");
+  const tileWindow = graphTileWindowForLevel(tileLevel);
+  const tileWindowMs = tileWindow.timeWindowMs;
   const [hiddenSeries, setHiddenSeries] = useState({});
   const [ignoreOpenSensorOutliers, setIgnoreOpenSensorOutliers] = useState(true);
+  const routes = Array.isArray(device?.routes) ? device.routes : [];
 
   const deviceWallId = wallForDevice(deviceId).wall_id + "-" + (activeChannel?.instance || 1);
   const storedPins = assigns.forWall(deviceWallId);
@@ -207,16 +226,16 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
     return defs.map((def) => {
       const bucketPins = sourcePins.filter((p) => graphBucketForParam(normalizeAssignment(p).param_id) === def.bucket);
       const tileId = `${deviceWallId}-${def.suffix}`;
-      const tile = buildGraphTileFromAssignments(bucketPins, {
+      const tileOptions = {
         tile_id: tileId,
         title: `${device ? device.label : deviceId} · channel ${activeChannel ? activeChannel.instance : activeChannelInst} · ${def.title}`,
         colorByChannel: false,
         timeWindowMs: tileWindowMs,
         level: tileLevel,
         ignoreOpenSensorOutliers: ignoreOpenSensorOutliers && def.bucket === "thermal",
-      });
-      return { ...def, tileId, tile, series: renderSeriesFromGraphTile(tile) };
-    }).filter((section) => section.series.length > 0 || section.bucket === "thermal" || section.bucket === "power");
+      };
+      return { ...def, tileId, bucketPins, tileOptions };
+    }).filter((section) => section.bucketPins.length > 0 || section.bucket === "thermal" || section.bucket === "power");
   }, [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannelInst, tileWindowMs, tileLevel, ignoreOpenSensorOutliers]);
   function toggleSeriesVisibility(tileId, key) {
     setHiddenSeries((cur) => {
@@ -319,8 +338,15 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
       />
       <div className="canvas">
         <div className="ws-head">
-          <h2>{device.label} <span className="id">{device.id} · {device.endpoint} · addr {device.address}</span></h2>
+          <h2>{device.label} <span className="id">{device.id} · {device.endpoint} · address {device.address}</span></h2>
           <div className="right">
+            <div className="route-strip" title="Connection redundancy">
+              {routes.map((route) => (
+                <Chip key={`${device.id}:${route.label}`} kind={route.kind === "hot" ? "accent" : "warn"} title={route.detail || route.label}>
+                  {formatRouteLabel(route).text}
+                </Chip>
+              ))}
+            </div>
             {channels.length > 1 && (
               <div className="role-toggle" style={{ height: 28 }}>
                 {channels.map((c) => (
@@ -328,13 +354,13 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
                           className={(c.role === "temp" ? "temp " : "supply ") + (c.instance === activeChannelInst ? "on" : "")}
                           style={{ padding: "0 12px" }}
                           onClick={() => setActiveChannelInst(c.instance)}>
-                    ch{c.instance} · {c.role}
+                    channel {c.instance} · {c.role === "temp" ? "temperature" : c.role}
                   </button>
                 ))}
               </div>
             )}
             {channels.length === 1 && (
-              <Chip kind={activeChannel.role === "supply" ? "warn" : "accent"}>ch{activeChannel.instance} · {activeChannel.role === "supply" ? "supply" : "temp ctrl"}</Chip>
+              <Chip kind={activeChannel.role === "supply" ? "warn" : "accent"}>channel {activeChannel.instance} · {activeChannel.role === "supply" ? "supply" : "temperature control"}</Chip>
             )}
             <button className="btn sm" onClick={() => setOnlyWritable((v) => !v)}>{onlyWritable ? "All params" : "Writable only"}</button>
             <button className="btn sm" onClick={onOpenSequencer}>Run sequence ▸</button>
@@ -354,9 +380,9 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--muted)" }}>
           <span>connected <b style={{ color: bs.connected ? "var(--ok)" : "var(--bad)" }}>{String(bs.connected)}</b></span>
-          <span>frames in <b style={{ color: "var(--text)" }}>{bs.frames_in.toLocaleString()}</b></span>
-          <span>frames out <b style={{ color: "var(--text)" }}>{bs.frames_out.toLocaleString()}</b></span>
-          <span>errors <b style={{ color: bs.error_count ? "var(--warn)" : "var(--text)" }}>{bs.error_count}</b></span>
+          <span>CAN RX frames <b style={{ color: "var(--text)" }}>{bs.frames_in.toLocaleString()}</b></span>
+          <span>CAN TX frames <b style={{ color: "var(--text)" }}>{bs.frames_out.toLocaleString()}</b></span>
+          <span>bus errors <b style={{ color: bs.error_count ? "var(--warn)" : "var(--text)" }}>{bs.error_count}</b></span>
           <span>last connect <b style={{ color: "var(--text)" }}>{bs.last_connect_at ? new Date(bs.last_connect_at).toLocaleTimeString() : "—"}</b></span>
         </div>
 
@@ -381,58 +407,69 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
         )}
 
         <div className="chart-toolbar">
-          <select className="select-sm" value={tileWindowMs} onChange={(e) => setTileWindowMs(Number(e.target.value))}>
-            <option value={90_000}>live 90s</option>
-            <option value={6 * 60_000}>history 6m</option>
-            <option value={60 * 60_000}>history 60m</option>
+          <select className="select-sm" value={tileLevel} onChange={(e) => setTileLevel(e.target.value)}>
+            {GRAPH_TILE_WINDOW_OPTIONS.map((option) => (
+              <option key={option.level} value={option.level}>{option.label}</option>
+            ))}
           </select>
           <Chip>{tileLevel} tile</Chip>
-          <Chip>500ms</Chip>
+          <Chip>live refresh 500 ms</Chip>
           <label className="toggle-sm">
             <input type="checkbox" checked={ignoreOpenSensorOutliers} onChange={(e) => setIgnoreOpenSensorOutliers(e.target.checked)} />
             ignore open-sensor lows
           </label>
         </div>
 
-        {graphSections.map((section) => {
-          const hiddenForTile = hiddenSeries[section.tileId] || [];
-          const suppressed = section.tile?.diagnostics?.suppressed_open_sensor_points || 0;
-          return (
-            <div className="chart-card" key={section.tileId}>
-              <div className="head">
-                <div className="title">{section.title}</div>
-                <div className="right">
-                  {suppressed > 0 && <Chip kind="warn">{suppressed} outliers hidden</Chip>}
-                  <Chip>{section.tile.level} tile</Chip>
-                </div>
-              </div>
-              <div className="body">
-                {section.series.length === 0 ? (
-                  <div className="empty">{section.empty}<br />Use the signal catalogue on the left; star an instance to add it.</div>
-                ) : (
-                  <div className="chart-layout">
-                    <div className="chart-plot">
-                      <MultiChart tile={section.tile} height={section.bucket === "other" ? 260 : 320} hiddenSeries={hiddenForTile} />
-                    </div>
-                    <div className="legend chart-legend">
-                      {section.series.map((s) => {
-                        const last = s.history.v[s.history.v.length - 1];
-                        const off = hiddenForTile.includes(s.key);
-                        return (
-                          <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => toggleSeriesVisibility(section.tileId, s.key)} title="Click to show/hide this tile series">
-                            <span className="sw" style={{ background: s.color }}></span>
-                            {(MecomAPI.catalogue().find((c) => c.id === s.paramId) || {}).name || ("#" + s.paramId)}
-                            <span className="cur">{MecomAPI.formatValue(last, s.unit, s.paramId)}{s.unit ? " " + s.unit : ""}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
+        {graphSections.map((section) => (
+          <GraphSectionCard
+            key={section.tileId}
+            section={section}
+            hiddenForTile={hiddenSeries[section.tileId] || []}
+            onToggleSeriesVisibility={toggleSeriesVisibility}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GraphSectionCard({ section, hiddenForTile, onToggleSeriesVisibility }) {
+  const tile = useGraphTileFromAssignments(section.bucketPins, section.tileOptions);
+  const series = useMemo(() => renderSeriesFromGraphTile(tile), [tile]);
+  const suppressed = tile?.diagnostics?.suppressed_open_sensor_points || 0;
+  return (
+    <div className="chart-card" key={section.tileId}>
+      <div className="head">
+        <div className="title">{section.title}</div>
+        <div className="right">
+          {suppressed > 0 && <Chip kind="warn">{suppressed} outliers hidden</Chip>}
+          <Chip>{tile.level} tile</Chip>
+          <Chip>{tile.diagnostics?.tile_source || "gateway tile"}</Chip>
+        </div>
+      </div>
+      <div className="body">
+        {series.length === 0 ? (
+          <div className="empty">{section.empty}<br />Use the signal catalogue on the left; star an instance to add it.</div>
+        ) : (
+          <div className="chart-layout">
+            <div className="chart-plot">
+              <MultiChart tile={tile} height={section.bucket === "other" ? 260 : 320} hiddenSeries={hiddenForTile} fill minHeight={section.bucket === "other" ? 220 : 280} />
             </div>
-          );
-        })}
+            <div className="legend chart-legend">
+              {series.map((s) => {
+                const last = s.history.v[s.history.v.length - 1];
+                const off = hiddenForTile.includes(s.key);
+                return (
+                  <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => onToggleSeriesVisibility(section.tileId, s.key)} title={s.fullLabel || "Click to show/hide this tile series"}>
+                    <span className="sw" style={{ background: s.color }}></span>
+                    <span className="series-label">{s.label}</span>
+                    <span className="cur">{MecomAPI.formatWithUnit(last, s.unit, s.paramId)}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

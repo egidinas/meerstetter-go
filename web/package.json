@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node scripts/test-telemetry.mjs",
+    "test": "node scripts/test-telemetry.mjs && node scripts/test-ui-semantics.mjs && node scripts/test-mecom-catalogue.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },

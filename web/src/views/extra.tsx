@@ -28,7 +28,7 @@ const SEQ_LIBRARY = [
     targets: ["tec-75"],
     timeout: 360,
     steps: [
-      { id: "set-target",    kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.6 },
+      { id: "set-target",    kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.6 },
       { id: "enable-output", kind: "send_command", command_name: "write_int32",  arguments: { param: 2010, value: 1 }, await_ack: true, duration: 0.4 },
       { id: "wait-stable",   kind: "wait_stable",  duration: 8 },
       { id: "hold",          kind: "wait",         duration: 12 },
@@ -44,9 +44,9 @@ const SEQ_LIBRARY = [
     targets: ["tec-75"],
     timeout: 90,
     steps: [
-      { id: "set-baseline", kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 20 }, await_ack: true, duration: 0.6 },
+      { id: "set-baseline", kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 20 }, await_ack: true, duration: 0.6 },
       { id: "settle",       kind: "wait_stable",  duration: 8 },
-      { id: "step",         kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.4 },
+      { id: "step",         kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.4 },
       { id: "capture",      kind: "wait",         duration: 16 },
       { id: "log",          kind: "log",          duration: 0.4 },
     ],

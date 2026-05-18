@@ -22,7 +22,7 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	if len(client.configured) != 1 {
 		t.Fatalf("configured calls = %d, want 1", len(client.configured))
 	}
-	if got, want := len(client.configured[0]), 8; got != want {
+	if got, want := len(client.configured[0]), 9; got != want {
 		t.Fatalf("ring capture slots = %d, want high-priority slots %d", got, want)
 	}
 	for _, p := range client.configured[0] {
@@ -85,7 +85,7 @@ func TestReadoutWidensRingReadWindowUnderBacklog(t *testing.T) {
 func TestReadoutSkipsRingForUnsupportedTransport(t *testing.T) {
 	ringSupported := false
 	params := DefaultTECReadoutParameters(1)
-	fallbacks := make([]ReadoutParameter, 0, 8)
+	fallbacks := make([]ReadoutParameter, 0, 9)
 	for _, param := range params {
 		if !param.HighPriority {
 			continue
@@ -99,7 +99,7 @@ func TestReadoutSkipsRingForUnsupportedTransport(t *testing.T) {
 	})
 	client := &fakeReadoutClient{
 		ringSupported: &ringSupported,
-		bulkValues:    []float64{1, 2, 3, 4, 5, 6, 7, 8},
+		bulkValues:    []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
 
 	batch := readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(12, 0))

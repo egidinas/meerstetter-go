@@ -12,6 +12,6 @@ require (
 
 require (
 	github.com/creack/goselect v0.1.2 // indirect
-	github.com/egidinas/signalforge v0.2.2
+	github.com/egidinas/signalforge v0.2.3
 	golang.org/x/sys v0.44.0
 )

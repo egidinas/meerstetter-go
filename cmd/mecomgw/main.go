@@ -5,6 +5,7 @@
 //	GET    /api/healthz              - liveness probe
 //	GET    /api/devices              - list devices + connection status
 //	GET    /api/catalogue            - mecomdict parameter catalogue
+//	GET    /api/commands             - recent write attempts and outcomes
 //	POST   /api/devices/{id}/lease   - acquire a write lease
 //	DELETE /api/devices/{id}/lease   - release a write lease
 //	POST   /api/devices/{id}/write   - send a tmtc.Telecommand (requires lease)
@@ -84,17 +85,38 @@ func main() {
 
 // Config is the on-disk JSON configuration.
 type Config struct {
-	Devices      []DeviceConfig `json:"devices"`
-	ChannelCount int            `json:"channel_count,omitempty"`
+	Devices         []DeviceConfig `json:"devices"`
+	ChannelCount    int            `json:"channel_count,omitempty"`
+	DefaultDeviceID string         `json:"default_device_id,omitempty"`
 }
 
 // DeviceConfig describes one upstream device.
 type DeviceConfig struct {
-	ID           string `json:"id"`
-	Endpoint     string `json:"endpoint"`
-	Address      byte   `json:"address"`
-	Label        string `json:"label,omitempty"`
-	ChannelCount int    `json:"channel_count,omitempty"`
+	ID           string          `json:"id"`
+	Endpoint     string          `json:"endpoint"`
+	Address      byte            `json:"address"`
+	Label        string          `json:"label,omitempty"`
+	ChannelCount int             `json:"channel_count,omitempty"`
+	Routes       []RouteConfig   `json:"routes,omitempty"`
+	Channels     []ChannelConfig `json:"channels,omitempty"`
+}
+
+// RouteConfig describes an alternate transport endpoint for a device.
+type RouteConfig struct {
+	Name      string `json:"name,omitempty"`
+	Role      string `json:"role,omitempty"`
+	Endpoint  string `json:"endpoint"`
+	Transport string `json:"transport,omitempty"`
+	State     string `json:"state,omitempty"`
+}
+
+// ChannelConfig carries operator-facing fixture metadata for one channel.
+type ChannelConfig struct {
+	Instance   int    `json:"instance"`
+	Role       string `json:"role,omitempty"`
+	Label      string `json:"label,omitempty"`
+	UserNote   string `json:"user_note,omitempty"`
+	HasCascade bool   `json:"has_cascade,omitempty"`
 }
 
 func loadConfig(path string) (Config, error) {
@@ -115,15 +137,69 @@ func loadConfig(path string) (Config, error) {
 	if cfg.ChannelCount == 0 {
 		cfg.ChannelCount = 4
 	}
+	if cfg.DefaultDeviceID != "" {
+		found := false
+		for _, d := range cfg.Devices {
+			if d.ID == cfg.DefaultDeviceID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return Config{}, fmt.Errorf("default_device_id %q not found in devices", cfg.DefaultDeviceID)
+		}
+	}
+	seen := make(map[string]int, len(cfg.Devices))
 	for i, d := range cfg.Devices {
 		if d.ID == "" || d.Endpoint == "" || d.Address == 0 {
 			return Config{}, fmt.Errorf("device[%d]: id, endpoint, address required", i)
 		}
+		if prev, ok := seen[d.ID]; ok {
+			return Config{}, fmt.Errorf("device[%d]: duplicate id %q already used at device[%d]", i, d.ID, prev)
+		}
+		seen[d.ID] = i
 		if d.ChannelCount < 0 || d.ChannelCount > 255 {
 			return Config{}, fmt.Errorf("device[%d]: channel_count must be 0/default or in range 1..255", i)
 		}
 		if d.ChannelCount == 0 {
 			cfg.Devices[i].ChannelCount = cfg.ChannelCount
+		}
+		if len(d.Routes) > 0 {
+			seenRouteRoles := map[string]struct{}{}
+			for j, route := range d.Routes {
+				if strings.TrimSpace(route.Endpoint) == "" {
+					return Config{}, fmt.Errorf("device[%d].routes[%d]: endpoint required", i, j)
+				}
+				if strings.TrimSpace(route.Role) == "" {
+					return Config{}, fmt.Errorf("device[%d].routes[%d]: role required", i, j)
+				}
+				role := strings.ToLower(strings.TrimSpace(route.Role))
+				switch role {
+				case "hot", "warm", "fallback":
+				default:
+					return Config{}, fmt.Errorf("device[%d].routes[%d]: role must be hot, warm, or fallback", i, j)
+				}
+				if _, ok := seenRouteRoles[role]; ok {
+					return Config{}, fmt.Errorf("device[%d].routes[%d]: duplicate role %q", i, j, role)
+				}
+				seenRouteRoles[role] = struct{}{}
+				cfg.Devices[i].Routes[j].Role = role
+				cfg.Devices[i].Routes[j].Name = strings.TrimSpace(route.Name)
+				cfg.Devices[i].Routes[j].Endpoint = strings.TrimSpace(route.Endpoint)
+				cfg.Devices[i].Routes[j].Transport = strings.TrimSpace(route.Transport)
+				cfg.Devices[i].Routes[j].State = strings.TrimSpace(route.State)
+			}
+		}
+		for j, ch := range d.Channels {
+			if ch.Instance < 1 || ch.Instance > cfg.Devices[i].ChannelCount {
+				return Config{}, fmt.Errorf("device[%d].channels[%d]: instance must be in range 1..channel_count", i, j)
+			}
+			switch strings.ToLower(strings.TrimSpace(ch.Role)) {
+			case "", "temp", "supply":
+				cfg.Devices[i].Channels[j].Role = strings.ToLower(strings.TrimSpace(ch.Role))
+			default:
+				return Config{}, fmt.Errorf("device[%d].channels[%d]: role must be temp or supply", i, j)
+			}
 		}
 	}
 	return cfg, nil
@@ -136,6 +212,11 @@ type server struct {
 	leases          *writelease.Registry
 	defaultLeaseTTL time.Duration
 	channelCount    int
+	defaultDeviceID string
+	commandLogMu    sync.Mutex
+	commandLog      []gatewayCommandActivity
+	graphHistoryMu  sync.Mutex
+	graphHistory    map[string]*graphTileHistory
 	logger          *log.Logger
 	uiDir           string
 	allowedOrigins  []string
@@ -168,6 +249,8 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 		leases:          writelease.NewRegistry(),
 		defaultLeaseTTL: defaultTTL,
 		channelCount:    channelCount,
+		defaultDeviceID: cfg.DefaultDeviceID,
+		graphHistory:    make(map[string]*graphTileHistory),
 		logger:          logger,
 	}
 	for _, dc := range cfg.Devices {

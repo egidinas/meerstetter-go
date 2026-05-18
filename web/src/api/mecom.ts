@@ -4,8 +4,22 @@
    Implements docs/gateway/UI_GRAPH_WALL_CONTRACT.md parameter IDs.
    ============================================================ */
 
+import catalogueJson from "../data/mecom-catalogue.json?raw";
+import protocolFamiliesJson from "../data/mecom-protocol-families.json?raw";
+
 const LS_KEY = "mecomgw.settings";
 const LS_CHANNELS = "mecomgw.channels";
+const LS_CHANNELS_VERSION = "mecomgw.channels.version";
+const CHANNEL_METADATA_VERSION = "2026-05-18-fixture-pattern-v1";
+
+const MECOM_PARAMETER_FAMILIES = JSON.parse(protocolFamiliesJson)
+  .map((family) => ({
+    start: Number(family.start),
+    end: Number(family.end),
+    label: String(family.label || "").trim(),
+  }))
+  .filter((family) => Number.isFinite(family.start) && Number.isFinite(family.end) && family.label)
+  .sort((a, b) => a.start - b.start || a.end - b.end);
 
 function loadSettings() {
   try {
@@ -23,67 +37,557 @@ function saveSettings(patch) {
   return next;
 }
 
-const CATALOGUE = [
-  { id: 1000,  name: "Object Temperature",            sid: "object_temp_c",        unit: "degC", type: "float32", kind: "continuous", role: "monitor", group: "Thermal", subgroup: "Object",    applicableModes: ["temp"], high_priority: true },
-  { id: 1001,  name: "Sink Temperature",              sid: "sink_temp_c",          unit: "degC", type: "float32", kind: "continuous", role: "monitor", group: "Thermal", subgroup: "Sink",      applicableModes: ["temp", "supply"], high_priority: true },
-  { id: 52200, name: "Cascade Temperature",           sid: "cascade_temp_c",       unit: "degC", type: "float32", kind: "continuous", role: "monitor", group: "Thermal", subgroup: "Cascade",   applicableModes: ["temp"], optional: true },
-  { id: 1200,  name: "Temperature Is Stable",         sid: "temperature_stable",   unit: "",     type: "int32",   kind: "boolean",    role: "monitor", group: "Status",  subgroup: "Stability", applicableModes: ["temp"], enum: { 0: "Drifting", 1: "Stable" } },
-  { id: 1020,  name: "Output Current",                sid: "output_current_a",     unit: "A",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], high_priority: true },
-  { id: 1021,  name: "Output Voltage",                sid: "output_voltage_v",     unit: "V",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"], high_priority: true },
-  { id: 1022,  name: "Output Power",                  sid: "output_power_w",       unit: "W",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Output",    applicableModes: ["temp", "supply"] },
-  { id: 1500,  name: "Driver Input Voltage",          sid: "driver_input_v",       unit: "V",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Input",     applicableModes: ["temp", "supply"] },
-  { id: 1501,  name: "Driver Input Current",          sid: "driver_input_a",       unit: "A",    type: "float32", kind: "continuous", role: "monitor", group: "Power",   subgroup: "Input",     applicableModes: ["temp", "supply"] },
-  { id: 3000,  name: "Target Object Temperature",     sid: "target_object_temp_c", unit: "degC", type: "float32", kind: "continuous", role: "control", group: "Control", subgroup: "Temperature setpoint", applicableModes: ["temp"], writable: true, cmd: "set_float32", min: -40, max: 150 },
-  { id: 2020,  name: "PID · Kp",                      sid: "pid_kp",               unit: "",     type: "float32", kind: "continuous", role: "control", group: "Control", subgroup: "PID gains", applicableModes: ["temp"], writable: true, cmd: "write_float32", min: 0, max: 100 },
-  { id: 2021,  name: "PID · Ti",                      sid: "pid_ti",               unit: "s",    type: "float32", kind: "continuous", role: "control", group: "Control", subgroup: "PID gains", applicableModes: ["temp"], writable: true, cmd: "write_float32", min: 0, max: 1000 },
-  { id: 2022,  name: "PID · Td",                      sid: "pid_td",               unit: "s",    type: "float32", kind: "continuous", role: "control", group: "Control", subgroup: "PID gains", applicableModes: ["temp"], writable: true, cmd: "write_float32", min: 0, max: 100 },
-  { id: 2010,  name: "Output Stage Enable",           sid: "output_stage_enable",  unit: "",     type: "int32",   kind: "enum",       role: "control", group: "Control", subgroup: "Stage",     applicableModes: ["temp", "supply"], writable: true, cmd: "write_int32", enum: { 0: "Static OFF", 1: "Static ON", 2: "Live OFF", 3: "HW ctrl" }, dangerous: true },
-  { id: 2040,  name: "Operating Mode",                sid: "operating_mode",       unit: "",     type: "int32",   kind: "enum",       role: "control", group: "Control", subgroup: "Mode",      applicableModes: ["temp", "supply"], writable: true, cmd: "write_int32", enum: { 0: "Off", 1: "TEC closed-loop", 2: "PSU constant voltage", 3: "PSU constant current" }, dangerous: true },
-  { id: 108,   name: "Save Data to Flash",            sid: "save_to_flash",        unit: "",     type: "int32",   kind: "enum",       role: "control", group: "Control", subgroup: "Persistence", applicableModes: ["temp", "supply"], writable: true, cmd: "save_to_flash", dangerous: true },
-  { id: 104,   name: "Device Status",                 sid: "device_status",        unit: "",     type: "int32",   kind: "enum",       role: "monitor", group: "Status",  subgroup: "Device",    applicableModes: ["temp", "supply"], enum: { 0: "Init", 1: "Ready", 2: "Run", 3: "Error", 4: "Bootloader" } },
-  { id: 105,   name: "Error Number",                  sid: "error_number",         unit: "",     type: "int32",   kind: "counter",    role: "monitor", group: "Status",  subgroup: "Errors",    applicableModes: ["temp", "supply"] },
-  { id: 4000,  name: "Active Error Bits",             sid: "active_error_bits",    unit: "",     type: "int32",   kind: "state",      role: "monitor", group: "Status",  subgroup: "Errors",    applicableModes: ["temp", "supply"] },
-  { id: 109,   name: "Flash Status",                  sid: "flash_status",         unit: "",     type: "int32",   kind: "boolean",    role: "monitor", group: "Status",  subgroup: "Persistence", applicableModes: ["temp", "supply"], enum: { 0: "Ready", 1: "Busy" } },
-  { id: 4010,  name: "Total Operating Time",          sid: "total_operating_s",    unit: "s",    type: "float32", kind: "counter",    role: "monitor", group: "Status",  subgroup: "Counters",  applicableModes: ["temp", "supply"] },
-  { id: 100,   name: "Device Type",                   sid: "device_type",          unit: "",     type: "int32",   kind: "state",      role: "monitor", group: "Metadata", subgroup: "Identity", applicableModes: ["temp", "supply"] },
-  { id: 101,   name: "Hardware Version",              sid: "hw_version",           unit: "",     type: "int32",   kind: "state",      role: "monitor", group: "Metadata", subgroup: "Identity", applicableModes: ["temp", "supply"] },
-  { id: 102,   name: "Serial Number",                 sid: "serial_number",        unit: "",     type: "int32",   kind: "state",      role: "monitor", group: "Metadata", subgroup: "Identity", applicableModes: ["temp", "supply"] },
-  { id: 103,   name: "Firmware Version",              sid: "fw_version",           unit: "",     type: "int32",   kind: "state",      role: "monitor", group: "Metadata", subgroup: "Identity", applicableModes: ["temp", "supply"] },
-];
+const CATALOGUE = JSON.parse(catalogueJson).map((entry) => {
+  const trees = treeSelectionFrom(entry, entry.id, entry.name || entry.sid);
+  return { ...entry, tree_path: trees.tree_path, tree_paths: trees.tree_paths };
+});
 
-function paramById(id) { return CATALOGUE.find((p) => p.id === id); }
+function paramById(id, instance?) {
+  if (instance !== undefined && instance !== null) {
+    const key = `${id}:${instance}`;
+    const keyed = CATALOGUE.find((p) => `${p.id}:${p.instance || 1}` === key);
+    if (keyed) return keyed;
+  }
+  return CATALOGUE.find((p) => p.id === id);
+}
+
+function parseTreeMeta(raw) {
+  if (!raw) return null;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+  return raw;
+}
+
+function parseTreeList(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function normalizePathSegments(raw) {
+  if (Array.isArray(raw)) {
+    return raw.map((part) => String(part || "").trim()).filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    return raw.split(/\s*(?:\/|>)\s*/).map((part) => part.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeTreePath(path, fallbackId, fallbackLabel) {
+  if (!path) return null;
+  if (typeof path === "string") {
+    const segments = normalizePathSegments(path);
+    if (!segments.length) return null;
+    const text = segments.join(" / ");
+    return {
+      id: String(fallbackId ?? text).replace(/\s+/g, "_"),
+      label: fallbackLabel || segments[segments.length - 1] || text,
+      path: segments,
+      default: true,
+    };
+  }
+  if (Array.isArray(path)) {
+    const segments = normalizePathSegments(path);
+    if (!segments.length) return null;
+    const text = segments.join(" / ");
+    return {
+      id: String(fallbackId ?? text).replace(/\s+/g, "_"),
+      label: fallbackLabel || segments[segments.length - 1] || text,
+      path: segments,
+      default: true,
+    };
+  }
+  if (typeof path !== "object") return null;
+  let segments = normalizePathSegments(path.path);
+  if (!segments.length) segments = normalizePathSegments(path.label);
+  if (!segments.length) return null;
+  const text = segments.join(" / ");
+  return {
+    id: String(path.id || fallbackId || text).trim(),
+    label: String(path.label || fallbackLabel || segments[segments.length - 1] || text).trim(),
+    path: segments,
+    default: Boolean(path.default),
+  };
+}
+
+function normalizeTreePaths(raw, fallbackId, fallbackLabel, fallbackPath) {
+  const list = parseTreeList(raw);
+  const normalized = list.map((entry, idx) => normalizeTreePath(entry, `${fallbackId || fallbackPath || "tree"}:${idx}`, fallbackLabel)).filter(Boolean);
+  if (normalized.length === 0) return [];
+  const defaultIndex = normalized.findIndex((item) => item.default);
+  if (defaultIndex >= 0) {
+    return normalized.map((item, idx) => ({ ...item, default: idx === defaultIndex }));
+  }
+  return normalized.map((item, idx) => ({ ...item, default: idx === 0 }));
+}
+
+function treeSelectionFrom(entry, fallbackId, fallbackLabel) {
+  const single = normalizeTreePath(entry && entry.tree_path, fallbackId, fallbackLabel);
+  const many = normalizeTreePaths(entry && entry.tree_paths, fallbackId, fallbackLabel, single && single.path && single.path.join("/"));
+  const generated = defaultTreePathsForEntry(entry, fallbackId, fallbackLabel, single);
+  const paths = many.length ? many : (generated.length ? generated : (single ? [single] : []));
+  const selected = paths.find((item) => item.default) || paths[0] || null;
+  return { tree_path: selected, tree_paths: paths };
+}
+
+function parseTransportSupport(raw) {
+  if (!raw) return raw;
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed;
+    } catch (_) {
+      return raw;
+    }
+  }
+  return raw;
+}
+
+function parseCounterparts(raw) {
+  if (!raw) return null;
+  if (typeof raw === "string") {
+    try {
+      return parseCounterparts(JSON.parse(raw));
+    } catch (_) {
+      return null;
+    }
+  }
+  if (typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out = {};
+  Object.keys(raw).forEach((key) => {
+    const value = raw[key];
+    if (!Array.isArray(value)) return;
+    const ids = value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+    if (ids.length) out[String(key)] = ids;
+  });
+  return Object.keys(out).length ? out : null;
+}
+
+function firstDefined(...values) {
+  return values.find((value) => value !== undefined && value !== null);
+}
+
+function semanticName(entry, base, id) {
+  return firstDefined(
+    entry && entry.name,
+    entry && entry.display_name,
+    entry && entry.displayName,
+    entry && entry.display,
+    base && base.name,
+    base && base.display_name,
+    base && base.displayName,
+    base && base.display,
+    `Parameter ${id}`,
+  );
+}
+
+function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
+  const displayName = firstDefined(entry.displayName, entry.display_name, entry.display, base.displayName, base.display_name, base.display);
+  const rawName = firstDefined(entry.rawName, entry.raw_name, base.rawName, base.raw_name, entry.sid, base.sid);
+  const applicableModes = firstDefined(entry.applicableModes, entry.applicable_modes, base.applicableModes, base.applicable_modes, ["temp", "supply"]);
+  const semanticRole = firstDefined(entry.semantic_role, entry.semanticRole, base.semantic_role, base.semanticRole, metadata && metadata.semantic_role);
+  const sourceParameterName = firstDefined(entry.source_parameter_name, entry.sourceParameterName, base.source_parameter_name, base.sourceParameterName, metadata && metadata.source_parameter_name);
+  const readoutPriority = firstDefined(entry.readout_priority, entry.readoutPriority, base.readout_priority, base.readoutPriority, metadata && metadata.readout_priority);
+  const preferredReadout = firstDefined(entry.preferred_readout, entry.preferredReadout, base.preferred_readout, base.preferredReadout, metadata && metadata.preferred_readout);
+  const transportSupport = parseTransportSupport(firstDefined(entry.transport_support, entry.transportSupport, base.transport_support, base.transportSupport));
+  const counterparts = parseCounterparts(firstDefined(entry.counterparts, base.counterparts, metadata && metadata.counterparts));
+  return {
+    ...base,
+    ...entry,
+    id,
+    instance,
+    name: semanticName(entry, base, id),
+    displayName,
+    display_name: displayName,
+    rawName,
+    raw_name: rawName,
+    sid: entry.sid || base.sid || String(entry.sensor || rawName || id),
+    unit: entry.unit ?? base.unit ?? "",
+    type: entry.type || base.type || "float32",
+    kind: entry.kind || base.kind || "continuous",
+    role: entry.role || base.role || (entry.writable ? "control" : "monitor"),
+    group: entry.group || base.group || (entry.writable ? "Control" : "Telemetry"),
+    subgroup: entry.subgroup || base.subgroup || "",
+    category: entry.category || base.category || "",
+    access: entry.access || base.access || (entry.writable ? "read_write" : "read_only"),
+    semantic_role: semanticRole,
+    semanticRole,
+    source_parameter_name: sourceParameterName,
+    sourceParameterName,
+    readout_priority: readoutPriority,
+    readoutPriority,
+    preferred_readout: preferredReadout,
+    preferredReadout,
+    counterparts,
+    min: entry.min ?? base.min,
+    max: entry.max ?? base.max,
+    enum: entry.enum !== undefined ? entry.enum : base.enum,
+    optional: entry.optional ?? base.optional,
+    dangerous: entry.dangerous ?? base.dangerous,
+    high_priority: Boolean(firstDefined(entry.high_priority, entry.highPriority, base.high_priority, base.highPriority)),
+    writable: entry.writable !== undefined ? Boolean(entry.writable) : isLocallyWritableParam(id, entry.writable),
+    applicableModes,
+    applicable_modes: applicableModes,
+    tree_path: trees.tree_path,
+    tree_paths: trees.tree_paths,
+    metadata: entry.metadata || base.metadata || null,
+    transport_support: transportSupport,
+    transportSupport,
+    command: entry.command || entry.cmd || base.command || base.cmd || metadata && metadata.command || null,
+    cmd: entry.cmd || base.cmd || null,
+  };
+}
+
+function mecomParameterFamily(id) {
+  const value = Number(id);
+  if (!Number.isFinite(value)) return "Unassigned parameters";
+  const family = MECOM_PARAMETER_FAMILIES.find((item) => value >= item.start && value < item.end);
+  if (family) return family.label;
+  const block = Math.floor(value / 1000) * 1000;
+  return `${String(block).padStart(4, "0")} MeCom parameter block`;
+}
+
+function defaultTreePathsForEntry(entry, fallbackId, fallbackLabel, single) {
+  if (!entry) return [];
+  const label = String(fallbackLabel || entry.name || entry.display || entry.sid || `Parameter ${fallbackId || ""}`).trim();
+  const group = String(entry.group || "Other Signals").trim();
+  const subgroup = String(entry.subgroup || "Signals").trim();
+  const operatorPath = single && single.path && single.path.length
+    ? single.path
+    : [group, subgroup, label].filter(Boolean);
+  const protocolName = String(entry.raw_name || entry.rawName || entry.sid || label).trim();
+  const paths = [
+    normalizeTreePath({ id: "operator", label: "Operator", path: operatorPath, default: true }),
+  ];
+  if (fallbackId !== undefined && fallbackId !== null && `${fallbackId}`.trim() !== "") {
+    paths.push(normalizeTreePath({
+      id: "protocol",
+      label: "MeCom protocol",
+      path: ["MeCom protocol", mecomParameterFamily(fallbackId), `Parameter ${fallbackId}`, protocolName].filter(Boolean),
+    }));
+  }
+  return paths.filter(Boolean);
+}
+
+const READ_ONLY_OUTPUT_STAGE_PARAMS = new Set([1020, 1021, 1022, 40000]);
+const WRITABLE_OUTPUT_STAGE_PARAMS = new Set([2020, 2021, 2030, 2031, 2032, 2033]);
+const WRITABLE_CASCADE_PARAMS = new Set([53120, 53121, 53122, 53123]);
+
+function isLocallyWritableParam(id, liveWritable) {
+  if (READ_ONLY_OUTPUT_STAGE_PARAMS.has(id)) return false;
+  if (WRITABLE_OUTPUT_STAGE_PARAMS.has(id) || WRITABLE_CASCADE_PARAMS.has(id)) return true;
+  const base = paramById(id);
+  return Boolean((base && base.writable) || liveWritable);
+}
+
+function unitLabel(unit) {
+  const u = String(unit || "").trim();
+  if (!u || u === "_") return "";
+  if (u === "degC") return "°C";
+  return u;
+}
+
+function formatWithUnit(value, unit, paramId?) {
+  if (value === null || value === undefined) return "—";
+  const label = unitLabel(unit);
+  if (typeof value === "number" && String(unit || "") === "W" && Math.abs(value) > 0 && Math.abs(value) < 1) {
+    return `${(value * 1000).toFixed(3)} mW`;
+  }
+  const formatted = mockAPIImpl.formatValue(value, unit, paramId);
+  return label ? `${formatted} ${label}` : formatted;
+}
 
 function commandNameFor(signal) {
   if (!signal) return "write_float32";
+  if (signal.command) return signal.command;
   if (signal.cmd) return signal.cmd;
-  if (signal.id === 3000) return "set_float32";
-  if (signal.type === "int32") return "write_int32";
+  if (signal.type === "latin1" || signal.type === "string" || signal.kind === "text") return "write_big_data_string";
+  if (signal.type === "int32" || signal.type === "uint32" || signal.type === "bool" || signal.type === "enum") return "write_int32";
   return "write_float32";
 }
 
+const COUNTERPART_PREFERENCE = {
+  telemetry: ["measured", "source", "readout", "feedback"],
+  control: ["setpoint", "command", "limit", "enable", "mode", "selection", "sync"],
+};
+
+function counterpartIdsFor(signal, kind?) {
+  const raw = signal && signal.counterparts;
+  if (!raw) return [];
+  if (kind) return Array.isArray(raw[kind]) ? raw[kind].slice() : [];
+  const seen = new Set();
+  const ids = [];
+  Object.values(raw).forEach((values) => {
+    (Array.isArray(values) ? values : []).forEach((value) => {
+      const id = Number(value);
+      if (!Number.isFinite(id) || seen.has(id)) return;
+      seen.add(id);
+      ids.push(id);
+    });
+  });
+  return ids;
+}
+
+function counterpartSignalsFor(signal, kind?) {
+  return counterpartIdsFor(signal, kind).map((id) => MecomAPI.paramById(id, signal && signal.instance)).filter(Boolean);
+}
+
+function semanticCounterpartFor(signal, side?) {
+  if (!signal) return null;
+  const kinds = side === "telemetry" ? COUNTERPART_PREFERENCE.control : COUNTERPART_PREFERENCE.telemetry;
+  for (const kind of kinds) {
+    const hit = counterpartSignalsFor(signal, kind)[0];
+    if (hit) {
+      return {
+        kind,
+        parameter: hit,
+        parameter_id: hit.id,
+        instance: hit.instance,
+      };
+    }
+  }
+  const fallback = counterpartSignalsFor(signal)[0] || null;
+  return fallback ? { kind: "", parameter: fallback, parameter_id: fallback.id, instance: fallback.instance } : null;
+}
+
+function semanticPairFor(signal) {
+  if (!signal) return null;
+  const telemetryHit = signal.role === "monitor" ? null : semanticCounterpartFor(signal, "telemetry");
+  const controlHit = signal.role === "monitor" ? semanticCounterpartFor(signal, "control") : null;
+  const telemetry = signal.role === "monitor" ? signal : telemetryHit && telemetryHit.parameter;
+  const control = signal.role === "monitor" ? controlHit && controlHit.parameter : signal;
+  if (!telemetry && !control) return null;
+  return {
+    telemetry: telemetry || null,
+    control: control || null,
+    telemetry_parameter_id: telemetry && telemetry.id || null,
+    control_parameter_id: control && control.id || null,
+    telemetry_semantic_role: telemetry && telemetry.semantic_role || null,
+    control_semantic_role: control && control.semantic_role || null,
+  };
+}
+
 const DEVICES_BASE = [
-  { id: "tec-75", label: "Bus A · TEC SN75", endpoint: "can:can0/0x4b", address: 75 },
-  { id: "tec-76", label: "Bus A · TEC SN76", endpoint: "can:can0/0x4c", address: 76 },
-  { id: "tec-81", label: "Bus A · TEC SN81", endpoint: "can:can0/0x51", address: 81 },
-  { id: "tec-84", label: "Bus A · TEC SN84", endpoint: "can:can0/0x54", address: 84 },
+  {
+    id: "tec-76",
+    label: "Bus A · TEC SN76",
+    endpoint: "serial+can:can0/0x4c",
+    address: 76,
+    transport: "serial MeCom over CANopen",
+    routes: [
+      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
+      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
+    ],
+  },
+  {
+    id: "tec-75",
+    label: "Bus A · TEC SN75",
+    endpoint: "serial+can:can0/0x4b",
+    address: 75,
+    transport: "serial MeCom over CANopen",
+    routes: [
+      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
+      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
+    ],
+  },
+  {
+    id: "tec-81",
+    label: "Bus A · TEC SN81",
+    endpoint: "serial+can:can0/0x51",
+    address: 81,
+    transport: "serial MeCom over CANopen",
+    routes: [
+      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
+      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
+    ],
+  },
+  {
+    id: "tec-84",
+    label: "Bus A · TEC SN84",
+    endpoint: "serial+can:can0/0x54",
+    address: 84,
+    transport: "serial MeCom over CANopen",
+    routes: [
+      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
+      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
+    ],
+  },
 ];
+
+function inferTransportFromEndpoint(endpoint) {
+  const value = String(endpoint || "");
+  if (value.startsWith("serial+can:")) return "serial+can";
+  if (value.startsWith("serial:")) return "serial";
+  if (value.startsWith("canopen:")) return "canopen";
+  if (value.startsWith("can:")) return "can";
+  if (value.startsWith("tcp:")) return "tcp";
+  return "";
+}
+
+function routeLabelFromRole(role) {
+  if (role === "hot") return "Hot path";
+  if (role === "warm") return "Warm standby";
+  if (role === "fallback") return "Fallback";
+  return "Route";
+}
+
+function normalizeRouteCandidate(route, activeRoute?, device?) {
+  const rawRole = String(route && (route.kind || route.role) || "").toLowerCase();
+  const activeEndpoint = activeRoute && activeRoute.endpoint;
+  const active = Boolean(route && route.active) || Boolean(activeEndpoint && route && route.endpoint === activeEndpoint);
+  const role = ["hot", "warm", "fallback"].includes(rawRole) ? rawRole : (active ? "hot" : "warm");
+  const endpoint = route && route.endpoint || device && device.endpoint || "";
+  const transport = route && route.transport || inferTransportFromEndpoint(endpoint);
+  const state = route && route.state || (active ? "active" : (role === "hot" ? "ready" : "standby"));
+  return {
+    ...(route || {}),
+    kind: role,
+    role,
+    label: route && (route.label || route.name) || routeLabelFromRole(role),
+    detail: route && route.detail || [state, transport, endpoint].filter(Boolean).join(" · "),
+    endpoint,
+    transport,
+    state,
+    active,
+  };
+}
+
+function normalizeDeviceView(device) {
+  const base = DEVICES_BASE.find((d) => d.id === device.id) || {};
+  const merged = { ...base, ...device, bound: device.bound !== false, last_error: device.last_error || "" };
+  const activeRaw = device.active_route || device.activeRoute || null;
+  const activeRoute = activeRaw ? normalizeRouteCandidate(activeRaw, null, merged) : null;
+  const rawRoutes = Array.isArray(device.route_candidates)
+    ? device.route_candidates
+    : (Array.isArray(device.routeCandidates) ? device.routeCandidates : (Array.isArray(device.routes) ? device.routes : []));
+  const routes = (rawRoutes.length ? rawRoutes : (activeRoute ? [activeRoute] : (base.routes || [])))
+    .map((route) => normalizeRouteCandidate(route, activeRoute, merged));
+  if (activeRoute && !routes.some((route) => route.endpoint === activeRoute.endpoint && route.role === activeRoute.role)) {
+    routes.unshift(activeRoute);
+  }
+  return {
+    ...merged,
+    routes,
+    active_route: activeRoute || routes.find((route) => route.active) || null,
+    route_candidates: routes,
+  };
+}
 
 const CHANNELS_PER_DEVICE = 4;
 const CHANNEL_ROLE_OVERRIDES = {
-  "tec-75/2": { role: "supply", label: "Laser drv ch2" },
-  "tec-81/2": { role: "supply", label: "LD seed ch2" },
+  "tec-75/1": {
+    role: "temp",
+    label: "Top-front-right temperature controller",
+    user_note: "SN75 - top-right fixture - top-front-right heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-75/2": {
+    role: "supply",
+    label: "Top-front-right power supply",
+    user_note: "SN75 - top-right fixture - power supply for the top-front-right test spot.",
+  },
+  "tec-75/3": {
+    role: "temp",
+    label: "Top-back-right temperature controller",
+    user_note: "SN75 - top-right fixture - top-back-right heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-75/4": {
+    role: "supply",
+    label: "Top-back-right power supply",
+    user_note: "SN75 - top-right fixture - power supply for the top-back-right test spot.",
+  },
+  "tec-76/1": {
+    role: "temp",
+    label: "Bottom-front-right cascade controller",
+    user_note: "SN76 - bottom-right quadrant - front-right-bottom heat-sink thermal zone. HR1 is cascade control temperature; LR1/LR2 monitor the heat sink and feed the cascade input. Target temperature 25 C.",
+  },
+  "tec-76/2": {
+    role: "supply",
+    label: "Bottom-front-right power supply",
+    user_note: "SN76 - bottom-right quadrant - power supply for the front-right-bottom test spot.",
+  },
+  "tec-76/3": {
+    role: "temp",
+    label: "Bottom-back-right temperature controller",
+    user_note: "SN76 - bottom-right quadrant - back-right-bottom heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-76/4": {
+    role: "supply",
+    label: "Bottom-back-right power supply",
+    user_note: "SN76 - bottom-right quadrant - power supply for the back-right-bottom test spot.",
+  },
+  "tec-81/1": {
+    role: "temp",
+    label: "Top-front-left temperature controller",
+    user_note: "SN81 - inferred top-left fixture - top-front-left heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-81/2": {
+    role: "supply",
+    label: "Top-front-left power supply",
+    user_note: "SN81 - inferred top-left fixture - power supply for the top-front-left test spot.",
+  },
+  "tec-81/3": {
+    role: "temp",
+    label: "Top-back-left temperature controller",
+    user_note: "SN81 - inferred top-left fixture - top-back-left heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-81/4": {
+    role: "supply",
+    label: "Top-back-left power supply",
+    user_note: "SN81 - inferred top-left fixture - power supply for the top-back-left test spot.",
+  },
+  "tec-84/1": {
+    role: "temp",
+    label: "Bottom-front-left temperature controller",
+    user_note: "SN84 - inferred bottom-left quadrant - front-left-bottom heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-84/2": {
+    role: "supply",
+    label: "Bottom-front-left power supply",
+    user_note: "SN84 - inferred bottom-left quadrant - power supply for the front-left-bottom test spot.",
+  },
+  "tec-84/3": {
+    role: "temp",
+    label: "Bottom-back-left temperature controller",
+    user_note: "SN84 - inferred bottom-left quadrant - back-left-bottom heat-sink thermal zone. Target temperature 25 C.",
+  },
+  "tec-84/4": {
+    role: "supply",
+    label: "Bottom-back-left power supply",
+    user_note: "SN84 - inferred bottom-left quadrant - power supply for the back-left-bottom test spot.",
+  },
 };
 
 function defaultChannelFor(deviceId, instance) {
-  const override = CHANNEL_ROLE_OVERRIDES[`${deviceId}/${instance}`] || {};
-  const role = override.role || "temp";
+  const key = `${deviceId}/${instance}`;
+  const hasOverride = Object.prototype.hasOwnProperty.call(CHANNEL_ROLE_OVERRIDES, key);
+  const override = CHANNEL_ROLE_OVERRIDES[key] || {};
+  const role = override.role || (instance % 2 === 0 ? "supply" : "temp");
   return {
     device_id: deviceId,
     instance,
     role,
-    role_source: "local-assumption",
+    role_source: override.role_source || (hasOverride ? "config" : "local-assumption"),
     label: override.label || (role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
-    hasCascade: deviceId === "tec-75" && instance === 1,
+    user_note: override.user_note || "",
+    hasCascade: override.hasCascade ?? (deviceId === "tec-76" && instance === 1),
   };
 }
 
@@ -100,6 +604,7 @@ function channelCountForDevice(device) {
 function normalizeChannels(channels, devices = DEVICES_BASE) {
   const byKey = new Map();
   const deviceById = new Map((Array.isArray(devices) ? devices : []).map((d) => [d.id, d]));
+  const deviceRank = new Map((Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).map((d, idx) => [d.id, idx]));
   (Array.isArray(channels) ? channels : []).forEach((ch) => {
     if (!ch || !ch.device_id || !Number.isFinite(Number(ch.instance))) return;
     const inst = Number(ch.instance);
@@ -115,21 +620,25 @@ function normalizeChannels(channels, devices = DEVICES_BASE) {
       if (!byKey.has(key)) byKey.set(key, { ...defaultChannelFor(d.id, inst), endpoint: d.endpoint });
     }
   });
-  return Array.from(byKey.values()).sort((a, b) =>
-    String(a.device_id).localeCompare(String(b.device_id)) || a.instance - b.instance
-  );
+  return Array.from(byKey.values()).sort((a, b) => {
+    const ar = deviceRank.has(a.device_id) ? deviceRank.get(a.device_id) : 9999;
+    const br = deviceRank.has(b.device_id) ? deviceRank.get(b.device_id) : 9999;
+    return ar - br || String(a.device_id).localeCompare(String(b.device_id)) || a.instance - b.instance;
+  });
 }
 
 function loadChannels() {
   try {
     const raw = JSON.parse(localStorage.getItem(LS_CHANNELS) || "null");
-    if (raw && raw.length) return normalizeChannels(raw);
+    const version = localStorage.getItem(LS_CHANNELS_VERSION);
+    if (raw && raw.length && version === CHANNEL_METADATA_VERSION) return normalizeChannels(raw);
   } catch (_) {}
   return normalizeChannels(DEFAULT_CHANNELS);
 }
 function saveChannels(channels) {
   const normalized = normalizeChannels(channels, live.active && live.devices ? live.devices : DEVICES_BASE);
   localStorage.setItem(LS_CHANNELS, JSON.stringify(normalized));
+  localStorage.setItem(LS_CHANNELS_VERSION, CHANNEL_METADATA_VERSION);
   mock.channels = normalized;
   mock.listeners.forEach((fn) => fn());
 }
@@ -216,12 +725,22 @@ function resetScenario(name) {
         cascadeT: ch.hasCascade ? ((s.target ?? 25.0) + 1.2 + (Math.random() - 0.5) * 0.3) : null,
         outputI: 0.6 + Math.random() * 0.2,
         outputV: 1.4 + Math.random() * 0.3,
+        outputStageT: 24.0 + (Math.random() - 0.5) * 0.5,
+        setI: 0.8,
+        setV: 2.0,
+        currentLimit: 6.5,
+        voltageLimit: 12.0,
+        currentErrorThreshold: 7.5,
+        voltageErrorThreshold: 14.0,
         outputEnable: 1,
         opMode: s.opMode ?? 1,
+        cascadeEnable: ch.hasCascade ? 1 : 0,
+        cascadeSelection: 0,
+        cascadeSyncChannel: 0,
+        cascadeTargetT: s.target ?? 25.0,
         bound: s.bound !== false,
         rejectWrites: !!s.rejectWrites,
         jitter: s.jitter ?? 0.03,
-        kp: 18, ti: 80, td: 1.5,
         stable: 1,
         savePending: 0,
         deviceStatus: 2,
@@ -234,6 +753,11 @@ function resetScenario(name) {
         setI: s.setI ?? 0.5,
         actualV: (s.setV ?? 5.0) - 0.03,
         actualI: (s.setI ?? 0.5) * 0.94,
+        outputStageT: 24.5 + (Math.random() - 0.5) * 0.5,
+        currentLimit: Math.max(1.0, (s.setI ?? 0.5) * 1.5),
+        voltageLimit: Math.max(6.0, (s.setV ?? 5.0) * 1.25),
+        currentErrorThreshold: Math.max(1.5, (s.setI ?? 0.5) * 1.8),
+        voltageErrorThreshold: Math.max(8.0, (s.setV ?? 5.0) * 1.4),
         opMode: s.opMode ?? 2,
         outputEnable: 1,
         sinkT: 22.0 + (Math.random() - 0.5) * 0.6,
@@ -275,6 +799,7 @@ setInterval(() => {
       if (s.cascadeT !== null) {
         s.cascadeT += (s.objectT + 1.5 - s.cascadeT) * 0.12 + (Math.random() - 0.5) * 0.06;
       }
+      s.outputStageT += (s.sinkT + 2.0 - s.outputStageT) * 0.1 + (Math.random() - 0.5) * 0.04;
       const dT = s.targetT - s.objectT;
       s.outputI = Math.max(0, Math.min(s.outputEnable ? 6.5 : 0,
         0.7 + Math.abs(dT) * 1.6 + (Math.random() - 0.5) * 0.15));
@@ -284,6 +809,7 @@ setInterval(() => {
       s.actualV = s.outputEnable ? (s.setV - 0.02 + (Math.random() - 0.5) * 0.03) : 0;
       s.actualI = s.outputEnable ? (s.setI * 0.94 + (Math.random() - 0.5) * 0.01) : 0;
       s.sinkT   += (Math.random() - 0.5) * 0.05;
+      s.outputStageT += (s.sinkT + 2.5 - s.outputStageT) * 0.08 + (Math.random() - 0.5) * 0.04;
     }
   });
   DEVICES_BASE.forEach((d) => {
@@ -334,7 +860,7 @@ function recordCommand({ deviceId, instance, paramId, value, prev, status, lease
   { dt: 3000,  st: "completed", tgt: "tec-75", inst: 1, p: 3000, v: 25,  prev: 24.8, holder: "ops-bench-12" },
   { dt: 15000, st: "completed", tgt: "tec-76", inst: 1, p: 2010, v: 1,   prev: 0,    holder: "design-claude" },
   { dt: 28000, st: "rejected",  tgt: "tec-84", inst: 1, p: 3000, v: 25,  prev: null, holder: "ops-bench-12", err: "transport unreachable: dial can0/0x54", hs: 503 },
-  { dt: 41000, st: "completed", tgt: "tec-75", inst: 2, p: 1021, v: 5.1, prev: 4.95, holder: "design-claude" },
+  { dt: 41000, st: "completed", tgt: "tec-75", inst: 2, p: 2021, v: 5.1, prev: 5.0, holder: "design-claude" },
   { dt: 60000, st: "completed", tgt: "tec-81", inst: 1, p: 3000, v: 25,  prev: 24.5, holder: "ops-bench-12" },
 ].forEach((e) => {
   const def = paramById(e.p) || {};
@@ -374,7 +900,8 @@ const mockAPIImpl = {
     if (idx >= 0) {
       mock.channels[idx] = { ...mock.channels[idx], role, role_source: (opts && opts.role_source) || "local-assumption" };
     } else {
-      mock.channels.push({ device_id: deviceId, instance, role, role_source: "local-assumption", label: `ch${instance}` });
+      const base = defaultChannelFor(deviceId, instance);
+      mock.channels.push({ ...base, role, role_source: "local-assumption" });
     }
     saveChannels(mock.channels);
     resetScenario(mock.scenario);
@@ -408,11 +935,16 @@ const mockAPIImpl = {
       }
       const map = {
         1000: ch.objectT, 1001: ch.sinkT, 1200: ch.stable,
-        1020: ch.outputI, 1021: ch.outputV, 1022: ch.outputI * ch.outputV,
+        1020: ch.outputI, 1021: ch.outputV, 1022: ch.outputI * ch.outputV, 40000: ch.outputStageT,
         1500: 12.0, 1501: 0.4,
-        2010: ch.outputEnable, 2020: ch.kp, 2021: ch.ti, 2022: ch.td,
+        2010: ch.outputEnable,
+        2020: ch.setI, 2021: ch.setV,
+        2030: ch.currentLimit, 2031: ch.voltageLimit,
+        2032: ch.currentErrorThreshold, 2033: ch.voltageErrorThreshold,
         2040: ch.opMode,
         3000: ch.targetT,
+        53120: ch.cascadeEnable, 53121: ch.cascadeSelection,
+        53122: ch.cascadeSyncChannel, 53123: ch.cascadeTargetT,
         104:  ch.deviceStatus, 105: 0, 109: ch.savePending,
         4000: 0, 4010: 60 * 60 * 24 * 12 + Math.random() * 1000,
         100:  150, 101: 2, 102: parseInt(deviceId.split("-")[1]) + 100, 103: 3.21,
@@ -421,8 +953,11 @@ const mockAPIImpl = {
     } else {
       const map = {
         1001: ch.sinkT,
-        1020: ch.actualI, 1021: ch.actualV, 1022: ch.actualV * ch.actualI,
+        1020: ch.actualI, 1021: ch.actualV, 1022: ch.actualV * ch.actualI, 40000: ch.outputStageT,
         1500: 12.0, 1501: 0.4,
+        2020: ch.setI, 2021: ch.setV,
+        2030: ch.currentLimit, 2031: ch.voltageLimit,
+        2032: ch.currentErrorThreshold, 2033: ch.voltageErrorThreshold,
         2010: ch.outputEnable, 2040: ch.opMode,
         104:  ch.deviceStatus, 105: 0, 109: ch.savePending,
         4000: 0, 4010: 60 * 60 * 24 * 12 + Math.random() * 1000,
@@ -438,8 +973,10 @@ const mockAPIImpl = {
     const ch = mock.channelState[ckey(deviceId, instance || 1)];
     if (!ch) return null;
     if (ch.role === "supply") {
-      if (paramId === 1020) return ch.setI;
-      if (paramId === 1021) return ch.setV;
+      if (paramId === 2020) return ch.setI;
+      if (paramId === 2021) return ch.setV;
+      if (paramId === 2030) return ch.currentLimit;
+      if (paramId === 2031) return ch.voltageLimit;
     }
     if (ch.role === "temp" && paramId === 3000) return ch.targetT;
     return null;
@@ -476,12 +1013,23 @@ const mockAPIImpl = {
       if (param === 3000) ch.targetT = value;
       if (param === 2010) ch.outputEnable = value;
       if (param === 2040) ch.opMode = value;
-      if (param === 2020) ch.kp = value;
-      if (param === 2021) ch.ti = value;
-      if (param === 2022) ch.td = value;
+      if (param === 2020) ch.setI = value;
+      if (param === 2021) ch.setV = value;
+      if (param === 2030) ch.currentLimit = value;
+      if (param === 2031) ch.voltageLimit = value;
+      if (param === 2032) ch.currentErrorThreshold = value;
+      if (param === 2033) ch.voltageErrorThreshold = value;
+      if (param === 53120) ch.cascadeEnable = value;
+      if (param === 53121) ch.cascadeSelection = value;
+      if (param === 53122) ch.cascadeSyncChannel = value;
+      if (param === 53123) ch.cascadeTargetT = value;
     } else {
-      if (param === 1021) ch.setV = value;
-      if (param === 1020) ch.setI = value;
+      if (param === 2021) ch.setV = value;
+      if (param === 2020) ch.setI = value;
+      if (param === 2030) ch.currentLimit = value;
+      if (param === 2031) ch.voltageLimit = value;
+      if (param === 2032) ch.currentErrorThreshold = value;
+      if (param === 2033) ch.voltageErrorThreshold = value;
       if (param === 2010) ch.outputEnable = value;
       if (param === 2040) ch.opMode = value;
     }
@@ -531,19 +1079,22 @@ const mockAPIImpl = {
   },
   settings: loadSettings,
   saveSettings,
+  unitLabel,
+  formatWithUnit,
   formatValue(v, unit, paramId?) {
     if (v === null || v === undefined) return "—";
     if (typeof v === "number") {
       if (paramId === 2010) return ({0: "OFF", 1: "ON", 2: "Live OFF", 3: "HW ctrl"}[v]) ?? String(v);
       if (paramId === 1200) return v ? "Stable" : "Drifting";
       if (paramId === 2040) return ({0: "Off", 1: "TEC", 2: "PSU CV", 3: "PSU CC"}[v]) ?? String(v);
+      if (paramId === 53120) return v ? "On" : "Off";
       if (paramId === 104)  return ({0:"Init",1:"Ready",2:"Run",3:"Error",4:"Bootloader"}[v]) ?? String(v);
       if (paramId === 109)  return v ? "Busy" : "Ready";
       const abs = Math.abs(v);
       let digits = 2;
       if (unit === "degC" || unit === "V") digits = 3;
       else if (unit === "A") digits = 3;
-      else if (unit === "W") digits = 2;
+      else if (unit === "W") digits = abs < 1 ? 5 : 3;
       else if (unit === "s") digits = abs > 1000 ? 0 : 2;
       else if (abs > 1000) digits = 0;
       else if (abs < 1)    digits = 4;
@@ -575,6 +1126,10 @@ const mockAPIImpl = {
     return `device=${deviceId} param=${paramId} instance=${instance || 1}` +
            (dev ? ` endpoint=${dev.endpoint}` : "");
   },
+  primaryDeviceId() {
+    const devices = DEVICES_BASE.slice();
+    return (devices.find((d) => d.id === "tec-76") || devices[0] || {}).id || "";
+  },
   roleConfidence(channel) {
     if (!channel) {
       return { kind: "warn", label: "unconfirmed", detail: "Channel role is not available from the current gateway response." };
@@ -601,6 +1156,8 @@ const live = {
   catalogue: null,
   leases: null,
   values: Object.create(null),
+  commands: [],
+  commandsUnavailable: false,
   timer: null,
 };
 
@@ -660,8 +1217,8 @@ function storeLiveValue(deviceId, entry) {
 }
 function paramsForChannel(role, instance) {
   const ids = role === "supply"
-    ? [1020, 1021, 1022]
-    : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022];
+    ? [1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 2010, 2040, 1001]
+    : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 53120, 53121, 53122, 53123];
   return ids.map((id) => `${id}:${instance || 1}`).join(",");
 }
 
@@ -672,22 +1229,20 @@ function liveCatalogueEntries() {
   liveParams.forEach((entry) => {
     if (!entry || !Number.isFinite(Number(entry.id))) return;
     const id = Number(entry.id);
-    if (byID.has(id)) return;
+    const instance = Number.isFinite(Number(entry.instance)) ? Number(entry.instance) : 1;
+    const key = `${id}:${instance}`;
+    if (byID.has(key)) return;
     const base = paramById(id) || {};
-    byID.set(id, {
+    const metadata = parseTreeMeta(entry.metadata);
+    const treeSource = {
       ...base,
-      id,
-      name: base.name || entry.name || `#${id}`,
-      unit: base.unit || entry.unit || "",
-      type: base.type || entry.type || "float32",
-      sid: base.sid || String(entry.sensor || id),
-      role: base.role || (entry.writable ? "control" : "monitor"),
-      group: base.group || (entry.writable ? "Control" : "Telemetry"),
-      subgroup: base.subgroup || "",
-      high_priority: Boolean(entry.high_priority || base.high_priority),
-      writable: Boolean(entry.writable || base.writable),
-      applicableModes: base.applicableModes || ["temp", "supply"],
-    });
+      ...entry,
+      tree_path: entry.tree_path || (metadata && metadata.ui_tree_path) || base.tree_path,
+      tree_paths: entry.tree_paths || (metadata && metadata.ui_tree_paths) || base.tree_paths,
+    };
+    const trees = treeSelectionFrom(treeSource, id, base.name || entry.name);
+    const merged = normalizeCatalogueEntry(entry, base, id, instance, metadata, trees);
+    byID.set(key, merged);
   });
   return Array.from(byID.values());
 }
@@ -713,6 +1268,50 @@ async function refreshLiveReads(devices) {
     }
   }));
 }
+
+function normalizeCommandEvent(e) {
+  const raw = e || {};
+  const targetId = raw.target_id || raw.device_id || "";
+  const time = raw.time || new Date().toISOString();
+  const unit = raw.unit ?? raw.signal_unit ?? "";
+  return {
+    ...raw,
+    time,
+    command_id: raw.command_id || raw.id || `${time}:${targetId}:${raw.param_id ?? ""}:${raw.instance ?? ""}:${raw.status ?? ""}`,
+    target_id: targetId,
+    unit,
+    status: raw.status || "completed",
+  };
+}
+function sameCommandEvent(a, b) {
+  if (!a || !b) return false;
+  if (a.command_id && b.command_id && a.command_id === b.command_id) return true;
+  const aTime = new Date(a.time).getTime();
+  const bTime = new Date(b.time).getTime();
+  return a.target_id === b.target_id
+    && Number(a.instance || 1) === Number(b.instance || 1)
+    && Number(a.param_id) === Number(b.param_id)
+    && String(a.requested_value ?? "") === String(b.requested_value ?? "")
+    && Number.isFinite(aTime)
+    && Number.isFinite(bTime)
+    && Math.abs(aTime - bTime) < 5000;
+}
+function mergeLiveCommand(event) {
+  const normalized = normalizeCommandEvent(event);
+  live.commands = [normalized, ...(live.commands || []).filter((entry) => !sameCommandEvent(entry, normalized))]
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    .slice(0, 80);
+  notify();
+  return normalized;
+}
+
+async function refreshLiveCommands() {
+  const body = await fetchJSON("/api/commands?limit=80");
+  const events = ((body && body.commands) || []).map(normalizeCommandEvent);
+  live.commands = events.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  live.commandsUnavailable = false;
+}
+
 async function refreshLiveOnce() {
   const base = configuredBase();
   if (!base || live.refreshing) return;
@@ -722,12 +1321,14 @@ async function refreshLiveOnce() {
     const devicesBody = await fetchJSON("/api/devices");
     const catalogueBody = await fetchJSON("/api/catalogue").catch(() => ({ parameters: [] }));
     const leasesBody = await fetchJSON("/api/leases").catch(() => ({ leases: [] }));
+    const commandsPromise = refreshLiveCommands().catch(() => { live.commandsUnavailable = true; });
     const devices = (devicesBody && devicesBody.devices) || [];
-    live.devices = devices.map((d) => ({ ...d, bound: d.bound !== false, last_error: d.last_error || "" }));
+    live.devices = devices.map(normalizeDeviceView);
     live.catalogue = (catalogueBody && catalogueBody.parameters) || [];
     mock.channels = normalizeChannels(mock.channels, live.devices);
     live.leases = (leasesBody && leasesBody.leases) || [];
     await refreshLiveReads(live.devices);
+    await commandsPromise;
     live.active = true;
     live.checked = true;
     live.lastError = "";
@@ -751,6 +1352,8 @@ function ensureLivePolling() {
     live.catalogue = null;
     live.leases = null;
     live.values = Object.create(null);
+    live.commands = [];
+    live.commandsUnavailable = false;
     live.base = base;
   }
   if (!live.timer) {
@@ -759,7 +1362,10 @@ function ensureLivePolling() {
   }
 }
 function liveDeviceById(deviceId) {
-  return (live.devices || []).find((d) => d.id === deviceId) || DEVICES_BASE.find((d) => d.id === deviceId);
+  const liveDevice = (live.devices || []).find((d) => d.id === deviceId);
+  const baseDevice = DEVICES_BASE.find((d) => d.id === deviceId);
+  if (!liveDevice) return baseDevice;
+  return normalizeDeviceView({ ...(baseDevice || {}), ...liveDevice });
 }
 
 export const MecomAPI = {
@@ -768,12 +1374,21 @@ export const MecomAPI = {
     ensureLivePolling();
     return activeCatalogue();
   },
-  paramById(id) {
-    return activeCatalogue().find((p) => p.id === id);
+  paramById(id, instance?) {
+    const catalogue = activeCatalogue();
+    if (instance !== undefined && instance !== null) {
+      const keyed = catalogue.find((p) => `${p.id}:${p.instance || 1}` === `${id}:${instance}`);
+      if (keyed) return keyed;
+    }
+    return catalogue.find((p) => p.id === id);
   },
   catalogueFor(role) {
     return activeCatalogue().filter((p) => !p.applicableModes || p.applicableModes.includes(role) || p.applicableModes.includes("any"));
   },
+  counterpartIdsFor,
+  counterpartSignalsFor,
+  semanticCounterpartFor,
+  semanticPairFor,
   isLive() {
     ensureLivePolling();
     return live.active;
@@ -787,7 +1402,10 @@ export const MecomAPI = {
   },
   devices() {
     ensureLivePolling();
-    return live.active && live.devices ? live.devices : mockAPIImpl.devices();
+    if (live.active && live.devices) {
+      return live.devices.map((d) => liveDeviceById(d.id));
+    }
+    return mockAPIImpl.devices();
   },
   channels() {
     ensureLivePolling();
@@ -800,6 +1418,16 @@ export const MecomAPI = {
   leases() {
     ensureLivePolling();
     return live.active && live.leases ? live.leases.slice() : mockAPIImpl.leases();
+  },
+  commandEvents() {
+    ensureLivePolling();
+    if (live.active && !live.commandsUnavailable) return (live.commands || []).slice(0, 80);
+    return mockAPIImpl.commandEvents();
+  },
+  primaryDeviceId() {
+    ensureLivePolling();
+    const devices = live.active && live.devices && live.devices.length ? live.devices : DEVICES_BASE;
+    return ((devices.find((d) => d.id === "tec-76") || devices[0] || {}).id) || "";
   },
   brokerStats(deviceId) {
     ensureLivePolling();
@@ -848,13 +1476,42 @@ export const MecomAPI = {
         headers: { "Content-Type": "application/json", "X-Lease-Token": leaseToken || "" },
         body: JSON.stringify(req),
       });
+      const signal = MecomAPI.paramById(param, inst) || MecomAPI.paramById(param) || {};
       const lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
-      recordCommand({ deviceId, instance: inst, paramId: param, value: req.arguments && req.arguments.value, prev, status: (body && body.status) || "completed", leaseHolder: lease && lease.holder });
+      const submittedCommand = mergeLiveCommand({
+        command_id: body && (body.command_id || body.id),
+        time: (body && body.time) || new Date().toISOString(),
+        target_id: deviceId,
+        instance: inst,
+        param_id: param,
+        signal_name: signal.name || ("#" + param),
+        unit: signal.unit || "",
+        prev_value: prev,
+        requested_value: req.arguments && req.arguments.value,
+        lease_holder: lease && lease.holder,
+        status: (body && body.status) || "completed",
+      });
+      await refreshLiveCommands().then(() => {
+        if (!(live.commands || []).some((entry) => sameCommandEvent(entry, submittedCommand))) {
+          mergeLiveCommand(submittedCommand);
+        }
+      }).catch(() => {
+        live.commandsUnavailable = true;
+        recordCommand({ deviceId, instance: inst, paramId: param, value: req.arguments && req.arguments.value, prev, status: (body && body.status) || "completed", leaseHolder: lease && lease.holder });
+      });
       refreshLiveOnce();
       return body;
     } catch (err: any) {
-      const lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
-      recordCommand({ deviceId, instance: inst, paramId: param, value: req.arguments && req.arguments.value, prev, status: (err.status === 423 || err.status === 409) ? "rejected" : "failed", leaseHolder: lease && lease.holder, errMessage: err.message, httpStatus: err.status });
+      if (live.commandsUnavailable) {
+        const lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
+        recordCommand({ deviceId, instance: inst, paramId: param, value: req.arguments && req.arguments.value, prev, status: (err.status === 423 || err.status === 409) ? "rejected" : "failed", leaseHolder: lease && lease.holder, errMessage: err.message, httpStatus: err.status });
+      } else {
+        await refreshLiveCommands().catch(() => {
+          live.commandsUnavailable = true;
+          const lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
+          recordCommand({ deviceId, instance: inst, paramId: param, value: req.arguments && req.arguments.value, prev, status: (err.status === 423 || err.status === 409) ? "rejected" : "failed", leaseHolder: lease && lease.holder, errMessage: err.message, httpStatus: err.status });
+        });
+      }
       throw err;
     }
   },
@@ -889,6 +1546,20 @@ export const MecomAPI = {
     });
     live.leases = (live.leases || []).filter((l) => l.device_id !== deviceId || l.token !== token);
     notify();
+  },
+  async graphTile(tileId, level, series) {
+    ensureLivePolling();
+    const params = new URLSearchParams();
+    (Array.isArray(series) ? series : []).forEach((item) => {
+      const deviceId = item.device_id || item.deviceId || item.options?.device_id || item.options?.deviceId;
+      const paramId = item.param_id || item.paramId || item.options?.param_id || item.options?.paramId;
+      const instance = item.instance || item.options?.instance || 1;
+      if (!deviceId || !Number.isFinite(Number(paramId))) return;
+      params.append("series", `${deviceId}:${Number(paramId)}:${Number(instance) || 1}`);
+    });
+    const qs = params.toString();
+    const path = `/api/graph/tiles/${encodeURIComponent(tileId || "graph-tile")}/${encodeURIComponent(level || "live")}${qs ? "?" + qs : ""}`;
+    return fetchJSON(path);
   },
   subscribe(fn) {
     ensureLivePolling();

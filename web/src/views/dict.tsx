@@ -273,8 +273,11 @@ function CommandRow({ signal, channel, holderId }) {
   const toast = useToast();
   const disabled = v.quality === "unreachable";
   const isEnum = signal.kind === "enum" && signal.id === 2010;
+  const isText = signal.kind === "text" || signal.type === "latin1";
   const stagedNum = parseFloat(staged);
-  const stagedValid = isEnum
+  const stagedValid = isText
+    ? staged.trim() !== "" && staged.length <= 240
+    : isEnum
     ? ["0", "1", "2", "3"].includes(staged.trim())
     : (staged.trim() !== "" && !Number.isNaN(stagedNum)
        && (signal.min === undefined || stagedNum >= signal.min)
@@ -286,7 +289,7 @@ function CommandRow({ signal, channel, holderId }) {
       if (!lease || lease.holder !== holderId) {
         lease = await MecomAPI.acquireLease(channel.device_id, holderId, "5m");
       }
-      const value = isEnum ? parseInt(staged, 10) : stagedNum;
+      const value = isText ? staged : isEnum ? parseInt(staged, 10) : stagedNum;
       await MecomAPI.write(channel.device_id, {
         name: MecomAPI.commandNameFor(signal),
         arguments: { param: signal.id, instance: channel.instance, value },
@@ -316,7 +319,7 @@ function CommandRow({ signal, channel, holderId }) {
       </td>
       <td>
         <span className="quick-write">
-          <input className={staged ? "staged" : ""} placeholder={isEnum ? "0–3" : "value"} value={staged} disabled={disabled}
+          <input className={staged ? "staged" : ""} placeholder={isText ? "note" : isEnum ? "0-3" : "value"} value={staged} disabled={disabled}
                  onChange={(e) => setStaged(e.target.value)} />
           <button disabled={!stagedValid || disabled || busy} onClick={commit}>{busy ? "…" : "Send"}</button>
         </span>
@@ -329,12 +332,17 @@ function ChannelsEditor() {
   useGatewayTick();
   const channels = MecomAPI.channels();
   const devices = MecomAPI.devices();
+  function channelCountForDevice(device) {
+    const raw = Number(device && (device.channel_count ?? device.channelCount));
+    if (!Number.isFinite(raw) || raw <= 0) return 4;
+    return Math.max(1, Math.min(255, Math.floor(raw)));
+  }
   function setRole(deviceId, instance, role) {
     MecomAPI.setChannelRole(deviceId, instance, role);
   }
   const rows = [];
   devices.forEach((d) => {
-    [1, 2, 3, 4].forEach((inst) => {
+    Array.from({ length: channelCountForDevice(d) }, (_, idx) => idx + 1).forEach((inst) => {
       const ch = channels.find((c) => c.device_id === d.id && c.instance === inst);
       rows.push({ device: d, instance: inst, channel: ch });
     });
@@ -347,7 +355,7 @@ function ChannelsEditor() {
       </div>
       <table>
         <thead>
-          <tr><th style={{ width: "30%" }}>Device</th><th>Instance</th><th>Active</th><th>Role</th><th>Label</th></tr>
+          <tr><th style={{ width: "26%" }}>Device</th><th>Instance</th><th>Active</th><th>Role</th><th>Label</th><th>User note</th></tr>
         </thead>
         <tbody>
           {rows.map(({ device, instance, channel }) => (
@@ -368,6 +376,7 @@ function ChannelsEditor() {
                 {channel && <div style={{ marginTop: 4 }}><RoleSourceBadge channel={channel} /></div>}
               </td>
               <td style={{ color: "var(--muted)" }}>{channel ? channel.label : "—"}</td>
+              <td style={{ color: "var(--muted)" }}>{channel && channel.user_note ? channel.user_note : "—"}</td>
             </tr>
           ))}
         </tbody>

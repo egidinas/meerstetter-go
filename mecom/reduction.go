@@ -1,6 +1,6 @@
 package mecom
 
-import "math"
+import "github.com/egidinas/signalforge/stats"
 
 // RingReductionPolicy names the consumer-facing reduction applied to high-rate
 // CRTVStream samples before publishing at the requested consumer rate.
@@ -31,7 +31,7 @@ func ReduceRingSamples(frames []RingFrame, configIndex int) (ReducedRingSample, 
 	acc := newRingReductionAccumulator(configIndex)
 	for _, frame := range frames {
 		for _, sample := range frame.Samples {
-			if sample.ConfigIndex != configIndex || math.IsNaN(sample.Value) {
+			if sample.ConfigIndex != configIndex {
 				continue
 			}
 			acc.add(frame, sample)
@@ -52,9 +52,6 @@ func ReduceRingSamplesForIndices(frames []RingFrame, configIndices []int) map[in
 	}
 	for _, frame := range frames {
 		for _, sample := range frame.Samples {
-			if math.IsNaN(sample.Value) {
-				continue
-			}
 			acc, ok := accumulators[sample.ConfigIndex]
 			if !ok {
 				continue
@@ -73,7 +70,7 @@ func ReduceRingSamplesForIndices(frames []RingFrame, configIndices []int) map[in
 
 type ringReductionAccumulator struct {
 	reduced ReducedRingSample
-	m2      float64
+	window  stats.Window
 }
 
 func newRingReductionAccumulator(configIndex int) *ringReductionAccumulator {
@@ -81,37 +78,32 @@ func newRingReductionAccumulator(configIndex int) *ringReductionAccumulator {
 		reduced: ReducedRingSample{
 			ConfigIndex: configIndex,
 			Policy:      RingReductionMeanStdDev,
-			Min:         math.Inf(1),
-			Max:         math.Inf(-1),
 		},
 	}
 }
 
 func (acc *ringReductionAccumulator) add(frame RingFrame, sample RingSample) {
+	if !acc.window.Add(sample.Value) {
+		return
+	}
 	if acc.reduced.Count == 0 {
 		acc.reduced.Type = sample.Type
 		acc.reduced.FirstTimestamp10us = frame.Timestamp10us
 	}
-	acc.reduced.Count++
+	acc.reduced.Count = acc.window.Count()
 	acc.reduced.LastTimestamp10us = frame.Timestamp10us
-	if sample.Value < acc.reduced.Min {
-		acc.reduced.Min = sample.Value
-	}
-	if sample.Value > acc.reduced.Max {
-		acc.reduced.Max = sample.Value
-	}
-	delta := sample.Value - acc.reduced.Mean
-	acc.reduced.Mean += delta / float64(acc.reduced.Count)
-	acc.m2 += delta * (sample.Value - acc.reduced.Mean)
 }
 
 func (acc *ringReductionAccumulator) result() (ReducedRingSample, bool) {
-	if acc.reduced.Count == 0 {
+	summary, ok := acc.window.Snapshot()
+	if !ok {
 		return ReducedRingSample{}, false
 	}
 	reduced := acc.reduced
-	if reduced.Count > 1 {
-		reduced.StdDev = math.Sqrt(acc.m2 / float64(reduced.Count-1))
-	}
+	reduced.Count = summary.Count
+	reduced.Mean = summary.Mean
+	reduced.Min = summary.Min
+	reduced.Max = summary.Max
+	reduced.StdDev = summary.StdDev
 	return reduced, true
 }
