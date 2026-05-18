@@ -13,7 +13,7 @@ export { seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile, normalizeGra
 
 /* ---------- Hook: latest value for a (device, param, instance) ---------- */
 export function useLiveValue(deviceId, paramId, instance?) {
-  const inst = instance || 1;
+  const inst = instance ?? 1;
   const [, force] = useState(0);
   useEffect(() => {
     const tick = () => {
@@ -79,7 +79,7 @@ export function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, s
       history,
       points: (history?.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (history?.v || [])[idx] })),
     }],
-  }), [history, history?.v?.length, history?.v?.[history?.v?.length - 1], color, showAxis, w]);
+  }), [history, history?.seq, history?.v?.length, history?.v?.[history?.v?.length - 1], history?.latestTs, color, showAxis, w]);
   return <UPlotTileRenderer tile={tile} height={h} dataGraphRenderer={CANONICAL_TILE_RENDERER} syncKey="meerstetter-go-sparkline" />;
 }
 
@@ -242,18 +242,21 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState("");
   const toast = useToast();
-  const dangerous = param.id === 2010 || param.cmd === "reset" || param.cmd === "save_to_flash";
+  const dangerous = Boolean(param.dangerous || param.cmd === "reset" || param.cmd === "save_to_flash");
   const youHold = leaseHolder === holderId;
   const someoneElse = leaseHolder && leaseHolder !== holderId;
   const stagedTrim = staged.trim();
-  const stagedNum = parseFloat(stagedTrim);
-  const isEnumWrite = param.id === 2010;
+  const fullNumber = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const stagedNum = fullNumber.test(stagedTrim) ? Number(stagedTrim) : NaN;
+  const enumEntries = Object.entries(param.enum || {}).sort(([a], [b]) => Number(a) - Number(b));
+  const enumValues = enumEntries.map(([key]) => key);
+  const isEnumWrite = enumValues.length > 0;
   const stagedValid = isEnumWrite
-    ? ["0", "1", "2", "3"].includes(stagedTrim)
+    ? enumValues.includes(stagedTrim)
     : (stagedTrim !== "" && !Number.isNaN(stagedNum)
        && (param.min === undefined || stagedNum >= param.min)
        && (param.max === undefined || stagedNum <= param.max));
-  const needsTypeConfirm = dangerous && stagedTrim && stagedTrim !== "0";
+  const needsTypeConfirm = dangerous && stagedTrim !== "";
   const confirmReady = !needsTypeConfirm || confirm.trim().toUpperCase() === "WRITE";
 
   async function commit() {
@@ -270,7 +273,7 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
       }
       const cmdName = MecomAPI.commandNameFor(param);
       const val = isEnumWrite ? parseInt(stagedTrim, 10) : stagedNum;
-      const req = { name: cmdName, arguments: { param: param.id, instance: param.instance || 1, value: val } };
+      const req = { name: cmdName, arguments: { param: param.id, instance: param.instance ?? 1, value: val } };
       await MecomAPI.write(deviceId, req, token);
       toast.push({ kind: "ok", title: `${param.name} = ${stagedTrim}${param.unit ? " " + param.unit : ""}`, body: `${deviceId}` });
       setStaged(""); setConfirm("");
@@ -304,7 +307,7 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
         </div>
         <div className={"new" + (stagedTrim ? " has" : "")}>
           <div className="lbl">Stage</div>
-          <input value={staged} placeholder={isEnumWrite ? "0–3" : "value"} onChange={(e) => setStaged(e.target.value)} inputMode="decimal" />
+          <input value={staged} placeholder={isEnumWrite ? enumValues.join("/") : "value"} onChange={(e) => setStaged(e.target.value)} inputMode="decimal" />
         </div>
       </div>
       {(param.min !== undefined || param.max !== undefined) && (
@@ -312,7 +315,7 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
       )}
       {isEnumWrite && (
         <div className="range" style={{ flexWrap: "wrap", gap: 4 }}>
-          <span>0 OFF</span><span>1 ON</span><span>2 Live OFF</span><span>3 HW ctrl</span>
+          {enumEntries.map(([key, label]) => <span key={key}>{key} {label}</span>)}
         </div>
       )}
       {needsTypeConfirm && (

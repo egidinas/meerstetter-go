@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "node scripts/test-telemetry.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "signalforge-web": "file:vendor/signalforge-web-0.1.0.tgz",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
