@@ -48,12 +48,13 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 type deviceView struct {
-	ID       string `json:"id"`
-	Label    string `json:"label,omitempty"`
-	Endpoint string `json:"endpoint"`
-	Address  byte   `json:"address"`
-	Bound    bool   `json:"bound"`
-	LastErr  string `json:"last_error,omitempty"`
+	ID           string `json:"id"`
+	Label        string `json:"label,omitempty"`
+	Endpoint     string `json:"endpoint"`
+	Address      byte   `json:"address"`
+	ChannelCount int    `json:"channel_count"`
+	Bound        bool   `json:"bound"`
+	LastErr      string `json:"last_error,omitempty"`
 }
 
 func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
@@ -61,11 +62,12 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 	for _, b := range s.devices {
 		b.mu.Lock()
 		v := deviceView{
-			ID:       b.cfg.ID,
-			Label:    b.cfg.Label,
-			Endpoint: b.cfg.Endpoint,
-			Address:  b.cfg.Address,
-			Bound:    b.client != nil,
+			ID:           b.cfg.ID,
+			Label:        b.cfg.Label,
+			Endpoint:     b.cfg.Endpoint,
+			Address:      b.cfg.Address,
+			ChannelCount: effectiveChannelCount(b.cfg.ChannelCount, s.channelCount),
+			Bound:        b.client != nil,
 		}
 		if b.lastErr != nil {
 			v.LastErr = b.lastErr.Error()
@@ -77,9 +79,10 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
-	params := mecom.DefaultTECReadoutParameters(2)
-	seen := make(map[string]struct{}, len(params)+4)
-	out := make([]gatewayCatalogueEntry, 0, len(params)+4)
+	channels := s.catalogueChannelCount()
+	params := mecom.DefaultTECReadoutParameters(channels)
+	seen := make(map[string]struct{}, len(params)+channels*2)
+	out := make([]gatewayCatalogueEntry, 0, len(params)+channels*2)
 	for _, p := range params {
 		e := gatewayCatalogueEntry{
 			ID:       p.Parameter.ID,
@@ -94,7 +97,7 @@ func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 		seen[gatewayCatalogueKey(e.ID, e.Instance)] = struct{}{}
 		out = append(out, e)
 	}
-	for _, e := range gatewayWriteOnlyCatalogueEntries(2) {
+	for _, e := range gatewayWriteOnlyCatalogueEntries(channels) {
 		key := gatewayCatalogueKey(e.ID, e.Instance)
 		if _, ok := seen[key]; ok {
 			continue
@@ -103,6 +106,29 @@ func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 		out = append(out, e)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"parameters": out})
+}
+
+func (s *server) catalogueChannelCount() int {
+	maxChannels := s.channelCount
+	for _, b := range s.devices {
+		if b.cfg.ChannelCount > maxChannels {
+			maxChannels = b.cfg.ChannelCount
+		}
+	}
+	return effectiveChannelCount(maxChannels, 4)
+}
+
+func effectiveChannelCount(values ...int) int {
+	for _, v := range values {
+		if v <= 0 {
+			continue
+		}
+		if v > 255 {
+			return 255
+		}
+		return v
+	}
+	return 4
 }
 
 type gatewayCatalogueEntry struct {
@@ -138,7 +164,10 @@ func gatewayCatalogueWritable(id int) bool {
 
 func gatewayWriteOnlyCatalogueEntries(channels int) []gatewayCatalogueEntry {
 	if channels <= 0 {
-		channels = 2
+		channels = 4
+	}
+	if channels > 255 {
+		channels = 255
 	}
 	type writeOnlyParam struct {
 		id   int
@@ -543,6 +572,17 @@ func gatewayParameterByID(id int) (mecom.Parameter, bool) {
 		if readout.Parameter.ID == id {
 			param := readout.Parameter
 			return param, true
+		}
+	}
+	for _, entry := range gatewayWriteOnlyCatalogueEntries(1) {
+		if entry.ID == id {
+			return mecom.Parameter{
+				ID:       entry.ID,
+				Instance: entry.Instance,
+				Name:     entry.Name,
+				Unit:     entry.Unit,
+				Type:     mecom.DataType(entry.Type),
+			}, true
 		}
 	}
 	return mecom.Parameter{}, false

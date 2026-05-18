@@ -9,6 +9,10 @@ import { channelColor } from "./assignments";
 export function HeroGraph({ wall, role, tile, height = 280, live = true, children }) {
   useGatewayTick();
   const renderedSeries = renderSeriesFromGraphTile(tile);
+  const [hiddenSeries, setHiddenSeries] = useState([]);
+  function toggleSeries(key) {
+    setHiddenSeries((cur) => cur.includes(key) ? cur.filter((item) => item !== key) : cur.concat(key));
+  }
   return (
     <div className={"hero" + (live ? " live" : "")}>
       <div className="hero-head">
@@ -22,30 +26,27 @@ export function HeroGraph({ wall, role, tile, height = 280, live = true, childre
           <Chip>shared timeline</Chip>
         </div>
       </div>
-      <div className="hero-plot">
-        {renderedSeries.length === 0 ? (
-          <div style={{ padding: 36, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
-            No signals assigned. Add from the Signal Dictionary →
-          </div>
-        ) : (
-          <MultiChart tile={tile} height={height} />
-        )}
-      </div>
-      <div className="hero-legend">
-        {role === "temp" && (
-          <>
-            <span className="item"><span className="sw cmd"></span>target (cmd)</span>
-            <span className="item"><span className="sw actual"></span>object (actual)</span>
-            <span className="item"><span className="sw ghost"></span>sink (reference)</span>
-          </>
-        )}
-        {role === "supply" && (
-          <>
-            <span className="item"><span className="sw aux"></span>set V (cmd)</span>
-            <span className="item"><span className="sw actual"></span>actual V</span>
-            <span className="item"><span className="sw dut"></span>actual I</span>
-          </>
-        )}
+      <div className="hero-chart-row">
+        <div className="hero-plot">
+          {renderedSeries.length === 0 ? (
+            <div style={{ padding: 36, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
+              No signals assigned. Add from the Signal Dictionary →
+            </div>
+          ) : (
+            <MultiChart tile={tile} height={height} hiddenSeries={hiddenSeries} />
+          )}
+        </div>
+        <div className="hero-legend">
+          {renderedSeries.map((s) => {
+            const off = hiddenSeries.includes(s.key);
+            return (
+              <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => toggleSeries(s.key)} title="Click to show/hide this tile series">
+                <span className="sw" style={{ background: s.color }}></span>
+                {s.label}
+              </span>
+            );
+          })}
+        </div>
       </div>
       {children}
     </div>

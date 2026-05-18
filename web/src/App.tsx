@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { MecomAPI } from "./api/mecom";
 import { ToastProvider, useGatewayTick } from "./components/atoms";
-import { Chip, Pill } from "./components/atoms";
 import { TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakColor, TweakSelect } from "./components/tweaks";
 import { seedAssignments } from "./views/assignments";
 import { FleetView, DeviceWorkspace } from "./views/main";
@@ -59,41 +58,30 @@ function App() {
   const isLive = MecomAPI.isLive && MecomAPI.isLive();
   const liveError = MecomAPI.liveError && MecomAPI.liveError();
   const devices = MecomAPI.devices();
-  const leaseCount = MecomAPI.leases().length;
+  const channels = MecomAPI.channels();
+  const leases = MecomAPI.leases();
+  const events = MecomAPI.commandEvents();
+  const tempChannels = channels.filter((c) => c.role === "temp");
+  const supplyChannels = channels.filter((c) => c.role === "supply");
+  const bound = devices.filter((d) => d.bound).length;
+  const errors = devices.filter((d) => d.last_error).length;
+  const leasedByMe = leases.filter((l) => l.holder === settings.holder).length;
+  const writesLastMinute = events.filter((e) => {
+    const t = new Date(e.time).getTime();
+    return (Date.now() - t) < 60_000 && (e.status === "completed" || e.status === "accepted");
+  }).length;
 
   return (
     <ToastProvider>
       <div className="app">
-        <header className="topbar">
-          <div className="brand">
-            <span className="mark">M</span>
-            <span>Meerstetter</span>
-            <span className="sub">mecomgw · v0.1</span>
-          </div>
-          <div className="crumbs">
-            <span>workspace</span>
-            <span className="sep">/</span>
-            <span className="cur">{
-              view === "fleet" ? "Fleet" :
-              view === "device" ? `Device · ${arg}` :
-              view === "dictionary" ? "Signal Dictionary" :
-              view === "sequencer" ? "Sequencer" :
-              view === "pid" ? "PID Advisor" :
-              view === "archive" ? "Archive" :
-              "Settings"
-            }</span>
-          </div>
-          <div className="spacer"></div>
-          <div className="right">
-            <Pill kind={isLive ? "ok" : liveError ? "warn" : "accent"}>
-              gateway · {isLive ? "live" : liveError ? "fallback" : "checking"}
-            </Pill>
-            <Chip kind="accent">holder · {settings.holder}</Chip>
-            <Chip>{isLive ? "same-origin /api" : settings.gateway ? "explicit offline" : "mock fallback"}</Chip>
-          </div>
-        </header>
-
         <aside className="rail">
+          <div className="rail-brand">
+            <span className="mark">M</span>
+            <span className="brand-text">
+              <b>Meerstetter</b>
+              <span>mecomgw · v0.1</span>
+            </span>
+          </div>
           <div className="nav-section">Operate</div>
           <div className="nav">
             <a className={view === "fleet" ? "active" : ""} href="#/fleet">
@@ -142,8 +130,24 @@ function App() {
             </a>
           </div>
           <div className="footer">
-            <span>leases · {leaseCount}</span>
-            <span>scenario · {t.scenario}</span>
+            <div className="rail-status">
+              <div className="rail-status-row">
+                <span>Gateway</span>
+                <b className={isLive ? "ok" : liveError ? "warn" : ""}>{isLive ? "live" : liveError ? "fallback" : "checking"}</b>
+              </div>
+              <small>{isLive ? (settings.gateway || "same-origin /api") : settings.gateway ? "explicit offline" : "mock fallback"}</small>
+              <div className="rail-status-row"><span>Devices</span><b>{bound}/{devices.length}</b></div>
+              <small>{bound} bound · {errors} errors</small>
+              <div className="rail-status-row"><span>Channels</span><b>{channels.length}</b></div>
+              <small>{tempChannels.length} temp · {supplyChannels.length} supply</small>
+              <div className="rail-status-row"><span>Leases</span><b>{leases.length}</b></div>
+              <small>{leasedByMe} you · {leases.length - leasedByMe} others</small>
+              <div className="rail-status-row"><span>Writes · 1m</span><b>{writesLastMinute}</b></div>
+              <small>completed + accepted</small>
+              <div className="rail-status-row"><span>Scenario</span><b>{t.scenario.replace("-", " ")}</b></div>
+              <small>change via Tweaks</small>
+            </div>
+            <span>holder · {settings.holder}</span>
           </div>
         </aside>
 

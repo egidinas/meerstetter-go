@@ -1,97 +1,41 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { MecomAPI } from "../api/mecom";
-import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick, categorizeError, DiscoveryTree, InputCard } from "../components/atoms";
-import { renderSeriesFromGraphTile } from "../lib/series";
-import { useAssignments, WALLS, wallForDevice, normalizeAssignment, buildGraphTileFromAssignments, channelColor } from "./assignments";
+import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick, categorizeError, DiscoveryTree, SignalValueCard } from "../components/atoms";
+import { renderSeriesFromGraphTile, pickTileLevel } from "../lib/series";
+import { useAssignments, WALLS, wallForDevice, normalizeAssignment, buildGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam } from "./assignments";
 import { HeroGraph, TempSettingsTable, SupplySettingsTable } from "./hero";
-import { SignalsAccordion } from "./accordion";
-
-function compactGatewayError(message) {
-  const text = String(message || "").replace(/\s+/g, " ").trim();
-  if (!text) return "waiting for gateway";
-  if (text.startsWith("<")) return "gateway unavailable";
-  return text.length > 96 ? `${text.slice(0, 93)}...` : text;
-}
 
 export function FleetView({ onOpenDevice }) {
   useGatewayTick();
   const assigns = useAssignments();
   const devices = MecomAPI.devices();
   const channels = MecomAPI.channels();
-  const leases = MecomAPI.leases();
-  const events = MecomAPI.commandEvents();
   const settings = MecomAPI.settings();
-  const isLive = MecomAPI.isLive();
-  const liveError = MecomAPI.liveError && MecomAPI.liveError();
+  const events = MecomAPI.commandEvents();
+  const leases = MecomAPI.leases();
 
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
 
-  const tempTile = useMemo(() =>
-    buildGraphTileFromAssignments(assigns.forWall(WALLS.fleetTemp.wall_id), {
-      tile_id: WALLS.fleetTemp.wall_id,
-      title: WALLS.fleetTemp.label,
-      colorByChannel: false,
-      timeWindowMs: 90_000,
-    }),
-    [assigns.list]);
-  const supplyTile = useMemo(() =>
-    buildGraphTileFromAssignments(assigns.forWall(WALLS.fleetSupply.wall_id), {
-      tile_id: WALLS.fleetSupply.wall_id,
-      title: WALLS.fleetSupply.label,
-      colorByChannel: false,
-      timeWindowMs: 90_000,
-    }),
-    [assigns.list]);
+  const fleetTempAssignments = assignmentsWithPriorityDefaults(assigns.forWall(WALLS.fleetTemp.wall_id), WALLS.fleetTemp.wall_id, tempChannels);
+  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(assigns.forWall(WALLS.fleetSupply.wall_id), WALLS.fleetSupply.wall_id, supplyChannels);
 
-  const total = devices.length;
-  const bound = devices.filter((d) => d.bound).length;
-  const errors = devices.filter((d) => d.last_error).length;
-  const leasedByMe = leases.filter((l) => l.holder === settings.holder).length;
-  const leasedByOthers = leases.length - leasedByMe;
-  const writesLastMinute = events.filter((e) => {
-    const t = new Date(e.time).getTime();
-    return (Date.now() - t) < 60_000 && (e.status === "completed" || e.status === "accepted");
-  }).length;
+  const tempTile = buildGraphTileFromAssignments(fleetTempAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "thermal"), {
+    tile_id: WALLS.fleetTemp.wall_id,
+    title: WALLS.fleetTemp.label,
+    colorByChannel: false,
+    timeWindowMs: 90_000,
+  });
+  const supplyTile = buildGraphTileFromAssignments(fleetSupplyAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "power"), {
+    tile_id: WALLS.fleetSupply.wall_id,
+    title: WALLS.fleetSupply.label,
+    colorByChannel: false,
+    timeWindowMs: 90_000,
+  });
 
   return (
     <div className="fleet">
-      <div className="stat-strip">
-        <div className="stat">
-          <div className="label">Gateway</div>
-          <div className={`value ${isLive ? "ok" : liveError ? "warn" : ""}`}>
-            {isLive ? "live" : liveError ? "fallback" : "checking"}
-          </div>
-          <div className="sub">{isLive ? (settings.gateway || "same-origin /api") : compactGatewayError(liveError)}</div>
-        </div>
-        <div className="stat">
-          <div className="label">Devices</div>
-          <div className="value">{bound}<span className="unit">/ {total}</span></div>
-          <div className="sub">{bound} bound · {errors} {errors === 1 ? "error" : "errors"}</div>
-        </div>
-        <div className="stat">
-          <div className="label">Channels</div>
-          <div className="value">{channels.length}</div>
-          <div className="sub">{tempChannels.length} temp · {supplyChannels.length} supply</div>
-        </div>
-        <div className="stat">
-          <div className="label">Leases</div>
-          <div className="value">{leases.length}</div>
-          <div className="sub">{leasedByMe} you · {leasedByOthers} others</div>
-        </div>
-        <div className="stat">
-          <div className="label">Writes · 1m</div>
-          <div className="value">{writesLastMinute}</div>
-          <div className="sub">completed + accepted</div>
-        </div>
-        <div className="stat">
-          <div className="label">Scenario</div>
-          <div className="value" style={{ fontSize: 14, textTransform: "capitalize" }}>{settings.scenario.replace("-", " ")}</div>
-          <div className="sub">change via Tweaks</div>
-        </div>
-      </div>
-
       <div className="fleet-heroes">
         <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={260}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
@@ -124,11 +68,6 @@ export function FleetView({ onOpenDevice }) {
           </Panel>
         </div>
       </div>
-
-      <SignalsAccordion role="monitor" channels={channels} title="Telemetry"
-                        defaultOpen={false} storageKey="mecomgw.acc.fleet.monitor" />
-      <SignalsAccordion role="control" channels={channels} title="Telecommands"
-                        defaultOpen={true} storageKey="mecomgw.acc.fleet.control" />
     </div>
   );
 }
@@ -248,28 +187,58 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   const lease = leases.find((l) => l.device_id === deviceId);
   const youHold = lease && lease.holder === settings.holder;
   const assigns = useAssignments();
+  const [tileWindowMs, setTileWindowMs] = useState(90_000);
+  const tileLevel = pickTileLevel(tileWindowMs);
+  const [hiddenSeries, setHiddenSeries] = useState({});
+  const [ignoreOpenSensorOutliers, setIgnoreOpenSensorOutliers] = useState(true);
 
   const deviceWallId = wallForDevice(deviceId).wall_id + "-" + (activeChannel?.instance || 1);
-  const pins = assigns.forWall(deviceWallId);
-  const graphTile = useMemo(() => buildGraphTileFromAssignments(device && activeChannel ? pins : [], {
-    tile_id: deviceWallId,
-    title: `${device ? device.label : deviceId} · channel ${activeChannel ? activeChannel.instance : activeChannelInst}`,
-    colorByChannel: false,
-    timeWindowMs: 90_000,
-  }), [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannelInst]);
-  const series = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
+  const storedPins = assigns.forWall(deviceWallId);
+  const pins = assignmentsWithPriorityDefaults(storedPins, deviceWallId, activeChannel ? [activeChannel] : []);
+  const graphSections = useMemo(() => {
+    const sourcePins = device && activeChannel ? pins : [];
+    const defs = [
+      { bucket: "thermal", suffix: "thermal", title: "Temperature", empty: "Pin temperature parameters from the signal catalogue." },
+      { bucket: "power", suffix: "power", title: "Power", empty: "Pin output power from the signal catalogue." },
+      { bucket: "voltage", suffix: "voltage", title: "Voltage", empty: "Pin voltage parameters from the signal catalogue." },
+      { bucket: "current", suffix: "current", title: "Current", empty: "Pin current parameters from the signal catalogue." },
+      { bucket: "other", suffix: "other", title: "Status and metadata", empty: "Pin status, counter, or metadata parameters from the signal catalogue." },
+    ];
+    return defs.map((def) => {
+      const bucketPins = sourcePins.filter((p) => graphBucketForParam(normalizeAssignment(p).param_id) === def.bucket);
+      const tileId = `${deviceWallId}-${def.suffix}`;
+      const tile = buildGraphTileFromAssignments(bucketPins, {
+        tile_id: tileId,
+        title: `${device ? device.label : deviceId} · channel ${activeChannel ? activeChannel.instance : activeChannelInst} · ${def.title}`,
+        colorByChannel: false,
+        timeWindowMs: tileWindowMs,
+        level: tileLevel,
+        ignoreOpenSensorOutliers: ignoreOpenSensorOutliers && def.bucket === "thermal",
+      });
+      return { ...def, tileId, tile, series: renderSeriesFromGraphTile(tile) };
+    }).filter((section) => section.series.length > 0 || section.bucket === "thermal" || section.bucket === "power");
+  }, [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannelInst, tileWindowMs, tileLevel, ignoreOpenSensorOutliers]);
+  function toggleSeriesVisibility(tileId, key) {
+    setHiddenSeries((cur) => {
+      const current = new Set(cur[tileId] || []);
+      if (current.has(key)) current.delete(key);
+      else current.add(key);
+      return { ...cur, [tileId]: Array.from(current) };
+    });
+  }
 
   const pinShape = useMemo(() => pins.map((p) => {
     const a = normalizeAssignment(p);
     const paramId = a.options.param_id;
-    return { id: paramId, color: MecomAPI.colorForRole(MecomAPI.roleForParam(paramId)) };
+    const inst = a.options.instance || activeChannel?.instance || 1;
+    return { id: paramId, instance: inst, color: MecomAPI.colorForRole(MecomAPI.roleForParam(paramId)) };
   }), [assigns.list, deviceWallId]);
 
   useEffect(() => {
     if (!activeChannel) return;
     const cur = assigns.forWall(deviceWallId);
     if (cur.length > 0) return;
-    const defaults = activeChannel.role === "temp" ? [3000, 1000, 1001] : [1021, 1020, 1022];
+    const defaults = activeChannel.role === "temp" ? [3000, 1000, 1001] : [1022];
     defaults.forEach((pid) => assigns.add(deviceWallId, pid, deviceId, activeChannel.instance));
   }, [deviceWallId, activeChannel?.instance, activeChannel?.role]);
 
@@ -293,19 +262,22 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   if (!device) return <div style={{ padding: 32, color: "var(--muted)" }}>Device {deviceId} not found.</div>;
   if (!activeChannel) return <div style={{ padding: 32, color: "var(--muted)" }}>No channels active for {deviceId}.</div>;
 
-  const applicableCatalogue = catalogue.filter((p) => !p.applicableModes || p.applicableModes.includes(activeChannel.role));
+  const deviceRoles = new Set(channels.map((c) => c.role));
+  const applicableCatalogue = catalogue.filter((p) => !p.applicableModes || p.applicableModes.some((role) => deviceRoles.has(role)));
 
-  function togglePin(param) {
-    if (assigns.hasAssignment(deviceWallId, param.id, deviceId, activeChannel.instance)) {
-      assigns.remove(deviceWallId, param.id, deviceId, activeChannel.instance);
+  function togglePin(param, instance) {
+    const inst = instance || activeChannel.instance;
+    if (assigns.hasAssignment(deviceWallId, param.id, deviceId, inst)) {
+      assigns.remove(deviceWallId, param.id, deviceId, inst);
     } else {
-      assigns.add(deviceWallId, param.id, deviceId, activeChannel.instance);
+      assigns.add(deviceWallId, param.id, deviceId, inst);
     }
   }
-  function openCard(param) {
-    setCards((cur) => cur.find((c) => c.id === param.id) ? cur : cur.concat({ id: param.id }));
+  function openCard(param, instance) {
+    const inst = instance || activeChannel.instance;
+    setCards((cur) => cur.find((c) => c.id === param.id && (c.instance || 1) === inst) ? cur : cur.concat({ id: param.id, instance: inst }));
   }
-  function closeCard(id) { setCards((cur) => cur.filter((c) => c.id !== id)); }
+  function closeCard(id, instance) { setCards((cur) => cur.filter((c) => !(c.id === id && (c.instance || 1) === (instance || 1)))); }
 
   async function quickAcquire() {
     try {
@@ -329,15 +301,21 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
       <DiscoveryTree
         deviceId={deviceId}
         instance={activeChannel.instance}
+        channels={channels}
         catalogue={applicableCatalogue}
         pins={pinShape}
-        onTogglePin={(p) => togglePin(p)}
-        onWrite={(p) => openCard(p)}
+        onTogglePin={(p, inst) => togglePin(p, inst)}
+        onPinCard={(p, inst) => openCard(p, inst)}
+        onWrite={(p, inst) => openCard(p, inst)}
         onlyWritable={onlyWritable}
         query={query}
         setQuery={setQuery}
         filterCat={filterCat}
         setFilterCat={setFilterCat}
+        writeCards={cards}
+        leaseHolder={lease ? lease.holder : null}
+        holderId={settings.holder}
+        onCloseWrite={closeCard}
       />
       <div className="canvas">
         <div className="ws-head">
@@ -382,71 +360,79 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
           <span>last connect <b style={{ color: "var(--text)" }}>{bs.last_connect_at ? new Date(bs.last_connect_at).toLocaleTimeString() : "—"}</b></span>
         </div>
 
-        <div className="chart-card">
-          <div className="head">
-            <div className="title">
-              {activeChannel.role === "temp" ? "Object T · Target T · Sink T" : "Output voltage · Set voltage · Output current"}
-            </div>
-            <div className="legend">
-              {series.map((s) => {
-                const last = s.history.v[s.history.v.length - 1];
-                return (
-                  <span key={s.key} className="item" onClick={() => assigns.remove(deviceWallId, s.paramId, s.deviceId, s.instance)} title="Click to unpin">
-                    <span className="sw" style={{ background: s.color }}></span>
-                    {(MecomAPI.catalogue().find((c) => c.id === s.paramId) || {}).name || ("#" + s.paramId)}
-                    <span className="cur">{MecomAPI.formatValue(last, s.unit, s.paramId)}{s.unit ? " " + s.unit : ""}</span>
-                  </span>
-                );
-              })}
-              {series.length === 0 && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--muted)" }}>Pin parameters from the tree →</span>}
-            </div>
-            <div className="right">
-              <Chip>90s</Chip>
-              <Chip>500ms</Chip>
-            </div>
-          </div>
-          <div className="body">
-            {series.length === 0
-              ? <div className="empty">Pin parameters from the discovery tree on the left.<br />Click a parameter to add it; star highlights pinned signals.</div>
-              : <MultiChart tile={graphTile} height={360} />}
-          </div>
-        </div>
-
         {cards.length > 0 && (
-          <div className="card-grid">
+          <div className="signal-card-strip">
             {cards.map((c) => {
               const param = catalogue.find((p) => p.id === c.id);
               if (!param) return null;
+              const inst = c.instance || activeChannel.instance;
               return (
-                <InputCard key={c.id}
-                           deviceId={deviceId}
-                           param={{ ...param, instance: activeChannel.instance }}
-                           leaseHolder={lease ? lease.holder : null}
-                           holderId={settings.holder}
-                           onClose={() => closeCard(c.id)} />
+                <SignalValueCard
+                  key={c.id + ":" + inst}
+                  deviceId={deviceId}
+                  param={{ ...param, instance: inst }}
+                  leaseHolder={lease ? lease.holder : null}
+                  holderId={settings.holder}
+                  onClose={() => closeCard(c.id, inst)}
+                />
               );
             })}
           </div>
         )}
 
-        <Panel title="Writable parameters · quick add" right={<Chip>{applicableCatalogue.filter((p) => p.writable).length}</Chip>}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {applicableCatalogue.filter((p) => p.writable).map((p) => (
-              <button key={p.id} className="btn sm" disabled={cards.find((c) => c.id === p.id)} onClick={() => openCard(p)}>
-                + {p.name} <span style={{ color: "var(--muted)" }}>·{p.id}</span>
-              </button>
-            ))}
-          </div>
-        </Panel>
+        <div className="chart-toolbar">
+          <select className="select-sm" value={tileWindowMs} onChange={(e) => setTileWindowMs(Number(e.target.value))}>
+            <option value={90_000}>live 90s</option>
+            <option value={6 * 60_000}>history 6m</option>
+            <option value={60 * 60_000}>history 60m</option>
+          </select>
+          <Chip>{tileLevel} tile</Chip>
+          <Chip>500ms</Chip>
+          <label className="toggle-sm">
+            <input type="checkbox" checked={ignoreOpenSensorOutliers} onChange={(e) => setIgnoreOpenSensorOutliers(e.target.checked)} />
+            ignore open-sensor lows
+          </label>
+        </div>
 
-        <SignalsAccordion role="monitor" channels={[activeChannel]} title="Telemetry"
-                          scopeLabel={`${deviceId}/${activeChannel.instance} only`}
-                          defaultOpen={false}
-                          storageKey={"mecomgw.acc.dev." + deviceId + "." + activeChannel.instance + ".monitor"} />
-        <SignalsAccordion role="control" channels={[activeChannel]} title="Telecommands"
-                          scopeLabel={`${deviceId}/${activeChannel.instance} only`}
-                          defaultOpen={true}
-                          storageKey={"mecomgw.acc.dev." + deviceId + "." + activeChannel.instance + ".control"} />
+        {graphSections.map((section) => {
+          const hiddenForTile = hiddenSeries[section.tileId] || [];
+          const suppressed = section.tile?.diagnostics?.suppressed_open_sensor_points || 0;
+          return (
+            <div className="chart-card" key={section.tileId}>
+              <div className="head">
+                <div className="title">{section.title}</div>
+                <div className="right">
+                  {suppressed > 0 && <Chip kind="warn">{suppressed} outliers hidden</Chip>}
+                  <Chip>{section.tile.level} tile</Chip>
+                </div>
+              </div>
+              <div className="body">
+                {section.series.length === 0 ? (
+                  <div className="empty">{section.empty}<br />Use the signal catalogue on the left; star an instance to add it.</div>
+                ) : (
+                  <div className="chart-layout">
+                    <div className="chart-plot">
+                      <MultiChart tile={section.tile} height={section.bucket === "other" ? 260 : 320} hiddenSeries={hiddenForTile} />
+                    </div>
+                    <div className="legend chart-legend">
+                      {section.series.map((s) => {
+                        const last = s.history.v[s.history.v.length - 1];
+                        const off = hiddenForTile.includes(s.key);
+                        return (
+                          <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => toggleSeriesVisibility(section.tileId, s.key)} title="Click to show/hide this tile series">
+                            <span className="sw" style={{ background: s.color }}></span>
+                            {(MecomAPI.catalogue().find((c) => c.id === s.paramId) || {}).name || ("#" + s.paramId)}
+                            <span className="cur">{MecomAPI.formatValue(last, s.unit, s.paramId)}{s.unit ? " " + s.unit : ""}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

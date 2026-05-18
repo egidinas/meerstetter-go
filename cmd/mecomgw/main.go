@@ -84,15 +84,17 @@ func main() {
 
 // Config is the on-disk JSON configuration.
 type Config struct {
-	Devices []DeviceConfig `json:"devices"`
+	Devices      []DeviceConfig `json:"devices"`
+	ChannelCount int            `json:"channel_count,omitempty"`
 }
 
 // DeviceConfig describes one upstream device.
 type DeviceConfig struct {
-	ID       string `json:"id"`
-	Endpoint string `json:"endpoint"`
-	Address  byte   `json:"address"`
-	Label    string `json:"label,omitempty"`
+	ID           string `json:"id"`
+	Endpoint     string `json:"endpoint"`
+	Address      byte   `json:"address"`
+	Label        string `json:"label,omitempty"`
+	ChannelCount int    `json:"channel_count,omitempty"`
 }
 
 func loadConfig(path string) (Config, error) {
@@ -107,9 +109,21 @@ func loadConfig(path string) (Config, error) {
 	if err := json.Unmarshal(raw, &cfg); err != nil {
 		return Config{}, fmt.Errorf("parse config: %w", err)
 	}
+	if cfg.ChannelCount < 0 || cfg.ChannelCount > 255 {
+		return Config{}, fmt.Errorf("channel_count must be 0/default or in range 1..255")
+	}
+	if cfg.ChannelCount == 0 {
+		cfg.ChannelCount = 4
+	}
 	for i, d := range cfg.Devices {
 		if d.ID == "" || d.Endpoint == "" || d.Address == 0 {
 			return Config{}, fmt.Errorf("device[%d]: id, endpoint, address required", i)
+		}
+		if d.ChannelCount < 0 || d.ChannelCount > 255 {
+			return Config{}, fmt.Errorf("device[%d]: channel_count must be 0/default or in range 1..255", i)
+		}
+		if d.ChannelCount == 0 {
+			cfg.Devices[i].ChannelCount = cfg.ChannelCount
 		}
 	}
 	return cfg, nil
@@ -121,6 +135,7 @@ type server struct {
 	devices         map[string]*deviceBinding
 	leases          *writelease.Registry
 	defaultLeaseTTL time.Duration
+	channelCount    int
 	logger          *log.Logger
 	uiDir           string
 	allowedOrigins  []string
@@ -144,13 +159,21 @@ type deviceBindingSnapshot struct {
 var errUnknownGatewayDevice = errors.New("unknown device")
 
 func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server {
+	channelCount := cfg.ChannelCount
+	if channelCount <= 0 {
+		channelCount = 4
+	}
 	s := &server{
 		devices:         make(map[string]*deviceBinding, len(cfg.Devices)),
 		leases:          writelease.NewRegistry(),
 		defaultLeaseTTL: defaultTTL,
+		channelCount:    channelCount,
 		logger:          logger,
 	}
 	for _, dc := range cfg.Devices {
+		if dc.ChannelCount <= 0 {
+			dc.ChannelCount = channelCount
+		}
 		s.devices[dc.ID] = &deviceBinding{cfg: dc}
 	}
 	return s

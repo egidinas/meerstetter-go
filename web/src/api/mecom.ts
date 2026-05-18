@@ -68,25 +68,69 @@ const DEVICES_BASE = [
   { id: "tec-84", label: "Bus A · TEC SN84", endpoint: "can:can0/0x54", address: 84 },
 ];
 
-const DEFAULT_CHANNELS = [
-  { device_id: "tec-75", instance: 1, role: "temp",   role_source: "local-assumption", label: "TEC ch1",       hasCascade: true  },
-  { device_id: "tec-75", instance: 2, role: "supply", role_source: "local-assumption", label: "Laser drv ch2", hasCascade: false },
-  { device_id: "tec-76", instance: 1, role: "temp",   role_source: "local-assumption", label: "TEC ch1",       hasCascade: false },
-  { device_id: "tec-81", instance: 1, role: "temp",   role_source: "local-assumption", label: "TEC ch1",       hasCascade: false },
-  { device_id: "tec-81", instance: 2, role: "supply", role_source: "local-assumption", label: "LD seed ch2",   hasCascade: false },
-  { device_id: "tec-84", instance: 1, role: "temp",   role_source: "local-assumption", label: "TEC ch1",       hasCascade: false },
-];
+const CHANNELS_PER_DEVICE = 4;
+const CHANNEL_ROLE_OVERRIDES = {
+  "tec-75/2": { role: "supply", label: "Laser drv ch2" },
+  "tec-81/2": { role: "supply", label: "LD seed ch2" },
+};
+
+function defaultChannelFor(deviceId, instance) {
+  const override = CHANNEL_ROLE_OVERRIDES[`${deviceId}/${instance}`] || {};
+  const role = override.role || "temp";
+  return {
+    device_id: deviceId,
+    instance,
+    role,
+    role_source: "local-assumption",
+    label: override.label || (role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
+    hasCascade: deviceId === "tec-75" && instance === 1,
+  };
+}
+
+const DEFAULT_CHANNELS = DEVICES_BASE.flatMap((d) =>
+ Array.from({ length: CHANNELS_PER_DEVICE }, (_, idx) => defaultChannelFor(d.id, idx + 1))
+);
+
+function channelCountForDevice(device) {
+  const raw = Number(device && (device.channel_count ?? device.channelCount));
+  if (!Number.isFinite(raw) || raw <= 0) return CHANNELS_PER_DEVICE;
+  return Math.max(1, Math.min(255, Math.floor(raw)));
+}
+
+function normalizeChannels(channels, devices = DEVICES_BASE) {
+  const byKey = new Map();
+  const deviceById = new Map((Array.isArray(devices) ? devices : []).map((d) => [d.id, d]));
+  (Array.isArray(channels) ? channels : []).forEach((ch) => {
+    if (!ch || !ch.device_id || !Number.isFinite(Number(ch.instance))) return;
+    const inst = Number(ch.instance);
+    const maxInst = channelCountForDevice(deviceById.get(ch.device_id));
+    if (inst < 1 || inst > maxInst) return;
+    const base = defaultChannelFor(ch.device_id, inst);
+    const dev = deviceById.get(ch.device_id);
+    byKey.set(`${ch.device_id}/${inst}`, { ...base, ...ch, instance: inst, endpoint: dev && dev.endpoint });
+  });
+  (Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).forEach((d) => {
+    for (let inst = 1; inst <= channelCountForDevice(d); inst++) {
+      const key = `${d.id}/${inst}`;
+      if (!byKey.has(key)) byKey.set(key, { ...defaultChannelFor(d.id, inst), endpoint: d.endpoint });
+    }
+  });
+  return Array.from(byKey.values()).sort((a, b) =>
+    String(a.device_id).localeCompare(String(b.device_id)) || a.instance - b.instance
+  );
+}
 
 function loadChannels() {
   try {
     const raw = JSON.parse(localStorage.getItem(LS_CHANNELS) || "null");
-    if (raw && raw.length) return raw;
+    if (raw && raw.length) return normalizeChannels(raw);
   } catch (_) {}
-  return DEFAULT_CHANNELS.slice();
+  return normalizeChannels(DEFAULT_CHANNELS);
 }
 function saveChannels(channels) {
-  localStorage.setItem(LS_CHANNELS, JSON.stringify(channels));
-  mock.channels = channels;
+  const normalized = normalizeChannels(channels, live.active && live.devices ? live.devices : DEVICES_BASE);
+  localStorage.setItem(LS_CHANNELS, JSON.stringify(normalized));
+  mock.channels = normalized;
   mock.listeners.forEach((fn) => fn());
 }
 
@@ -145,6 +189,8 @@ function resetScenario(name) {
   const seed = SCENARIOS[name] || SCENARIOS.mixed;
   mock.leases = [];
   mock.channelState = {};
+
+  mock.channels = normalizeChannels(mock.channels, DEVICES_BASE);
 
   DEVICES_BASE.forEach((d) => {
     mock.deviceBound[d.id] = true;
@@ -552,6 +598,7 @@ const live = {
   base: "",
   lastError: "",
   devices: null,
+  catalogue: null,
   leases: null,
   values: Object.create(null),
   timer: null,
@@ -617,8 +664,41 @@ function paramsForChannel(role, instance) {
     : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022];
   return ids.map((id) => `${id}:${instance || 1}`).join(",");
 }
+
+function liveCatalogueEntries() {
+  const liveParams = Array.isArray(live.catalogue) ? live.catalogue : [];
+  if (!live.active || liveParams.length === 0) return null;
+  const byID = new Map();
+  liveParams.forEach((entry) => {
+    if (!entry || !Number.isFinite(Number(entry.id))) return;
+    const id = Number(entry.id);
+    if (byID.has(id)) return;
+    const base = paramById(id) || {};
+    byID.set(id, {
+      ...base,
+      id,
+      name: base.name || entry.name || `#${id}`,
+      unit: base.unit || entry.unit || "",
+      type: base.type || entry.type || "float32",
+      sid: base.sid || String(entry.sensor || id),
+      role: base.role || (entry.writable ? "control" : "monitor"),
+      group: base.group || (entry.writable ? "Control" : "Telemetry"),
+      subgroup: base.subgroup || "",
+      high_priority: Boolean(entry.high_priority || base.high_priority),
+      writable: Boolean(entry.writable || base.writable),
+      applicableModes: base.applicableModes || ["temp", "supply"],
+    });
+  });
+  return Array.from(byID.values());
+}
+
+function activeCatalogue() {
+  return liveCatalogueEntries() || CATALOGUE.slice();
+}
+
 async function refreshLiveReads(devices) {
-  const channels = mock.channels.slice();
+  const channels = normalizeChannels(mock.channels, devices);
+  mock.channels = channels;
   await Promise.all(devices.map(async (dev) => {
     const devChannels = channels.filter((c) => c.device_id === dev.id);
     for (const ch of devChannels) {
@@ -640,9 +720,12 @@ async function refreshLiveOnce() {
   live.base = base;
   try {
     const devicesBody = await fetchJSON("/api/devices");
+    const catalogueBody = await fetchJSON("/api/catalogue").catch(() => ({ parameters: [] }));
     const leasesBody = await fetchJSON("/api/leases").catch(() => ({ leases: [] }));
     const devices = (devicesBody && devicesBody.devices) || [];
     live.devices = devices.map((d) => ({ ...d, bound: d.bound !== false, last_error: d.last_error || "" }));
+    live.catalogue = (catalogueBody && catalogueBody.parameters) || [];
+    mock.channels = normalizeChannels(mock.channels, live.devices);
     live.leases = (leasesBody && leasesBody.leases) || [];
     await refreshLiveReads(live.devices);
     live.active = true;
@@ -665,6 +748,7 @@ function ensureLivePolling() {
     live.checked = false;
     live.lastError = "";
     live.devices = null;
+    live.catalogue = null;
     live.leases = null;
     live.values = Object.create(null);
     live.base = base;
@@ -680,6 +764,16 @@ function liveDeviceById(deviceId) {
 
 export const MecomAPI = {
   ...mockAPIImpl,
+  catalogue() {
+    ensureLivePolling();
+    return activeCatalogue();
+  },
+  paramById(id) {
+    return activeCatalogue().find((p) => p.id === id);
+  },
+  catalogueFor(role) {
+    return activeCatalogue().filter((p) => !p.applicableModes || p.applicableModes.includes(role) || p.applicableModes.includes("any"));
+  },
   isLive() {
     ensureLivePolling();
     return live.active;
@@ -694,6 +788,14 @@ export const MecomAPI = {
   devices() {
     ensureLivePolling();
     return live.active && live.devices ? live.devices : mockAPIImpl.devices();
+  },
+  channels() {
+    ensureLivePolling();
+    if (live.active && live.devices) {
+      mock.channels = normalizeChannels(mock.channels, live.devices);
+      return mock.channels.slice();
+    }
+    return mockAPIImpl.channels();
   },
   leases() {
     ensureLivePolling();

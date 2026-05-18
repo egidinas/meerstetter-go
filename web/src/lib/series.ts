@@ -7,5 +7,6 @@ export {
   emptyGraphTile,
   renderSeriesFromGraphTile,
   normalizeGraphTile,
+  pickTileLevel,
 } from "signalforge-web";
-export type { SeriesRoleMeta, RenderedTileSeries } from "signalforge-web";
+export type { SeriesRoleMeta, RenderedTileSeries, TileLevel } from "signalforge-web";

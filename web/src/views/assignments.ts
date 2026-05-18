@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { MecomAPI } from "../api/mecom";
 import { getTelemetry, recordTelemetry } from "../lib/telemetry";
-import { CANONICAL_TILE_RENDERER, seriesRoleMeta } from "../lib/series";
+import { CANONICAL_TILE_RENDERER, seriesRoleMeta, pickTileLevel } from "../lib/series";
 
 const ASSIGNMENT_KEY = "mecomgw.assignments";
 
@@ -106,22 +106,56 @@ export function useAssignments() {
   };
 }
 
-const SEED_VERSION = 5;
-export function seedAssignments() {
-  const ver = parseInt(localStorage.getItem("mecomgw.assignments.version") || "0", 10);
-  if (ver === SEED_VERSION && loadAssignments().length > 0) return;
-  const channels = MecomAPI.channels();
+const SEED_VERSION = 8;
+
+function priorityParamIdsForChannel(ch) {
+  const catalogue = MecomAPI.catalogue();
+  const role = ch.role || "temp";
+  const ids = catalogue
+    .filter((p) => p.high_priority && (!p.applicableModes || p.applicableModes.includes(role)))
+    .filter((p) => role !== "supply" || String(p.unit || "").toLowerCase() === "w")
+    .map((p) => p.id);
+  const defaults = role === "temp" ? [3000, 1000, 1001] : [1022];
+  return Array.from(new Set(defaults.concat(ids))).filter((id) => Number.isFinite(Number(id)));
+}
+
+export function defaultAssignmentsForChannels(wallId, channels) {
   const seeds = [];
-  channels.forEach((ch) => {
-    if (ch.role === "temp") {
-      const params = [3000, 1000, 1001];
-      if (ch.hasCascade) params.push(52200);
-      params.forEach((pid) => seeds.push(makeAssignment(WALLS.fleetTemp.wall_id, pid, ch.device_id, ch.instance)));
-    } else {
-      [1021, 1020, 1022].forEach((pid) => seeds.push(makeAssignment(WALLS.fleetSupply.wall_id, pid, ch.device_id, ch.instance)));
+  (channels || []).forEach((ch) => {
+    priorityParamIdsForChannel(ch).forEach((pid) => {
+      seeds.push(makeAssignment(wallId, pid, ch.device_id, ch.instance));
+    });
+  });
+  return seeds;
+}
+
+export function assignmentsWithPriorityDefaults(existing, wallId, channels) {
+  const out = (existing || []).map(normalizeAssignment);
+  const seen = new Set(out.map((a) => `${a.wall_id}:${a.target_id}`));
+  defaultAssignmentsForChannels(wallId, channels).forEach((a) => {
+    const key = `${a.wall_id}:${a.target_id}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(a);
     }
   });
-  saveAssignments(seeds);
+  return out;
+}
+
+export function seedAssignments() {
+  const channels = MecomAPI.channels();
+  const current = loadAssignments();
+  let next = current.slice();
+  const tempChannels = channels.filter((c) => c.role === "temp");
+  const supplyChannels = channels.filter((c) => c.role === "supply");
+  next = assignmentsWithPriorityDefaults(next, WALLS.fleetTemp.wall_id, tempChannels);
+  next = assignmentsWithPriorityDefaults(next, WALLS.fleetSupply.wall_id, supplyChannels);
+  channels.forEach((ch) => {
+    const wallId = wallForDevice(ch.device_id).wall_id + "-" + ch.instance;
+    next = assignmentsWithPriorityDefaults(next, wallId, [ch]);
+  });
+  const changed = next.length !== current.length || parseInt(localStorage.getItem("mecomgw.assignments.version") || "0", 10) !== SEED_VERSION;
+  if (changed) saveAssignments(next);
   localStorage.setItem("mecomgw.assignments.version", String(SEED_VERSION));
 }
 
@@ -132,6 +166,18 @@ export function channelColor(deviceId, instance?) {
   return CHANNEL_COLORS[Math.max(0, idx) % CHANNEL_COLORS.length];
 }
 
+export function graphBucketForParam(paramId) {
+  const p = MecomAPI.catalogue().find((x) => x.id === Number(paramId));
+  const unit = String((p && p.unit) || "").toLowerCase();
+  const group = String((p && p.group) || "").toLowerCase();
+  if (unit === "degc" || group === "thermal" || Number(paramId) === 3000) return "thermal";
+  if (unit === "w") return "power";
+  if (unit === "v") return "voltage";
+  if (unit === "a") return "current";
+  if (group === "power") return "power";
+  return "other";
+}
+
 export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const catalogue = MecomAPI.catalogue();
   const normalized = (assignments || []).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
@@ -140,13 +186,14 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const now = new Date(nowMs).toISOString();
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
   const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || 90_000;
+  const level = opts.level || pickTileLevel(timeWindowMs);
   const series = normalized.map((a) => {
     const paramId = a.options.param_id;
     const deviceId = a.options.device_id;
     const instance = a.options.instance || 1;
     const def = catalogue.find((p) => p.id === paramId) || { id: paramId, name: "#" + paramId, unit: "" };
     let history = getTelemetry(deviceId, paramId, instance);
-    if ((!history.v || history.v.length === 0) && typeof MecomAPI.readValue === "function") {
+    if (typeof MecomAPI.readValue === "function") {
       const latest = MecomAPI.readValue(deviceId, paramId, instance);
       if (latest && typeof latest.value === "number" && !Number.isNaN(latest.value)) {
         recordTelemetry(deviceId, paramId, latest.value, latest.quality || "ok", instance);
@@ -167,6 +214,29 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
     const unit = def.unit || "_";
     if (units.indexOf(unit) === -1) units.push(unit);
     const sourceRef = `device=${deviceId} param=${paramId} instance=${instance} endpoint=${(ch && ch.endpoint) || ""}`;
+    let seriesHistory = history;
+    let suppressedPointCount = 0;
+    if (opts.ignoreOpenSensorOutliers && unit === "degC") {
+      const keptTs = [];
+      const keptV = [];
+      (history.ts || []).forEach((ts, idx) => {
+        const value = (history.v || [])[idx];
+        if (typeof value === "number" && value < -50) {
+          suppressedPointCount += 1;
+          return;
+        }
+        keptTs.push(ts);
+        keptV.push(value);
+      });
+      seriesHistory = { ...history, ts: keptTs, v: keptV };
+    }
+    let points = (seriesHistory.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (seriesHistory.v || [])[idx] || 0 }));
+    if (points.length === 1) {
+      points = [
+        { timestamp: new Date(Date.parse(points[0].timestamp) - 1_000).toISOString(), value: points[0].value },
+        points[0],
+      ];
+    }
     return {
       id: tileSeriesKey(a),
       series_id: tileSeriesKey(a),
@@ -175,14 +245,15 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
       full_label: signalPath || def.name,
       color,
       unit,
-      history,
+      history: seriesHistory,
       role: seriesRole,
       axis_id: axisIdForUnit(unit, seriesRole),
       role_rank: roleMeta.rank,
       provenance,
       source_ref: sourceRef,
       source: { device_id: deviceId, instance, param_id: paramId, signal_id: def.sid || String(def.id), endpoint: ch && ch.endpoint },
-      points: (history.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (history.v || [])[idx] || 0 })),
+      diagnostics: suppressedPointCount ? { suppressed_open_sensor_points: suppressedPointCount } : undefined,
+      points,
     };
   }).sort((a, b) => {
     if ((a.role_rank || 0) !== (b.role_rank || 0)) return (a.role_rank || 0) - (b.role_rank || 0);
@@ -190,7 +261,7 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   });
   return {
     schema_version: "signalforge.graph_tile.v1",
-    id: tileId, card_id: tileId, level: "live",
+    id: tileId, card_id: tileId, level,
     t0: new Date(nowMs - timeWindowMs).toISOString(),
     t1: now,
     generated_at: now,
@@ -199,6 +270,13 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
     tile_id: tileId,
     title: opts.title || "",
     time_window_ms: timeWindowMs,
+    latest_endpoint: `/api/graph/tiles/${encodeURIComponent(tileId)}/live`,
+    tile_endpoint: `/api/graph/tiles/${encodeURIComponent(tileId)}/${level}`,
+    tile_files: [
+      { level: "live", time_window_ms: 90_000 },
+      { level: "minute", time_window_ms: 6 * 60_000 },
+      { level: "hour", time_window_ms: 60 * 60_000 },
+    ],
     axes: units.slice(0, 2).map((unit, idx) => ({ unit, side: idx === 0 ? "left" : "right" })),
     bands: [],
     markers: [],
@@ -209,6 +287,10 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
       point_count: series.reduce((acc, s) => acc + ((s.points && s.points.length) || 0), 0),
       decimation: "none",
       renderer: CANONICAL_TILE_RENDERER,
+      tile_level: level,
+      tile_source: level === "live" ? "live-read-cache" : "history-read-cache",
+      outlier_policy: opts.ignoreOpenSensorOutliers ? "drop_degC_below_-50" : "off",
+      suppressed_open_sensor_points: series.reduce((acc, s) => acc + ((s.diagnostics && s.diagnostics.suppressed_open_sensor_points) || 0), 0),
     },
     provenance: { source: "meerstetter-go.graphwall.assignments", generated_at: now },
     series,

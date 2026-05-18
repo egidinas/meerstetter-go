@@ -334,7 +334,7 @@ function ChannelsEditor() {
   }
   const rows = [];
   devices.forEach((d) => {
-    [1, 2].forEach((inst) => {
+    [1, 2, 3, 4].forEach((inst) => {
       const ch = channels.find((c) => c.device_id === d.id && c.instance === inst);
       rows.push({ device: d, instance: inst, channel: ch });
     });

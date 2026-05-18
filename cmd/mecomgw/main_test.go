@@ -39,6 +39,21 @@ func TestLoadConfigValidatesRequiredFields(t *testing.T) {
 	if cfg.Devices[0].ID != "tec-75" || cfg.Devices[0].Address != 75 {
 		t.Fatalf("unexpected device config: %+v", cfg.Devices[0])
 	}
+	if cfg.ChannelCount != 4 || cfg.Devices[0].ChannelCount != 4 {
+		t.Fatalf("channel_count defaults = %d/%d, want 4/4", cfg.ChannelCount, cfg.Devices[0].ChannelCount)
+	}
+
+	explicit := dir + "/explicit.json"
+	if err := os.WriteFile(explicit, []byte(`{"channel_count":3,"devices":[{"id":"tec-75","endpoint":"tcp:127.0.0.1:50000","address":75},{"id":"tec-76","endpoint":"tcp:127.0.0.1:50001","address":76,"channel_count":6}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = loadConfig(explicit)
+	if err != nil {
+		t.Fatalf("loadConfig explicit returned error: %v", err)
+	}
+	if cfg.Devices[0].ChannelCount != 3 || cfg.Devices[1].ChannelCount != 6 {
+		t.Fatalf("explicit channel_count = %d/%d, want 3/6", cfg.Devices[0].ChannelCount, cfg.Devices[1].ChannelCount)
+	}
 
 	bad := dir + "/bad.json"
 	if err := os.WriteFile(bad, []byte(`{"devices":[{"id":"missing-address","endpoint":"tcp:127.0.0.1:50000"}]}`), 0o600); err != nil {
@@ -61,7 +76,7 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 		Devices []deviceView `json:"devices"`
 	}
 	getJSON(t, ts.URL+"/api/devices", http.StatusOK, &devices)
-	if len(devices.Devices) != 1 || devices.Devices[0].ID != "tec-75" || devices.Devices[0].Bound {
+	if len(devices.Devices) != 1 || devices.Devices[0].ID != "tec-75" || devices.Devices[0].Bound || devices.Devices[0].ChannelCount != 4 {
 		t.Fatalf("unexpected devices response: %+v", devices)
 	}
 
@@ -78,6 +93,9 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	}
 	for _, id := range []int{2010, 2040, 3000} {
 		assertCatalogueWritable(t, catalogue.Parameters, id, 1, true)
+	}
+	for _, id := range []int{1000, 1001, 2010, 2040, 3000} {
+		assertCataloguePresent(t, catalogue.Parameters, id, 4)
 	}
 
 	lease := postLease(t, ts.URL+"/api/devices/tec-75/lease", `{"holder":"operator","ttl":"1m"}`)
@@ -106,6 +124,42 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("DELETE lease status = %d, want %d", resp.StatusCode, http.StatusNoContent)
 	}
+}
+
+func TestGatewayCatalogueUsesConfiguredChannelInventory(t *testing.T) {
+	s := newServer(Config{
+		ChannelCount: 3,
+		Devices: []DeviceConfig{
+			{ID: "tec-75", Endpoint: "tcp:127.0.0.1:50000", Address: 75, Label: "TEC 75"},
+			{ID: "tec-76", Endpoint: "tcp:127.0.0.1:50001", Address: 76, Label: "TEC 76", ChannelCount: 6},
+		},
+	}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var devices struct {
+		Devices []deviceView `json:"devices"`
+	}
+	getJSON(t, ts.URL+"/api/devices", http.StatusOK, &devices)
+	if len(devices.Devices) != 2 {
+		t.Fatalf("devices len = %d, want 2", len(devices.Devices))
+	}
+	byID := map[string]deviceView{}
+	for _, d := range devices.Devices {
+		byID[d.ID] = d
+	}
+	if byID["tec-75"].ChannelCount != 3 || byID["tec-76"].ChannelCount != 6 {
+		t.Fatalf("device channel counts = %+v, want tec-75=3 tec-76=6", byID)
+	}
+
+	var catalogue struct {
+		Parameters []gatewayCatalogueEntry `json:"parameters"`
+	}
+	getJSON(t, ts.URL+"/api/catalogue", http.StatusOK, &catalogue)
+	assertCataloguePresent(t, catalogue.Parameters, 1000, 6)
+	assertCataloguePresent(t, catalogue.Parameters, 2010, 6)
+	assertCatalogueMissing(t, catalogue.Parameters, 1000, 7)
+	assertCatalogueMissing(t, catalogue.Parameters, 2010, 7)
 }
 
 func TestGatewayBindFailuresUseTransportStatus(t *testing.T) {
@@ -182,6 +236,25 @@ func assertCatalogueWritable(t *testing.T, params []gatewayCatalogueEntry, id, i
 	t.Fatalf("catalogue missing parameter %d:%d", id, instance)
 }
 
+func assertCataloguePresent(t *testing.T, params []gatewayCatalogueEntry, id, instance int) {
+	t.Helper()
+	for _, p := range params {
+		if p.ID == id && p.Instance == instance {
+			return
+		}
+	}
+	t.Fatalf("catalogue missing parameter %d:%d", id, instance)
+}
+
+func assertCatalogueMissing(t *testing.T, params []gatewayCatalogueEntry, id, instance int) {
+	t.Helper()
+	for _, p := range params {
+		if p.ID == id && p.Instance == instance {
+			t.Fatalf("catalogue unexpectedly included parameter %d:%d", id, instance)
+		}
+	}
+}
+
 func TestParseParamsQuery(t *testing.T) {
 	params, err := parseParamsQuery("1000:1, 1021:2")
 	if err != nil {
@@ -196,6 +269,13 @@ func TestParseParamsQuery(t *testing.T) {
 	}
 	if intParams[0].Type != mecom.DataTypeInt32 {
 		t.Fatalf("param 1200 type = %s, want %s", intParams[0].Type, mecom.DataTypeInt32)
+	}
+	writeParams, err := parseParamsQuery("2010:4,2040:4")
+	if err != nil {
+		t.Fatalf("parseParamsQuery write param returned error: %v", err)
+	}
+	if writeParams[0].Type != mecom.DataTypeInt32 || writeParams[1].Type != mecom.DataTypeInt32 {
+		t.Fatalf("write param types = %s/%s, want int32/int32", writeParams[0].Type, writeParams[1].Type)
 	}
 
 	for _, raw := range []string{"", "1000", "x:1", "1000:x", "1000:0", "1000:-1", "1000:256", "999999:1"} {

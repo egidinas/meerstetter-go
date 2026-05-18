@@ -83,10 +83,29 @@ export function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, s
   return <UPlotTileRenderer tile={tile} height={h} dataGraphRenderer={CANONICAL_TILE_RENDERER} syncKey="meerstetter-go-sparkline" />;
 }
 
-export function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
+export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSeries = [] }) {
   useGatewayTick();
   const graphTile = useMemo(() => normalizeGraphTile(tile || emptyGraphTile({ timeWindowMs }), { timeWindowMs }), [tile, timeWindowMs]);
-  const orderedSeries = useMemo(() => renderSeriesFromGraphTile(graphTile), [graphTile]);
+  const hidden = useMemo(() => new Set(hiddenSeries || []), [hiddenSeries.join ? hiddenSeries.join("|") : String(hiddenSeries)]);
+  const visibleTile = useMemo(() => {
+    if (!hidden.size) return graphTile;
+    return normalizeGraphTile({
+      ...graphTile,
+      series: (graphTile.series || []).filter((series) => {
+        const key = series.series_id || series.id || series.target_id || series.label;
+        return !hidden.has(key);
+      }),
+      diagnostics: {
+        ...(graphTile.diagnostics || {}),
+        hidden_series_count: hidden.size,
+        visible_series_count: (graphTile.series || []).filter((series) => {
+          const key = series.series_id || series.id || series.target_id || series.label;
+          return !hidden.has(key);
+        }).length,
+      },
+    }, { timeWindowMs });
+  }, [graphTile, hidden, timeWindowMs]);
+  const orderedSeries = useMemo(() => renderSeriesFromGraphTile(visibleTile), [visibleTile]);
   const title = graphTile.title || graphTile.tile_id || graphTile.id || "graph tile";
   return (
     <div
@@ -94,10 +113,11 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000 }) {
       data-graph-tile={graphTile.tile_id || graphTile.id || ""}
       data-graph-renderer={CANONICAL_TILE_RENDERER}
       data-series-count={orderedSeries.length}
+      data-hidden-series-count={hidden.size}
       title={title}
     >
       <UPlotTileRenderer
-        tile={graphTile}
+        tile={visibleTile}
         height={height}
         dataGraphRenderer={CANONICAL_TILE_RENDERER}
         syncKey="meerstetter-go-wall"
@@ -159,57 +179,102 @@ export function CategoryFor(name) {
   return "Other Signals";
 }
 
-export function DiscoveryTree({ deviceId, instance, catalogue, pins, onTogglePin, onWrite, onlyWritable, query, setQuery, filterCat, setFilterCat }) {
+export function DiscoveryTree({
+  deviceId,
+  instance,
+  channels = [],
+  catalogue,
+  pins,
+  onTogglePin,
+  onWrite,
+  onPinCard,
+  onCloseWrite,
+  writeCards = [],
+  leaseHolder,
+  holderId,
+  onlyWritable,
+  query,
+  setQuery,
+  filterCat,
+  setFilterCat,
+}) {
   useGatewayTick();
   const filtered = useMemo(() => {
     const q = (query || "").toLowerCase().trim();
     return catalogue.filter((p) => {
       if (onlyWritable && !p.writable) return false;
-      if (filterCat && CategoryFor(p.name) !== filterCat) return false;
+      if (filterCat && p.group !== filterCat) return false;
       if (!q) return true;
-      return (p.name.toLowerCase().includes(q) || String(p.id).includes(q) || (p.unit || "").toLowerCase().includes(q));
+      return (
+        p.name.toLowerCase().includes(q) ||
+        String(p.id).includes(q) ||
+        (p.unit || "").toLowerCase().includes(q) ||
+        (p.group || "").toLowerCase().includes(q) ||
+        (p.subgroup || "").toLowerCase().includes(q)
+      );
     });
   }, [catalogue, onlyWritable, filterCat, query]);
   const groups = useMemo(() => {
     const g = {};
     filtered.forEach((p) => {
-      const cat = CategoryFor(p.name);
-      if (!g[cat]) g[cat] = [];
-      g[cat].push(p);
+      const group = p.group || CategoryFor(p.name);
+      const subgroup = p.subgroup || "Signals";
+      if (!g[group]) g[group] = {};
+      if (!g[group][subgroup]) g[group][subgroup] = [];
+      g[group][subgroup].push(p);
     });
     return g;
   }, [filtered]);
   const [collapsed, setCollapsed] = useState({});
-  const cats = ["Temperature", "Power and Output", "Control", "Status and Events", "Device Metadata", "Other Signals"];
+  const groupNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  const channelFanout = (channels && channels.length ? channels : [{ device_id: deviceId, instance }]);
   return (
     <div className="tree-pane">
+      <div className="tree-title">
+        <span>Signal catalogue</span>
+        <Chip>{filtered.length} signals</Chip>
+        <Chip>{channelFanout.length} inst</Chip>
+      </div>
       <div className="tree-head">
         <input className="field" placeholder="Search parameters…" value={query} onChange={(e) => setQuery(e.target.value)} />
         <div className="tree-filters">
           <button className={!filterCat ? "on" : ""} onClick={() => setFilterCat("")}>All</button>
-          {cats.map((c) => (
-            <button key={c} className={filterCat === c ? "on" : ""} onClick={() => setFilterCat(c)}>{c.replace(" and Events", "").replace(" and Output", "")}</button>
+          {groupNames.map((c) => (
+            <button key={c} className={filterCat === c ? "on" : ""} onClick={() => setFilterCat(c)}>{c}</button>
           ))}
         </div>
       </div>
       <div className="tree-list">
-        {cats.map((cat) => {
-          const items = groups[cat];
-          if (!items || !items.length) return null;
-          const isCollapsed = collapsed[cat];
+        {groupNames.map((group) => {
+          const sgrps = groups[group];
+          const groupCount = Object.values(sgrps).reduce((acc, items) => acc + items.length, 0);
+          const isCollapsed = collapsed[group];
           return (
-            <div key={cat}>
-              <div className="tree-group-head" onClick={() => setCollapsed((c) => ({ ...c, [cat]: !c[cat] }))}>
+            <div key={group}>
+              <div className="tree-group-head" onClick={() => setCollapsed((c) => ({ ...c, [group]: !c[group] }))}>
                 <span>{isCollapsed ? "▸" : "▾"}</span>
-                <span>{cat}</span>
-                <span className="count">{items.length}</span>
+                <span>{group}</span>
+                <span className="count">{groupCount}</span>
               </div>
-              {!isCollapsed && items.map((p) => (
-                <TreeNode key={p.id + ":" + (p.instance || 1)}
-                          deviceId={deviceId} instance={instance} param={p}
-                          pinned={pins.some((x) => x.id === p.id)}
-                          onTogglePin={() => onTogglePin(p)}
-                          onWrite={() => onWrite(p)} />
+              {!isCollapsed && Object.entries(sgrps).map(([subgroup, items]) => (
+                <div key={group + ":" + subgroup} className="tree-subgroup">
+                  <div className="tree-subgroup-head">
+                    <span>{subgroup}</span>
+                    <span>{items.length}</span>
+                  </div>
+                  {items.map((p) => (
+                    <TreeNode key={p.id + ":" + subgroup}
+                              deviceId={deviceId} channels={channelFanout} param={p}
+                              pins={pins}
+                              writeCards={writeCards}
+                              leaseHolder={leaseHolder}
+                              holderId={holderId}
+                              onTogglePin={onTogglePin}
+                              onPinCard={onPinCard}
+                              onCloseWrite={onCloseWrite}
+                              onWrite={onWrite} />
+                  ))}
+                </div>
               ))}
             </div>
           );
@@ -219,18 +284,90 @@ export function DiscoveryTree({ deviceId, instance, catalogue, pins, onTogglePin
   );
 }
 
-function TreeNode({ deviceId, instance, param, pinned, onTogglePin, onWrite }) {
+function TreeNode({ deviceId, channels, param, pins, writeCards, leaseHolder, holderId, onTogglePin, onPinCard, onWrite, onCloseWrite }) {
+  const applicableChannels = (channels || []).filter((c) => !param.applicableModes || param.applicableModes.includes(c.role));
+  const activeCards = (writeCards || []).filter((c) => c.id === param.id);
+  return (
+    <div className={["tree-node", param.writable ? "write" : ""].join(" ")}>
+      <span className="swatch"></span>
+      <span className="nm" title={`${param.group || ""} / ${param.subgroup || ""} / ${param.name}`}>
+        {param.name} <span className="id">·{param.id}</span>
+      </span>
+      <span className="unit">{param.unit || "unitless"}</span>
+      <span className="kind">{param.writable ? "R/W" : "R"}</span>
+      <div className="tree-instances">
+        {applicableChannels.map((ch) => (
+          <TreeInstance key={ch.device_id + ":" + ch.instance}
+                        deviceId={deviceId}
+                        instance={ch.instance}
+                        role={ch.role}
+                        param={param}
+                        pinned={pins.some((x) => x.id === param.id && (x.instance || 1) === ch.instance)}
+                        onTogglePin={() => onTogglePin(param, ch.instance)}
+                        onPinCard={() => onPinCard && onPinCard(param, ch.instance)}
+                        onWrite={() => onWrite(param, ch.instance)} />
+        ))}
+        {applicableChannels.length === 0 && <span className="tree-no-inst">not applicable</span>}
+      </div>
+      {activeCards.length > 0 && (
+        <div className="tree-write-panel">
+          {activeCards.map((c) => (
+            <InputCard
+              key={param.id + ":" + (c.instance || 1)}
+              deviceId={deviceId}
+              param={{ ...param, instance: c.instance || 1 }}
+              leaseHolder={leaseHolder}
+              holderId={holderId}
+              onClose={() => onCloseWrite && onCloseWrite(param.id, c.instance || 1)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TreeInstance({ deviceId, instance, role, param, pinned, onTogglePin, onPinCard, onWrite }) {
   const { value, quality } = useLiveValue(deviceId, param.id, instance);
   const displayValue = MecomAPI.formatValue(value, param.unit, param.id);
   return (
-    <div className={["tree-node", pinned ? "pinned" : "", param.writable ? "write" : "", "q-" + quality].join(" ")} onClick={onTogglePin}>
-      <span className="swatch"></span>
-      <span className="nm" title={param.name}>{param.name} <span className="id">·{param.id}</span></span>
-      <span className="vl">{displayValue}{param.unit ? <span className="u">{param.unit}</span> : null}</span>
-      <span className="actions" onClick={(e) => e.stopPropagation()}>
-        <button title="Pin to chart" onClick={onTogglePin}>{pinned ? "★" : "☆"}</button>
-        {param.writable && <button title="Open write card" onClick={onWrite}>✎</button>}
-      </span>
+    <span className={["tree-inst", pinned ? "pinned" : "", "q-" + quality].join(" ")} title={`instance ${instance} · ${role || "channel"} · ${quality}`}>
+      <button title="Pin instance to graph" onClick={onTogglePin}>{pinned ? "★" : "☆"}</button>
+      <span className="inst">i{instance}</span>
+      <span className="vl">{displayValue}</span>
+      <button title="Pin value card" onClick={onPinCard}>▣</button>
+      {param.writable && <button title="Open write card" onClick={onWrite}>✎</button>}
+    </span>
+  );
+}
+
+export function SignalValueCard({ deviceId, param, leaseHolder, holderId, onClose }) {
+  if (param.writable) {
+    return (
+      <InputCard
+        deviceId={deviceId}
+        param={param}
+        leaseHolder={leaseHolder}
+        holderId={holderId}
+        onClose={onClose}
+      />
+    );
+  }
+  const { value, quality } = useLiveValue(deviceId, param.id, param.instance);
+  const displayValue = MecomAPI.formatValue(value, param.unit, param.id);
+  return (
+    <div className={["signal-card", "q-" + quality].join(" ")}>
+      <div className="nm-row">
+        <div>
+          <div className="nm">{param.name}</div>
+          <div className="id">{param.group || "Signal"} / {param.subgroup || "Signals"} · #{param.id}:{param.instance || 1}</div>
+        </div>
+        <button className="x" onClick={onClose}>✕</button>
+      </div>
+      <div className="signal-value">
+        <span>{quality}</span>
+        <b>{displayValue}{param.unit ? <em>{" " + param.unit}</em> : null}</b>
+      </div>
     </div>
   );
 }
