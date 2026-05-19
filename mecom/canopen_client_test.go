@@ -164,6 +164,64 @@ func TestCANopenClientReadsOutputStageActuals(t *testing.T) {
 	}
 }
 
+func TestCANopenClientReadsChannelSpecificObjects(t *testing.T) {
+	tests := []struct {
+		name      string
+		paramID   int
+		instance  int
+		wantIndex uint16
+		wantSub   byte
+		wantValue float32
+	}{
+		{name: "channel 1 object temperature", paramID: 1000, instance: 1, wantIndex: 0x2100, wantSub: 0x01, wantValue: 31.25},
+		{name: "channel 3 object temperature", paramID: 1000, instance: 3, wantIndex: 0x2100, wantSub: 0x03, wantValue: 32.5},
+		{name: "channel 2 output power", paramID: 1022, instance: 2, wantIndex: 0x2122, wantSub: 0x02, wantValue: 0.007},
+		{name: "channel 4 output power", paramID: 1022, instance: 4, wantIndex: 0x2122, wantSub: 0x04, wantValue: 0.011},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &fakeCANTransceiver{
+				replies: []canopen.Frame{sdoFloatUploadReply(0x4b, tt.wantIndex, tt.wantSub, tt.wantValue)},
+			}
+			client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+			got, err := client.ReadFloat32(context.Background(), tt.paramID, tt.instance)
+			if err != nil {
+				t.Fatalf("ReadFloat32 returned error: %v", err)
+			}
+			if math.Abs(got-float64(tt.wantValue)) > 0.001 {
+				t.Fatalf("ReadFloat32=%f, want %f", got, tt.wantValue)
+			}
+			assertSDOUploadRequest(t, fake.sent, 0x4b, tt.wantIndex, tt.wantSub)
+		})
+	}
+}
+
+func TestCANopenClientRejectsInvalidInstanceWithoutChannelOneAlias(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		instance int
+	}{
+		{name: "zero", instance: 0},
+		{name: "negative", instance: -1},
+		{name: "too large", instance: 256},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &fakeCANTransceiver{}
+			client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+			_, err := client.ReadFloat32(context.Background(), 1000, tt.instance)
+			if err == nil {
+				t.Fatalf("expected invalid instance %d to be rejected", tt.instance)
+			}
+			if !errors.Is(err, ErrUnknownParameter) {
+				t.Fatalf("error = %v, want ErrUnknownParameter", err)
+			}
+			if len(fake.sent) != 0 {
+				t.Fatalf("sent=%d frames; invalid instance must not alias to channel 1", len(fake.sent))
+			}
+		})
+	}
+}
+
 func TestCANopenClientWritesOutputStageSetpointsAndLimits(t *testing.T) {
 	tests := []struct {
 		name      string

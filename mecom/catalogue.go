@@ -11,6 +11,24 @@ import (
 	"github.com/egidinas/signalforge/graphsem"
 )
 
+func RoleForParam(id int) string {
+	for _, p := range DefaultTECCatalogueEntries(1) {
+		if p.ID == id {
+			return p.Role
+		}
+	}
+	return "aux"
+}
+
+func KindForParam(id int) string {
+	for _, p := range DefaultTECCatalogueEntries(1) {
+		if p.ID == id {
+			return p.Kind
+		}
+	}
+	return "continuous"
+}
+
 const DefaultMeComTECCatalogueSourceID = "mecom_tec"
 
 const (

@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -22,9 +23,12 @@ type Route struct {
 // request frames to per-device downstream brokers.
 type RouterConfig struct {
 	Routes            []Route
+	DefaultAddress    byte
+	AddressZeroOrder  []byte
 	RequestTimeout    time.Duration
 	ReconnectDelay    time.Duration
 	ClientIdleTimeout time.Duration
+	TraceFrames       bool
 	Logger            *log.Logger
 
 	// stats is filled in by prepareRoutes so callers can retrieve a
@@ -86,6 +90,10 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 	if err != nil {
 		return err
 	}
+	addressZero, err := newAddressZeroSelector(cfg, routes)
+	if err != nil {
+		return err
+	}
 	go func() {
 		<-ctx.Done()
 		_ = ln.Close()
@@ -102,7 +110,7 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 			}
 			continue
 		}
-		go handleRoutedClient(ctx, conn, routes, *cfg)
+		go handleRoutedClient(ctx, conn, routes, *cfg, addressZero.Next())
 	}
 }
 
@@ -151,22 +159,42 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (map[byte]chan reques
 			RequestTimeout:    cfg.RequestTimeout,
 			ReconnectDelay:    cfg.ReconnectDelay,
 			ClientIdleTimeout: cfg.ClientIdleTimeout,
+			TraceFrames:       cfg.TraceFrames,
 			Logger:            cfg.Logger,
 			statsRecorder:     recorder,
 		}
 		go runBroker(ctx, routeCfg, requests)
 	}
+	if cfg.DefaultAddress != 0 {
+		if _, ok := routes[cfg.DefaultAddress]; !ok {
+			return nil, fmt.Errorf("mecomserver: default address 0x%02X has no configured route", cfg.DefaultAddress)
+		}
+	}
+	for _, addr := range cfg.AddressZeroOrder {
+		if addr == 0 {
+			return nil, fmt.Errorf("mecomserver: address-zero route order cannot include address 0")
+		}
+		if _, ok := routes[addr]; !ok {
+			return nil, fmt.Errorf("mecomserver: address-zero route 0x%02X has no configured route", addr)
+		}
+	}
 	return routes, nil
 }
 
-func handleRoutedClient(ctx context.Context, conn net.Conn, routes map[byte]chan request, cfg RouterConfig) {
+func handleRoutedClient(ctx context.Context, conn net.Conn, routes map[byte]chan request, cfg RouterConfig, addressZero byte) {
 	if cfg.ClientIdleTimeout <= 0 {
 		cfg.ClientIdleTimeout = defaultClientIdleTimeout
 	}
-	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, func(frame []byte) (chan<- request, error) {
+	if cfg.RequestTimeout <= 0 {
+		cfg.RequestTimeout = defaultRequestTimeout
+	}
+	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, cfg.RequestTimeout, cfg.TraceFrames, func(frame []byte) (chan<- request, error) {
 		addr, err := RequestAddress(frame)
 		if err != nil {
 			return nil, err
+		}
+		if addr == 0 && addressZero != 0 {
+			addr = addressZero
 		}
 		requests, ok := routes[addr]
 		if !ok {
@@ -174,4 +202,44 @@ func handleRoutedClient(ctx context.Context, conn net.Conn, routes map[byte]chan
 		}
 		return requests, nil
 	})
+}
+
+type addressZeroSelector struct {
+	fixed byte
+	order []byte
+	next  atomic.Uint64
+}
+
+func newAddressZeroSelector(cfg *RouterConfig, routes map[byte]chan request) (*addressZeroSelector, error) {
+	if cfg.DefaultAddress != 0 && len(cfg.AddressZeroOrder) > 0 {
+		return nil, fmt.Errorf("mecomserver: configure either fixed default address or address-zero route order, not both")
+	}
+	if cfg.DefaultAddress != 0 {
+		return &addressZeroSelector{fixed: cfg.DefaultAddress}, nil
+	}
+	if len(cfg.AddressZeroOrder) == 0 {
+		return &addressZeroSelector{}, nil
+	}
+	order := make([]byte, 0, len(cfg.AddressZeroOrder))
+	for _, addr := range cfg.AddressZeroOrder {
+		if _, ok := routes[addr]; !ok {
+			return nil, fmt.Errorf("mecomserver: address-zero route 0x%02X has no configured route", addr)
+		}
+		order = append(order, addr)
+	}
+	return &addressZeroSelector{order: order}, nil
+}
+
+func (s *addressZeroSelector) Next() byte {
+	if s == nil {
+		return 0
+	}
+	if s.fixed != 0 {
+		return s.fixed
+	}
+	if len(s.order) == 0 {
+		return 0
+	}
+	i := s.next.Add(1) - 1
+	return s.order[int(i%uint64(len(s.order)))]
 }

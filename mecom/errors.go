@@ -41,4 +41,9 @@ var (
 	// type, value outside spec). Distinct from ErrBadAddress for narrower
 	// matching.
 	ErrInvalidArgument = errors.New("mecom: invalid argument")
+
+	// ErrReadbackMismatch indicates a write succeeded at the protocol level
+	// but an immediate readback showed the value did not stick or changed
+	// unexpectedly.
+	ErrReadbackMismatch = errors.New("mecom: readback mismatch")
 )

@@ -37,6 +37,8 @@ type Parameter struct {
 	Unit     string
 	Type     DataType
 	Writable bool
+	Role     string
+	Kind     string
 }
 
 const (
@@ -802,17 +804,28 @@ func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataTyp
 
 func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]byte, error)) ([]byte, error) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	frame, err := buildFrame(c.nextSeqLocked())
+	seq := c.nextSeqLocked()
+	c.mu.Unlock()
+
+	frame, err := buildFrame(seq)
 	if err != nil {
 		return nil, err
 	}
+	return c.roundTripRaw(ctx, frame)
+}
+
+func (c *Client) roundTripRaw(ctx context.Context, frame []byte) ([]byte, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	if _, err := c.rw.Write(frame); err != nil {
 		return nil, err
 	}
+
 	if deadlineRW, ok := c.rw.(interface{ SetReadDeadline(time.Time) error }); ok {
 		deadline := time.Now().Add(c.timeout)
 		if ctxDeadline, ok := ctx.Deadline(); ok && ctxDeadline.Before(deadline) {
@@ -823,6 +836,7 @@ func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]b
 		}
 		defer deadlineRW.SetReadDeadline(time.Time{})
 	}
+
 	raw, err := readFrame(c.rw)
 	if err != nil {
 		if ctxErr := ctx.Err(); ctxErr != nil {

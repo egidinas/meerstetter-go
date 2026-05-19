@@ -81,6 +81,49 @@ func TestServeSerializesFramesFromMultipleClients(t *testing.T) {
 	}
 }
 
+func TestExchangeCancelsBlockedDownstreamRead(t *testing.T) {
+	downstreamClient, downstreamServer := net.Pipe()
+	defer downstreamServer.Close()
+
+	seen := make(chan []byte, 1)
+	serverClosed := make(chan struct{})
+	go func() {
+		defer close(serverClosed)
+		reader := bufio.NewReader(downstreamServer)
+		frame, err := reader.ReadBytes(mecom.FrameTerminator)
+		if err == nil {
+			seen <- append([]byte(nil), frame...)
+		}
+		_, _ = reader.ReadByte()
+	}()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	req := []byte("#500001?VR03E8010000\r")
+	go func() {
+		_, err := exchange(ctx, downstreamClient, bufio.NewReader(downstreamClient), req, time.Second)
+		done <- err
+	}()
+
+	if got := receiveSeen(t, seen); !bytes.Equal(got, req) {
+		t.Fatalf("downstream got %q, want %q", got, req)
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("exchange error = %v, want context.Canceled", err)
+		}
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("exchange did not return after request context cancellation")
+	}
+	select {
+	case <-serverClosed:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("downstream connection was not closed after cancellation")
+	}
+}
+
 func TestRequestAddress(t *testing.T) {
 	addr, err := RequestAddress([]byte("#4B0001?VR03E8010000\r"))
 	if err != nil {
@@ -155,6 +198,131 @@ func TestServeRouterRoutesByMeComAddress(t *testing.T) {
 	}
 	if replyB := readFrame(t, client); !bytes.Contains(replyB, []byte("510002?VR03E9010000+")) {
 		t.Fatalf("client got wrong route B reply: %q", replyB)
+	}
+}
+
+func TestServeRouterRoutesAddressZeroToDefaultAddress(t *testing.T) {
+	routeClient, routeServer := net.Pipe()
+	defer routeClient.Close()
+	defer routeServer.Close()
+	seen := serveDownstreamPipe(t, routeServer, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, &RouterConfig{
+			DefaultAddress: 0x4C,
+			Routes: []Route{
+				{Address: 0x4C, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeClient, "pipe-default", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	client := dialClient(t, ln.Addr().String())
+	defer client.Close()
+
+	req := []byte("#000001?VR03E8010000\r")
+	if _, err := client.Write(req); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, req) {
+		t.Fatalf("default route got %q, want unchanged frame %q", got, req)
+	}
+	if reply := readFrame(t, client); !bytes.Contains(reply, []byte("000001?VR03E8010000+")) {
+		t.Fatalf("client got wrong default route reply: %q", reply)
+	}
+}
+
+func TestServeRouterRoutesAddressZeroByConnectionRouteOrder(t *testing.T) {
+	routeAClient, routeAServer := net.Pipe()
+	defer routeAClient.Close()
+	defer routeAServer.Close()
+	routeBClient, routeBServer := net.Pipe()
+	defer routeBClient.Close()
+	defer routeBServer.Close()
+
+	seenA := serveDownstreamPipe(t, routeAServer, 1)
+	seenB := serveDownstreamPipe(t, routeBServer, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, &RouterConfig{
+			AddressZeroOrder: []byte{0x50, 0x51},
+			Routes: []Route{
+				{Address: 0x50, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeAClient, "pipe-a", nil
+				}},
+				{Address: 0x51, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeBClient, "pipe-b", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	reqA := []byte("#000001?VR03E8010000\r")
+	clientA := dialClient(t, ln.Addr().String())
+	defer clientA.Close()
+	if _, err := clientA.Write(reqA); err != nil {
+		t.Fatalf("write A: %v", err)
+	}
+	if got := receiveSeen(t, seenA); !bytes.Equal(got, reqA) {
+		t.Fatalf("route A got %q, want unchanged frame %q", got, reqA)
+	}
+	_ = readFrame(t, clientA)
+
+	reqB := []byte("#000002?VR03E8010000\r")
+	clientB := dialClient(t, ln.Addr().String())
+	defer clientB.Close()
+	if _, err := clientB.Write(reqB); err != nil {
+		t.Fatalf("write B: %v", err)
+	}
+	if got := receiveSeen(t, seenB); !bytes.Equal(got, reqB) {
+		t.Fatalf("route B got %q, want unchanged frame %q", got, reqB)
+	}
+	_ = readFrame(t, clientB)
+}
+
+func TestPrepareRoutesRejectsDefaultAddressWithoutRoute(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	_, err := prepareRoutes(ctx, &RouterConfig{
+		DefaultAddress: 0x4C,
+		Routes: []Route{
+			{Address: 0x4B, Downstream: func(context.Context) (net.Conn, string, error) {
+				client, _ := net.Pipe()
+				return client, "unused", nil
+			}},
+		},
+	})
+	if err == nil || !strings.Contains(err.Error(), "default address 0x4C") {
+		t.Fatalf("prepareRoutes error = %v, want default address route error", err)
 	}
 }
 

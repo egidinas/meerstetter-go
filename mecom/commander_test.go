@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 type fakeWriteClient struct {

@@ -6,6 +6,11 @@ import (
 	"net"
 )
 
+type MeComASCIIClient interface {
+	DeviceClient
+	MeComClient() *Client
+}
+
 // DeviceClient is the unified surface every concrete MeCom client implements.
 // Use this as the consumer-facing type when transport choice should be opaque.
 type DeviceClient interface {
@@ -103,6 +108,10 @@ func (c *closingASCII) Close() error {
 		return c.conn.Close()
 	}
 	return nil
+}
+
+func (c *closingASCII) MeComClient() *Client {
+	return c.Client
 }
 
 type closingCAN struct {

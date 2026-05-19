@@ -216,10 +216,7 @@ type canopenSDOObject struct {
 }
 
 func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
-	if instance <= 0 {
-		instance = 1
-	}
-	if instance > 0xff {
+	if instance <= 0 || instance > 0xff {
 		return canopenSDOObject{}, false
 	}
 	sub := byte(instance)

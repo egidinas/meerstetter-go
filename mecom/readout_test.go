@@ -233,6 +233,14 @@ func (f *fakeReadoutClient) SupportsRingReadout() bool {
 	return *f.ringSupported
 }
 
+func (f *fakeReadoutClient) ReadFloat32(_ context.Context, _, _ int) (float64, error) {
+	return 0, nil
+}
+
+func (f *fakeReadoutClient) ReadInt32(_ context.Context, _, _ int) (int32, error) {
+	return 0, nil
+}
+
 func (f *fakeReadoutClient) ReadBulk(_ context.Context, params []Parameter) ([]float64, error) {
 	copied := append([]Parameter(nil), params...)
 	f.bulkParams = append(f.bulkParams, copied)

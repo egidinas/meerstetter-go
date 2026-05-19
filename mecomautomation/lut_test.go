@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/sequencer"
+	"github.com/egidinas/signalforge/sequencer"
 )
 
 func TestFourCycleSampleProgramDefaultsToFourControllers(t *testing.T) {

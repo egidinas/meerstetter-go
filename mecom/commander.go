@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 // Commander adapts any WriteClient into a tmtc.Commander. It is the bridge
@@ -28,6 +28,7 @@ import (
 // Unrecognised names return CommandRejected with the offending name.
 type Commander struct {
 	Writer       WriteClient
+	Reader       ReadClient
 	StringWriter StringWriteClient
 	Control      ControlClient
 	Timeout      time.Duration
@@ -63,6 +64,9 @@ func (f AuthorizerFunc) Authorize(targetID string, tc tmtc.Telecommand) error {
 // commands are rejected.
 func NewCommander(writer WriteClient, timeout time.Duration) *Commander {
 	c := &Commander{Writer: writer, Timeout: timeout}
+	if reader, ok := writer.(ReadClient); ok {
+		c.Reader = reader
+	}
 	if stringWriter, ok := writer.(StringWriteClient); ok {
 		c.StringWriter = stringWriter
 	}
@@ -133,7 +137,16 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err := c.authorize(tc); err != nil {
 			return err
 		}
-		return c.Writer.WriteFloat32(ctx, paramID, instance, float32(value))
+		if err := c.Writer.WriteFloat32(ctx, paramID, instance, float32(value)); err != nil {
+			return err
+		}
+		if c.Reader != nil {
+			got, err := c.Reader.ReadFloat32(ctx, paramID, instance)
+			if err == nil && float32(got) != float32(value) {
+				return fmt.Errorf("%w: wrote %v, confirmed %v", ErrReadbackMismatch, float32(value), float32(got))
+			}
+		}
+		return nil
 
 	case "write_int32", "set_int32":
 		paramID, instance, err := paramAndInstance(tc.Arguments)
@@ -147,7 +160,16 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err := c.authorize(tc); err != nil {
 			return err
 		}
-		return c.Writer.WriteInt32(ctx, paramID, instance, int32(value))
+		if err := c.Writer.WriteInt32(ctx, paramID, instance, int32(value)); err != nil {
+			return err
+		}
+		if c.Reader != nil {
+			got, err := c.Reader.ReadInt32(ctx, paramID, instance)
+			if err == nil && got != int32(value) {
+				return fmt.Errorf("readback_mismatch: wrote %v, confirmed %v", int32(value), got)
+			}
+		}
+		return nil
 
 	case "write_string", "set_string":
 		if c.StringWriter == nil {

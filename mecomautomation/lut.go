@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/sequencer"
-	"github.com/egidinas/meerstetter-go/tmtc"
+	"github.com/egidinas/signalforge/sequencer"
+	tmtc "github.com/egidinas/signalforge/contracts"
 	"github.com/egidinas/signalforge/controlprogram"
 )
 
