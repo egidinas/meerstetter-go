@@ -2,30 +2,153 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick, categorizeError, DiscoveryTree, SignalValueCard } from "../components/atoms";
-import { DEFAULT_TILE_LEVELS, renderSeriesFromGraphTile } from "../lib/series";
-import { useAssignments, WALLS, wallForDevice, normalizeAssignment, useGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam, GRAPH_ORIGIN_DEVICE_ID } from "./assignments";
+import { DEFAULT_TILE_LEVELS, graphSeriesIdentityKey, renderSeriesFromGraphTile } from "../lib/series";
+import { useAssignments, WALLS, wallForDevice, normalizeAssignment, useGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam, DEFAULT_GRAPH_TILE_LEVEL, graphTileWindowForLevel } from "./assignments";
 import { HeroGraph, TempSettingsTable, SupplySettingsTable } from "./hero";
 
+function routeRole(route) {
+  return String(route?.kind || route?.role || "").toLowerCase();
+}
+
+function routeEndpoint(route) {
+  return String(route?.endpoint || "").trim();
+}
+
+function routeTransport(route) {
+  const explicit = String(route?.transport || "").trim().toLowerCase();
+  if (explicit) return explicit;
+  const endpoint = routeEndpoint(route).toLowerCase();
+  const label = `${route?.label || ""} ${route?.name || ""} ${route?.detail || ""}`.toLowerCase();
+  if (endpoint.startsWith("serial+can:")) return "serial+can";
+  if (endpoint.startsWith("can:") || endpoint.startsWith("canopen:") || label.includes("can")) return "can";
+  if (endpoint.startsWith("serial:") || endpoint.includes("tty") || label.includes("ftdi") || label.includes("rs485") || label.includes("rs-485")) return "serial";
+  if (endpoint.startsWith("tcp:")) return "tcp";
+  return "";
+}
+
+function uninformativeRouteLabel(value) {
+  const label = String(value || "").trim().toLowerCase();
+  return !label || label === "configured" || label === "route" || label === "hot path" || label === "warm path" || label === "fallback";
+}
+
+function canInterfaceName(endpoint) {
+  const match = String(endpoint || "").match(/^can(?:open)?:([^/]+)/i);
+  return match ? match[1] : "";
+}
+
+function canonicalRouteName(route) {
+  const raw = String(route?.label || route?.name || "").trim();
+  const endpoint = routeEndpoint(route);
+  const haystack = `${raw} ${route?.detail || ""} ${endpoint}`.toLowerCase();
+  if (haystack.includes("pixtend")) return "PiXtend CAN";
+  if (haystack.includes("kvaser")) return "Kvaser USB CAN";
+  if (haystack.includes("ftdi") || haystack.includes("rs485") || haystack.includes("rs-485")) return "USB FTDI RS485";
+  if (!uninformativeRouteLabel(raw)) return raw;
+
+  const transport = routeTransport(route);
+  if (transport === "can" || transport === "canopen") {
+    const iface = canInterfaceName(endpoint);
+    return iface ? `SocketCAN ${iface}` : "CAN bus";
+  }
+  if (transport === "serial+can") return "Serial MeCom over CAN";
+  if (transport === "serial") return "Serial RS485";
+  if (transport === "tcp") return "TCP route";
+  return "Connection route";
+}
+
+function routeRoleText(route) {
+  const role = routeRole(route);
+  const transport = routeTransport(route);
+  const isCan = transport === "can" || transport === "canopen" || transport === "serial+can";
+  const isSerial = transport === "serial";
+  if (role === "hot") return isCan ? "hot CAN" : isSerial ? "hot serial" : "hot route";
+  if (role === "warm") return isCan ? "warm CAN" : isSerial ? "warm serial" : "warm standby";
+  if (role === "fallback") return isCan ? "fallback CAN" : isSerial ? "fallback serial" : "fallback route";
+  return "route";
+}
+
+function routeChipKind(route) {
+  const role = routeRole(route);
+  if (role === "hot") return "accent";
+  if (role === "fallback") return "warn";
+  return "warn";
+}
+
+function routeChipKey(deviceId, route) {
+  return [deviceId, routeRole(route), routeEndpoint(route), route?.label || route?.name || ""].join(":");
+}
+
 function formatRouteLabel(route) {
-  const kind = String(route?.kind || route?.role || "").toLowerCase();
-  const label = String(route?.label || route?.name || "").trim();
-  const detail = String(route?.detail || "").trim();
-  const routeText = kind === "hot"
-    ? "hot CAN path"
-    : kind === "warm"
-      ? "warm serial/FTDI"
-      : kind === "fallback"
-        ? "warm fallback route"
-        : "route";
-  const title = label || routeText;
-  const suffix = detail ? ` · ${detail}` : "";
-  return { title, text: `${title} · ${routeText}${suffix}` };
+  const name = canonicalRouteName(route);
+  const roleText = routeRoleText(route);
+  const detail = [
+    roleText,
+    route?.state,
+    routeTransport(route),
+    routeEndpoint(route),
+  ].filter(Boolean).join(" · ");
+  return { title: detail ? `${name} · ${detail}` : name, text: `${name} · ${roleText}` };
 }
 
 const GRAPH_TILE_WINDOW_OPTIONS = DEFAULT_TILE_LEVELS;
 
-function graphTileWindowForLevel(level) {
-  return GRAPH_TILE_WINDOW_OPTIONS.find((option) => option.level === level) || GRAPH_TILE_WINDOW_OPTIONS[0];
+function channelSortRank(channel) {
+  const instance = Number(channel?.instance || 0);
+  const role = String(channel?.role || "");
+  const roleRank = role === "temp" ? 0 : role === "supply" ? 1 : 2;
+  return instance * 10 + roleRank;
+}
+
+const DEFAULT_HIDDEN_QUALITIES = new Set(["missing", "detached", "open_sensor", "no_data", "unreachable", "nan", "error"]);
+
+function seriesKey(series) {
+  return graphSeriesIdentityKey(series);
+}
+
+function seriesQuality(series) {
+  const quality = series?.quality ?? series?.source_quality ?? series?.diagnostics?.quality ?? series?.source?.quality;
+  return String(quality || "").trim().toLowerCase();
+}
+
+function seriesDefaultVisible(series) {
+  const explicit = series?.default_visible ?? series?.defaultVisible;
+  if (explicit === false) return false;
+  if (explicit === true) return true;
+  return null;
+}
+
+function seriesValues(series) {
+  const values = [];
+  (series?.history?.v || []).forEach((value) => values.push(Number(value)));
+  (series?.points || []).forEach((point) => values.push(Number(point?.value ?? point?.v)));
+  return values;
+}
+
+function isDegreeCSeries(series) {
+  const unit = String(series?.unit || "").toLowerCase();
+  return unit === "degc" || unit === "c" || unit.includes("deg") || unit.includes("°") || unit.includes("celsius");
+}
+
+function hasFiniteInFamilyValue(series) {
+  const degreeC = isDegreeCSeries(series);
+  return seriesValues(series).some((value) => Number.isFinite(value) && (!degreeC || value > -50));
+}
+
+function defaultHiddenSeriesForTile(tile) {
+  const hiddenKeys = new Set();
+  (tile?.series || []).forEach((series) => {
+    const key = seriesKey(series);
+    if (!key) return;
+    const quality = seriesQuality(series);
+    if (
+      seriesDefaultVisible(series) === false ||
+      DEFAULT_HIDDEN_QUALITIES.has(quality) ||
+      (isDegreeCSeries(series) && !hasFiniteInFamilyValue(series))
+    ) {
+      hiddenKeys.add(key);
+    }
+  });
+  return Array.from(hiddenKeys);
 }
 
 export function FleetView({ onOpenDevice }) {
@@ -36,37 +159,49 @@ export function FleetView({ onOpenDevice }) {
 
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
-  const originDeviceId = (typeof MecomAPI.primaryDeviceId === "function" && MecomAPI.primaryDeviceId()) || GRAPH_ORIGIN_DEVICE_ID;
-  const originTempChannels = tempChannels.filter((c) => c.device_id === originDeviceId);
-  const originSupplyChannels = supplyChannels.filter((c) => c.device_id === originDeviceId);
-  const originTempStored = assigns.forWall(WALLS.fleetTemp.wall_id).filter((a) => normalizeAssignment(a).device_id === originDeviceId);
-  const originSupplyStored = assigns.forWall(WALLS.fleetSupply.wall_id).filter((a) => normalizeAssignment(a).device_id === originDeviceId);
+  const fleetTempStored = assigns.forWall(WALLS.fleetTemp.wall_id);
+  const fleetSupplyStored = assigns.forWall(WALLS.fleetSupply.wall_id);
 
-  const fleetTempAssignments = assignmentsWithPriorityDefaults(originTempStored, WALLS.fleetTemp.wall_id, originTempChannels);
-  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(originSupplyStored, WALLS.fleetSupply.wall_id, originSupplyChannels);
+  const fleetTempAssignments = assignmentsWithPriorityDefaults(fleetTempStored, WALLS.fleetTemp.wall_id, tempChannels);
+  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(fleetSupplyStored, WALLS.fleetSupply.wall_id, supplyChannels);
+  const [fleetTileLevel, setFleetTileLevel] = useState(DEFAULT_GRAPH_TILE_LEVEL);
+  const fleetTileWindow = graphTileWindowForLevel(fleetTileLevel);
 
   const tempTile = useGraphTileFromAssignments(fleetTempAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "thermal"), {
     tile_id: WALLS.fleetTemp.wall_id,
     title: WALLS.fleetTemp.label,
     colorByChannel: false,
-    timeWindowMs: 90_000,
-    level: "live",
+    timeWindowMs: fleetTileWindow.timeWindowMs,
+    level: fleetTileLevel,
   });
   const supplyTile = useGraphTileFromAssignments(fleetSupplyAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "power"), {
     tile_id: WALLS.fleetSupply.wall_id,
     title: WALLS.fleetSupply.label,
     colorByChannel: false,
-    timeWindowMs: 90_000,
-    level: "live",
+    timeWindowMs: fleetTileWindow.timeWindowMs,
+    level: fleetTileLevel,
   });
+  const defaultTempHidden = useMemo(() => defaultHiddenSeriesForTile(tempTile), [tempTile]);
+  const defaultSupplyHidden = useMemo(() => defaultHiddenSeriesForTile(supplyTile), [supplyTile]);
 
   return (
     <div className="fleet">
+      <div className="chart-toolbar fleet-chart-toolbar">
+        <label>
+          History
+          <select value={fleetTileLevel} onChange={(event) => setFleetTileLevel(event.target.value)}>
+            {GRAPH_TILE_WINDOW_OPTIONS.map((option) => (
+              <option key={option.level} value={option.level}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <Chip>{fleetTileWindow.label} shared timeline</Chip>
+      </div>
       <div className="fleet-heroes">
-        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={260}>
+        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={340} initialHiddenSeries={defaultTempHidden}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
         </HeroGraph>
-        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={260}>
+        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={340} initialHiddenSeries={defaultSupplyHidden}>
           {supplyChannels.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
               No supply-mode channels configured. Set a channel role under Signal Dictionary → Metadata.
@@ -106,7 +241,7 @@ export function DeviceMini({ device, onOpen }) {
       </div>
       <div className="routes" title="Connection redundancy">
         {routes.map((route) => (
-          <Chip key={`${device.id}:${route.label}`} kind={route.kind === "hot" ? "accent" : "warn"} title={route.detail || route.label}>
+          <Chip key={routeChipKey(device.id, route)} kind={routeChipKind(route)} title={formatRouteLabel(route).title}>
             {formatRouteLabel(route).text}
           </Chip>
         ))}
@@ -195,16 +330,32 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   const catalogue = MecomAPI.catalogue();
   const device = MecomAPI.devices().find((d) => d.id === deviceId);
   const allChannels = MecomAPI.channels();
-  const channels = allChannels.filter((c) => c.device_id === deviceId);
-  const [activeChannelInst, setActiveChannelInst] = useState(() => channels[0]?.instance || 1);
-  const activeChannel = channels.find((c) => c.instance === activeChannelInst) || channels[0];
+  const channels = useMemo(() => allChannels
+    .filter((c) => c.device_id === deviceId)
+    .slice()
+    .sort((a, b) => channelSortRank(a) - channelSortRank(b)), [allChannels, deviceId]);
+  const channelKey = channels.map((c) => `${c.instance}:${c.role || ""}`).join("|");
+  const defaultChannelInst = channels.find((c) => c.instance === 1)?.instance
+    || channels.find((c) => c.role === "temp")?.instance
+    || channels[0]?.instance
+    || 1;
+  const [activeChannelInst, setActiveChannelInst] = useState(defaultChannelInst);
+  useEffect(() => {
+    if (!channels.length) return;
+    if (!channels.some((c) => c.instance === activeChannelInst)) {
+      setActiveChannelInst(defaultChannelInst);
+    }
+  }, [activeChannelInst, channelKey, defaultChannelInst]);
+  const activeChannel = channels.find((c) => c.instance === activeChannelInst)
+    || channels.find((c) => c.instance === defaultChannelInst)
+    || channels[0];
 
   const settings = MecomAPI.settings();
   const leases = MecomAPI.leases();
   const lease = leases.find((l) => l.device_id === deviceId);
   const youHold = lease && lease.holder === settings.holder;
   const assigns = useAssignments();
-  const [tileLevel, setTileLevel] = useState("live");
+  const [tileLevel, setTileLevel] = useState(DEFAULT_GRAPH_TILE_LEVEL);
   const tileWindow = graphTileWindowForLevel(tileLevel);
   const tileWindowMs = tileWindow.timeWindowMs;
   const [hiddenSeries, setHiddenSeries] = useState({});
@@ -242,6 +393,21 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
       const current = new Set(cur[tileId] || []);
       if (current.has(key)) current.delete(key);
       else current.add(key);
+      return { ...cur, [tileId]: Array.from(current) };
+    });
+  }
+  function applyDefaultHiddenSeries(tileId, keys, validKeys) {
+    setHiddenSeries((cur) => {
+      const valid = new Set(validKeys || []);
+      const previous = cur[tileId] || [];
+      const current = new Set(previous.filter((key) => valid.size === 0 || valid.has(key)));
+      let changed = current.size !== previous.length;
+      (keys || []).forEach((key) => {
+        if (!key || (valid.size > 0 && !valid.has(key)) || current.has(key)) return;
+        current.add(key);
+        changed = true;
+      });
+      if (!changed) return cur;
       return { ...cur, [tileId]: Array.from(current) };
     });
   }
@@ -342,7 +508,7 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
           <div className="right">
             <div className="route-strip" title="Connection redundancy">
               {routes.map((route) => (
-                <Chip key={`${device.id}:${route.label}`} kind={route.kind === "hot" ? "accent" : "warn"} title={route.detail || route.label}>
+                <Chip key={routeChipKey(device.id, route)} kind={routeChipKind(route)} title={formatRouteLabel(route).title}>
                   {formatRouteLabel(route).text}
                 </Chip>
               ))}
@@ -426,6 +592,7 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
             section={section}
             hiddenForTile={hiddenSeries[section.tileId] || []}
             onToggleSeriesVisibility={toggleSeriesVisibility}
+            onApplyDefaultHidden={applyDefaultHiddenSeries}
           />
         ))}
       </div>
@@ -433,9 +600,80 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   );
 }
 
-function GraphSectionCard({ section, hiddenForTile, onToggleSeriesVisibility }) {
+function GraphSectionCard({ section, hiddenForTile, onToggleSeriesVisibility, onApplyDefaultHidden }) {
   const tile = useGraphTileFromAssignments(section.bucketPins, section.tileOptions);
   const series = useMemo(() => renderSeriesFromGraphTile(tile), [tile]);
+  const renderedSeriesKey = useMemo(() => series.map((s) => seriesKey(s)).sort().join("|"), [series]);
+  const rawSeriesKeys = useMemo(() => (tile?.series || []).map((s) => seriesKey(s)).filter(Boolean), [tile]);
+  const tileSeriesCount = rawSeriesKeys.length;
+  const renderedSeriesKeys = useMemo(() => new Set(series.map((s) => seriesKey(s))), [renderedSeriesKey]);
+  const rawSeriesMeta = useMemo(() => {
+    const out = new Map();
+    (tile?.series || []).forEach((raw) => {
+      const key = seriesKey(raw);
+      if (!key) return;
+      out.set(key, {
+        quality: raw.quality || raw.diagnostics?.status || "ok",
+        visibilityReason: raw.visibility_reason || raw.visibilityReason || "",
+      });
+    });
+    return out;
+  }, [tile]);
+  const renderedLegendSeries = useMemo(() => series.map((s) => {
+    const key = seriesKey(s);
+    const meta = rawSeriesMeta.get(key) || {};
+    return {
+      ...s,
+      key,
+      quality: s.quality || meta.quality || "ok",
+      visibilityReason: s.visibilityReason || meta.visibilityReason || "",
+    };
+  }), [renderedSeriesKey, rawSeriesMeta]);
+  const rawOnlyLegendSeries = useMemo(() => (tile?.series || [])
+    .map((raw) => {
+      const key = seriesKey(raw);
+      if (!key || renderedSeriesKeys.has(key)) return null;
+      const history = raw.history || {};
+      const values = Array.isArray(history.v) ? history.v : [];
+      const source = raw.source || {};
+      return {
+        key,
+        label: raw.label || key,
+        fullLabel: raw.full_label || raw.fullLabel || "",
+        visibilityReason: raw.visibility_reason || raw.visibilityReason || "",
+        unit: raw.unit || "",
+        paramId: source.param_id || raw.param_id || raw.paramId,
+        color: channelColor(source.device_id || source.deviceId || "", source.instance || raw.instance || 1),
+        quality: raw.quality || raw.diagnostics?.status || "missing",
+        history: { v: values },
+      };
+    })
+    .filter(Boolean), [tile, renderedSeriesKey]);
+  const legendSeries = useMemo(() => renderedLegendSeries.concat(rawOnlyLegendSeries), [renderedLegendSeries, rawOnlyLegendSeries]);
+  const validSeriesKeys = useMemo(() => Array.from(new Set(renderedLegendSeries.map((s) => s.key).concat(rawSeriesKeys))), [renderedSeriesKey, rawSeriesKeys.join("|")]);
+  const validSeriesKey = useMemo(() => validSeriesKeys.slice().sort().join("|"), [validSeriesKeys.join("|")]);
+  const defaultHidden = useMemo(() => defaultHiddenSeriesForTile(tile), [tile]);
+  const defaultHiddenKey = useMemo(() => defaultHidden.slice().sort().join("|"), [defaultHidden.join("|")]);
+  const appliedDefaultHiddenKey = useRef("");
+  const defaultHiddenApplyKey = `${section.tileId}:${defaultHiddenKey}:${validSeriesKey}`;
+  const hiddenForTileKey = hiddenForTile.join ? hiddenForTile.join("|") : String(hiddenForTile);
+  const effectiveHiddenForTile = useMemo(() => {
+    const valid = new Set(validSeriesKeys || []);
+    const current = new Set((hiddenForTile || []).filter((key) => valid.size === 0 || valid.has(key)));
+    if (appliedDefaultHiddenKey.current !== defaultHiddenApplyKey) {
+      (defaultHidden || []).forEach((key) => {
+        if (!key || (valid.size > 0 && !valid.has(key))) return;
+        current.add(key);
+      });
+    }
+    return Array.from(current);
+  }, [hiddenForTileKey, defaultHiddenKey, defaultHiddenApplyKey, validSeriesKey]);
+  useEffect(() => {
+    const applyKey = defaultHiddenApplyKey;
+    if (appliedDefaultHiddenKey.current === applyKey) return;
+    appliedDefaultHiddenKey.current = applyKey;
+    onApplyDefaultHidden(section.tileId, defaultHidden, validSeriesKeys);
+  }, [defaultHiddenApplyKey]);
   const suppressed = tile?.diagnostics?.suppressed_open_sensor_points || 0;
   return (
     <div className="chart-card" key={section.tileId}>
@@ -448,22 +686,32 @@ function GraphSectionCard({ section, hiddenForTile, onToggleSeriesVisibility }) 
         </div>
       </div>
       <div className="body">
-        {series.length === 0 ? (
+        {tileSeriesCount === 0 ? (
           <div className="empty">{section.empty}<br />Use the signal catalogue on the left; star an instance to add it.</div>
         ) : (
           <div className="chart-layout">
             <div className="chart-plot">
-              <MultiChart tile={tile} height={section.bucket === "other" ? 260 : 320} hiddenSeries={hiddenForTile} fill minHeight={section.bucket === "other" ? 220 : 280} />
+              <MultiChart tile={tile} height={section.bucket === "other" ? 260 : 320} hiddenSeries={effectiveHiddenForTile} fill minHeight={section.bucket === "other" ? 220 : 280} />
             </div>
             <div className="legend chart-legend">
-              {series.map((s) => {
-                const last = s.history.v[s.history.v.length - 1];
-                const off = hiddenForTile.includes(s.key);
+              {legendSeries.map((s) => {
+                const values = Array.isArray(s.history?.v) ? s.history.v : [];
+                const last = values.length ? values[values.length - 1] : null;
+                const off = effectiveHiddenForTile.includes(s.key);
                 return (
-                  <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => onToggleSeriesVisibility(section.tileId, s.key)} title={s.fullLabel || "Click to show/hide this tile series"}>
+                  <span
+                    key={s.key}
+                    className={"item " + (off ? "off" : "")}
+                    data-series-key={s.key}
+                    data-series-quality={s.quality || "ok"}
+                    data-series-visible={off ? "false" : "true"}
+                    onClick={() => onToggleSeriesVisibility(section.tileId, s.key)}
+                    title={[s.fullLabel || "Click to show/hide this tile series", s.visibilityReason || ""].filter(Boolean).join(" · ")}
+                  >
                     <span className="sw" style={{ background: s.color }}></span>
                     <span className="series-label">{s.label}</span>
                     <span className="cur">{MecomAPI.formatWithUnit(last, s.unit, s.paramId)}</span>
+                    {s.quality && s.quality !== "ok" ? <span className="quality-mini">{s.quality}</span> : null}
                   </span>
                 );
               })}

@@ -1,30 +1,37 @@
 // @ts-nocheck
 import { useState, useEffect, useMemo } from "react";
+import {
+  loadAssignments as loadSignalForgeAssignments,
+  saveAssignments as saveSignalForgeAssignments,
+  makeAssignment as makeSignalForgeAssignment,
+  useAssignments as useSignalForgeAssignments,
+} from "signalforge-web";
 import { MecomAPI } from "../api/mecom";
-import { getTelemetry, recordTelemetry } from "../lib/telemetry";
-import { CANONICAL_TILE_RENDERER, DEFAULT_TILE_LEVELS, seriesRoleMeta, pickTileLevel } from "../lib/series";
+import { CANONICAL_TILE_RENDERER, DEFAULT_TILE_LEVELS, graphSeriesIdentityKey, seriesRoleMeta, pickTileLevel } from "../lib/series";
 
-const ASSIGNMENT_KEY = "mecomgw.assignments";
+const ASSIGNMENT_STORE = { namespace: "mecomgw" };
 
 export function loadAssignments() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(ASSIGNMENT_KEY) || "[]");
-    if (!Array.isArray(raw)) return [];
-    return raw.map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
-  } catch (_) { return []; }
+  return loadSignalForgeAssignments(ASSIGNMENT_STORE).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
 }
 export function saveAssignments(list) {
   const normalized = (Array.isArray(list) ? list : [])
     .map(normalizeAssignment)
     .filter((a) => a.device_id && Number.isFinite(a.param_id));
-  localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(normalized));
-  window.dispatchEvent(new CustomEvent("mecomgw-assignments-changed"));
+  saveSignalForgeAssignments(normalized, ASSIGNMENT_STORE);
 }
 
 export const WALLS = {
   fleetTemp:   { wall_id: "fleet-temp",   label: "Fleet hero · Temperature" },
   fleetSupply: { wall_id: "fleet-supply", label: "Fleet hero · Power supplies" },
 };
+export const DEFAULT_GRAPH_TILE_LEVEL = "three_day";
+export function graphTileWindowForLevel(level) {
+  return DEFAULT_TILE_LEVELS.find((option) => option.level === level)
+    || DEFAULT_TILE_LEVELS.find((option) => option.level === DEFAULT_GRAPH_TILE_LEVEL)
+    || DEFAULT_TILE_LEVELS[0]
+    || { level: DEFAULT_GRAPH_TILE_LEVEL, label: "3 days", timeWindowMs: 3 * 24 * 60 * 60_000 };
+}
 export const GRAPH_ORIGIN_DEVICE_ID = "tec-76";
 export function wallForDevice(deviceId) { return { wall_id: "device-" + deviceId, label: "Device · " + deviceId }; }
 
@@ -66,48 +73,24 @@ export function normalizeAssignment(a) {
 }
 
 export function makeAssignment(wallId, paramId, deviceId, instance?) {
-  return normalizeAssignment({
-    wall_id: wallId,
-    target_id: signalAddress(paramId, deviceId, instance || 1),
-    kind: "trend",
-  });
+  return normalizeAssignment(makeSignalForgeAssignment(wallId, paramId, deviceId, instance || 1));
 }
 
 export function tileSeriesKey(a) {
   const n = normalizeAssignment(a);
-  return [n.wall_id || "wall", n.tile_id || n.target_id || "target", n.kind || "trend"].join(":");
+  return `${n.device_id}:${n.param_id}:${n.instance || 1}`;
 }
 
 export function useAssignments() {
-  const [list, setList] = useState(loadAssignments);
-  useEffect(() => {
-    const fn = () => setList(loadAssignments());
-    window.addEventListener("mecomgw-assignments-changed", fn);
-    return () => window.removeEventListener("mecomgw-assignments-changed", fn);
-  }, []);
+  const handle = useSignalForgeAssignments(ASSIGNMENT_STORE);
   return {
-    list,
-    add: (wallId, paramId, deviceId, instance?) => {
-      const cur = loadAssignments();
-      const next = makeAssignment(wallId, paramId, deviceId, instance);
-      if (cur.find((a) => a.wall_id === wallId && a.target_id === next.target_id)) return;
-      cur.push(next);
-      saveAssignments(cur);
-    },
-    remove: (wallId, paramId, deviceId, instance?) => {
-      const addr = signalAddress(paramId, deviceId, instance);
-      const cur = loadAssignments().filter((a) => !(a.wall_id === wallId && a.target_id === addr));
-      saveAssignments(cur);
-    },
-    forWall: (wallId) => list.filter((a) => a.wall_id === wallId),
-    hasAssignment: (wallId, paramId, deviceId, instance?) => {
-      const addr = signalAddress(paramId, deviceId, instance);
-      return list.some((a) => a.wall_id === wallId && a.target_id === addr);
-    },
+    ...handle,
+    list: handle.list.map(normalizeAssignment),
+    forWall: (wallId) => handle.forWall(wallId).map(normalizeAssignment),
   };
 }
 
-const SEED_VERSION = 9;
+const SEED_VERSION = 10;
 
 function priorityParamIdsForChannel(ch) {
   const catalogue = MecomAPI.catalogue();
@@ -148,20 +131,17 @@ export function seedAssignments() {
   const current = loadAssignments();
   let next = current.slice();
   const seedVersion = parseInt(localStorage.getItem("mecomgw.assignments.version") || "0", 10);
-  const originDeviceId = (typeof MecomAPI.primaryDeviceId === "function" && MecomAPI.primaryDeviceId()) || GRAPH_ORIGIN_DEVICE_ID;
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
-  const originTempChannels = tempChannels.filter((c) => c.device_id === originDeviceId);
-  const originSupplyChannels = supplyChannels.filter((c) => c.device_id === originDeviceId);
   if (seedVersion !== SEED_VERSION) {
     next = next.filter((item) => {
       const a = normalizeAssignment(item);
       const fleetWall = a.wall_id === WALLS.fleetTemp.wall_id || a.wall_id === WALLS.fleetSupply.wall_id;
-      return !fleetWall || a.device_id === originDeviceId;
+      return !fleetWall;
     });
   }
-  next = assignmentsWithPriorityDefaults(next, WALLS.fleetTemp.wall_id, originTempChannels);
-  next = assignmentsWithPriorityDefaults(next, WALLS.fleetSupply.wall_id, originSupplyChannels);
+  next = assignmentsWithPriorityDefaults(next, WALLS.fleetTemp.wall_id, tempChannels);
+  next = assignmentsWithPriorityDefaults(next, WALLS.fleetSupply.wall_id, supplyChannels);
   channels.forEach((ch) => {
     const wallId = wallForDevice(ch.device_id).wall_id + "-" + ch.instance;
     next = assignmentsWithPriorityDefaults(next, wallId, [ch]);
@@ -201,9 +181,23 @@ const PARAM_SHORTHANDS = {
 };
 
 function compactParamLabel(def) {
+  const id = Number(def && def.id);
+  if (id === 1000) return "OT";
+  if (id === 1001) return "ST";
+  if (id === 3000) return "NOT";
+  if (id === 1022) return "OP";
+  if (id === 1021) return "OV";
+  if (id === 1020) return "OC";
   const name = String((def && def.name) || "").trim();
-  const key = name.toLowerCase().replace(/\s+/g, " ");
+  const key = name.toLowerCase().replace(/[_/-]+/g, " ").replace(/\s+/g, " ");
   if (PARAM_SHORTHANDS[key]) return PARAM_SHORTHANDS[key];
+  if (key.includes("object temp") && !key.includes("target") && !key.includes("nominal")) return "OT";
+  if (key.includes("sink temp")) return "ST";
+  if (key.includes("target") && key.includes("temp")) return "NOT";
+  if (key.includes("nominal") && key.includes("temp")) return "NOT";
+  if (key.includes("output power")) return "OP";
+  if (key.includes("output voltage")) return "OV";
+  if (key.includes("output current")) return "OC";
   if (def && def.sid) {
     const sid = String(def.sid)
       .replace(/_c$|_v$|_a$|_w$/i, "")
@@ -298,6 +292,29 @@ function filterSeriesHistoryForScale(history, unit) {
   };
 }
 
+function isDegreeCUnit(unit) {
+  const u = String(unit || "").toLowerCase();
+  return u === "degc" || u === "c" || u.includes("deg") || u.includes("°") || u.includes("celsius");
+}
+
+function fallbackSeriesVisibility(history, filteredHistory, unit) {
+  const rawValues = (history?.v || []).map(Number).filter((value) => Number.isFinite(value));
+  const visibleValues = (filteredHistory?.v || []).map(Number).filter((value) => Number.isFinite(value));
+  if (visibleValues.length > 0) return { quality: "ok", default_visible: true, visibility_reason: "" };
+  if (isDegreeCUnit(unit) && rawValues.some((value) => value < -50)) {
+    return {
+      quality: "detached",
+      default_visible: false,
+      visibility_reason: "hidden by default because the measured temperature is below the detached-sensor floor",
+    };
+  }
+  return {
+    quality: "missing",
+    default_visible: false,
+    visibility_reason: "hidden by default because no live value or history is available",
+  };
+}
+
 export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const catalogue = MecomAPI.catalogue();
   const normalized = (assignments || []).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
@@ -305,21 +322,15 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const nowMs = Date.now();
   const now = new Date(nowMs).toISOString();
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
-  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || 90_000;
-  const level = opts.level || pickTileLevel(timeWindowMs);
+  const requestedLevel = opts.level || opts.tileLevel || DEFAULT_GRAPH_TILE_LEVEL;
+  const requestedWindow = graphTileWindowForLevel(requestedLevel);
+  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || requestedWindow.timeWindowMs;
+  const level = opts.level || opts.tileLevel || pickTileLevel(timeWindowMs) || requestedLevel;
   const series = normalized.map((a) => {
     const paramId = a.options.param_id;
     const deviceId = a.options.device_id;
     const instance = a.options.instance || 1;
     const def = catalogue.find((p) => p.id === paramId) || { id: paramId, name: "#" + paramId, unit: "" };
-    let history = getTelemetry(deviceId, paramId, instance);
-    if (typeof MecomAPI.readValue === "function") {
-      const latest = MecomAPI.readValue(deviceId, paramId, instance);
-      if (latest && typeof latest.value === "number" && !Number.isNaN(latest.value)) {
-        recordTelemetry(deviceId, paramId, latest.value, latest.quality || "ok", instance);
-        history = getTelemetry(deviceId, paramId, instance);
-      }
-    }
     const seriesRole = MecomAPI.roleForParam(paramId);
     const roleMeta = seriesRoleMeta(seriesRole);
     let color;
@@ -335,17 +346,6 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
     if (units.indexOf(unit) === -1) units.push(unit);
     const channelContext = `${deviceId} · channel ${instance}${ch && ch.label ? " · " + ch.label : ""}`;
     const sourceRef = `device=${deviceId} param=${paramId} instance=${instance} endpoint=${(ch && ch.endpoint) || ""}`;
-    const filtered = filterSeriesHistoryForScale(history, unit);
-    const seriesHistory = filtered.history;
-    const suppressedPointCount = filtered.suppressedOpenSensorPoints;
-    const suppressedInitialOutliers = filtered.suppressedInitialOutliers;
-    let points = (seriesHistory.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (seriesHistory.v || [])[idx] }));
-    if (points.length === 1) {
-      points = [
-        { timestamp: new Date(Date.parse(points[0].timestamp) - 1_000).toISOString(), value: points[0].value },
-        points[0],
-      ];
-    }
     return {
       id: tileSeriesKey(a),
       series_id: tileSeriesKey(a),
@@ -354,15 +354,18 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
       full_label: `${channelContext} · param ${paramId} · ${signalPath || def.name}`,
       color,
       unit,
-      history: seriesHistory,
+      history: { ts: [], v: [] },
       role: seriesRole,
       axis_id: axisIdForUnit(unit, seriesRole),
       role_rank: roleMeta.rank,
+      quality: "missing",
+      default_visible: false,
+      visibility_reason: "waiting for gateway archive tile; frontend does not synthesize graph history",
       provenance,
       source_ref: sourceRef,
       source: { device_id: deviceId, instance, param_id: paramId, signal_id: def.sid || String(def.id), endpoint: ch && ch.endpoint },
-      diagnostics: suppressedPointCount || suppressedInitialOutliers ? { suppressed_open_sensor_points: suppressedPointCount, suppressed_initial_outlier_points: suppressedInitialOutliers } : undefined,
-      points,
+      diagnostics: { status: "missing", message: "gateway tile unavailable" },
+      points: [],
     };
   }).sort((a, b) => {
     if ((a.role_rank || 0) !== (b.role_rank || 0)) return (a.role_rank || 0) - (b.role_rank || 0);
@@ -387,16 +390,17 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
     markers: [],
     events: [],
     diagnostics: {
-      status: series.length > 0 ? "ok" : "empty",
+      status: "unavailable",
       series_count: series.length,
-      point_count: series.reduce((acc, s) => acc + ((s.points && s.points.length) || 0), 0),
-      decimation: "none",
+      point_count: 0,
+      decimation: "gateway-owned",
       renderer: CANONICAL_TILE_RENDERER,
       tile_level: level,
-      tile_source: level === "live" ? "live-read-cache" : "history-read-cache",
-      outlier_policy: "drop_detached_degC_below_-50_and_initial_out_of_family",
-      suppressed_open_sensor_points: series.reduce((acc, s) => acc + ((s.diagnostics && s.diagnostics.suppressed_open_sensor_points) || 0), 0),
-      suppressed_initial_outlier_points: series.reduce((acc, s) => acc + ((s.diagnostics && s.diagnostics.suppressed_initial_outlier_points) || 0), 0),
+      tile_source: "gateway-tile-unavailable",
+      message: "frontend placeholder only; graph history must come from /api/graph/tiles",
+      outlier_policy: "gateway-owned",
+      suppressed_open_sensor_points: 0,
+      suppressed_initial_outlier_points: 0,
     },
     provenance: { source: "meerstetter-go.graphwall.assignments", generated_at: now },
     series,
@@ -422,21 +426,11 @@ function historyFromServerSeries(series) {
   const history = series && series.history ? series.history : {};
   const ts = Array.isArray(history.ts) ? history.ts : [];
   const v = Array.isArray(history.v) ? history.v : [];
-  if (ts.length || v.length) return { ...history, ts, v };
-  const points = Array.isArray(series && series.points) ? series.points : [];
-  return {
-    ...history,
-    ts: points.map((p) => p.timestamp || p.t).filter(Boolean),
-    v: points.map((p) => Number(p.value ?? p.v)).filter((value) => Number.isFinite(value)),
-  };
+  return { ...history, ts, v };
 }
 
 function seriesSourceKey(series) {
-  const source = (series && series.source) || {};
-  const id = source.device_id || series?.device_id || String(series?.series_id || series?.id || "").split(":")[0];
-  const param = Number(source.param_id ?? series?.param_id ?? String(series?.series_id || series?.id || "").split(":")[1]);
-  const inst = Number(source.instance ?? series?.instance ?? String(series?.series_id || series?.id || "").split(":")[2] ?? 1) || 1;
-  return `${id}:${param}:${inst}`;
+  return graphSeriesIdentityKey(series);
 }
 
 function axesForUnits(units) {
@@ -474,6 +468,7 @@ function enrichServerGraphTile(tile, assignments, opts: any = {}) {
     const instance = Number(source.instance ?? assignment?.instance ?? parts[2] ?? 1) || 1;
     const def = catalogue.find((p) => p.id === paramId) || { id: paramId, name: "#" + paramId, unit: raw.unit || "" };
     const ch = channels.find((c) => c.device_id === deviceId && c.instance === instance);
+    const exactSeriesKey = `${deviceId}:${paramId}:${instance}`;
     const unit = raw.unit || def.unit || "_";
     if (units.indexOf(unit) === -1) units.push(unit);
     const history = historyFromServerSeries(raw);
@@ -486,8 +481,8 @@ function enrichServerGraphTile(tile, assignments, opts: any = {}) {
     const channelContext = `${deviceId} · channel ${instance}${ch && ch.label ? " · " + ch.label : ""}`;
     return {
       ...raw,
-      id: raw.id || (assignment && tileSeriesKey(assignment)) || key,
-      series_id: raw.series_id || (assignment && tileSeriesKey(assignment)) || key,
+      id: exactSeriesKey,
+      series_id: exactSeriesKey,
       target_id: raw.target_id || (assignment && assignment.target_id),
       label: compactSeriesLabel(deviceId, instance, def, ch),
       full_label: `${channelContext} · param ${paramId} · ${signalPath || def.name}`,
@@ -536,8 +531,10 @@ export function useGraphTileFromAssignments(assignments, opts: any = {}) {
   const assignmentsKey = graphTileAssignmentsKey(assignments);
   const normalized = useMemo(() => graphTileSeriesFromAssignments(assignments), [assignmentsKey]);
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
-  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || 90_000;
-  const level = opts.level || pickTileLevel(timeWindowMs);
+  const requestedLevel = opts.level || opts.tileLevel || DEFAULT_GRAPH_TILE_LEVEL;
+  const requestedWindow = graphTileWindowForLevel(requestedLevel);
+  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || requestedWindow.timeWindowMs;
+  const level = opts.level || opts.tileLevel || pickTileLevel(timeWindowMs) || requestedLevel;
   const title = opts.title || "";
   const colorByChannel = !!opts.colorByChannel;
   const ignoreOpenSensorOutliers = opts.ignoreOpenSensorOutliers !== false;

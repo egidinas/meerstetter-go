@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MecomAPI } from "../api/mecom";
 import {
   Chip,
@@ -11,7 +11,8 @@ import {
   useLiveValue,
   useGatewayTick,
 } from "../components/atoms";
-import { renderSeriesFromGraphTile } from "../lib/series";
+import { HistoryController } from "../components/HistoryController";
+import { graphSeriesIdentityKey, renderSeriesFromGraphTile } from "../lib/series";
 import { channelColor } from "./assignments";
 
 const PARAM_OBJECT_TEMPERATURE = 1000;
@@ -25,6 +26,7 @@ const PARAM_FIXED_CURRENT = 2020;
 const PARAM_FIXED_VOLTAGE = 2021;
 const PARAM_CURRENT_LIMIT = 2030;
 const PARAM_VOLTAGE_LIMIT = 2031;
+const PARAM_VOLTAGE_ERROR_THRESHOLD = 2033;
 const PARAM_OUTPUT_MODE = 2040;
 const PARAM_CASCADE_ENABLE = 53120;
 const PARAM_CASCADE_TARGET_TEMPERATURE = 53123;
@@ -70,45 +72,157 @@ function axisBadgeLabel(role, tile) {
   return labels.length ? labels.join(" / ") : "Power [W]";
 }
 
-export function HeroGraph({ wall, role, tile, height = 280, live = true, children }) {
+function tileSeriesKey(series) {
+  return graphSeriesIdentityKey(series);
+}
+
+export function HeroGraph({ wall, role, tile, height = 280, live = true, initialHiddenSeries = [], children }) {
   useGatewayTick();
   const renderedSeries = renderSeriesFromGraphTile(tile);
-  const [hiddenSeries, setHiddenSeries] = useState([]);
+  const renderedSeriesKey = renderedSeries.map((series) => tileSeriesKey(series)).sort().join("|");
+  const rawSeriesKeys = useMemo(() => (tile?.series || []).map((series) => tileSeriesKey(series)).filter(Boolean), [tile]);
+  const tileSeriesCount = rawSeriesKeys.length;
+  const renderedSeriesKeys = useMemo(() => new Set(renderedSeries.map((series) => tileSeriesKey(series))), [renderedSeriesKey]);
+  const rawSeriesMeta = useMemo(() => {
+    const out = new Map();
+    (tile?.series || []).forEach((series) => {
+      const key = tileSeriesKey(series);
+      if (!key) return;
+      out.set(key, {
+        quality: series.quality || series.diagnostics?.status || "ok",
+        visibilityReason: series.visibility_reason || series.visibilityReason || "",
+      });
+    });
+    return out;
+  }, [tile]);
+  const renderedLegendSeries = useMemo(() => renderedSeries.map((series) => {
+    const key = tileSeriesKey(series);
+    const meta = rawSeriesMeta.get(key) || {};
+    return {
+      ...series,
+      key,
+      quality: series.quality || meta.quality || "ok",
+      visibilityReason: series.visibilityReason || meta.visibilityReason || "",
+    };
+  }), [renderedSeriesKey, rawSeriesMeta]);
+  const rawOnlyLegendSeries = useMemo(() => (tile?.series || [])
+    .map((series) => {
+      const key = tileSeriesKey(series);
+      if (!key || renderedSeriesKeys.has(key)) return null;
+      const history = series.history || {};
+      const values = Array.isArray(history.v) ? history.v : [];
+      const source = series.source || {};
+      return {
+        key,
+        label: series.label || key,
+        fullLabel: series.full_label || series.fullLabel || "",
+        visibilityReason: series.visibility_reason || series.visibilityReason || "",
+        unit: series.unit || "",
+        paramId: source.param_id || series.param_id || series.paramId,
+        color: channelColor(source.device_id || source.deviceId || "", source.instance || series.instance || 1),
+        quality: series.quality || series.diagnostics?.status || "missing",
+        history: { v: values },
+      };
+    })
+    .filter(Boolean), [tile, renderedSeriesKey]);
+  const legendSeries = renderedLegendSeries.concat(rawOnlyLegendSeries);
+  const validHiddenSeriesKeys = useMemo(() => Array.from(new Set(renderedSeries.map((series) => tileSeriesKey(series)).concat(rawSeriesKeys))), [renderedSeriesKey, rawSeriesKeys.join("|")]);
+  const validHiddenSeriesKey = useMemo(() => validHiddenSeriesKeys.slice().sort().join("|"), [validHiddenSeriesKeys.join("|")]);
+  const initialHiddenKey = useMemo(() => (initialHiddenSeries || []).slice().sort().join("|"), [initialHiddenSeries.join ? initialHiddenSeries.join("|") : String(initialHiddenSeries)]);
+  const [hiddenSeries, setHiddenSeries] = useState(() => initialHiddenSeries || []);
+  const appliedInitialHiddenKey = useRef("");
+  const initialHiddenApplyKey = `${initialHiddenKey}:${validHiddenSeriesKey}`;
+  const hiddenSeriesKey = hiddenSeries.join ? hiddenSeries.join("|") : String(hiddenSeries);
+  const effectiveHiddenSeries = useMemo(() => {
+    const valid = new Set(validHiddenSeriesKeys);
+    const next = new Set((hiddenSeries || []).filter((key) => valid.has(key)));
+    if (appliedInitialHiddenKey.current !== initialHiddenApplyKey) {
+      (initialHiddenSeries || []).forEach((key) => {
+        if (valid.has(key)) next.add(key);
+      });
+    }
+    return Array.from(next);
+  }, [hiddenSeriesKey, initialHiddenKey, initialHiddenApplyKey, validHiddenSeriesKey]);
+  useEffect(() => {
+    const applyKey = initialHiddenApplyKey;
+    if (appliedInitialHiddenKey.current === applyKey) return;
+    appliedInitialHiddenKey.current = applyKey;
+    setHiddenSeries((cur) => {
+      const valid = new Set(validHiddenSeriesKeys);
+      const next = new Set((cur || []).filter((key) => valid.has(key)));
+      (initialHiddenSeries || []).forEach((key) => {
+        if (valid.has(key)) next.add(key);
+      });
+      return Array.from(next);
+    });
+  }, [initialHiddenApplyKey]);
   function toggleSeries(key) {
     setHiddenSeries((cur) => cur.includes(key) ? cur.filter((item) => item !== key) : cur.concat(key));
   }
+
+  const [isLiveLocal, setIsLiveLocal] = useState(true);
+  const [historicalTile, setHistoricalTile] = useState(null);
+  const [range, setRange] = useState({ t0: null, t1: null });
+
+  useEffect(() => {
+    if (!isLiveLocal && range.t0 && range.t1) {
+      MecomAPI.graphTile(wall.wall_id, "range", wall.series, { t0: range.t0, t1: range.t1 })
+        .then(setHistoricalTile)
+        .catch(console.error);
+    }
+  }, [isLiveLocal, range.t0, range.t1, wall.wall_id]);
+
+  const effectiveTile = isLiveLocal ? tile : (historicalTile || tile);
+  const isStreaming = isLiveLocal && live;
+
   return (
-    <div className={"hero" + (live ? " live" : "")}>
+    <div className={"hero" + (isStreaming ? " live" : "")}>
       <div className="hero-head">
         <div className="title-grp">
-          <span className="live-dot"></span>
+          {isStreaming && <span className="live-dot"></span>}
+          {!isStreaming && <span className="history-icon">◔</span>}
           <h2>{wall.label}</h2>
-          <span className="sub">· {renderedSeries.length} tile series · live</span>
+          <span className="sub">
+            · {tileSeriesCount} tile series · {isStreaming ? "live" : "historical"}
+          </span>
         </div>
         <div className="badge-row">
-          <Chip kind="accent">{axisBadgeLabel(role, tile)}</Chip>
-          <Chip>shared timeline</Chip>
+          <Chip kind={isStreaming ? "accent" : "info"}>{axisBadgeLabel(role, effectiveTile)}</Chip>
+          <HistoryController 
+            isLive={isLiveLocal} 
+            onSetLive={setIsLiveLocal}
+            onRangeChange={(t0, t1) => setRange({ t0, t1 })}
+          />
         </div>
       </div>
       <div className="hero-chart-row">
         <div className="hero-plot">
-          {renderedSeries.length === 0 ? (
+          {tileSeriesCount === 0 ? (
             <div style={{ padding: 36, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
               No signals assigned. Add from the Signal Dictionary →
             </div>
           ) : (
-            <MultiChart tile={tile} height={height} hiddenSeries={hiddenSeries} fill minHeight={220} />
+            <MultiChart tile={effectiveTile} height={height} hiddenSeries={effectiveHiddenSeries} fill minHeight={height} />
           )}
         </div>
         <div className="hero-legend">
-          {renderedSeries.map((s) => {
-            const off = hiddenSeries.includes(s.key);
+          {legendSeries.map((s) => {
+            const off = effectiveHiddenSeries.includes(s.key);
             const last = s.history.v[s.history.v.length - 1];
             return (
-              <span key={s.key} className={"item " + (off ? "off" : "")} onClick={() => toggleSeries(s.key)} title={s.fullLabel || "Click to show/hide this tile series"}>
+              <span
+                key={s.key}
+                className={"item " + (off ? "off" : "")}
+                data-series-key={s.key}
+                data-series-quality={s.quality || "ok"}
+                data-series-visible={off ? "false" : "true"}
+                onClick={() => toggleSeries(s.key)}
+                title={`${s.fullLabel || "Click to show/hide this tile series"}${s.quality ? ` · quality ${s.quality}` : ""}${s.visibilityReason ? ` · ${s.visibilityReason}` : ""}`}
+              >
                 <span className="sw" style={{ background: s.color }}></span>
                 <span className="series-label">{s.label}</span>
                 <span className="cur">{MecomAPI.formatWithUnit(last, s.unit, s.paramId)}</span>
+                {s.quality && s.quality !== "ok" ? <span className="quality-mini">{s.quality}</span> : null}
               </span>
             );
           })}
@@ -149,19 +263,31 @@ export function TempSettingsTable({ channels, holderId }) {
       let lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
       if (!lease || lease.holder !== holderId) { lease = await MecomAPI.acquireLease(deviceId, holderId, "5m"); }
       const body = await MecomAPI.write(deviceId, { name: MecomAPI.commandNameFor(signal), arguments: { param: PARAM_TARGET_TEMPERATURE, instance, value: numeric } }, lease.token);
-      const confirmed = liveSnapshot(deviceId, PARAM_TARGET_TEMPERATURE, instance).value;
+      const confirmation = await MecomAPI.confirmWriteValue(deviceId, PARAM_TARGET_TEMPERATURE, instance, numeric);
       setTraces((t) => ({
         ...t,
         [traceKey]: {
           ...(t[traceKey] || {}),
-          phase: "done",
-          status: (body && body.status) || "completed",
+          phase: confirmation.matched ? "done" : "error",
+          status: confirmation.status || (body && body.status) || (confirmation.matched ? "completed" : "readback mismatch"),
           at: Date.now(),
-          confirmedValue: confirmed !== null ? confirmed : numeric,
+          confirmedValue: confirmation.value,
+          confirmedMatched: confirmation.matched,
+          ...(confirmation.matched ? {} : {
+            error: `Readback mismatch: expected ${MecomAPI.formatWithUnit(numeric, signal.unit, PARAM_TARGET_TEMPERATURE)}, got ${MecomAPI.formatWithUnit(confirmation.value, signal.unit, PARAM_TARGET_TEMPERATURE)}`,
+          }),
         },
       }));
-      toast.push({ kind: "ok", title: "Target set", body: `${deviceId}/${instance} → ${value} °C` });
-      setStaged((s) => ({ ...s, [key]: "" }));
+      if (confirmation.matched) {
+        toast.push({ kind: "ok", title: "Target set", body: `${deviceId}/${instance} → ${value} °C` });
+        setStaged((s) => ({ ...s, [key]: "" }));
+      } else {
+        toast.push({
+          kind: "bad",
+          title: "READBACK MISMATCH",
+          body: `${deviceId}/${instance} expected ${MecomAPI.formatWithUnit(numeric, signal.unit, PARAM_TARGET_TEMPERATURE)} but read back ${MecomAPI.formatWithUnit(confirmation.value, signal.unit, PARAM_TARGET_TEMPERATURE)}`,
+        });
+      }
     } catch (err) {
       setTraces((t) => ({
         ...t,
@@ -195,8 +321,8 @@ export function TempSettingsTable({ channels, holderId }) {
       <table className="hero-settings">
         <thead>
           <tr>
-            <th style={{ width: "22%" }}>Channel</th>
-            <th>Target [°C]</th><th>Object [°C]</th><th>Sink [°C]</th><th>Output</th><th>Stable</th><th>Quick-set target [°C]</th>
+            <th style={{ width: "18%" }}>Channel</th>
+            <th>Target [°C]</th><th>Object [°C]</th><th>Sink [°C]</th><th>Electrical live</th><th>Output</th><th>Stable</th><th>Quick-set target [°C]</th>
           </tr>
         </thead>
         <tbody>
@@ -218,6 +344,9 @@ function TempSettingsRow({ ch, staged, setStaged, busy, writeTrace, onCommit, on
   const cascadeTargetSignal = signalFor(PARAM_CASCADE_TARGET_TEMPERATURE, ch.instance, { unit: "degC", name: "Cascade target temperature" });
   const objSignal = signalFor(PARAM_OBJECT_TEMPERATURE, ch.instance, { unit: "degC", name: "Object temperature" });
   const sinkSignal = signalFor(PARAM_SINK_TEMPERATURE, ch.instance, { unit: "degC", name: "Sink temperature" });
+  const measuredVoltageSignal = signalFor(PARAM_OUTPUT_VOLTAGE, ch.instance, { unit: "V", name: "Measured output voltage" });
+  const measuredCurrentSignal = signalFor(PARAM_OUTPUT_CURRENT, ch.instance, { unit: "A", name: "Measured output current" });
+  const measuredPowerSignal = signalFor(PARAM_OUTPUT_POWER, ch.instance, { unit: "W", name: "Measured output power" });
   const cascadeEnableSignal = signalFor(PARAM_CASCADE_ENABLE, ch.instance, { name: "Cascade enable" });
   const stableSignal = signalFor(PARAM_STABLE_STATE, ch.instance, { name: "Temperature stability" });
   const tgt    = useLiveValue(ch.device_id, PARAM_TARGET_TEMPERATURE, ch.instance);
@@ -225,8 +354,12 @@ function TempSettingsRow({ ch, staged, setStaged, busy, writeTrace, onCommit, on
   const cascadeEnable = useLiveValue(ch.device_id, PARAM_CASCADE_ENABLE, ch.instance);
   const obj    = useLiveValue(ch.device_id, PARAM_OBJECT_TEMPERATURE, ch.instance);
   const sink   = useLiveValue(ch.device_id, PARAM_SINK_TEMPERATURE, ch.instance);
+  const actV   = useLiveValue(ch.device_id, PARAM_OUTPUT_VOLTAGE, ch.instance);
+  const actI   = useLiveValue(ch.device_id, PARAM_OUTPUT_CURRENT, ch.instance);
+  const power  = useLiveValue(ch.device_id, PARAM_OUTPUT_POWER, ch.instance);
   const out    = useLiveValue(ch.device_id, PARAM_OUTPUT_ENABLE, ch.instance);
   const stable = useLiveValue(ch.device_id, PARAM_STABLE_STATE, ch.instance);
+  const livePower = power.value != null ? power.value : ((actV.value != null && actI.value != null) ? actV.value * actI.value : null);
   const cascadeActive = cascadeEnable.value === 1;
   const dt = (obj.value != null && tgt.value != null) ? obj.value - tgt.value : null;
   const reachable = tgt.quality !== "unreachable";
@@ -260,6 +393,22 @@ function TempSettingsRow({ ch, staged, setStaged, busy, writeTrace, onCommit, on
         <SemanticValuePopup param={sinkSignal} value={sink.value} quality={sink.quality} className="semantic-inline-value">
           <span>{MecomAPI.formatWithUnit(sink.value, "degC", PARAM_SINK_TEMPERATURE)}</span>
         </SemanticValuePopup>
+      </td>
+      <td className="num actual">
+        <span className="electrical-stack">
+          <SemanticValuePopup param={measuredPowerSignal} value={livePower} quality={power.quality} className="semantic-inline-value">
+            <span>{MecomAPI.formatWithUnit(livePower, "W", PARAM_OUTPUT_POWER)}</span>
+          </SemanticValuePopup>
+          <span className="subtle-line">
+            <SemanticValuePopup param={measuredVoltageSignal} value={actV.value} quality={actV.quality} className="semantic-inline-value">
+              <span>{MecomAPI.formatWithUnit(actV.value, "V", PARAM_OUTPUT_VOLTAGE)}</span>
+            </SemanticValuePopup>
+            {" · "}
+            <SemanticValuePopup param={measuredCurrentSignal} value={actI.value} quality={actI.quality} className="semantic-inline-value">
+              <span>{MecomAPI.formatWithUnit(actI.value, "A", PARAM_OUTPUT_CURRENT)}</span>
+            </SemanticValuePopup>
+          </span>
+        </span>
       </td>
       <td>
         <span className={"out-toggle " + (out.value === 1 ? "on" : "off") + (!reachable ? " locked" : "")}
@@ -333,23 +482,35 @@ export function SupplySettingsTable({ channels, holderId }) {
       let lease = MecomAPI.leases().find((l) => l.device_id === deviceId);
       if (!lease || lease.holder !== holderId) { lease = await MecomAPI.acquireLease(deviceId, holderId, "5m"); }
       const body = await MecomAPI.write(deviceId, { name: MecomAPI.commandNameFor(signal), arguments: { param, instance, value: numeric } }, lease.token);
-      const confirmed = liveSnapshot(deviceId, param, instance).value;
+      const confirmation = await MecomAPI.confirmWriteValue(deviceId, param, instance, numeric);
       setTraces((t) => ({
         ...t,
         [key]: {
           ...(t[key] || {}),
-          phase: "done",
-          status: (body && body.status) || "completed",
+          phase: confirmation.matched ? "done" : "error",
+          status: confirmation.status || (body && body.status) || (confirmation.matched ? "completed" : "readback mismatch"),
           at: Date.now(),
-          confirmedValue: confirmed !== null ? confirmed : numeric,
+          confirmedValue: confirmation.value,
+          confirmedMatched: confirmation.matched,
+          ...(confirmation.matched ? {} : {
+            error: `Readback mismatch: expected ${MecomAPI.formatWithUnit(numeric, signal.unit, param)}, got ${MecomAPI.formatWithUnit(confirmation.value, signal.unit, param)}`,
+          }),
         },
       }));
-      toast.push({
-        kind: "ok",
-        title: commandTitle(param),
-        body: `${deviceId}/channel ${instance} → ${MecomAPI.formatWithUnit(numeric, signal.unit, param)}; mode and output state unchanged`,
-      });
-      setStaged((s) => ({ ...s, [key]: "" }));
+      if (confirmation.matched) {
+        toast.push({
+          kind: "ok",
+          title: commandTitle(param),
+          body: `${deviceId}/channel ${instance} → ${MecomAPI.formatWithUnit(numeric, signal.unit, param)}; mode and output state unchanged`,
+        });
+        setStaged((s) => ({ ...s, [key]: "" }));
+      } else {
+        toast.push({
+          kind: "bad",
+          title: "READBACK MISMATCH",
+          body: `${deviceId}/channel ${instance} expected ${MecomAPI.formatWithUnit(numeric, signal.unit, param)} but read back ${MecomAPI.formatWithUnit(confirmation.value, signal.unit, param)}`,
+        });
+      }
     } catch (err) {
       setTraces((t) => ({
         ...t,
@@ -384,7 +545,7 @@ export function SupplySettingsTable({ channels, holderId }) {
         <thead>
           <tr>
             <th style={{ width: "20%" }}>Channel</th>
-            <th>Voltage command [V]</th><th>Voltage limit [V]</th><th>Measured voltage [V]</th><th>Current limit [A]</th><th>Measured current [A]</th>
+            <th>Voltage command [V]</th><th>Voltage limit [V]</th><th>Voltage error threshold [V]</th><th>Measured voltage [V]</th><th>Current limit [A]</th><th>Measured current [A]</th>
             <th>Measured power [W]</th><th>Reported mode</th><th>Output stage</th>
           </tr>
         </thead>
@@ -393,15 +554,19 @@ export function SupplySettingsTable({ channels, holderId }) {
             key={ch.device_id + "/" + ch.instance} ch={ch}
             stagedV={staged[keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)] || ""}
             stagedVL={staged[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)] || ""}
+            stagedVET={staged[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)] || ""}
             stagedI={staged[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)] || ""}
             setStagedV={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]: v }))}
             setStagedVL={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]: v }))}
+            setStagedVET={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]: v }))}
             setStagedI={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]: v }))}
             busyV={busy[keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]}
             busyVL={busy[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]}
+            busyVET={busy[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]}
             busyI={busy[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]}
             writeTraceV={traces[keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]}
             writeTraceVL={traces[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]}
+            writeTraceVET={traces[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]}
             writeTraceI={traces[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]}
             onCommitField={commitField} onToggleOutput={toggleOutput} />)}
         </tbody>
@@ -410,11 +575,12 @@ export function SupplySettingsTable({ channels, holderId }) {
   );
 }
 
-function SupplySettingsRow({ ch, stagedV, stagedVL, stagedI, setStagedV, setStagedVL, setStagedI, busyV, busyVL, busyI, writeTraceV, writeTraceVL, writeTraceI, onCommitField, onToggleOutput }) {
+function SupplySettingsRow({ ch, stagedV, stagedVL, stagedVET, stagedI, setStagedV, setStagedVL, setStagedVET, setStagedI, busyV, busyVL, busyVET, busyI, writeTraceV, writeTraceVL, writeTraceVET, writeTraceI, onCommitField, onToggleOutput }) {
   const fixedVoltageSignal = signalFor(PARAM_FIXED_VOLTAGE, ch.instance, { unit: "V", name: "Fixed voltage" });
   const fixedCurrentSignal = signalFor(PARAM_FIXED_CURRENT, ch.instance, { unit: "A", name: "Fixed current" });
   const currentLimitSignal = signalFor(PARAM_CURRENT_LIMIT, ch.instance, { unit: "A", name: "Current limit" });
   const voltageLimitSignal = signalFor(PARAM_VOLTAGE_LIMIT, ch.instance, { unit: "V", name: "Voltage limit" });
+  const voltageErrorThresholdSignal = signalFor(PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance, { unit: "V", name: "Voltage error threshold" });
   const measuredVoltageSignal = signalFor(PARAM_OUTPUT_VOLTAGE, ch.instance, { unit: "V", name: "Measured output voltage" });
   const measuredCurrentSignal = signalFor(PARAM_OUTPUT_CURRENT, ch.instance, { unit: "A", name: "Measured output current" });
   const measuredPowerSignal = signalFor(PARAM_OUTPUT_POWER, ch.instance, { unit: "W", name: "Measured output power" });
@@ -426,18 +592,22 @@ function SupplySettingsRow({ ch, stagedV, stagedVL, stagedI, setStagedV, setStag
   const fixedI = useLiveValue(ch.device_id, PARAM_FIXED_CURRENT, ch.instance);
   const currentLimit = useLiveValue(ch.device_id, PARAM_CURRENT_LIMIT, ch.instance);
   const voltageLimit = useLiveValue(ch.device_id, PARAM_VOLTAGE_LIMIT, ch.instance);
+  const voltageErrorThreshold = useLiveValue(ch.device_id, PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance);
   const mode  = useLiveValue(ch.device_id, PARAM_OUTPUT_MODE, ch.instance);
   const out   = useLiveValue(ch.device_id, PARAM_OUTPUT_ENABLE, ch.instance);
   const setV  = MecomAPI.setpoint(ch.device_id, PARAM_FIXED_VOLTAGE, ch.instance) ?? fixedV.value;
   const setVL = MecomAPI.setpoint(ch.device_id, PARAM_VOLTAGE_LIMIT, ch.instance) ?? voltageLimit.value;
+  const setVET = MecomAPI.setpoint(ch.device_id, PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance) ?? voltageErrorThreshold.value;
   const setI  = MecomAPI.setpoint(ch.device_id, PARAM_CURRENT_LIMIT, ch.instance) ?? currentLimit.value;
   const reachable = actV.quality !== "unreachable";
   const livePower = power.value != null ? power.value : ((actV.value != null && actI.value != null) ? actV.value * actI.value : null);
   const stagedVNumber = Number(stagedV);
   const stagedVLNumber = Number(stagedVL);
+  const stagedVETNumber = Number(stagedVET);
   const stagedINumber = Number(stagedI);
   const stagedVValid = stagedV !== "" && Number.isFinite(stagedVNumber);
   const stagedVLValid = stagedVL !== "" && Number.isFinite(stagedVLNumber);
+  const stagedVETValid = stagedVET !== "" && Number.isFinite(stagedVETNumber);
   const stagedIValid = stagedI !== "" && Number.isFinite(stagedINumber);
   return (
     <tr title={MecomAPI.provenance(ch.device_id, PARAM_FIXED_VOLTAGE, ch.instance)}>
@@ -502,6 +672,36 @@ function SupplySettingsRow({ ch, stagedV, stagedVL, stagedI, setStagedV, setStag
                 staged={stagedVL}
                 commandName={MecomAPI.commandNameFor(voltageLimitSignal)}
                 trace={writeTraceVL}
+              />
+            </span>
+          )}
+        </span>
+      </td>
+      <td className="num cmd">
+        <span className="quick-write-cell">
+          <span className="quick-input">
+            <input className={stagedVET ? "staged" : ""} placeholder={(setVET ?? 0).toFixed(3)} value={stagedVET} disabled={!reachable}
+                   title="Voltage error threshold. This writes parameter 2033 only and does not change the voltage limit."
+                   onChange={(e) => setStagedVET(e.target.value)} />
+            <button className={stagedVETValid ? "primary" : ""} disabled={!stagedVETValid || !reachable || busyVET}
+                    title="Write voltage error threshold only"
+                    onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD, stagedVET)}>
+              {busyVET ? "…" : "Set"}
+            </button>
+          </span>
+          <span className="cmd-live-line">
+            threshold {MecomAPI.formatWithUnit(voltageErrorThreshold.value, "V", PARAM_VOLTAGE_ERROR_THRESHOLD)}
+          </span>
+          {writeTraceVET && (
+            <span className="write-inline-trace">
+              <WriteLifecycleTrace
+                param={voltageErrorThresholdSignal}
+                deviceId={ch.device_id}
+                instance={ch.instance}
+                busy={busyVET}
+                staged={stagedVET}
+                commandName={MecomAPI.commandNameFor(voltageErrorThresholdSignal)}
+                trace={writeTraceVET}
               />
             </span>
           )}

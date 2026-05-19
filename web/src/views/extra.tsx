@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick } from "../components/atoms";
 import { CANONICAL_TILE_RENDERER, seriesRoleMeta } from "../lib/series";
+import { HeroGraph } from "./hero";
 
 const SEQ_LIBRARY = [
   {
@@ -632,11 +633,12 @@ export function ArchiveView() {
   const [streamSel, setStreamSel] = useState({});
   const [format, setFormat] = useState("ndjson");
   const [range, setRange] = useState("15m");
+  const [importedTile, setImportedTile] = useState(null);
   const toast = useToast();
   const formats = [
     { id: "ndjson", label: "NDJSON" },
     { id: "arrow_ipc", label: "Arrow IPC" },
-    { id: "hdf5", label: "HDF5", planned: true },
+    { id: "hdf5", label: "HDF5" },
   ];
   const ranges = ["5m", "15m", "1h", "6h", "24h"];
 
@@ -644,13 +646,93 @@ export function ArchiveView() {
   function exportNow() {
     const picked = Object.entries(streamSel).filter(([, v]) => v).map(([k]) => k);
     if (!picked.length) { toast.push({ kind: "warn", title: "Pick at least one stream" }); return; }
-    if (format === "hdf5") { toast.push({ kind: "warn", title: "HDF5 is planned", body: "Stream contract preserved; writer not implemented." }); return; }
-    toast.push({ kind: "ok", title: "Export queued", body: `${picked.length} stream(s) · ${format} · range ${range}` });
+    
+    const url = `/api/log/export?format=${format}&range=${range}`;
+    window.open(url, "_blank");
+    
+    toast.push({ kind: "ok", title: "Export started", body: `${picked.length} stream(s) · ${format} · range ${range}` });
+  }
+
+  async function loadRange() {
+    try {
+      const tileId = "tec-all"; // Default or selectable
+      const t1 = new Date();
+      const t0 = new Date(t1.getTime() - parseRange(range));
+      const res = await fetch(`/api/graph/tiles/${tileId}/range?t0=${t0.toISOString()}&t1=${t1.toISOString()}`);
+      if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      const data = await res.json();
+      setImportedTile(data);
+      toast.push({ kind: "ok", title: "Range loaded", body: `Loaded ${data.series.length} series for ${range}` });
+    } catch (err) {
+      toast.push({ kind: "bad", title: "Load failed", body: err.message });
+    }
+  }
+
+  function parseRange(r) {
+    const unit = r.slice(-1);
+    const val = parseInt(r.slice(0, -1));
+    if (unit === "m") return val * 60 * 1000;
+    if (unit === "h") return val * 60 * 60 * 1000;
+    if (unit === "d") return val * 24 * 60 * 60 * 1000;
+    return 15 * 60 * 1000;
+  }
+
+  function handleFileImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const res = await fetch("/api/log/import", {
+          method: "POST",
+          body: ev.target.result,
+          headers: { "Content-Type": "application/vnd.apache.arrow.stream" }
+        });
+        if (!res.ok) throw new Error(`import failed: ${res.status}`);
+        const data = await res.json();
+        toast.push({ kind: "ok", title: "Import successful", body: `Imported ${data.imported_samples} samples from ${file.name}` });
+        // After import, try to load the range to see the data
+        loadRange();
+      } catch (err) {
+        toast.push({ kind: "bad", title: "Import failed", body: err.message });
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   return (
     <div className="arc">
-      <Panel title="Export archive" right={<span className="dim mono" style={{ fontSize: 11 }}>route GET /api/log/export</span>}>
+      <div className="arc-grid">
+        <div className="arc-left">
+          <Panel title="Campaign viewer" meta="Explore imported or historical data" flush>
+             <div style={{ padding: 12 }}>
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                    <label className="btn sm primary">
+                       Import .arrow / .ndjson
+                       <input type="file" style={{ display: "none" }} onChange={handleFileImport} accept=".arrow,.ndjson" />
+                    </label>
+                    <div style={{ flex: 1 }}></div>
+                    <select className="field sm" style={{ width: 100 }} value={range} onChange={(e) => setRange(e.target.value)}>
+                       {ranges.map((r) => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                    <button className="btn sm" onClick={loadRange}>Load Range</button>
+                </div>
+                <div className="campaign-placeholder">
+                   {importedTile ? (
+                      <HeroGraph wall={{ wall_id: "campaign", label: "Imported Campaign", series: [] }} role="temp" tile={importedTile} height={400} />
+                   ) : (
+                      <div style={{ padding: 48, textAlign: "center", color: "var(--muted)", border: "1px dashed var(--border)", borderRadius: 6 }}>
+                         <p>Select a historical range or import a campaign file to visualize data here.</p>
+                         <p style={{ fontSize: 11 }}>Supports SignalForge Arrow IPC and NDJSON telemetry streams.</p>
+                      </div>
+                   )}
+                </div>
+             </div>
+          </Panel>
+        </div>
+
+        <div className="arc-right">
+          <Panel title="Export archive" right={<span className="dim mono" style={{ fontSize: 11 }}>route GET /api/log/export</span>}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
             <label className="lbl">Range</label>
@@ -708,14 +790,29 @@ export function ArchiveView() {
           ))}
         </div>
       </Panel>
-    </div>
+    </div></div></div>
   );
 }
 
 export function SettingsView() {
   useGatewayTick();
   const [s, setS] = useState(() => MecomAPI.settings());
+  const [aliasJson, setAliasJson] = useState(() => JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+  const [aliasStatus, setAliasStatus] = useState("");
   function set(patch) { const next = MecomAPI.saveSettings(patch); setS(next); }
+  function refreshAliasExport() {
+    setAliasJson(JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+    setAliasStatus("refreshed");
+  }
+  function importAliasOverlay() {
+    try {
+      const saved = MecomAPI.importChannelAliases?.(aliasJson);
+      setAliasJson(JSON.stringify(saved || MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+      setAliasStatus("imported");
+    } catch (err) {
+      setAliasStatus(`import failed: ${err?.message || err}`);
+    }
+  }
   return (
     <div className="set">
       <Panel title="Gateway connection">
@@ -759,6 +856,26 @@ export function SettingsView() {
               Object.keys(localStorage).filter((k) => k.startsWith("mecomgw.pins.") || k.startsWith("mecomgw.cards.")).forEach((k) => localStorage.removeItem(k));
               location.reload();
             }}>Reset pinned params & input cards</button>
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Channel alias overlay" meta="SignalForge semantic overlay">
+        <div style={{ display: "grid", gap: 8 }}>
+          <div className="dim small">
+            User aliases and fixture notes are stored as a separate overlay. The canonical MeCom signal catalogue and channel role defaults stay unchanged.
+          </div>
+          <textarea
+            className="field mono small"
+            style={{ minHeight: 180, resize: "vertical" }}
+            value={aliasJson}
+            onChange={(e) => setAliasJson(e.target.value)}
+            spellCheck={false}
+          />
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button className="btn sm" onClick={refreshAliasExport}>Refresh export</button>
+            <button className="btn sm primary" onClick={importAliasOverlay}>Import overlay JSON</button>
+            {aliasStatus && <Chip>{aliasStatus}</Chip>}
           </div>
         </div>
       </Panel>

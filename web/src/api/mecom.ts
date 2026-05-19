@@ -6,10 +6,21 @@
 
 import catalogueJson from "../data/mecom-catalogue.json?raw";
 import protocolFamiliesJson from "../data/mecom-protocol-families.json?raw";
+import operatorProjectionJson from "../data/mecom-operator-projection.json?raw";
+import {
+  loadSemanticOverlay,
+  normalizeSemanticOverlayBundle,
+  overlayEntryForTarget,
+  removeSemanticOverlayEntry,
+  saveSemanticOverlay,
+  semanticOverlayTargetKey,
+  upsertSemanticOverlayEntry,
+} from "signalforge-web";
 
 const LS_KEY = "mecomgw.settings";
 const LS_CHANNELS = "mecomgw.channels";
 const LS_CHANNELS_VERSION = "mecomgw.channels.version";
+const CHANNEL_ALIAS_NAMESPACE = "mecomgw.channelAliases";
 const CHANNEL_METADATA_VERSION = "2026-05-18-fixture-pattern-v1";
 
 const MECOM_PARAMETER_FAMILIES = JSON.parse(protocolFamiliesJson)
@@ -20,6 +31,48 @@ const MECOM_PARAMETER_FAMILIES = JSON.parse(protocolFamiliesJson)
   }))
   .filter((family) => Number.isFinite(family.start) && Number.isFinite(family.end) && family.label)
   .sort((a, b) => a.start - b.start || a.end - b.end);
+
+const OPERATOR_PROJECTION = (() => {
+  try {
+    return JSON.parse(operatorProjectionJson);
+  } catch (_) {
+    return { primary_mappings: [], secondary_mappings: [] };
+  }
+})();
+const OPERATOR_PRIMARY_PROJECTION_BY_ID = new Map();
+const OPERATOR_SECONDARY_PROJECTION_BY_ID = new Map();
+
+function registerOperatorProjectionMapping(mapping, secondary = false) {
+  const ids = Array.isArray(mapping && mapping.ids) ? mapping.ids : [];
+  ids.map((id) => Number(id)).filter((id) => Number.isFinite(id)).forEach((id) => {
+    const normalized = {
+      ...mapping,
+      ids,
+      path: normalizePathSegments(mapping && mapping.path),
+      sort: Number.isFinite(Number(mapping && mapping.sort)) ? Number(mapping.sort) : 0,
+      default_collapsed: Boolean(mapping && mapping.default_collapsed),
+      secondary,
+    };
+    if (secondary) {
+      const list = OPERATOR_SECONDARY_PROJECTION_BY_ID.get(id) || [];
+      list.push(normalized);
+      OPERATOR_SECONDARY_PROJECTION_BY_ID.set(id, list.sort((a, b) => a.sort - b.sort || String(a.bundle || "").localeCompare(String(b.bundle || ""))));
+    } else if (!OPERATOR_PRIMARY_PROJECTION_BY_ID.has(id)) {
+      OPERATOR_PRIMARY_PROJECTION_BY_ID.set(id, normalized);
+    }
+  });
+}
+
+(OPERATOR_PROJECTION.primary_mappings || []).forEach((mapping) => registerOperatorProjectionMapping(mapping, false));
+(OPERATOR_PROJECTION.secondary_mappings || []).forEach((mapping) => registerOperatorProjectionMapping(mapping, true));
+
+function operatorProjectionForID(id) {
+  return OPERATOR_PRIMARY_PROJECTION_BY_ID.get(Number(id)) || null;
+}
+
+function secondaryOperatorProjectionsForID(id) {
+  return OPERATOR_SECONDARY_PROJECTION_BY_ID.get(Number(id)) || [];
+}
 
 function loadSettings() {
   try {
@@ -97,6 +150,13 @@ function normalizeTreePath(path, fallbackId, fallbackLabel) {
       label: fallbackLabel || segments[segments.length - 1] || text,
       path: segments,
       default: true,
+      bundle: "",
+      default_collapsed: false,
+      secondary: false,
+      reason: "",
+      duplicate_reason: "",
+      instance_scope: "",
+      sort: 0,
     };
   }
   if (Array.isArray(path)) {
@@ -108,6 +168,13 @@ function normalizeTreePath(path, fallbackId, fallbackLabel) {
       label: fallbackLabel || segments[segments.length - 1] || text,
       path: segments,
       default: true,
+      bundle: "",
+      default_collapsed: false,
+      secondary: false,
+      reason: "",
+      duplicate_reason: "",
+      instance_scope: "",
+      sort: 0,
     };
   }
   if (typeof path !== "object") return null;
@@ -115,11 +182,20 @@ function normalizeTreePath(path, fallbackId, fallbackLabel) {
   if (!segments.length) segments = normalizePathSegments(path.label);
   if (!segments.length) return null;
   const text = segments.join(" / ");
+  const sort = Number(path.sort);
   return {
     id: String(path.id || fallbackId || text).trim(),
     label: String(path.label || fallbackLabel || segments[segments.length - 1] || text).trim(),
     path: segments,
     default: Boolean(path.default),
+    bundle: String(path.bundle || "").trim(),
+    default_collapsed: Boolean(path.default_collapsed),
+    secondary: Boolean(path.secondary),
+    reason: String(path.reason || path.duplicate_reason || "").trim(),
+    duplicate_reason: String(path.duplicate_reason || path.reason || "").trim(),
+    instance_scope: String(path.instance_scope || path.instanceScope || "").trim(),
+    sort: Number.isFinite(sort) ? sort : 0,
+    column_order: path.column_order || path.columnOrder || null,
   };
 }
 
@@ -196,6 +272,8 @@ function semanticName(entry, base, id) {
 }
 
 function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
+  entry = entry || {};
+  base = base || {};
   const displayName = firstDefined(entry.displayName, entry.display_name, entry.display, base.displayName, base.display_name, base.display);
   const rawName = firstDefined(entry.rawName, entry.raw_name, base.rawName, base.raw_name, entry.sid, base.sid);
   const applicableModes = firstDefined(entry.applicableModes, entry.applicable_modes, base.applicableModes, base.applicable_modes, ["temp", "supply"]);
@@ -205,6 +283,9 @@ function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
   const preferredReadout = firstDefined(entry.preferred_readout, entry.preferredReadout, base.preferred_readout, base.preferredReadout, metadata && metadata.preferred_readout);
   const transportSupport = parseTransportSupport(firstDefined(entry.transport_support, entry.transportSupport, base.transport_support, base.transportSupport));
   const counterparts = parseCounterparts(firstDefined(entry.counterparts, base.counterparts, metadata && metadata.counterparts));
+  const hoverHelp = firstDefined(entry.hover_help, entry.hoverHelp, entry.help_text, entry.helpText, base.hover_help, base.hoverHelp, base.help_text, base.helpText, metadata && metadata.hover_help, metadata && metadata.help_text);
+  const helpText = firstDefined(entry.help_text, entry.helpText, entry.hover_help, entry.hoverHelp, base.help_text, base.helpText, base.hover_help, base.hoverHelp, metadata && metadata.help_text, metadata && metadata.hover_help);
+  const visibility = firstDefined(entry.visibility, base.visibility, metadata && metadata.visibility, "advanced");
   return {
     ...base,
     ...entry,
@@ -232,6 +313,11 @@ function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
     readoutPriority,
     preferred_readout: preferredReadout,
     preferredReadout,
+    visibility,
+    hover_help: hoverHelp || "",
+    hoverHelp: hoverHelp || "",
+    help_text: helpText || "",
+    helpText: helpText || "",
     counterparts,
     min: entry.min ?? base.min,
     max: entry.max ?? base.max,
@@ -244,6 +330,8 @@ function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
     applicable_modes: applicableModes,
     tree_path: trees.tree_path,
     tree_paths: trees.tree_paths,
+    projection_bundle: trees.tree_path && trees.tree_path.bundle || "",
+    projectionBundle: trees.tree_path && trees.tree_path.bundle || "",
     metadata: entry.metadata || base.metadata || null,
     transport_support: transportSupport,
     transportSupport,
@@ -263,21 +351,48 @@ function mecomParameterFamily(id) {
 
 function defaultTreePathsForEntry(entry, fallbackId, fallbackLabel, single) {
   if (!entry) return [];
+  const primaryProjection = operatorProjectionForID(fallbackId);
   const label = String(fallbackLabel || entry.name || entry.display || entry.sid || `Parameter ${fallbackId || ""}`).trim();
   const group = String(entry.group || "Other Signals").trim();
   const subgroup = String(entry.subgroup || "Signals").trim();
-  const operatorPath = single && single.path && single.path.length
+  const operatorPath = primaryProjection && primaryProjection.path && primaryProjection.path.length
+    ? primaryProjection.path
+    : single && single.path && single.path.length
     ? single.path
     : [group, subgroup, label].filter(Boolean);
   const protocolName = String(entry.raw_name || entry.rawName || entry.sid || label).trim();
   const paths = [
-    normalizeTreePath({ id: "operator", label: "Operator", path: operatorPath, default: true }),
+    normalizeTreePath({
+      id: "operator",
+      label: primaryProjection && primaryProjection.label || "Operator",
+      path: operatorPath,
+      default: true,
+      bundle: primaryProjection && primaryProjection.bundle || "",
+      default_collapsed: Boolean(primaryProjection && primaryProjection.default_collapsed),
+      instance_scope: primaryProjection && primaryProjection.instance_scope || "",
+      sort: primaryProjection && primaryProjection.sort || 0,
+    }),
   ];
+  secondaryOperatorProjectionsForID(fallbackId).forEach((mapping, idx) => {
+    paths.push(normalizeTreePath({
+      id: `operator-secondary-${mapping.bundle || idx}`,
+      label: mapping.label || "Secondary",
+      path: mapping.path,
+      default: false,
+      secondary: true,
+      bundle: mapping.bundle || "",
+      default_collapsed: Boolean(mapping.default_collapsed),
+      instance_scope: mapping.instance_scope || "",
+      reason: mapping.reason || "",
+      duplicate_reason: mapping.reason || "",
+      sort: mapping.sort || 0,
+    }));
+  });
   if (fallbackId !== undefined && fallbackId !== null && `${fallbackId}`.trim() !== "") {
     paths.push(normalizeTreePath({
       id: "protocol",
       label: "MeCom protocol",
-      path: ["MeCom protocol", mecomParameterFamily(fallbackId), `Parameter ${fallbackId}`, protocolName].filter(Boolean),
+      path: ["MeCom protocol", mecomParameterFamily(fallbackId), `Parameter ${fallbackId}`, protocolName],
     }));
   }
   return paths.filter(Boolean);
@@ -381,6 +496,27 @@ function semanticPairFor(signal) {
   };
 }
 
+function semanticPairSummary(param) {
+  if (!param) return "";
+  const pair = semanticPairFor(param);
+  if (!pair) return "";
+  const telemetry = pair.telemetry;
+  const control = pair.control;
+  const telemetryLabel = telemetry ? (telemetry.name || telemetry.label || `#${telemetry.id}`) : "n/a";
+  const controlLabel = control ? (control.name || control.label || `#${control.id}`) : "n/a";
+  const telemetryCmd = telemetry ? commandNameFor(telemetry) : "";
+  const controlCmd = control ? commandNameFor(control) : "";
+  const uLabel = (u) => {
+    const l = unitLabel(u);
+    if (!l) return "unitless";
+    if (l === "degC") return "Degree Celsius";
+    return l;
+  };
+  const telemetryUnit = telemetry && telemetry.unit ? ` ${uLabel(telemetry.unit)}` : "";
+  const controlUnit = control && control.unit ? ` ${uLabel(control.unit)}` : "";
+  return `telemetry ${telemetryLabel}${telemetryUnit}${telemetryCmd ? ` · ${telemetryCmd}` : ""} · telecommand ${controlLabel}${controlUnit}${controlCmd ? ` · ${controlCmd}` : ""}`;
+}
+
 const DEVICES_BASE = [
   {
     id: "tec-76",
@@ -389,8 +525,8 @@ const DEVICES_BASE = [
     address: 76,
     transport: "serial MeCom over CANopen",
     routes: [
-      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
-      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
+      { kind: "warm", label: "USB FTDI RS485", detail: "serial bridge" },
       { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
     ],
   },
@@ -401,8 +537,8 @@ const DEVICES_BASE = [
     address: 75,
     transport: "serial MeCom over CANopen",
     routes: [
-      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
-      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
+      { kind: "warm", label: "USB FTDI RS485", detail: "serial bridge" },
       { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
     ],
   },
@@ -413,8 +549,8 @@ const DEVICES_BASE = [
     address: 81,
     transport: "serial MeCom over CANopen",
     routes: [
-      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
-      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
+      { kind: "warm", label: "USB FTDI RS485", detail: "serial bridge" },
       { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
     ],
   },
@@ -425,8 +561,8 @@ const DEVICES_BASE = [
     address: 84,
     transport: "serial MeCom over CANopen",
     routes: [
-      { kind: "hot", label: "Direct Kvaser USB-CAN", detail: "primary" },
-      { kind: "warm", label: "Serial FTDI", detail: "serial bridge" },
+      { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
+      { kind: "warm", label: "USB FTDI RS485", detail: "serial bridge" },
       { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
     ],
   },
@@ -489,6 +625,131 @@ function normalizeDeviceView(device) {
     active_route: activeRoute || routes.find((route) => route.active) || null,
     route_candidates: routes,
   };
+}
+
+function serialForDevice(deviceId, devices = DEVICES_BASE) {
+  const device = (Array.isArray(devices) ? devices : []).find((d) => d.id === deviceId) || DEVICES_BASE.find((d) => d.id === deviceId);
+  const direct = device && (device.serial || device.serial_number || device.sn);
+  if (direct) return String(direct);
+  const text = [device && device.label, deviceId].filter(Boolean).join(" ");
+  const match = text.match(/\bSN\s*-?\s*([0-9A-Za-z]+)/i);
+  return match ? `SN${match[1]}` : undefined;
+}
+
+function channelAliasTarget(deviceId, instance, channel?, devices = DEVICES_BASE) {
+  const inst = Number(instance);
+  return {
+    kind: "channel",
+    device_id: String(deviceId || channel && channel.device_id || "").trim(),
+    serial: channel && channel.serial || serialForDevice(deviceId || channel && channel.device_id, devices),
+    channel: Number.isFinite(inst) ? inst : instance,
+    instance: Number.isFinite(inst) ? inst : instance,
+  };
+}
+
+function loadChannelAliasBundle() {
+  return loadSemanticOverlay({ namespace: CHANNEL_ALIAS_NAMESPACE });
+}
+
+function saveChannelAliasBundle(bundle) {
+  const saved = saveSemanticOverlay(normalizeSemanticOverlayBundle(bundle, CHANNEL_ALIAS_NAMESPACE), { namespace: CHANNEL_ALIAS_NAMESPACE });
+  mock.channels = normalizeChannels(mock.channels, live.active && live.devices ? live.devices : DEVICES_BASE);
+  mock.listeners.forEach((fn) => fn());
+  return saved;
+}
+
+function stripChannelOverlayFields(channel) {
+  if (!channel || typeof channel !== "object") return channel;
+  const {
+    alias,
+    nickname,
+    custom_label,
+    fixture_note,
+    user_overlay_note,
+    semantic_overlay,
+    ...rest
+  } = channel;
+  return rest;
+}
+
+function applyChannelAliasOverlay(channels, devices = DEVICES_BASE) {
+  const bundle = loadChannelAliasBundle();
+  const entries = new Map((bundle.entries || []).map((entry) => [semanticOverlayTargetKey(entry.target), entry]));
+  return (channels || []).map((channel) => {
+    const target = channelAliasTarget(channel.device_id, channel.instance, channel, devices);
+    const entry = entries.get(semanticOverlayTargetKey(target));
+    if (!entry) {
+      return {
+        ...channel,
+        serial: channel.serial || target.serial,
+      };
+    }
+    const alias = entry.alias || entry.label || "";
+    return {
+      ...channel,
+      serial: channel.serial || target.serial,
+      alias: alias || undefined,
+      nickname: alias || undefined,
+      custom_label: entry.label || undefined,
+      fixture_note: entry.fixture_note || undefined,
+      user_overlay_note: entry.note || undefined,
+      semantic_overlay: entry,
+    };
+  });
+}
+
+function channelDisplayLabel(channel, opts?) {
+  const raw = [channel && channel.device_id || "device", `ch${channel && channel.instance || "?"}`].join(" ");
+  if (opts && opts.includeAlias === false) return raw;
+  const alias = channel && (channel.alias || channel.nickname);
+  return alias ? `${raw} · ${alias}` : raw;
+}
+
+function setChannelAlias(deviceId, instance, patch = {}) {
+  const devices = live.active && live.devices ? live.devices : DEVICES_BASE;
+  const channels = normalizeChannels(mock.channels, devices);
+  const channel = channels.find((ch) => ch.device_id === deviceId && Number(ch.instance) === Number(instance));
+  const target = channelAliasTarget(deviceId, instance, channel, devices);
+  const bundle = loadChannelAliasBundle();
+  const current = overlayEntryForTarget(bundle, target) || {};
+  const alias = String(patch.alias ?? current.alias ?? "").trim();
+  const note = String(patch.note ?? current.note ?? "").trim();
+  const fixtureNote = String(patch.fixture_note ?? patch.fixtureNote ?? current.fixture_note ?? "").trim();
+  if (!alias && !note && !fixtureNote && patch.hidden === undefined && !(patch.tags && patch.tags.length)) {
+    return saveChannelAliasBundle(removeSemanticOverlayEntry(bundle, target, CHANNEL_ALIAS_NAMESPACE));
+  }
+  return saveChannelAliasBundle(upsertSemanticOverlayEntry(bundle, {
+    ...current,
+    target,
+    alias,
+    note,
+    fixture_note: fixtureNote,
+    source: patch.source || current.source || "meerstetter-go-ui",
+    author: patch.author || current.author || loadSettings().holder || "operator",
+    hidden: patch.hidden !== undefined ? patch.hidden : current.hidden,
+    tags: patch.tags || current.tags,
+    meta: {
+      ...(current.meta || {}),
+      device_id: deviceId,
+      instance: Number(instance),
+      serial: target.serial,
+    },
+  }, CHANNEL_ALIAS_NAMESPACE));
+}
+
+function clearChannelAlias(deviceId, instance) {
+  const bundle = loadChannelAliasBundle();
+  const target = channelAliasTarget(deviceId, instance, null, live.active && live.devices ? live.devices : DEVICES_BASE);
+  return saveChannelAliasBundle(removeSemanticOverlayEntry(bundle, target, CHANNEL_ALIAS_NAMESPACE));
+}
+
+function exportChannelAliases() {
+  return loadChannelAliasBundle();
+}
+
+function importChannelAliases(input) {
+  const parsed = typeof input === "string" ? JSON.parse(input) : input;
+  return saveChannelAliasBundle(normalizeSemanticOverlayBundle(parsed, CHANNEL_ALIAS_NAMESPACE));
 }
 
 const CHANNELS_PER_DEVICE = 4;
@@ -587,7 +848,7 @@ function defaultChannelFor(deviceId, instance) {
     role_source: override.role_source || (hasOverride ? "config" : "local-assumption"),
     label: override.label || (role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
     user_note: override.user_note || "",
-    hasCascade: override.hasCascade ?? (deviceId === "tec-76" && instance === 1),
+    hasCascade: override.hasCascade ?? false,
   };
 }
 
@@ -601,7 +862,7 @@ function channelCountForDevice(device) {
   return Math.max(1, Math.min(255, Math.floor(raw)));
 }
 
-function normalizeChannels(channels, devices = DEVICES_BASE) {
+function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
   const byKey = new Map();
   const deviceById = new Map((Array.isArray(devices) ? devices : []).map((d) => [d.id, d]));
   const deviceRank = new Map((Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).map((d, idx) => [d.id, idx]));
@@ -620,11 +881,12 @@ function normalizeChannels(channels, devices = DEVICES_BASE) {
       if (!byKey.has(key)) byKey.set(key, { ...defaultChannelFor(d.id, inst), endpoint: d.endpoint });
     }
   });
-  return Array.from(byKey.values()).sort((a, b) => {
+  const sorted = Array.from(byKey.values()).sort((a, b) => {
     const ar = deviceRank.has(a.device_id) ? deviceRank.get(a.device_id) : 9999;
     const br = deviceRank.has(b.device_id) ? deviceRank.get(b.device_id) : 9999;
     return ar - br || String(a.device_id).localeCompare(String(b.device_id)) || a.instance - b.instance;
   });
+  return opts.withoutOverlay ? sorted.map(stripChannelOverlayFields) : applyChannelAliasOverlay(sorted, devices);
 }
 
 function loadChannels() {
@@ -636,10 +898,11 @@ function loadChannels() {
   return normalizeChannels(DEFAULT_CHANNELS);
 }
 function saveChannels(channels) {
-  const normalized = normalizeChannels(channels, live.active && live.devices ? live.devices : DEVICES_BASE);
+  const devices = live.active && live.devices ? live.devices : DEVICES_BASE;
+  const normalized = normalizeChannels((Array.isArray(channels) ? channels : []).map(stripChannelOverlayFields), devices, { withoutOverlay: true });
   localStorage.setItem(LS_CHANNELS, JSON.stringify(normalized));
   localStorage.setItem(LS_CHANNELS_VERSION, CHANNEL_METADATA_VERSION);
-  mock.channels = normalized;
+  mock.channels = applyChannelAliasOverlay(normalized, devices);
   mock.listeners.forEach((fn) => fn());
 }
 
@@ -895,6 +1158,12 @@ const mockAPIImpl = {
     last_error: mock.deviceLastError[d.id] || "",
   })),
   channels: () => mock.channels.slice(),
+  channelAliases: exportChannelAliases,
+  setChannelAlias,
+  clearChannelAlias,
+  exportChannelAliases,
+  importChannelAliases,
+  channelDisplayLabel,
   setChannelRole(deviceId, instance, role, opts?) {
     const idx = mock.channels.findIndex((c) => c.device_id === deviceId && c.instance === instance);
     if (idx >= 0) {
@@ -924,14 +1193,15 @@ const mockAPIImpl = {
   },
   readValue(deviceId, paramId, instance?) {
     const inst = instance || 1;
+    const now = Date.now();
     const ch = mock.channelState[ckey(deviceId, inst)];
-    if (!ch) return { value: null, quality: "missing" };
-    if (!ch.bound) return { value: null, quality: "unreachable" };
+    if (!ch) return { value: null, quality: "missing", at: null, age_ms: null };
+    if (!ch.bound) return { value: null, quality: "unreachable", at: now, age_ms: 0 };
     let v;
     if (ch.role === "temp") {
       if (paramId === 52200) {
-        if (ch.cascadeT === null) return { value: null, quality: "missing" };
-        return { value: ch.cascadeT, quality: "ok" };
+        if (ch.cascadeT === null) return { value: null, quality: "missing", at: now, age_ms: 0 };
+        return { value: ch.cascadeT, quality: "ok", at: now, age_ms: 0 };
       }
       const map = {
         1000: ch.objectT, 1001: ch.sinkT, 1200: ch.stable,
@@ -965,9 +1235,9 @@ const mockAPIImpl = {
       };
       v = map[paramId];
     }
-    if (v === undefined) return { value: null, quality: "missing" };
-    if (typeof v === "number" && Number.isNaN(v)) return { value: null, quality: "nan" };
-    return { value: v, quality: "ok" };
+    if (v === undefined) return { value: null, quality: "missing", at: now, age_ms: 0 };
+    if (typeof v === "number" && Number.isNaN(v)) return { value: null, quality: "nan", at: now, age_ms: 0 };
+    return { value: v, quality: "ok", at: now, age_ms: 0 };
   },
   setpoint(deviceId, paramId, instance?) {
     const ch = mock.channelState[ckey(deviceId, instance || 1)];
@@ -1143,6 +1413,8 @@ const mockAPIImpl = {
     return { kind: "warn", label: "unconfirmed", detail: "Channel role is a local assumption; confirm against the MeCom operating mode before relying on it." };
   },
   errorCategoryFromStatus: categorizeStatus,
+  semanticPairFor,
+  semanticPairSummary,
 };
 
 // Live gateway adapter
@@ -1160,6 +1432,10 @@ const live = {
   commandsUnavailable: false,
   timer: null,
 };
+const LIVE_LAZY_READ_COOLDOWN_MS = 30_000;
+const LIVE_STALE_REFRESH_MS = 60_000;
+const liveLazyReadInflight = new Set();
+const liveLazyReadLast = new Map();
 
 function configuredBase() {
   const raw = (loadSettings().gateway || "").trim();
@@ -1209,17 +1485,60 @@ async function fetchJSON(path, opts?) {
 function liveKey(deviceId, paramId, instance?) {
   return `${deviceId}:${paramId}:${instance || 1}`;
 }
+function liveSampleAtMs(entry, now) {
+  const rawAt = entry && entry.at;
+  const atNumber = Number(rawAt);
+  if (Number.isFinite(atNumber)) return atNumber > 1e12 ? atNumber : atNumber * 1000;
+  if (typeof rawAt === "string") {
+    const parsed = Date.parse(rawAt);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  const age = Number(entry && entry.age_ms);
+  if (Number.isFinite(age)) return now - Math.max(0, age);
+  return now;
+}
 function storeLiveValue(deviceId, entry) {
   const instance = entry.instance || 1;
   const value = entry.value;
   const quality = entry.quality || (value === null || value === undefined ? "missing" : "ok");
-  live.values[liveKey(deviceId, entry.id, instance)] = { value, quality, at: Date.now() };
+  const now = Date.now();
+  const at = liveSampleAtMs(entry, now);
+  live.values[liveKey(deviceId, entry.id, instance)] = {
+    value,
+    quality,
+    at,
+    age_ms: Math.max(0, now - at),
+  };
 }
 function paramsForChannel(role, instance) {
   const ids = role === "supply"
     ? [1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 2010, 2040, 1001]
     : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 53120, 53121, 53122, 53123];
   return ids.map((id) => `${id}:${instance || 1}`).join(",");
+}
+
+function queueLiveValueRead(deviceId, paramId, instance?) {
+  if (!live.active || !configuredBase()) return;
+  const inst = instance || 1;
+  const key = liveKey(deviceId, paramId, inst);
+  const now = Date.now();
+  const last = liveLazyReadLast.get(key) || 0;
+  if (liveLazyReadInflight.has(key) || now - last < LIVE_LAZY_READ_COOLDOWN_MS) return;
+  liveLazyReadLast.set(key, now);
+  liveLazyReadInflight.add(key);
+  fetchJSON(`/api/devices/${encodeURIComponent(deviceId)}/read?params=${encodeURIComponent(`${paramId}:${inst}`)}`)
+    .then((body) => {
+      (body && body.values || []).forEach((entry) => storeLiveValue(deviceId, entry));
+    })
+    .catch((err: any) => {
+      if ((err.status || 0) >= 400) {
+        live.values[key] = { value: null, quality: "unreachable", at: Date.now(), age_ms: 0 };
+      }
+    })
+    .finally(() => {
+      liveLazyReadInflight.delete(key);
+      notify();
+    });
 }
 
 function liveCatalogueEntries() {
@@ -1247,8 +1566,77 @@ function liveCatalogueEntries() {
   return Array.from(byID.values());
 }
 
+function catalogueSignalKey(entry) {
+  return String(Number(entry && entry.id));
+}
+
+const LIVE_CATALOGUE_OBSERVED_FIELDS = [
+  "name",
+  "unit",
+  "type",
+  "kind",
+  "role",
+  "group",
+  "subgroup",
+  "access",
+  "metadata",
+  "transport_support",
+  "readout_priority",
+  "preferred_readout",
+  "tree_path",
+  "tree_paths",
+];
+
+function liveCatalogueObserved(entry) {
+  const out = {};
+  LIVE_CATALOGUE_OBSERVED_FIELDS.forEach((field) => {
+    if (entry && entry[field] !== undefined && entry[field] !== null && entry[field] !== "") {
+      out[field] = entry[field];
+    }
+  });
+  return out;
+}
+
+function mergeLiveCatalogueEntries(full, liveEntries) {
+  const byID = new Map();
+  (Array.isArray(full) ? full : []).forEach((entry, index) => {
+    if (!entry || !Number.isFinite(Number(entry.id))) return;
+    byID.set(catalogueSignalKey(entry), {
+      ...entry,
+      live_instances: [],
+      __catalogue_order: index,
+    });
+  });
+  (Array.isArray(liveEntries) ? liveEntries : []).forEach((entry) => {
+    if (!entry || !Number.isFinite(Number(entry.id))) return;
+    const key = catalogueSignalKey(entry);
+    const existing = byID.get(key);
+    if (!existing) {
+      return;
+    }
+    const liveInstances = new Set(existing.live_instances || []);
+    liveInstances.add(Number(entry.instance) || 1);
+    const observed = liveCatalogueObserved(entry);
+    const observedList = Array.isArray(existing.live_catalogue_observed)
+      ? existing.live_catalogue_observed.slice()
+      : [];
+    if (Object.keys(observed).length) {
+      observedList.push({ instance: Number(entry.instance) || 1, ...observed });
+    }
+    byID.set(key, {
+      ...existing,
+      live_instances: Array.from(liveInstances).sort((a, b) => a - b),
+      live_catalogue_observed: observedList,
+      __catalogue_order: existing.__catalogue_order,
+    });
+  });
+  return Array.from(byID.values())
+    .sort((a, b) => (a.__catalogue_order ?? Number.MAX_SAFE_INTEGER) - (b.__catalogue_order ?? Number.MAX_SAFE_INTEGER) || Number(a.id) - Number(b.id))
+    .map(({ __catalogue_order, ...entry }) => entry);
+}
+
 function activeCatalogue() {
-  return liveCatalogueEntries() || CATALOGUE.slice();
+  return mergeLiveCatalogueEntries(CATALOGUE, liveCatalogueEntries());
 }
 
 async function refreshLiveReads(devices) {
@@ -1274,6 +1662,7 @@ function normalizeCommandEvent(e) {
   const targetId = raw.target_id || raw.device_id || "";
   const time = raw.time || new Date().toISOString();
   const unit = raw.unit ?? raw.signal_unit ?? "";
+  const result = raw.result || {};
   return {
     ...raw,
     time,
@@ -1281,6 +1670,12 @@ function normalizeCommandEvent(e) {
     target_id: targetId,
     unit,
     status: raw.status || "completed",
+    // Field mapping for UI components
+    paramId: raw.param_id,
+    requestedValue: raw.requested_value,
+    confirmedValue: result.confirmed_value !== undefined ? result.confirmed_value : raw.confirmed_value,
+    prevValue: result.prev_value !== undefined ? result.prev_value : raw.prev_value,
+    confirmedMatched: result.readback_matched !== undefined ? result.readback_matched : raw.readback_matched,
   };
 }
 function sameCommandEvent(a, b) {
@@ -1352,6 +1747,8 @@ function ensureLivePolling() {
     live.catalogue = null;
     live.leases = null;
     live.values = Object.create(null);
+    liveLazyReadInflight.clear();
+    liveLazyReadLast.clear();
     live.commands = [];
     live.commandsUnavailable = false;
     live.base = base;
@@ -1442,14 +1839,51 @@ export const MecomAPI = {
       last_error: dev && dev.last_error || "",
     };
   },
+  async readFreshValue(deviceId, paramId, instance?) {
+    ensureLivePolling();
+    const inst = instance ?? 1;
+    if (!live.active && !explicitBase()) return mockAPIImpl.readValue(deviceId, paramId, inst);
+    try {
+      const body = await fetchJSON(`/api/devices/${encodeURIComponent(deviceId)}/read?params=${encodeURIComponent(`${paramId}:${inst}`)}`);
+      (body && body.values || []).forEach((entry) => storeLiveValue(deviceId, entry));
+      notify();
+      return MecomAPI.readValue(deviceId, paramId, inst);
+    } catch (err: any) {
+      if (!live.active && !explicitBase()) return mockAPIImpl.readValue(deviceId, paramId, inst);
+      live.values[liveKey(deviceId, paramId, inst)] = { value: null, quality: "unreachable", at: Date.now(), age_ms: 0 };
+      notify();
+      throw err;
+    }
+  },
+  async confirmWriteValue(deviceId, paramId, instance, expected, opts?) {
+    const readback = await MecomAPI.readFreshValue(deviceId, paramId, instance);
+    const actual = readback && readback.value;
+    const numeric = typeof actual === "number" && typeof expected === "number";
+    const tolerance = opts && Number.isFinite(Number(opts.tolerance)) ? Number(opts.tolerance) : (numeric ? Math.max(1e-6, Math.abs(expected) * 1e-6) : 0);
+    const matched = numeric ? Number.isFinite(actual) && Math.abs(actual - expected) <= tolerance : String(actual) === String(expected);
+    return {
+      ...readback,
+      expected,
+      matched,
+      status: matched ? "confirmedMatched" : "readback mismatch",
+    };
+  },
   readValue(deviceId, paramId, instance?) {
     ensureLivePolling();
+    const inst = instance ?? 1;
     if (live.active) {
-      const v = live.values[liveKey(deviceId, paramId, instance)];
-      if (v) return { value: v.value, quality: v.quality || "ok" };
-      return { value: null, quality: "missing" };
+      const now = Date.now();
+      const v = live.values[liveKey(deviceId, paramId, inst)];
+      if (v) {
+        const at = Number.isFinite(Number(v.at)) ? Number(v.at) : now;
+        const age = Math.max(0, now - at);
+        if (age > LIVE_STALE_REFRESH_MS) queueLiveValueRead(deviceId, paramId, inst);
+        return { value: v.value, quality: v.quality || "ok", at, age_ms: age };
+      }
+      queueLiveValueRead(deviceId, paramId, inst);
+      return { value: null, quality: "missing", at: null, age_ms: null };
     }
-    return mockAPIImpl.readValue(deviceId, paramId, instance);
+    return mockAPIImpl.readValue(deviceId, paramId, inst);
   },
   setpoint(deviceId, paramId, instance?) {
     ensureLivePolling();
@@ -1486,7 +1920,7 @@ export const MecomAPI = {
         param_id: param,
         signal_name: signal.name || ("#" + param),
         unit: signal.unit || "",
-        prev_value: prev,
+        prev_value: (body && body.result && body.result.prev_value) !== undefined ? body.result.prev_value : prev,
         requested_value: req.arguments && req.arguments.value,
         lease_holder: lease && lease.holder,
         status: (body && body.status) || "completed",
@@ -1547,7 +1981,7 @@ export const MecomAPI = {
     live.leases = (live.leases || []).filter((l) => l.device_id !== deviceId || l.token !== token);
     notify();
   },
-  async graphTile(tileId, level, series) {
+  async graphTile(tileId, level, series, opts?) {
     ensureLivePolling();
     const params = new URLSearchParams();
     (Array.isArray(series) ? series : []).forEach((item) => {
@@ -1557,9 +1991,25 @@ export const MecomAPI = {
       if (!deviceId || !Number.isFinite(Number(paramId))) return;
       params.append("series", `${deviceId}:${Number(paramId)}:${Number(instance) || 1}`);
     });
+    if (opts && opts.t0 && opts.t1) {
+      params.append("t0", opts.t0);
+      params.append("t1", opts.t1);
+    }
     const qs = params.toString();
-    const path = `/api/graph/tiles/${encodeURIComponent(tileId || "graph-tile")}/${encodeURIComponent(level || "live")}${qs ? "?" + qs : ""}`;
+    const path = `/api/graph/tiles/${encodeURIComponent(tileId || "graph-tile")}/${encodeURIComponent(level || "three_day")}${qs ? "?" + qs : ""}`;
+    const headers = {};
+    if (opts && opts.format === "arrow") {
+      headers["X-Format"] = "arrow";
+      return fetch(path, { headers }).then((res) => {
+        if (!res.ok) throw new Error(`graph tile arrow failed: ${res.status}`);
+        return res.arrayBuffer();
+      });
+    }
     return fetchJSON(path);
+  },
+  async fetchAvailability() {
+    ensureLivePolling();
+    return fetchJSON("/api/graph/availability");
   },
   subscribe(fn) {
     ensureLivePolling();

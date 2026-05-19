@@ -6,19 +6,58 @@ import { MecomAPI } from "../api/mecom";
 import { recordTelemetry, getTelemetry } from "../lib/telemetry";
 import {
   seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile,
-  normalizeGraphTile, CANONICAL_TILE_RENDERER,
+  normalizeGraphTile, CANONICAL_TILE_RENDERER, SharedTimeAxis, graphSeriesIdentityKey,
+  Sparkline, WriteLifecycleTrace as SharedWriteLifecycleTrace,
 } from "../lib/series";
 
 export { seriesRoleMeta, renderSeriesFromGraphTile, emptyGraphTile, normalizeGraphTile };
+
+function finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function valueAgeMs(sample) {
+  if (!sample) return null;
+  const direct = finiteNumber(sample.age_ms);
+  if (direct !== null) return Math.max(0, direct);
+  const at = finiteNumber(sample.at);
+  if (at !== null) return Math.max(0, Date.now() - at);
+  return null;
+}
+
+export function formatValueAge(ageMs, quality) {
+  const q = String(quality || "").toLowerCase();
+  if (ageMs === null || ageMs === undefined || !Number.isFinite(Number(ageMs))) {
+    return q === "missing" ? "unread" : "age unknown";
+  }
+  const ms = Math.max(0, Number(ageMs));
+  if (ms < 1_000) return "now";
+  if (ms < 60_000) return `${Math.round(ms / 1_000)}s`;
+  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
+  return `${Math.round(ms / 3_600_000)}h`;
+}
+
+export function valueAgeKind(ageMs, quality) {
+  const q = String(quality || "").toLowerCase();
+  if (q === "missing" || q === "unreachable" || q === "nan") return q;
+  if (ageMs === null || ageMs === undefined || !Number.isFinite(Number(ageMs))) return "unknown";
+  const ms = Math.max(0, Number(ageMs));
+  if (ms > 120_000) return "stale";
+  if (ms > 30_000) return "old";
+  return "fresh";
+}
 
 /* ---------- Hook: latest value for a (device, param, instance) ---------- */
 export function useLiveValue(deviceId, paramId, instance?) {
   const inst = instance ?? 1;
   const [, force] = useState(0);
+  const [latest, setLatest] = useState(null);
   useEffect(() => {
     const tick = () => {
       const r = MecomAPI.readValue(deviceId, paramId, inst);
       recordTelemetry(deviceId, paramId, r.value, r.quality, inst);
+      setLatest(r);
       force((n) => (n + 1) % 1e9);
     };
     tick();
@@ -28,7 +67,33 @@ export function useLiveValue(deviceId, paramId, instance?) {
   const buf = getTelemetry(deviceId, paramId, inst);
   const v = buf.v.length ? buf.v[buf.v.length - 1] : null;
   const q = buf.q.length ? buf.q[buf.q.length - 1] : "missing";
-  return { value: v, quality: q, history: buf };
+  return { value: v, quality: q, ageMs: valueAgeMs(latest), at: latest?.at ?? null, history: buf };
+}
+
+export function useSparkline(deviceId, paramId, instance?) {
+  const inst = instance ?? 1;
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    let active = true;
+    const fetch = async () => {
+      try {
+        const resp = await window.fetch(`/api/graph/sparklines?device=${deviceId}&param=${paramId}&instance=${inst}`);
+        const body = await resp.json();
+        if (active && body.values) {
+          setData(body.values);
+        }
+      } catch (err) {
+        console.warn("sparkline fetch failed", err);
+      }
+    };
+    fetch();
+    const timer = setInterval(fetch, 5000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [deviceId, paramId, inst]);
+  return data;
 }
 
 /* ---------- Hook: re-render on any state change ---------- */
@@ -67,20 +132,68 @@ export function Panel({ title, meta, right, children, flush, style, className })
 }
 
 /* ============================================================ Canonical SignalForge/uPlot charts ============================================================ */
-export function Sparkline({ history, color = "var(--accent)", w = 320, h = 56, showAxis = false }) {
-  const tile = useMemo(() => normalizeGraphTile({
-    ...emptyGraphTile({ tile_id: "sparkline", timeWindowMs: 90_000 }),
-    series: [{
-      id: "sparkline",
-      label: "sparkline",
-      role: "actual",
-      unit: "_",
-      color,
-      history,
-      points: (history?.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (history?.v || [])[idx] })),
-    }],
-  }), [history, history?.seq, history?.v?.length, history?.v?.[history?.v?.length - 1], history?.latestTs, color, showAxis, w]);
-  return <UPlotTileRenderer tile={tile} height={h} dataGraphRenderer={CANONICAL_TILE_RENDERER} syncKey="meerstetter-go-sparkline" />;
+
+
+function validTimeMs(value) {
+  const t = typeof value === "number" ? value : Date.parse(String(value || ""));
+  return Number.isFinite(t) ? t : null;
+}
+
+function graphTileTimeRange(tile, timeWindowMs) {
+  const now = Date.now();
+  const fallbackEnd = now;
+  const fallbackStart = now - Math.max(1_000, timeWindowMs || tile?.time_window_ms || 90_000);
+  const t0 = validTimeMs(tile?.t0);
+  const t1 = validTimeMs(tile?.t1);
+  if (t0 !== null && t1 !== null && t1 > t0) return { start: t0, end: t1 };
+
+  const times = [];
+  (tile?.series || []).forEach((series) => {
+    (series?.points || []).forEach((point) => {
+      const t = validTimeMs(point?.timestamp ?? point?.t ?? point?.time);
+      if (t !== null) times.push(t);
+    });
+    (series?.history?.ts || []).forEach((ts) => {
+      const t = validTimeMs(ts);
+      if (t !== null) times.push(t);
+    });
+  });
+  if (times.length) {
+    const start = Math.min(...times);
+    const end = Math.max(...times);
+    return { start, end: Math.max(end, start + 1) };
+  }
+  return { start: fallbackStart, end: fallbackEnd };
+}
+
+function graphTileWithinTimeRange(tile, range, timeWindowMs) {
+  if (!tile || !Array.isArray(tile.series)) return tile;
+  const start = range?.start;
+  const end = range?.end;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return tile;
+  const series = tile.series.map((item) => {
+    const points = (item.points || []).filter((point) => {
+      const t = validTimeMs(point?.timestamp ?? point?.t ?? point?.time);
+      return t !== null && t >= start && t <= end;
+    });
+    const history = item.history && Array.isArray(item.history.ts) && Array.isArray(item.history.v)
+      ? item.history.ts.reduce((acc, ts, idx) => {
+          const t = validTimeMs(ts);
+          if (t !== null && t >= start && t <= end && Number.isFinite(Number(item.history.v[idx]))) {
+            acc.ts.push(new Date(t).toISOString());
+            acc.v.push(Number(item.history.v[idx]));
+          }
+          return acc;
+        }, { ts: [], v: [] })
+      : item.history;
+    return { ...item, points, history };
+  });
+  return normalizeGraphTile({
+    ...tile,
+    t0: new Date(start).toISOString(),
+    t1: new Date(end).toISOString(),
+    series,
+  }, { timeWindowMs });
 }
 
 export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSeries = [], fill = false, minHeight = 220 }) {
@@ -91,26 +204,35 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
   const [yMin, setYMin] = useState("");
   const [yMax, setYMax] = useState("");
   const [viewToken, setViewToken] = useState(0);
+  const [manualX, setManualX] = useState(false);
   const visibleTile = useMemo(() => {
     if (!hidden.size) return graphTile;
     return normalizeGraphTile({
       ...graphTile,
       series: (graphTile.series || []).filter((series) => {
-        const key = series.series_id || series.id || series.target_id || series.label;
+        const key = graphSeriesIdentityKey(series);
         return !hidden.has(key);
       }),
       diagnostics: {
         ...(graphTile.diagnostics || {}),
         hidden_series_count: hidden.size,
         visible_series_count: (graphTile.series || []).filter((series) => {
-          const key = series.series_id || series.id || series.target_id || series.label;
+          const key = graphSeriesIdentityKey(series);
           return !hidden.has(key);
         }).length,
       },
     }, { timeWindowMs });
   }, [graphTile, hidden, timeWindowMs]);
-  const orderedSeries = useMemo(() => renderSeriesFromGraphTile(visibleTile), [visibleTile]);
+  const fullTimeRange = useMemo(() => graphTileTimeRange(visibleTile, timeWindowMs), [visibleTile, timeWindowMs]);
+  const fullTimeRangeKey = `${fullTimeRange.start}:${fullTimeRange.end}`;
+  const [timeRange, setTimeRange] = useState(fullTimeRange);
+  useEffect(() => {
+    if (!manualX) setTimeRange(fullTimeRange);
+  }, [fullTimeRangeKey, manualX]);
+  const rangedTile = useMemo(() => graphTileWithinTimeRange(visibleTile, timeRange, timeWindowMs), [visibleTile, timeRange?.start, timeRange?.end, timeWindowMs]);
+  const orderedSeries = useMemo(() => renderSeriesFromGraphTile(rangedTile), [rangedTile]);
   const title = graphTile.title || graphTile.tile_id || graphTile.id || "graph tile";
+  const currentTimeMs = validTimeMs(rangedTile?.t1) ?? fullTimeRange.end;
   const parsedYRange = useMemo(() => {
     const min = Number(yMin);
     const max = Number(yMax);
@@ -118,12 +240,39 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
     if (max <= min) return null;
     return [min, max];
   }, [yMin, yMax]);
+  
+  const zoomIn = () => {
+    const start = timeRange.start;
+    const end = timeRange.end;
+    const center = (start + end) / 2;
+    const halfWidth = (end - start) / 4;
+    setTimeRange({ start: center - halfWidth, end: center + halfWidth });
+    setManualX(true);
+  };
+  const zoomOut = () => {
+    const start = timeRange.start;
+    const end = timeRange.end;
+    const center = (start + end) / 2;
+    const halfWidth = (end - start);
+    setTimeRange({ start: center - halfWidth, end: center + halfWidth });
+    setManualX(true);
+  };
+  const panLeft = () => {
+    const shift = (timeRange.end - timeRange.start) * 0.25;
+    setTimeRange({ start: timeRange.start - shift, end: timeRange.end - shift });
+    setManualX(true);
+  };
+  const panRight = () => {
+    const shift = (timeRange.end - timeRange.start) * 0.25;
+    setTimeRange({ start: timeRange.start + shift, end: timeRange.end + shift });
+    setManualX(true);
+  };
   return (
     <div
       style={{
         width: "100%",
         minWidth: 0,
-        ...(fill ? { height: "100%", display: "grid", gridTemplateRows: "auto minmax(0, 1fr)" } : {}),
+        ...(fill ? { height: "100%", display: "grid", gridTemplateRows: "auto minmax(0, 1fr) auto" } : {}),
       }}
       data-graph-tile={graphTile.tile_id || graphTile.id || ""}
       data-graph-renderer={CANONICAL_TILE_RENDERER}
@@ -132,7 +281,13 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
       title={title}
     >
       <div className="chart-controls">
-        <button className="btn sm" onClick={() => setViewToken((n) => n + 1)} title="Reset the x-axis to the full tile range">Auto X</button>
+        <div className="btn-group">
+          <button className="btn sm" onClick={panLeft} title="Pan left">←</button>
+          <button className="btn sm" onClick={zoomIn} title="Zoom in">+</button>
+          <button className="btn sm" onClick={zoomOut} title="Zoom out">−</button>
+          <button className="btn sm" onClick={panRight} title="Pan right">→</button>
+        </div>
+        <button className="btn sm" onClick={() => { setManualX(false); setTimeRange(fullTimeRange); setViewToken((n) => n + 1); }} title="Reset the x-axis to the full tile range">Auto X</button>
         <label className="toggle-sm">
           <input type="checkbox" checked={autoY} onChange={(e) => setAutoY(e.target.checked)} />
           Auto Y
@@ -142,7 +297,7 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
         <button className="btn sm" onClick={() => { setYMin(""); setYMax(""); setAutoY(true); }} title="Return to automatic y-axis scaling">Reset Y</button>
       </div>
       <UPlotTileRenderer
-        tile={visibleTile}
+        tile={rangedTile}
         height={height}
         dataGraphRenderer={CANONICAL_TILE_RENDERER}
         syncKey="meerstetter-go-wall"
@@ -151,6 +306,13 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
         viewToken={viewToken}
         fillContainer={fill}
         minHeight={minHeight}
+      />
+      <SharedTimeAxis
+        fullRange={fullTimeRange}
+        timeRange={timeRange}
+        currentTimeMs={currentTimeMs}
+        onTimeRange={(range) => { setManualX(true); setTimeRange(range); }}
+        tickCount={16}
       />
     </div>
   );
@@ -205,10 +367,21 @@ function displayUnit(unit) {
   return label;
 }
 
+function displayUnitTag(unit) {
+  if (!unit) return "unitless";
+  if (unit === "degC") return "Degree Celsius";
+  return MecomAPI.unitLabel ? MecomAPI.unitLabel(unit) : unit;
+}
+
 function formatWithUnit(value, unit, paramId) {
   if (MecomAPI.formatWithUnit) return MecomAPI.formatWithUnit(value, unit, paramId);
   const label = displayUnit(unit);
   return label ? `${value} ${label}` : `${value}`;
+}
+
+function semanticPairSummary(param) {
+  if (!param || !MecomAPI.semanticPairSummary) return "";
+  return MecomAPI.semanticPairSummary(param);
 }
 
 /* ============================================================ DiscoveryTree ============================================================ */
@@ -250,19 +423,23 @@ function treeProjectionOptions(catalogue) {
       if (existing) {
         existing.count += 1;
         existing.default = existing.default || item.default;
+        existing.default_collapsed = existing.default_collapsed && item.default_collapsed;
+        existing.sort = Math.min(existing.sort, Number(item.sort) || 0);
       } else {
         byId.set(id, {
           id,
           label: item.label || id,
           count: 1,
           default: Boolean(item.default),
+          default_collapsed: Boolean(item.default_collapsed),
+          sort: Number(item.sort) || 0,
         });
       }
     });
   });
   return Array.from(byId.values()).sort((a, b) => {
     if (a.default !== b.default) return a.default ? -1 : 1;
-    return a.label.localeCompare(b.label);
+    return (a.sort || 0) - (b.sort || 0) || a.label.localeCompare(b.label);
   });
 }
 
@@ -277,6 +454,13 @@ function normalizeTreeItem(item) {
       label: path[path.length - 1] || text,
       path,
       default: true,
+      bundle: "",
+      default_collapsed: false,
+      secondary: false,
+      reason: "",
+      duplicate_reason: "",
+      instance_scope: "",
+      sort: 0,
     };
   }
   if (typeof item !== "object") return null;
@@ -284,11 +468,20 @@ function normalizeTreeItem(item) {
   if (!path.length) path = treeSegments(item.label);
   if (!path.length) return null;
   const text = treePathText(path);
+  const sort = Number(item.sort);
   return {
     id: String(item.id || text).trim(),
     label: String(item.label || path[path.length - 1] || text).trim(),
     path,
     default: Boolean(item.default),
+    bundle: String(item.bundle || "").trim(),
+    default_collapsed: Boolean(item.default_collapsed),
+    secondary: Boolean(item.secondary),
+    reason: String(item.reason || item.duplicate_reason || "").trim(),
+    duplicate_reason: String(item.duplicate_reason || item.reason || "").trim(),
+    instance_scope: String(item.instance_scope || item.instanceScope || "").trim(),
+    sort: Number.isFinite(sort) ? sort : 0,
+    column_order: item.column_order || item.columnOrder || null,
   };
 }
 
@@ -316,7 +509,22 @@ function treeContext(param, projectionId) {
     item.id,
     item.label,
     treePathText(item.path),
+    item.bundle,
+    item.reason,
+    item.duplicate_reason,
   ].filter(Boolean).join(" ")).join(" ");
+  const helpText = [
+    param && param.hover_help,
+    param && param.hoverHelp,
+    param && param.help_text,
+    param && param.helpText,
+    param && param.source_parameter_name,
+    param && param.sourceParameterName,
+    param && param.readout_priority,
+    param && param.readoutPriority,
+    param && param.preferred_readout,
+    param && param.preferredReadout,
+  ].filter(Boolean).join(" ");
   const selected = selectedTreePath(param, projectionId);
   if (!selected) {
     const group = param && param.group ? param.group : CategoryFor(param && param.name);
@@ -327,7 +535,7 @@ function treeContext(param, projectionId) {
       subgroup,
       title: [group, subgroup, param && param.name].filter(Boolean).join(" / "),
       visibleLabel: param && param.name,
-      searchText: [param && param.name, param && param.id, param && param.unit, group, subgroup, allTreeText].map((v) => String(v || "").toLowerCase()).join(" "),
+      searchText: [param && param.name, param && param.id, param && param.unit, group, subgroup, allTreeText, helpText].map((v) => String(v || "").toLowerCase()).join(" "),
     };
   }
   const segs = treeSegments(selected.path);
@@ -341,9 +549,13 @@ function treeContext(param, projectionId) {
     subgroup,
     title: [pathText, param && param.name].filter(Boolean).join(" / "),
     visibleLabel: leaf,
-    searchText: [param && param.name, param && param.id, param && param.unit, selected.label, pathText, selected.id, allTreeText].map((v) => String(v || "").toLowerCase()).join(" "),
+    searchText: [param && param.name, param && param.id, param && param.unit, selected.label, pathText, selected.id, selected.bundle, selected.reason, allTreeText, helpText].map((v) => String(v || "").toLowerCase()).join(" "),
     path: pathText,
     label: selected.label,
+    default_collapsed: Boolean(selected.default_collapsed),
+    sort: Number(selected.sort) || 0,
+    bundle: selected.bundle || "",
+    duplicate_reason: selected.duplicate_reason || selected.reason || "",
   };
 }
 
@@ -391,11 +603,17 @@ export function DiscoveryTree({
       const subgroup = ctx.subgroup || p.subgroup || "Signals";
       if (!g[group]) g[group] = {};
       if (!g[group][subgroup]) g[group][subgroup] = [];
-      g[group][subgroup].push(p);
+      g[group][subgroup].push({ param: p, ctx });
+    });
+    Object.values(g).forEach((subgroups: any) => {
+      Object.keys(subgroups).forEach((subgroup) => {
+        subgroups[subgroup].sort((a, b) => (a.ctx.sort || 0) - (b.ctx.sort || 0) || Number(a.param.id) - Number(b.param.id) || String(a.param.name || "").localeCompare(String(b.param.name || "")));
+      });
     });
     return g;
   }, [filtered]);
   const [collapsed, setCollapsed] = useState({});
+  const hasActiveFilter = Boolean((query || "").trim() || filterCat || onlyWritable);
   const groupNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
   const channelFanout = (channels && channels.length ? channels : [{ device_id: deviceId, instance }]);
   return (
@@ -433,23 +651,31 @@ export function DiscoveryTree({
         {groupNames.map((group) => {
           const sgrps = groups[group];
           const groupCount = Object.values(sgrps).reduce((acc, items) => acc + items.length, 0);
-          const isCollapsed = collapsed[group];
+          const isCollapsed = collapsed[group] !== undefined ? collapsed[group] : !hasActiveFilter;
           return (
             <div key={group}>
-              <div className="tree-group-head" onClick={() => setCollapsed((c) => ({ ...c, [group]: !c[group] }))}>
+              <div className="tree-group-head" onClick={() => setCollapsed((c) => {
+                const current = c[group] !== undefined ? c[group] : !hasActiveFilter;
+                return { ...c, [group]: !current };
+              })}>
                 <span>{isCollapsed ? "▸" : "▾"}</span>
                 <span>{group}</span>
                 <span className="count">{groupCount}</span>
               </div>
-              {!isCollapsed && Object.entries(sgrps).map(([subgroup, items]) => (
+              {!isCollapsed && Object.entries(sgrps).sort((a, b) => {
+                const ax = a[1][0]?.ctx?.sort || 0;
+                const bx = b[1][0]?.ctx?.sort || 0;
+                return ax - bx || a[0].localeCompare(b[0]);
+              }).map(([subgroup, items]) => (
                 <div key={group + ":" + subgroup} className="tree-subgroup">
                   <div className="tree-subgroup-head">
                     <span>{subgroup}</span>
                     <span>{items.length}</span>
                   </div>
-                  {items.map((p) => (
+                  {items.map(({ param: p, ctx }) => (
                     <TreeNode key={p.id + ":" + subgroup}
                               deviceId={deviceId} channels={channelFanout} param={p}
+                              ctx={ctx}
                               pins={pins}
                               writeCards={writeCards}
                               treeProjection={treeProjection}
@@ -470,23 +696,33 @@ export function DiscoveryTree({
   );
 }
 
-function TreeNode({ deviceId, channels, param, pins, writeCards, treeProjection, leaseHolder, holderId, onTogglePin, onPinCard, onWrite, onCloseWrite }) {
-  const ctx = treeContext(param, treeProjection);
+const TreeNode = React.memo(({ deviceId, channels, param, ctx: suppliedCtx, pins, writeCards, treeProjection, leaseHolder, holderId, onTogglePin, onPinCard, onWrite, onCloseWrite }) => {
+  const ctx = suppliedCtx || treeContext(param, treeProjection);
   const applicableChannels = (channels || []).filter((c) => !param.applicableModes || param.applicableModes.includes(c.role));
   const activeCards = (writeCards || []).filter((c) => c.id === param.id);
-  const unitLabel = displayUnit(param.unit) || "unitless";
+  const unitLabel = displayUnitTag(param.unit) || "unitless";
+  const pairSummary = semanticPairSummary(param);
+  const catalogueHelp = param.help || param.hover_help || param.hoverHelp || param.help_text || param.helpText || "";
+  const duplicateReason = ctx.duplicate_reason || "";
+  const limits = (param.min !== undefined || param.max !== undefined) ? `[${param.min ?? "-∞"}, ${param.max ?? "+∞"}]` : "";
   return (
-    <div className={["tree-node", param.writable ? "write" : ""].join(" ")}>
+    <div className={["tree-node", param.writable ? "write" : "", param.dangerous ? "dangerous" : ""].join(" ")}>
       <span className="swatch"></span>
       <span className="nm" title={ctx.title}>
         {ctx.visibleLabel || param.name} <span className="id">·{param.id}</span>
       </span>
       <span className="unit">{unitLabel}</span>
       <span className="kind">{param.writable ? "Read/write" : "Read-only"}</span>
+      {pairSummary && <div className="tree-help-line">{pairSummary}</div>}
+      {catalogueHelp && <div className="tree-help-line" title={catalogueHelp}>{catalogueHelp}</div>}
+      {param.safety_note && <div className="tree-help-line warn" title="Safety critical note">CAUTION: {param.safety_note}</div>}
+      {limits && <div className="tree-help-line muted" title="Operational limits">Limits: {limits}</div>}
+      {duplicateReason && <div className="tree-help-line muted" title={duplicateReason}>secondary placement: {duplicateReason}</div>}
       <div className="tree-instances">
         {applicableChannels.map((ch) => (
           <TreeInstance key={ch.device_id + ":" + ch.instance}
                         deviceId={deviceId}
+                        channel={ch}
                         instance={ch.instance}
                         role={ch.role}
                         param={param}
@@ -513,25 +749,96 @@ function TreeNode({ deviceId, channels, param, pins, writeCards, treeProjection,
       )}
     </div>
   );
-}
+});
 
-function TreeInstance({ deviceId, instance, role, param, pinned, onTogglePin, onPinCard, onWrite }) {
-  const { value, quality } = useLiveValue(deviceId, param.id, instance);
+const TreeInstance = React.memo(({ deviceId, channel, instance, role, param, pinned, onTogglePin, onPinCard, onWrite }) => {
+  const resolvedDeviceId = channel?.device_id || deviceId;
+  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, param.id, instance);
+  const [editingAlias, setEditingAlias] = useState(false);
+  const [aliasDraft, setAliasDraft] = useState(channel?.alias || channel?.nickname || "");
+  const [noteDraft, setNoteDraft] = useState(channel?.user_overlay_note || channel?.fixture_note || "");
+  useEffect(() => {
+    if (!editingAlias) {
+      setAliasDraft(channel?.alias || channel?.nickname || "");
+      setNoteDraft(channel?.user_overlay_note || channel?.fixture_note || "");
+    }
+  }, [channel?.alias, channel?.nickname, channel?.user_overlay_note, channel?.fixture_note, editingAlias]);
   const displayValue = formatWithUnit(value, param.unit, param.id);
   const channelLabel = role || "channel";
+  const alias = channel?.alias || channel?.nickname || "";
+  const rawLabel = MecomAPI.channelDisplayLabel ? MecomAPI.channelDisplayLabel(channel || { device_id: resolvedDeviceId, instance }, { includeAlias: false }) : `${resolvedDeviceId} ch${instance}`;
+  const pair = MecomAPI.semanticPairFor ? MecomAPI.semanticPairFor(param) : null;
+  const peer = pair && pair.telemetry && pair.telemetry.id !== param.id ? pair.telemetry : pair && pair.control && pair.control.id !== param.id ? pair.control : null;
+  const helpText = [
+    rawLabel,
+    alias ? `alias ${alias}` : "no alias",
+    `role ${channelLabel}`,
+    `instance ${instance}`,
+    `quality ${quality}`,
+    `age ${formatValueAge(ageMs, quality)}`,
+    `unit ${displayUnitTag(param.unit)}`,
+    channel?.semantic_overlay?.note ? `note ${channel.semantic_overlay.note}` : "",
+    peer ? `paired ${peer.name || peer.label || `#${peer.id}`}` : "unpaired",
+  ].filter(Boolean).join(" · ");
+  const saveAlias = () => {
+    MecomAPI.setChannelAlias?.(resolvedDeviceId, instance, {
+      alias: aliasDraft,
+      note: noteDraft,
+      source: "operator-signal-tree",
+      author: MecomAPI.settings?.().holder,
+    });
+    setEditingAlias(false);
+  };
+  const clearAlias = () => {
+    MecomAPI.clearChannelAlias?.(resolvedDeviceId, instance);
+    setAliasDraft("");
+    setNoteDraft("");
+    setEditingAlias(false);
+  };
   return (
-    <span className={["tree-inst", pinned ? "pinned" : "", "q-" + quality].join(" ")} title={`channel ${channelLabel} · instance ${instance} · ${quality}`}>
+    <span className={["tree-inst", pinned ? "pinned" : "", editingAlias ? "alias-editing" : "", "q-" + quality].join(" ")} title={helpText}>
       <button title="Pin instance to graph" onClick={onTogglePin}>{pinned ? "★" : "☆"}</button>
       <span className="inst">{channelLabel} · i{instance}</span>
+      <span className={"alias " + (alias ? "" : "empty")} title={alias ? `User alias for ${rawLabel}` : `No user alias for ${rawLabel}`}>{alias || "—"}</span>
       <span className="vl">{displayValue}</span>
+      <span className={"qtag " + quality}>{quality || "missing"}</span>
+      <span className={"age " + valueAgeKind(ageMs, quality)}>{formatValueAge(ageMs, quality)}</span>
+      <SparklineWrapper deviceId={resolvedDeviceId} paramId={param.id} instance={instance} />
+      <span className={"pairline " + (pair ? "" : "empty")}>
+        {pair ? (
+          <PeerValue resolvedDeviceId={resolvedDeviceId} instance={instance} peer={peer} />
+        ) : (
+          <span>unpaired</span>
+        )}
+      </span>
+      <button title="Edit channel alias overlay" onClick={() => setEditingAlias((v) => !v)}>alias</button>
       <button title="Pin value card" onClick={onPinCard}>▣</button>
       {param.writable && <button title="Open write card" onClick={onWrite}>✎</button>}
+      {editingAlias && (
+        <span className="tree-alias-editor">
+          <input
+            value={aliasDraft}
+            onChange={(e) => setAliasDraft(e.target.value)}
+            placeholder={`${rawLabel} alias`}
+            aria-label={`${rawLabel} alias`}
+          />
+          <input
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            placeholder="optional note"
+            aria-label={`${rawLabel} note`}
+          />
+          <button onClick={saveAlias} title="Save alias overlay">Save</button>
+          <button onClick={clearAlias} title="Clear alias overlay">Clear</button>
+        </span>
+      )}
     </span>
   );
-}
+});
 
 export function SignalValueCard({ deviceId, param, leaseHolder, holderId, onClose }) {
   const ctx = treeContext(param);
+  const pairSummary = semanticPairSummary(param);
   if (param.writable) {
     return (
       <InputCard
@@ -543,31 +850,46 @@ export function SignalValueCard({ deviceId, param, leaseHolder, holderId, onClos
       />
     );
   }
-  const { value, quality } = useLiveValue(deviceId, param.id, param.instance);
+  const { value, quality, ageMs } = useLiveValue(deviceId, param.id, param.instance);
   const displayValue = formatWithUnit(value, param.unit, param.id);
+  const channel = MecomAPI.channels?.().find((ch) => ch.device_id === deviceId && Number(ch.instance) === Number(param.instance || 1));
+  const channelLabel = channel && MecomAPI.channelDisplayLabel ? MecomAPI.channelDisplayLabel(channel) : `${deviceId} ch${param.instance || 1}`;
   return (
     <div className={["signal-card", "q-" + quality].join(" ")}>
       <div className="nm-row">
         <div>
           <div className="nm">{ctx.visibleLabel || param.name}</div>
-          <div className="id">{ctx.group || "Signal"} / {ctx.subgroup || "Signals"} · #{param.id}:{param.instance || 1}</div>
+          <div className="id">{channelLabel} · {ctx.group || "Signal"} / {ctx.subgroup || "Signals"} · #{param.id}:{param.instance || 1}</div>
+          {pairSummary && <div className="signal-help-line">{pairSummary}</div>}
         </div>
         <button className="x" onClick={onClose}>✕</button>
       </div>
       <div className="signal-value">
-        <span>{quality}</span>
+        <span className="signal-value-meta">
+          <em className={"qtag " + quality}>{quality || "missing"}</em>
+          <em className={"age " + valueAgeKind(ageMs, quality)}>{formatValueAge(ageMs, quality)}</em>
+        </span>
         <b>{displayValue}</b>
       </div>
     </div>
   );
 }
 
-function semanticValueRows(param, value, quality) {
+function semanticValueRows(param, value, quality, ageMs) {
   const rows = [];
   rows.push({ label: "value", value: formatWithUnit(value, param.unit, param.id) });
   rows.push({ label: "quality", value: quality || "missing" });
+  rows.push({ label: "age", value: formatValueAge(ageMs, quality) });
+  if (param.hover_help || param.hoverHelp || param.help_text || param.helpText) rows.push({ label: "help", value: param.hover_help || param.hoverHelp || param.help_text || param.helpText });
   if (param.type) rows.push({ label: "type", value: param.type });
   if (param.kind) rows.push({ label: "kind", value: param.kind });
+  if (param.visibility) rows.push({ label: "visibility", value: param.visibility });
+  if (param.semantic_role || param.semanticRole) rows.push({ label: "semantic role", value: param.semantic_role || param.semanticRole });
+  if (param.safety_note || param.safetyNote) rows.push({ label: "safety note", value: param.safety_note || param.safetyNote });
+  if (param.source_evidence) rows.push({ label: "evidence", value: Array.isArray(param.source_evidence) ? param.source_evidence.join(" · ") : String(param.source_evidence) });
+  if (param.source_parameter_name || param.sourceParameterName) rows.push({ label: "source", value: param.source_parameter_name || param.sourceParameterName });
+  if (param.readout_priority || param.readoutPriority) rows.push({ label: "readout", value: param.readout_priority || param.readoutPriority });
+  if (param.preferred_readout || param.preferredReadout) rows.push({ label: "preferred readout", value: param.preferred_readout || param.preferredReadout });
   if (param.cmd || param.command) rows.push({ label: "write command", value: param.command || param.cmd });
   if (param.min !== undefined || param.max !== undefined) rows.push({ label: "range", value: `${param.min ?? "—"} .. ${param.max ?? "—"}` });
   if (param.enum && typeof param.enum === "object") {
@@ -580,9 +902,24 @@ function semanticValueRows(param, value, quality) {
   return rows;
 }
 
-export function SemanticValuePopup({ param, value, quality, children, className = "" }) {
+const PeerValue = React.memo(({ resolvedDeviceId, instance, peer }) => {
+  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, peer?.id, instance);
+  if (!peer) return null;
+  const displayValue = formatWithUnit(value, peer.unit, peer.id);
+  const kind = peer.role === "monitor" ? "telemetry" : "telecommand";
+  return (
+    <span>
+      {kind} <b>{peer.name || peer.label || `#${peer.id}`}</b>
+      <span className="peer-val" style={{ marginLeft: 8, color: "var(--muted)" }}>
+        {displayValue} <span className={"q-" + quality} style={{ fontSize: "0.8em", opacity: 0.7 }}>({quality})</span>
+      </span>
+    </span>
+  );
+});
+
+export function SemanticValuePopup({ param, value, quality, ageMs, children, className = "" }) {
   const [open, setOpen] = useState(false);
-  const rows = semanticValueRows(param || {}, value, quality);
+  const rows = semanticValueRows(param || {}, value, quality, ageMs);
   return (
     <span
       className={"semantic-value-popup " + className}
@@ -606,50 +943,27 @@ export function SemanticValuePopup({ param, value, quality, children, className 
 
 export function WriteLifecycleTrace({ param, deviceId, instance, phase = "idle", elapsedMs = 0, leaseHolder, holderId, busy = false, staged = "", commandName, trace = null }) {
   const dangerous = Boolean(param && (param.dangerous || param.cmd === "reset" || param.cmd === "save_to_flash"));
-  const youHold = leaseHolder === holderId;
-  const tracePhase = trace && trace.phase ? trace.phase : phase;
-  const traceStatus = trace && trace.status ? trace.status : (tracePhase === "done" ? "completed" : tracePhase === "error" ? "failed" : tracePhase);
   const unit = (param && param.unit) || (trace && trace.unit) || "";
   const paramId = param && param.id !== undefined ? param.id : trace && trace.paramId;
-  const phaseElapsed = trace && trace.at ? Date.now() - trace.at : elapsedMs;
-  const valueRows = trace ? [
-    { label: "current", value: formatWithUnit(trace.currentValue, unit, paramId) },
-    { label: "prospective", value: formatWithUnit(trace.prospectiveValue, unit, paramId) },
-    { label: "submitted", value: formatWithUnit(trace.submittedValue, unit, paramId) },
-    { label: "confirmed", value: trace.confirmedValue !== undefined ? formatWithUnit(trace.confirmedValue, unit, paramId) : traceStatus },
-  ] : [];
-  const steps = [
-    { key: "prepare", label: "prepare", detail: staged ? `staged ${staged}` : "no staged value" },
-    { key: "lease", label: "lease", detail: youHold ? "held locally" : (leaseHolder ? `held by ${leaseHolder}` : "available") },
-    { key: "validate", label: "validate", detail: dangerous ? "confirmation required" : "range / type check" },
-    { key: "write", label: "write", detail: commandName || (trace && trace.commandName) || (param && (param.command || param.cmd)) || "write_float32" },
-    { key: "ack", label: "ack", detail: tracePhase === "done" ? traceStatus : (tracePhase === "error" ? (trace && trace.error || "failed") : (busy ? "waiting" : "idle")) },
-  ];
+
   return (
-    <div className="write-lifecycle-trace" data-phase={tracePhase} title={`device=${deviceId} instance=${instance || 1}`}>
-      <div className="write-lifecycle-trace__head">
-        <span className="write-lifecycle-trace__title">Write lifecycle</span>
-        <span className="write-lifecycle-trace__meta">{busy ? "busy" : traceStatus} · {Math.max(0, Math.round(phaseElapsed))} ms</span>
-      </div>
-      <div className="write-lifecycle-trace__steps">
-        {steps.map((step) => (
-          <span key={step.key} className={"write-lifecycle-trace__step " + (tracePhase === step.key || (tracePhase === "done" && step.key === "ack") || (tracePhase === "error" && step.key === "ack") ? "on" : "")}>
-            <b>{step.label}</b>
-            <em>{step.detail}</em>
-          </span>
-        ))}
-      </div>
-      {valueRows.length > 0 && (
-        <div className="write-lifecycle-trace__values">
-          {valueRows.map((row) => (
-            <span key={row.label} className="write-lifecycle-trace__value-row">
-              <b>{row.label}</b>
-              <em>{row.value}</em>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
+    <SharedWriteLifecycleTrace
+      phase={phase}
+      status={trace?.status}
+      unit={unit}
+      paramId={paramId}
+      deviceId={deviceId}
+      instance={instance}
+      elapsedMs={elapsedMs}
+      leaseHolder={leaseHolder}
+      holderId={holderId}
+      busy={busy}
+      staged={staged}
+      dangerous={dangerous}
+      commandName={commandName}
+      trace={trace}
+      formatValue={formatWithUnit}
+    />
   );
 }
 
@@ -679,6 +993,15 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
       : (stagedTrim !== "" && !Number.isNaN(stagedNum)
          && (param.min === undefined || stagedNum >= param.min)
          && (param.max === undefined || stagedNum <= param.max));
+  
+  const validationError = !stagedTrim ? "" : (
+    isEnumWrite ? (!enumValues.includes(stagedTrim) ? "Invalid enum selection" : "") :
+    isTextWrite ? (stagedTrim.length > 240 ? "Text too long (max 240)" : "") :
+    (Number.isNaN(stagedNum) ? "Invalid number format" :
+     (param.min !== undefined && stagedNum < param.min ? `Below minimum (${param.min})` :
+      (param.max !== undefined && stagedNum > param.max ? `Above maximum (${param.max})` : "")))
+  );
+
   const needsTypeConfirm = dangerous && stagedTrim !== "";
   const confirmReady = !needsTypeConfirm || confirm.trim().toUpperCase() === "WRITE";
 
@@ -700,22 +1023,37 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
       }
       setPhase("validate");
       setPhaseSince(Date.now());
-      const cmdName = MecomAPI.commandNameFor(param);
-      const val = isTextWrite ? stagedTrim : (isEnumWrite ? parseInt(stagedTrim, 10) : stagedNum);
-      const req = { name: cmdName, arguments: { param: param.id, instance: param.instance ?? 1, value: val } };
-      setPhase("write");
+      const commandName = MecomAPI.commandNameFor(param);
+      const body = await MecomAPI.write(deviceId, {
+        name: commandName || (isTextWrite ? "write_big_data_string" : (isEnumWrite || param.type === "int32" ? "write_int32" : "write_float32")),
+        arguments: {
+          param: param.id,
+          instance: param.instance || 1,
+          value: isTextWrite ? stagedTrim : (isEnumWrite ? Number(stagedTrim) : stagedNum),
+        },
+      }, token);
+      setPhase("ack");
       setPhaseSince(Date.now());
-      await MecomAPI.write(deviceId, req, token);
+      if (body.status === "completed" || body.status === "confirmed") {
+        const confirmed = body.result && body.result.confirmed_value;
+        const matched = body.result && body.result.readback_matched;
+        if (matched === false) {
+           throw new Error(`Readback mismatch: requested ${stagedTrim}, confirmed ${confirmed}`);
+        }
+        toast.push({ 
+          kind: "ok", 
+          title: "Command validated", 
+          body: `Parameter ${param.id} verified as ${confirmed} ${param.unit || ""}` 
+        });
+        setStaged("");
+        onApplied && onApplied();
+      } else {
+        throw new Error(body.error || body.status || "Command failed");
+      }
       setPhase("done");
-      setPhaseSince(Date.now());
-      toast.push({ kind: "ok", title: `${param.name} = ${stagedTrim}${param.unit ? " " + param.unit : ""}`, body: `${deviceId}` });
-      setStaged(""); setConfirm("");
-      onApplied && onApplied();
     } catch (err) {
       setPhase("error");
-      setPhaseSince(Date.now());
-      const c = categorizeError(err);
-      toast.push({ kind: c.kind, title: c.cat.toUpperCase(), body: err.message || String(err) });
+      toast.push({ kind: "bad", title: "Command failed", body: err.message });
     } finally {
       setBusy(false);
     }
@@ -727,6 +1065,13 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
         <div>
           <div className="nm">{param.name}</div>
           <div className="id">MeCom #{param.id}{param.instance ? `:${param.instance}` : ":1"} · {MecomAPI.commandNameFor(param)}</div>
+          {param.help && <div className="input-card-help">{param.help}</div>}
+          {param.safety_note && <div className="input-card-safety">CAUTION: {param.safety_note}</div>}
+          {(param.min !== undefined || param.max !== undefined) && (
+            <div className="input-card-limits">
+              Limits: <b>{param.min ?? "-∞"}</b> to <b>{param.max ?? "+∞"}</b> {param.unit}
+            </div>
+          )}
         </div>
         <button className="x" onClick={onClose}>✕</button>
       </div>
@@ -755,12 +1100,15 @@ export function InputCard({ deviceId, param, leaseHolder, holderId, onClose, onA
         <div className={"new" + (stagedTrim ? " has" : "")}>
           <div className="lbl">Staged value</div>
           <input
+            className={"input-card-field " + (validationError ? "invalid" : "")}
+            type={isTextWrite ? "text" : "number"}
+            step="any"
             value={staged}
-            placeholder={isTextWrite ? "note" : isEnumWrite ? enumValues.join("/") : "value"}
             onChange={(e) => setStaged(e.target.value)}
-            inputMode={isTextWrite ? "text" : "decimal"}
-            maxLength={isTextWrite ? 240 : undefined}
+            disabled={busy || someoneElse}
+            placeholder={isTextWrite ? "Enter text..." : "Enter value..."}
           />
+          {validationError && <div className="input-card-error">{validationError}</div>}
         </div>
       </div>
       {(param.min !== undefined || param.max !== undefined) && (
@@ -799,5 +1147,13 @@ export function MetricTile({ label, value, unit, kind = "", title }) {
         <div className={"val " + kind}>{formattedValue}</div>
       </div>
     </SemanticValuePopup>
+  );
+}
+function SparklineWrapper({ deviceId, paramId, instance }) {
+  const data = useSparkline(deviceId, paramId, instance);
+  return (
+    <div className="tree-sparkline">
+      <Sparkline data={data} width={80} height={16} />
+    </div>
   );
 }

@@ -1,0 +1,104 @@
+{
+  "schema_version": "meerstetter.operator_projection.v1",
+  "projection_id": "operator",
+  "label": "Operator",
+  "description": "Default operator tree projection for Meerstetter TEC controller signals. This file maps protocol catalogue entries into deterministic UI bundles without changing the canonical MeCom signal definitions.",
+  "primary_mappings": [
+    {
+      "bundle": "device_identity",
+      "label": "Device identity",
+      "path": ["Device", "Identity"],
+      "ids": [102, 120],
+      "instance_scope": "device",
+      "sort": 10
+    },
+    {
+      "bundle": "temperature_measurement",
+      "label": "Temperature measurement",
+      "path": ["Temperature Controller", "Measured Temperatures"],
+      "ids": [1000, 1001, 1010, 1011, 1200],
+      "instance_scope": "temperature_channel",
+      "sort": 100
+    },
+    {
+      "bundle": "output_measurement",
+      "label": "Output measurement",
+      "path": ["Output Stage", "Measured Output"],
+      "ids": [1020, 1021, 1022],
+      "instance_scope": "all_channels",
+      "sort": 200
+    },
+    {
+      "bundle": "output_controls",
+      "label": "Output controls and limits",
+      "path": ["Output Stage", "Controls And Limits"],
+      "ids": [2000, 2010, 2020, 2021, 2030, 2031, 2033, 2040],
+      "instance_scope": "all_channels",
+      "sort": 300
+    },
+    {
+      "bundle": "temperature_setpoint",
+      "label": "Temperature setpoint",
+      "path": ["Temperature Controller", "Setpoint And Ramp"],
+      "ids": [3000, 3002, 3003, 3004],
+      "instance_scope": "temperature_channel",
+      "sort": 400
+    },
+    {
+      "bundle": "pid_tuning",
+      "label": "PID tuning",
+      "path": ["Temperature Controller", "PID Tuning"],
+      "ids": [3010, 3011, 3012, 3013],
+      "instance_scope": "temperature_channel",
+      "default_collapsed": true,
+      "sort": 500
+    },
+    {
+      "bundle": "thermal_model",
+      "label": "Thermal model",
+      "path": ["Temperature Controller", "Thermal Model"],
+      "ids": [3020, 3030, 3033, 3034, 3040, 3041, 3050, 3051],
+      "instance_scope": "temperature_channel",
+      "default_collapsed": true,
+      "sort": 600
+    },
+    {
+      "bundle": "cascade_control",
+      "label": "Cascade control",
+      "path": ["Cascade Control", "Settings"],
+      "ids": [53120, 53121, 53122, 53123],
+      "instance_scope": "temperature_channel",
+      "sort": 700
+    },
+    {
+      "bundle": "cascade_tuning",
+      "label": "Cascade tuning",
+      "path": ["Cascade Control", "PID And Ramp"],
+      "ids": [53124, 53125, 53126, 53128, 53129, 53130, 53131, 53133, 53134, 53135],
+      "instance_scope": "temperature_channel",
+      "default_collapsed": true,
+      "sort": 800
+    },
+    {
+      "bundle": "cascade_monitor",
+      "label": "Cascade monitor",
+      "path": ["Cascade Control", "Monitor"],
+      "ids": [53136, 53137, 53138, 53139, 53140],
+      "instance_scope": "temperature_channel",
+      "default_collapsed": true,
+      "sort": 900
+    }
+  ],
+  "secondary_mappings": [
+    {
+      "bundle": "output_stage_diagnostics",
+      "label": "Output stage diagnostics",
+      "path": ["Diagnostics", "Output Stage"],
+      "ids": [40000],
+      "instance_scope": "all_channels",
+      "default_collapsed": true,
+      "reason": "Readable output-stage temperature is useful for fault investigation, but it is not part of the default operator-visible TEC control surface.",
+      "sort": 910
+    }
+  ]
+}
