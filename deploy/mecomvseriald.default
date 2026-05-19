@@ -8,6 +8,13 @@ MECOM_LISTEN=0.0.0.0:50000
 MECOM_TIMEOUT=2s
 MECOM_RECONNECT_DELAY=500ms
 
+# How to handle legacy/discovery clients that send MeCom address 0.
+# Public default is disabled. Site deployments may choose:
+# - disabled: reject address-zero requests;
+# - route-order: assign new address-zero clients through the configured routes;
+# - a fixed configured MeCom address, for example 0x4C.
+MECOM_ADDRESS_ZERO=disabled
+
 # Address -> downstream target. Use serial:/dev/serial/by-id/... so cable swaps
 # don't shuffle which device sits on which ttyUSB index.
 MECOM_ROUTE_1=75=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_A-if00-port0@57600

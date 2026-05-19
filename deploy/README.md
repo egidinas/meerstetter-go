@@ -45,6 +45,7 @@ sudo udevadm trigger --subsystem-match=tty
 # 3. Run interactively to confirm routing
 mecomvseriald \
   -listen 0.0.0.0:50000 \
+  -address-zero disabled \
   -route 75=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_A-if00-port0@57600 \
   -route 76=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_B-if00-port0@57600 \
   -route 81=serial:/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_CONTROLLER_C-if00-port0@57600 \
@@ -99,6 +100,25 @@ COM-port routes, for example:
 mecomvseriald -listen 0.0.0.0:50000 -route 75=COM3@57600
 ```
 
+### Address-zero discovery clients
+
+Some legacy tools, including commissioning software that discovers a device
+before switching to an explicit address, may initially send MeCom frames to
+address `0`. A multi-device server cannot infer the operator's intended serial
+number from those frames. Keep the public default disabled and set an explicit
+deployment policy only where needed:
+
+| `MECOM_ADDRESS_ZERO` / `-address-zero` | Behavior |
+|----------------------------------------|----------|
+| `disabled` | Reject address-zero requests with a clear device-server error. |
+| `route-order` | Assign new address-zero client connections through the configured route order. |
+| fixed address | Send all address-zero requests to that configured MeCom address. |
+
+Use fixed-address mode only as a site-local operator setting, for example when
+a Windows commissioning tool is intentionally pointed at one current device.
+Do not bake a serial number into the binary, public service unit, or checked-in
+defaults.
+
 The files in this `deploy/` directory are Linux deployment helpers only:
 systemd handles restart policy and udev handles serial permissions. On
 Windows, run the binary interactively during commissioning or wrap it with a
@@ -134,6 +154,7 @@ Prefer the device server unless a specific legacy client requires this mode.
 |---------|-------|-----|
 | `open: permission denied` in journal | runtime user lacks serial access | install udev rule (`60-ftdi-meerstetter.rules`) or add user to `dialout` |
 | `no downstream route for MeCom address 0xNN` | client sent frame for an address with no `-route` | check `-route` flags and the client's `Address` field |
+| `no downstream route for MeCom address 0x00` | legacy/discovery client sent address zero and address-zero routing is disabled | set `MECOM_ADDRESS_ZERO` to `route-order` or to the current configured device address as a site-local operator override |
 | Clients see frames cross-replied | two clients hit the same downstream concurrently | check the unit isn't started twice; broker serializes per address, not across them |
 | `mecomvseriald` exits with `address 0 is reserved` | broadcast address 0 cannot be routed | use the device's real address (1–254) |
 | Bridge stays up but clients see EOF | downstream serial port unplugged | server reconnects automatically with `reconnect-delay`; check `journalctl -u mecomvseriald` |
