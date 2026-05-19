@@ -13,13 +13,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/mecom/writelease"
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 func TestLoadConfigValidatesRequiredFields(t *testing.T) {
@@ -222,8 +223,21 @@ func TestGatewayCatalogueUsesConfiguredChannelInventory(t *testing.T) {
 	if byID["tec-75"].ChannelCount != 3 || byID["tec-76"].ChannelCount != 6 {
 		t.Fatalf("device channel counts = %+v, want tec-75=3 tec-76=6", byID)
 	}
-	if got := byID["tec-76"].Channels[0]; got.Instance != 6 || got.Role != "supply" || got.RoleSource != "config" || got.Label != "Aux supply" {
-		t.Fatalf("device channel metadata = %+v", got)
+	if len(byID["tec-75"].Channels) != 3 || len(byID["tec-76"].Channels) != 6 {
+		t.Fatalf("device channel inventory lengths = tec-75:%d tec-76:%d, want 3 and 6", len(byID["tec-75"].Channels), len(byID["tec-76"].Channels))
+	}
+	configured := channelView{}
+	for _, ch := range byID["tec-76"].Channels {
+		if ch.Instance == 6 {
+			configured = ch
+			break
+		}
+	}
+	if configured.Instance != 6 || configured.Role != "supply" || configured.RoleSource != "config" || configured.Label != "Aux supply" {
+		t.Fatalf("configured device channel metadata = %+v", configured)
+	}
+	if got := byID["tec-76"].Channels[0]; got.Instance != 1 || got.Role != "temp" || got.RoleSource != "gateway-default" {
+		t.Fatalf("default device channel metadata = %+v", got)
 	}
 
 	var catalogue struct {
@@ -314,6 +328,15 @@ func TestGatewayServesGraphTileContract(t *testing.T) {
 	if tile.Series[0].Label == "" || tile.Series[1].Label == "" || !strings.Contains(tile.Series[0].Label, "SN76") || !strings.Contains(tile.Series[1].Label, "SN75") {
 		t.Fatalf("unexpected series labels: %+v", []string{tile.Series[0].Label, tile.Series[1].Label})
 	}
+	if tile.Series[0].Quality != "ok" || tile.Series[1].Quality != "ok" {
+		t.Fatalf("unexpected series quality: %+v", []string{tile.Series[0].Quality, tile.Series[1].Quality})
+	}
+	if !tile.Series[0].DefaultVisible || !tile.Series[1].DefaultVisible || tile.Series[0].VisibilityReason != "" || tile.Series[1].VisibilityReason != "" {
+		t.Fatalf("unexpected default visibility for ok series: %+v", tile.Series)
+	}
+	if tile.Series[0].Diagnostics.Status != "ok" || tile.Series[1].Diagnostics.Status != "ok" {
+		t.Fatalf("unexpected series diagnostics: %+v", []graphTileItemDiag{tile.Series[0].Diagnostics, tile.Series[1].Diagnostics})
+	}
 	if len(tile.Axes) == 0 || tile.Axes[0].Unit != "degC" {
 		t.Fatalf("unexpected axes: %+v", tile.Axes)
 	}
@@ -323,17 +346,742 @@ func TestGatewayServesGraphTileContract(t *testing.T) {
 
 	var defaultTile graphTileResponse
 	getJSON(t, ts.URL+"/api/graph/tiles/default-temp/day", http.StatusOK, &defaultTile)
-	if defaultTile.Level != "day" || defaultTile.TimeWindowMs != 24*60*60_000 || len(defaultTile.Series) != 2 {
+	if defaultTile.Level != "day" || defaultTile.TimeWindowMs != 24*60*60_000 || len(defaultTile.Series) != 4 {
 		t.Fatalf("unexpected default day tile: level=%s window=%d series=%d", defaultTile.Level, defaultTile.TimeWindowMs, len(defaultTile.Series))
+	}
+	for _, series := range defaultTile.Series {
+		wantKey := fmt.Sprintf("%s:%d:%d", series.Source.DeviceID, series.Source.ParamID, series.Source.Instance)
+		if series.ID != wantKey || series.SeriesID != wantKey {
+			t.Fatalf("default temperature series identity = id %q series_id %q, want %q", series.ID, series.SeriesID, wantKey)
+		}
+		if series.Source.ParamID != 1000 {
+			t.Fatalf("default temperature tile included param %d, want 1000", series.Source.ParamID)
+		}
+		if series.Source.Instance != 1 && series.Source.Instance != 3 {
+			t.Fatalf("default temperature tile included instance %d, want temperature-control channels 1/3", series.Source.Instance)
+		}
 	}
 	if !tileFilesContain(defaultTile.TileFiles, "three_hour", 3*60*60_000) {
 		t.Fatalf("three_hour tile file missing from manifest: %+v", defaultTile.TileFiles)
+	}
+
+	var supplyTile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/fleet-supply/live", http.StatusOK, &supplyTile)
+	if len(supplyTile.Series) != 4 {
+		t.Fatalf("supply default series = %d, want supply channels 2/4 on both devices", len(supplyTile.Series))
+	}
+	if len(supplyTile.Axes) == 0 || supplyTile.Axes[0].Unit != "W" || supplyTile.Axes[0].Label != "Power [W]" {
+		t.Fatalf("unexpected supply axes: %+v", supplyTile.Axes)
+	}
+	for _, series := range supplyTile.Series {
+		wantKey := fmt.Sprintf("%s:%d:%d", series.Source.DeviceID, series.Source.ParamID, series.Source.Instance)
+		if series.ID != wantKey || series.SeriesID != wantKey {
+			t.Fatalf("supply series identity = id %q series_id %q, want %q", series.ID, series.SeriesID, wantKey)
+		}
+		if series.Source.ParamID != 1022 || series.Unit != "W" || !strings.Contains(series.Label, "OP") {
+			t.Fatalf("supply tile series = %+v, want output power", series)
+		}
+		if series.Source.Instance != 2 && series.Source.Instance != 4 {
+			t.Fatalf("supply tile included instance %d, want power-supply channels 2/4", series.Source.Instance)
+		}
 	}
 
 	var threeHourTile graphTileResponse
 	getJSON(t, ts.URL+"/api/graph/tiles/default-temp/3h", http.StatusOK, &threeHourTile)
 	if threeHourTile.Level != "three_hour" || threeHourTile.TimeWindowMs != 3*60*60_000 || threeHourTile.Diagnostics.TileSource != "bounded-gateway-history-cache" {
 		t.Fatalf("unexpected 3h tile: level=%s window=%d source=%s", threeHourTile.Level, threeHourTile.TimeWindowMs, threeHourTile.Diagnostics.TileSource)
+	}
+}
+
+func TestGatewayGraphHistoryKeepsHotRawSamplesAndReducesLongRangeHistory(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	now := time.Date(2026, 5, 19, 12, 0, 0, 250_000_000, time.UTC)
+	s.recordGraphSample("tec-75", 1000, 1, 20.0, "ok", now)
+	s.recordGraphSample("tec-75", 1000, 1, 1.0, "ok", now.Add(400*time.Millisecond))
+
+	hot := s.lookupGraphHistory("tec-75", 1000, 1, 15*60*1000, now.Add(time.Second))
+	if len(hot.TS) != 2 || len(hot.V) != 2 {
+		t.Fatalf("15-minute history = %+v, want 2 raw samples", hot)
+	}
+	if hot.V[0] != 20.0 || hot.V[1] != 1.0 {
+		t.Fatalf("15-minute history values = %+v, want raw samples", hot.V)
+	}
+
+	long := s.lookupGraphHistory("tec-75", 1000, 1, 3*24*60*60*1000, now.Add(time.Second))
+	if len(long.TS) != 1 || len(long.V) != 1 {
+		t.Fatalf("3-day history = %+v, want 1 mean bucket", long)
+	}
+	if long.V[0] != 10.5 {
+		t.Fatalf("3-day history mean = %v, want 10.5", long.V[0])
+	}
+}
+
+func TestGatewayGraphTileDuplicatesSingleHistoryPointChronologically(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	now := time.Now().UTC().Add(-30 * time.Second)
+	s.recordGraphSample("tec-75", 1022, 2, 0.0041, "ok", now)
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/single-point/live?series=tec-75:1022:2", http.StatusOK, &tile)
+	if len(tile.Series) != 1 {
+		t.Fatalf("series count = %d, want 1", len(tile.Series))
+	}
+	history := tile.Series[0].History
+	if len(history.TS) != 2 || len(history.V) != 2 {
+		t.Fatalf("history = %+v, want duplicated two-point series", history)
+	}
+	t0, err := time.Parse(time.RFC3339Nano, history.TS[0])
+	if err != nil {
+		t.Fatalf("parse t0: %v", err)
+	}
+	t1, err := time.Parse(time.RFC3339Nano, history.TS[1])
+	if err != nil {
+		t.Fatalf("parse t1: %v", err)
+	}
+	if !t0.Before(t1) {
+		t.Fatalf("history timestamps are not chronological: %+v", history.TS)
+	}
+	if history.V[0] != 0.0041 || history.V[1] != 0.0041 {
+		t.Fatalf("history values = %+v, want duplicated original value", history.V)
+	}
+}
+
+func TestGatewayGraphHistoryImportSeedsTileCache(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-75",
+		Endpoint: "tcp:127.0.0.1:50000",
+		Address:  75,
+		Label:    "TEC 75",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := fmt.Sprintf(`{"schema_version":"signalforge.graph_tile.v1","id":"imported","renderer":"signalforge.tile.uplot","series":[{"id":"tec-75:1000:1","label":"SN75-ch1 OT","source":{"device_id":"tec-75","param_id":1000,"instance":1},"history":{"ts":[%q,%q],"v":[22.25,22.5]}}]}`,
+		now.Add(-2*time.Minute).Format(time.RFC3339Nano),
+		now.Add(-time.Minute).Format(time.RFC3339Nano),
+	)
+	raw := postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusOK)
+	var imported graphHistoryImportResponse
+	if err := json.Unmarshal(raw, &imported); err != nil {
+		t.Fatal(err)
+	}
+	if imported.Status != "ok" || imported.SeriesCount != 1 || imported.ImportedSamples != 2 {
+		t.Fatalf("import response = %+v, want 1 series and 2 samples", imported)
+	}
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/imported/day?series=tec-75:1000:1", http.StatusOK, &tile)
+	if len(tile.Series) != 1 {
+		t.Fatalf("series count = %d, want 1", len(tile.Series))
+	}
+	series := tile.Series[0]
+	if series.ID != "tec-75:1000:1" || series.Source.DeviceID != "tec-75" || series.Source.ParamID != 1000 || series.Source.Instance != 1 {
+		t.Fatalf("series identity = %+v, want exact imported identity", series.Source)
+	}
+	if series.Quality != gatewayQualityOK || series.Diagnostics.HistoryPoints != 2 || series.Diagnostics.LiveRead != "" {
+		t.Fatalf("series diagnostics = quality %q %+v, want history-backed ok without live read", series.Quality, series.Diagnostics)
+	}
+	if tile.Diagnostics.TileSource != "bounded-gateway-history-cache" {
+		t.Fatalf("tile source = %q, want bounded-gateway-history-cache", tile.Diagnostics.TileSource)
+	}
+	if len(series.History.V) != 2 || series.History.V[0] != 22.25 || series.History.V[1] != 22.5 {
+		t.Fatalf("history values = %+v, want imported values", series.History.V)
+	}
+}
+
+func TestGatewayGraphHistoryImportHidesDetachedTemperatureSeries(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-75",
+		Endpoint: "tcp:127.0.0.1:50000",
+		Address:  75,
+		Label:    "TEC 75",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := fmt.Sprintf(`{"schema_version":"signalforge.graph_tile.v1","series":[{"source":{"device_id":"tec-75","param_id":1000,"instance":1},"history":{"ts":[%q,%q],"v":[23.25,23.5]}},{"source":{"device_id":"tec-75","param_id":1000,"instance":3},"history":{"ts":[%q,%q],"v":[-55.5,-55.25]}}]}`,
+		now.Add(-20*time.Second).Format(time.RFC3339Nano),
+		now.Add(-10*time.Second).Format(time.RFC3339Nano),
+		now.Add(-20*time.Second).Format(time.RFC3339Nano),
+		now.Add(-10*time.Second).Format(time.RFC3339Nano),
+	)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusOK)
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/imported/live?series=tec-75:1000:1&series=tec-75:1000:3", http.StatusOK, &tile)
+	if len(tile.Series) != 2 {
+		t.Fatalf("series count = %d, want 2", len(tile.Series))
+	}
+
+	visible := tile.Series[0]
+	detached := tile.Series[1]
+	if visible.ID != "tec-75:1000:1" || visible.Quality != gatewayQualityOK || !visible.DefaultVisible {
+		t.Fatalf("visible imported series = id %q quality %q default_visible %v, want ok visible", visible.ID, visible.Quality, visible.DefaultVisible)
+	}
+	if detached.ID != "tec-75:1000:3" {
+		t.Fatalf("detached series id = %q, want tec-75:1000:3", detached.ID)
+	}
+	if detached.Quality != gatewayQualityDetached || detached.Diagnostics.Status != gatewayQualityDetached {
+		t.Fatalf("detached imported series = quality %q diagnostics %+v, want detached", detached.Quality, detached.Diagnostics)
+	}
+	if detached.DefaultVisible || detached.VisibilityReason == "" {
+		t.Fatalf("detached imported default visibility = %v reason %q, want hidden with reason", detached.DefaultVisible, detached.VisibilityReason)
+	}
+	if detached.Diagnostics.SuppressedOpenSensorPoints != 2 || tile.Diagnostics.SuppressedOpenSensorPoints != 2 {
+		t.Fatalf("suppressed detached points = item %d tile %d, want 2", detached.Diagnostics.SuppressedOpenSensorPoints, tile.Diagnostics.SuppressedOpenSensorPoints)
+	}
+	if len(detached.History.V) != 2 || detached.History.V[0] != -55.5 || detached.History.V[1] != -55.25 {
+		t.Fatalf("detached imported history = %+v, want diagnostic values preserved", detached.History.V)
+	}
+}
+
+func TestGatewayGraphHistoryExportRoundTripShape(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-75",
+		Endpoint: "tcp:127.0.0.1:50000",
+		Address:  75,
+		Label:    "TEC 75",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := fmt.Sprintf(`{"schema_version":"signalforge.graph_tile.v1","series":[{"source":{"device_id":"tec-75","param_id":1000,"instance":1},"history":{"ts":[%q,%q],"v":[22.25,22.5]}}]}`,
+		now.Add(-2*time.Minute).Format(time.RFC3339Nano),
+		now.Add(-time.Minute).Format(time.RFC3339Nano),
+	)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusOK)
+
+	var exported graphHistoryExportResponse
+	getJSON(t, ts.URL+"/api/graph/history/export?level=three_day&series=tec-75:1000:1", http.StatusOK, &exported)
+
+	if exported.SchemaVersion != "signalforge.graph_tile.v1" || exported.Source != "meerstetter-go.graph-history" {
+		t.Fatalf("unexpected export identity: %+v", exported)
+	}
+	if exported.Level != "three_day" || exported.TimeWindowMs != 3*24*60*60_000 {
+		t.Fatalf("unexpected export window: level=%s window=%d", exported.Level, exported.TimeWindowMs)
+	}
+	if exported.SeriesCount != 1 || exported.SampleCount != 2 || len(exported.Series) != 1 {
+		t.Fatalf("unexpected export counts: %+v", exported)
+	}
+	series := exported.Series[0]
+	if series.DeviceID != "tec-75" || series.ParamID != 1000 || series.Instance != 1 {
+		t.Fatalf("export identity = %+v, want exact imported identity", series)
+	}
+	if series.Source.DeviceID != "tec-75" || series.Source.ParamID != 1000 || series.Source.Instance != 1 || series.Source.SignalID == "" {
+		t.Fatalf("export source = %+v, want signal source metadata", series.Source)
+	}
+	if len(series.History.TS) != 2 || len(series.History.V) != 2 || series.History.V[0] != 22.25 || series.History.V[1] != 22.5 {
+		t.Fatalf("exported history = %+v, want imported bucket values", series.History)
+	}
+
+	fresh := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-75",
+		Endpoint: "tcp:127.0.0.1:50000",
+		Address:  75,
+		Label:    "TEC 75",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	freshTS := httptest.NewServer(fresh.routes())
+	defer freshTS.Close()
+	raw, err := json.Marshal(graphHistoryImportRequest{
+		SchemaVersion: exported.SchemaVersion,
+		Source:        exported.Source,
+		Series:        exported.Series,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	postJSON(t, freshTS.URL+"/api/graph/history/import", string(raw), http.StatusOK)
+
+	var tile graphTileResponse
+	getJSON(t, freshTS.URL+"/api/graph/tiles/roundtrip/day?series=tec-75:1000:1", http.StatusOK, &tile)
+	if len(tile.Series) != 1 || len(tile.Series[0].History.V) != 2 || tile.Series[0].History.V[0] != 22.25 || tile.Series[0].History.V[1] != 22.5 {
+		t.Fatalf("round-tripped tile history = %+v", tile.Series)
+	}
+}
+
+func TestGatewayGraphHistoryExportEmptyIsOk(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var exported graphHistoryExportResponse
+	getJSON(t, ts.URL+"/api/graph/history/export?series=tec-75:1000:1", http.StatusOK, &exported)
+	if exported.SchemaVersion != "signalforge.graph_tile.v1" || exported.SeriesCount != 0 || exported.SampleCount != 0 || len(exported.Series) != 0 {
+		t.Fatalf("empty export = %+v, want empty successful archive", exported)
+	}
+}
+
+func TestGatewayGraphHistoryImportRejectsUnknownDevice(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	body := fmt.Sprintf(`{"series":[{"source":{"device_id":"tec-999","param_id":1000,"instance":1},"history":{"ts":[%q],"v":[22.25]}}]}`, now)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusBadRequest)
+}
+
+func TestGatewayGraphHistoryImportRejectsAtomically(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	body := fmt.Sprintf(`{"series":[{"source":{"device_id":"tec-75","param_id":1000,"instance":1},"history":{"ts":[%q],"v":[22.25]}},{"source":{"device_id":"tec-999","param_id":1000,"instance":1},"history":{"ts":[%q],"v":[23.25]}}]}`, now, now)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusBadRequest)
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/imported/day?series=tec-75:1000:1", http.StatusOK, &tile)
+	if len(tile.Series) != 1 {
+		t.Fatalf("series count = %d, want 1", len(tile.Series))
+	}
+	if tile.Series[0].Diagnostics.HistoryPoints != 0 || len(tile.Series[0].History.TS) != 0 || len(tile.Series[0].History.V) != 0 {
+		t.Fatalf("rejected import persisted history: diagnostics=%+v history=%+v", tile.Series[0].Diagnostics, tile.Series[0].History)
+	}
+}
+
+func TestGatewayGraphHistoryImportRejectsMalformedHistoryShape(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	body := fmt.Sprintf(`{"series":[{"source":{"device_id":"tec-75","param_id":1000,"instance":1},"history":{"ts":[%q],"v":[22.25,22.5]}}]}`, now)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusBadRequest)
+}
+
+func TestGatewayGraphHistoryImportRejectsIdentityMismatch(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	body := fmt.Sprintf(`{"series":[{"device_id":"tec-75","source":{"device_id":"tec-76","param_id":1000,"instance":1},"history":{"ts":[%q],"v":[22.25]}}]}`, now)
+	postJSON(t, ts.URL+"/api/graph/history/import", body, http.StatusBadRequest)
+}
+
+func TestGatewayGraphTileMissingSeriesStaysEmpty(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/missing-series/live?series=tec-75:1000:1", http.StatusOK, &tile)
+
+	if len(tile.Series) != 1 {
+		t.Fatalf("series count = %d, want 1", len(tile.Series))
+	}
+	got := tile.Series[0]
+	if got.Quality != "missing" {
+		t.Fatalf("quality = %q, want missing", got.Quality)
+	}
+	if got.DefaultVisible || got.VisibilityReason == "" {
+		t.Fatalf("missing series default visibility = %v reason %q, want hidden with reason", got.DefaultVisible, got.VisibilityReason)
+	}
+	if got.Diagnostics.Status != "missing" || got.Diagnostics.LiveRead != "unavailable" || got.Diagnostics.Message == "" {
+		t.Fatalf("missing-series diagnostics = %+v", got.Diagnostics)
+	}
+	if len(got.Points) != 0 {
+		t.Fatalf("missing-series points = %+v, want empty", got.Points)
+	}
+	if len(got.History.TS) != 0 || len(got.History.V) != 0 {
+		t.Fatalf("missing-series history = %+v, want empty", got.History)
+	}
+	if got.History.TS == nil || got.History.V == nil {
+		t.Fatalf("missing-series history slices are nil: %+v", got.History)
+	}
+	if tile.Diagnostics.SeriesCount != 1 || tile.Diagnostics.PointCount != 0 || tile.Diagnostics.Status != "ok" {
+		t.Fatalf("unexpected tile diagnostics for missing series: %+v", tile.Diagnostics)
+	}
+}
+
+func TestGatewayArchiveGraphTileDoesNotUseLiveReadFallback(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 25.5,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var archive graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/no-history/three_day?series=tec-75:1000:1", http.StatusOK, &archive)
+	if len(archive.Series) != 1 {
+		t.Fatalf("archive series count = %d, want 1", len(archive.Series))
+	}
+	gotArchive := archive.Series[0]
+	if gotArchive.Quality != gatewayQualityMissing || gotArchive.Diagnostics.Status != gatewayQualityMissing {
+		t.Fatalf("archive series quality/diagnostics = %q %+v, want missing without live synthesis", gotArchive.Quality, gotArchive.Diagnostics)
+	}
+	if gotArchive.Diagnostics.LiveRead != "not_attempted" {
+		t.Fatalf("archive live_read = %q, want not_attempted", gotArchive.Diagnostics.LiveRead)
+	}
+	if len(gotArchive.Points) != 0 || len(gotArchive.History.TS) != 0 || len(gotArchive.History.V) != 0 {
+		t.Fatalf("archive series was synthesized from live data: points=%+v history=%+v", gotArchive.Points, gotArchive.History)
+	}
+
+	var live graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/no-history/live?series=tec-75:1000:1", http.StatusOK, &live)
+	if len(live.Series) != 1 {
+		t.Fatalf("live series count = %d, want 1", len(live.Series))
+	}
+	gotLive := live.Series[0]
+	if gotLive.Quality != gatewayQualityOK || gotLive.Diagnostics.LiveRead != "ok" || len(gotLive.Points) != 2 {
+		t.Fatalf("live tile fallback = quality %q diagnostics %+v points=%+v, want explicit live fallback only", gotLive.Quality, gotLive.Diagnostics, gotLive.Points)
+	}
+}
+
+func TestGatewayReadAndGraphTileClassifyDetachedTemperatureSensor(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:3":  -55.5,
+		"1001:3":  -55.5,
+		"3000:3":  -55.5,
+		"40000:3": -55.5,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Values []gatewayReadValue `json:"values"`
+	}
+	getJSON(t, ts.URL+"/api/devices/tec-75/read?params=1000:3,1001:3,3000:3,40000:3", http.StatusOK, &got)
+	if len(got.Values) != 4 {
+		t.Fatalf("values len = %d, want 4", len(got.Values))
+	}
+	for _, idx := range []int{0, 1, 3} {
+		if got.Values[idx].Value == nil || got.Values[idx].Quality != gatewayQualityDetached {
+			t.Fatalf("value %d = %+v, want detached sensor value", idx, got.Values[idx])
+		}
+	}
+	if got.Values[2].Value == nil || got.Values[2].Quality != gatewayQualityOK {
+		t.Fatalf("target temperature quality = %+v, want ok", got.Values[2])
+	}
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/detached-temp/live?series=tec-75:1000:3&series=tec-75:3000:3", http.StatusOK, &tile)
+	if len(tile.Series) != 2 {
+		t.Fatalf("series count = %d, want 2", len(tile.Series))
+	}
+	objectTemp := tile.Series[0]
+	targetTemp := tile.Series[1]
+	if objectTemp.Quality != gatewayQualityDetached || objectTemp.Diagnostics.Status != gatewayQualityDetached {
+		t.Fatalf("object temperature series = quality %q diagnostics %+v, want detached", objectTemp.Quality, objectTemp.Diagnostics)
+	}
+	if objectTemp.DefaultVisible || objectTemp.VisibilityReason == "" {
+		t.Fatalf("detached object temperature default visibility = %v reason %q, want hidden with reason", objectTemp.DefaultVisible, objectTemp.VisibilityReason)
+	}
+	if objectTemp.Diagnostics.SuppressedOpenSensorPoints == 0 || tile.Diagnostics.SuppressedOpenSensorPoints == 0 {
+		t.Fatalf("detached points were not counted: item=%+v tile=%+v", objectTemp.Diagnostics, tile.Diagnostics)
+	}
+	if len(objectTemp.Points) == 0 || len(objectTemp.History.V) == 0 {
+		t.Fatalf("detached value should stay available for diagnostics: %+v", objectTemp)
+	}
+	if targetTemp.Quality != gatewayQualityOK || targetTemp.Diagnostics.Status != gatewayQualityOK {
+		t.Fatalf("target temperature series = quality %q diagnostics %+v, want ok", targetTemp.Quality, targetTemp.Diagnostics)
+	}
+	if !targetTemp.DefaultVisible || targetTemp.VisibilityReason != "" {
+		t.Fatalf("target temperature default visibility = %v reason %q, want visible without reason", targetTemp.DefaultVisible, targetTemp.VisibilityReason)
+	}
+}
+
+func TestGatewayReadPreservesExactChannelParameterInstances(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-76",
+		Endpoint: "tcp:127.0.0.1:50001",
+		Address:  76,
+		Label:    "TEC 76",
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-76"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 31.25,
+		"1022:2": 0.0041,
+		"1000:3": 32.50,
+		"1022:4": 0.0035,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Values []gatewayReadValue `json:"values"`
+	}
+	getJSON(t, ts.URL+"/api/devices/tec-76/read?params=1000:1,1022:2,1000:3,1022:4", http.StatusOK, &got)
+	if len(got.Values) != 4 {
+		t.Fatalf("values len = %d, want 4", len(got.Values))
+	}
+	want := []struct {
+		id       int
+		instance int
+		value    float64
+	}{
+		{1000, 1, 31.25},
+		{1022, 2, 0.0041},
+		{1000, 3, 32.50},
+		{1022, 4, 0.0035},
+	}
+	for i, w := range want {
+		if got.Values[i].ID != w.id || got.Values[i].Instance != w.instance {
+			t.Fatalf("value %d identity = %d:%d, want %d:%d", i, got.Values[i].ID, got.Values[i].Instance, w.id, w.instance)
+		}
+		if got.Values[i].Value == nil || *got.Values[i].Value != w.value || got.Values[i].Quality != gatewayQualityOK {
+			t.Fatalf("value %d = %+v, want %v ok", i, got.Values[i], w.value)
+		}
+	}
+}
+
+func TestGatewayReadValuesExposeFreshnessMetadata(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 25.5,
+		"1022:2": 0.0041,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Values []struct {
+			ID       int      `json:"id"`
+			Instance int      `json:"instance"`
+			Value    *float64 `json:"value"`
+			Quality  string   `json:"quality"`
+			At       string   `json:"at"`
+			AgeMS    *int64   `json:"age_ms"`
+		} `json:"values"`
+	}
+	getJSON(t, ts.URL+"/api/devices/tec-75/read?params=1000:1,1022:2", http.StatusOK, &got)
+	if len(got.Values) != 2 {
+		t.Fatalf("values len = %d, want 2", len(got.Values))
+	}
+	for i, value := range got.Values {
+		if value.Value == nil || value.Quality != gatewayQualityOK {
+			t.Fatalf("value %d = %+v, want readable ok value", i, value)
+		}
+		if value.At == "" {
+			t.Fatalf("value %d at = empty, want sample timestamp", i)
+		}
+		if _, err := time.Parse(time.RFC3339Nano, value.At); err != nil {
+			t.Fatalf("value %d at = %q, want RFC3339Nano timestamp: %v", i, value.At, err)
+		}
+		if value.AgeMS == nil || *value.AgeMS < 0 {
+			t.Fatalf("value %d age_ms = %v, want non-negative freshness", i, value.AgeMS)
+		}
+	}
+}
+
+func TestGatewayGraphTilePreservesExactDeviceChannelInstances(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{
+		{
+			ID:       "tec-76",
+			Endpoint: "tcp:127.0.0.1:50001",
+			Address:  76,
+			Label:    "TEC 76",
+		},
+		{
+			ID:       "tec-75",
+			Endpoint: "tcp:127.0.0.1:50000",
+			Address:  75,
+			Label:    "TEC 75",
+		},
+	}}, time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-76"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 21.25,
+		"1000:3": -55.5,
+	}}
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 22.75,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/channel-isolation/live?series=tec-76:1000:1&series=tec-76:1000:3&series=tec-75:1000:1&series=tec-75:1000:3", http.StatusOK, &tile)
+	if len(tile.Series) != 4 {
+		t.Fatalf("series count = %d, want 4", len(tile.Series))
+	}
+
+	got := map[string]graphTileItem{}
+	for _, series := range tile.Series {
+		got[series.ID] = series
+		if series.SeriesID != series.ID {
+			t.Fatalf("series %q has series_id %q, want exact identity", series.ID, series.SeriesID)
+		}
+		if series.Source.DeviceID == "" || series.Source.ParamID != 1000 || series.Source.Instance == 0 {
+			t.Fatalf("series %q source = %+v, want device/param/instance", series.ID, series.Source)
+		}
+	}
+
+	wantVisible := map[string]float64{
+		"tec-76:1000:1": 21.25,
+		"tec-75:1000:1": 22.75,
+	}
+	for key, value := range wantVisible {
+		series, ok := got[key]
+		if !ok {
+			t.Fatalf("series %q missing from graph tile", key)
+		}
+		if series.Source.DeviceID+":"+strconv.Itoa(series.Source.ParamID)+":"+strconv.Itoa(series.Source.Instance) != key {
+			t.Fatalf("series %q source = %+v, want exact key", key, series.Source)
+		}
+		if len(series.History.V) != 2 || series.History.V[0] != value || series.History.V[1] != value {
+			t.Fatalf("series %q history = %+v, want duplicated live value %v", key, series.History.V, value)
+		}
+		if series.Quality != gatewayQualityOK || !series.DefaultVisible || series.VisibilityReason != "" {
+			t.Fatalf("series %q quality/default visibility = %q/%v reason %q, want ok visible", key, series.Quality, series.DefaultVisible, series.VisibilityReason)
+		}
+	}
+
+	detached := got["tec-76:1000:3"]
+	if detached.Source.DeviceID != "tec-76" || detached.Source.Instance != 3 {
+		t.Fatalf("detached series source = %+v, want tec-76 instance 3", detached.Source)
+	}
+	if detached.Quality != gatewayQualityDetached || detached.DefaultVisible || detached.VisibilityReason == "" {
+		t.Fatalf("detached series = quality %q visible %v reason %q, want hidden detached", detached.Quality, detached.DefaultVisible, detached.VisibilityReason)
+	}
+	if len(detached.History.V) != 2 || detached.History.V[0] != -55.5 || detached.History.V[1] != -55.5 {
+		t.Fatalf("detached series history = %+v, want diagnostic value preserved", detached.History.V)
+	}
+
+	missing := got["tec-75:1000:3"]
+	if missing.Source.DeviceID != "tec-75" || missing.Source.Instance != 3 {
+		t.Fatalf("missing series source = %+v, want tec-75 instance 3", missing.Source)
+	}
+	if missing.Quality != gatewayQualityMissing || missing.DefaultVisible || missing.VisibilityReason == "" {
+		t.Fatalf("missing series = quality %q visible %v reason %q, want hidden missing", missing.Quality, missing.DefaultVisible, missing.VisibilityReason)
+	}
+	if len(missing.History.V) != 0 || len(missing.Points) != 0 {
+		t.Fatalf("missing series data = history %+v points %+v, want empty", missing.History, missing.Points)
+	}
+}
+
+func TestGatewayDefaultGraphTilesUseAllConfiguredChannelRoles(t *testing.T) {
+	channelRoles := []ChannelConfig{
+		{Instance: 1, Role: "temp"},
+		{Instance: 2, Role: "supply"},
+		{Instance: 3, Role: "temp"},
+		{Instance: 4, Role: "supply"},
+		{Instance: 5, Role: "temp"},
+		{Instance: 6, Role: "supply"},
+	}
+	s := newServer(Config{
+		ChannelCount:    6,
+		DefaultDeviceID: "tec-76",
+		Devices: []DeviceConfig{
+			{ID: "tec-81", Endpoint: "tcp:127.0.0.1:50002", Address: 81, Label: "TEC 81", ChannelCount: 6, Channels: channelRoles},
+			{ID: "tec-76", Endpoint: "tcp:127.0.0.1:50001", Address: 76, Label: "TEC 76", ChannelCount: 6, Channels: channelRoles},
+		},
+	}, time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-76"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 21.25,
+		"1000:3": -55.5,
+		"1000:5": 22.50,
+		"1022:2": 0.002,
+		"1022:4": 0.004,
+		"1022:6": 0.006,
+	}}
+	s.devices["tec-81"].client = fakeGatewayDevice{byKey: map[string]float64{
+		"1000:1": 31.25,
+		"1000:3": 32.50,
+		"1022:2": 0.012,
+		"1022:4": 0.014,
+		"1022:6": 0.016,
+		// 1000:5 is intentionally missing to verify that absent sensors remain
+		// represented in the legend but hidden from the default plotted tile.
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var tempTile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/fleet-temperature/live", http.StatusOK, &tempTile)
+	wantTemp := map[string]struct {
+		device   string
+		instance int
+		quality  string
+		visible  bool
+	}{
+		"tec-76:1000:1": {device: "tec-76", instance: 1, quality: gatewayQualityOK, visible: true},
+		"tec-76:1000:3": {device: "tec-76", instance: 3, quality: gatewayQualityDetached, visible: false},
+		"tec-76:1000:5": {device: "tec-76", instance: 5, quality: gatewayQualityOK, visible: true},
+		"tec-81:1000:1": {device: "tec-81", instance: 1, quality: gatewayQualityOK, visible: true},
+		"tec-81:1000:3": {device: "tec-81", instance: 3, quality: gatewayQualityOK, visible: true},
+		"tec-81:1000:5": {device: "tec-81", instance: 5, quality: gatewayQualityMissing, visible: false},
+	}
+	assertGraphTileSeriesSet(t, tempTile.Series, wantTemp, 1000)
+	if len(tempTile.Series) > 0 && tempTile.Series[0].Source.DeviceID != "tec-76" {
+		t.Fatalf("default device ordering starts with %q, want tec-76", tempTile.Series[0].Source.DeviceID)
+	}
+	for _, series := range tempTile.Series {
+		if series.Source.Instance%2 == 0 {
+			t.Fatalf("temperature tile contains supply channel series: %+v", series.Source)
+		}
+	}
+
+	var powerTile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/fleet-supply-power/live", http.StatusOK, &powerTile)
+	wantPower := map[string]struct {
+		device   string
+		instance int
+		quality  string
+		visible  bool
+	}{
+		"tec-76:1022:2": {device: "tec-76", instance: 2, quality: gatewayQualityOK, visible: true},
+		"tec-76:1022:4": {device: "tec-76", instance: 4, quality: gatewayQualityOK, visible: true},
+		"tec-76:1022:6": {device: "tec-76", instance: 6, quality: gatewayQualityOK, visible: true},
+		"tec-81:1022:2": {device: "tec-81", instance: 2, quality: gatewayQualityOK, visible: true},
+		"tec-81:1022:4": {device: "tec-81", instance: 4, quality: gatewayQualityOK, visible: true},
+		"tec-81:1022:6": {device: "tec-81", instance: 6, quality: gatewayQualityOK, visible: true},
+	}
+	assertGraphTileSeriesSet(t, powerTile.Series, wantPower, 1022)
+	for _, series := range powerTile.Series {
+		if series.Source.Instance%2 != 0 {
+			t.Fatalf("power tile contains temperature channel series: %+v", series.Source)
+		}
+		if !series.DefaultVisible || series.VisibilityReason != "" {
+			t.Fatalf("power series %q default visibility = %v reason %q, want visible", series.ID, series.DefaultVisible, series.VisibilityReason)
+		}
+	}
+}
+
+func assertGraphTileSeriesSet(t *testing.T, got []graphTileItem, want map[string]struct {
+	device   string
+	instance int
+	quality  string
+	visible  bool
+}, paramID int) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("series count = %d, want %d: %+v", len(got), len(want), got)
+	}
+	seen := map[string]bool{}
+	for _, series := range got {
+		expected, ok := want[series.ID]
+		if !ok {
+			t.Fatalf("unexpected series %q in tile: %+v", series.ID, series)
+		}
+		if seen[series.ID] {
+			t.Fatalf("duplicate series identity %q", series.ID)
+		}
+		seen[series.ID] = true
+		if series.SeriesID != series.ID {
+			t.Fatalf("series %q has series_id %q, want exact identity", series.ID, series.SeriesID)
+		}
+		if series.Source.DeviceID != expected.device || series.Source.ParamID != paramID || series.Source.Instance != expected.instance {
+			t.Fatalf("series %q source = %+v, want %s:%d:%d", series.ID, series.Source, expected.device, paramID, expected.instance)
+		}
+		if series.Quality != expected.quality || series.DefaultVisible != expected.visible {
+			t.Fatalf("series %q quality/default visibility = %q/%v, want %q/%v", series.ID, series.Quality, series.DefaultVisible, expected.quality, expected.visible)
+		}
+		if !expected.visible && series.VisibilityReason == "" {
+			t.Fatalf("series %q hidden without visibility reason", series.ID)
+		}
+	}
+	for key := range want {
+		if !seen[key] {
+			t.Fatalf("expected series %q missing from tile", key)
+		}
 	}
 }
 
@@ -389,6 +1137,101 @@ func TestGatewayRecordsCommandActivity(t *testing.T) {
 	}
 	if got.RequestedValue == nil {
 		t.Fatalf("command requested value missing: %+v", got)
+	}
+}
+
+func TestGatewayRecordsTemperatureTargetWriteMetadata(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-76",
+		Endpoint: "can:can0/0x4c",
+		Address:  76,
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	fw := &recordingWriteClient{}
+	s.devices["tec-76"].client = fw
+	s.devices["tec-76"].commander = mecom.NewCommander(fw, time.Second)
+	s.devices["tec-76"].commander.TargetID = "tec-76"
+	s.devices["tec-76"].commander.Authorizer = mecom.AuthorizerFunc(s.authorize)
+	s.leases.Acquire("tec-76", "operator", time.Minute)
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	body := `{"name":"write_float32","arguments":{"param":3000,"instance":1,"value":25},"metadata":{"lease_token":"ignored"}}`
+	req, err := http.NewRequest(http.MethodPost, ts.URL+"/api/devices/tec-76/write", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", s.leases.List()[0].Token)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("write status = %d, want 200", resp.StatusCode)
+	}
+	if fw.lastParamID != 3000 || fw.lastInstance != 1 || fw.value != 25 {
+		t.Fatalf("writer got param=%d instance=%d value=%d, want 3000:1=25", fw.lastParamID, fw.lastInstance, fw.value)
+	}
+
+	var commands struct {
+		Commands []gatewayCommandActivity `json:"commands"`
+	}
+	getJSON(t, ts.URL+"/api/commands", http.StatusOK, &commands)
+	if len(commands.Commands) != 1 {
+		t.Fatalf("commands len = %d, want 1", len(commands.Commands))
+	}
+	got := commands.Commands[0]
+	if got.DeviceID != "tec-76" || got.ParamID != 3000 || got.Instance != 1 || got.SignalName != "target_object_temp_c" || got.SignalUnit != "degC" || got.Status != "completed" || got.HTTPStatus != http.StatusOK {
+		t.Fatalf("unexpected temperature command metadata: %+v", got)
+	}
+	requested, ok := got.RequestedValue.(float64)
+	if !ok || math.Abs(requested-25) > 1e-9 {
+		t.Fatalf("temperature command requested value = %#v, want 25", got.RequestedValue)
+	}
+}
+
+func TestGatewayWriteReturnsConflictWhenReadbackDoesNotMatch(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-76",
+		Endpoint: "can:can0/0x4c",
+		Address:  76,
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	fw := &recordingWriteClient{
+		readback: map[string]float64{gatewayCatalogueKey(3000, 1): 45},
+	}
+	s.devices["tec-76"].client = fw
+	s.devices["tec-76"].commander = mecom.NewCommander(fw, time.Second)
+	s.devices["tec-76"].commander.TargetID = "tec-76"
+	s.devices["tec-76"].commander.Authorizer = mecom.AuthorizerFunc(s.authorize)
+	s.leases.Acquire("tec-76", "operator", time.Minute)
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	body := `{"name":"write_float32","arguments":{"param":3000,"instance":1,"value":25},"metadata":{"lease_token":"ignored"}}`
+	req, err := http.NewRequest(http.MethodPost, ts.URL+"/api/devices/tec-76/write", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", s.leases.List()[0].Token)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("write status = %d, want 409 readback mismatch", resp.StatusCode)
+	}
+
+	var commands struct {
+		Commands []gatewayCommandActivity `json:"commands"`
+	}
+	getJSON(t, ts.URL+"/api/commands", http.StatusOK, &commands)
+	if len(commands.Commands) != 1 {
+		t.Fatalf("commands len = %d, want 1", len(commands.Commands))
+	}
+	got := commands.Commands[0]
+	if got.Status != "readback_mismatch" || got.HTTPStatus != http.StatusConflict || got.Error == "" {
+		t.Fatalf("unexpected mismatch command activity: %+v", got)
 	}
 }
 
@@ -620,27 +1463,67 @@ func TestLeaseReleaseRequiresPathDeviceMatch(t *testing.T) {
 }
 
 type recordingWriteClient struct {
-	paramID  int
-	instance int
-	value    int32
+	lastParamID  int
+	lastInstance int
+	value        int32
+	floatValue   float32
+	readback     map[string]float64
 }
 
 func (c *recordingWriteClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
-	c.paramID = paramID
-	c.instance = instance
+	c.lastParamID = paramID
+	c.lastInstance = instance
 	c.value = int32(value)
+	c.floatValue = value
 	return nil
 }
 
 func (c *recordingWriteClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
-	c.paramID = paramID
-	c.instance = instance
+	c.lastParamID = paramID
+	c.lastInstance = instance
 	c.value = value
+	c.floatValue = float32(value)
 	return nil
 }
 
 func (c *recordingWriteClient) ReadBulk(ctx context.Context, params []mecom.Parameter) ([]float64, error) {
-	return nil, mecom.ErrTransportNotSupported
+	values := make([]float64, 0, len(params))
+	for _, p := range params {
+		if c.readback != nil {
+			if v, ok := c.readback[gatewayCatalogueKey(p.ID, p.Instance)]; ok {
+				values = append(values, v)
+				continue
+			}
+		}
+		if p.ID != c.lastParamID || p.Instance != c.lastInstance {
+			return nil, fmt.Errorf("%w: parameter %d instance %d", mecom.ErrUnknownParameter, p.ID, p.Instance)
+		}
+		if p.Type == mecom.DataTypeInt32 {
+			values = append(values, float64(c.value))
+		} else {
+			values = append(values, float64(c.floatValue))
+		}
+	}
+	return values, nil
+}
+
+func (c *recordingWriteClient) ReadFloat32(_ context.Context, paramID, instance int) (float64, error) {
+	if c.readback != nil {
+		if v, ok := c.readback[gatewayCatalogueKey(paramID, instance)]; ok {
+			return v, nil
+		}
+	}
+	if paramID == c.lastParamID && instance == c.lastInstance {
+		return float64(c.floatValue), nil
+	}
+	return 0, nil
+}
+
+func (c *recordingWriteClient) ReadInt32(_ context.Context, paramID, instance int) (int32, error) {
+	if paramID == c.lastParamID && instance == c.lastInstance {
+		return c.value, nil
+	}
+	return 0, nil
 }
 
 func (c *recordingWriteClient) ConfigureRingCapture(ctx context.Context, captureID uint16, params []mecom.RingCaptureParameter) error {
@@ -801,6 +1684,14 @@ func (f fakeGatewayDevice) ReadBulk(_ context.Context, params []mecom.Parameter)
 		return values, nil
 	}
 	return f.values, nil
+}
+
+func (f fakeGatewayDevice) ReadFloat32(_ context.Context, _, _ int) (float64, error) {
+	return 0, nil
+}
+
+func (f fakeGatewayDevice) ReadInt32(_ context.Context, _, _ int) (int32, error) {
+	return 0, nil
 }
 
 func (f fakeGatewayDevice) ConfigureRingCapture(context.Context, uint16, []mecom.RingCaptureParameter) error {
@@ -988,6 +1879,23 @@ func getJSON(t *testing.T, url string, wantStatus int, out any) {
 			t.Fatalf("decode %s: %v", url, err)
 		}
 	}
+}
+
+func postJSON(t *testing.T, url string, body string, wantStatus int) []byte {
+	t.Helper()
+	resp, err := http.Post(url, "application/json", bytes.NewBufferString(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != wantStatus {
+		t.Fatalf("POST %s status = %d, want %d; body=%s", url, resp.StatusCode, wantStatus, string(raw))
+	}
+	return raw
 }
 
 func postLease(t *testing.T, url string, body string) writelease.Lease {

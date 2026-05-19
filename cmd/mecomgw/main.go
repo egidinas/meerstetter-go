@@ -33,7 +33,7 @@ import (
 
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/mecom/writelease"
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 func main() {
@@ -42,6 +42,7 @@ func main() {
 	defaultLeaseTTL := flag.Duration("default-lease-ttl", 5*time.Minute, "default lease TTL")
 	uiDir := flag.String("ui-dir", "", "optional static UI directory served at /ui/")
 	allowOrigin := flag.String("allow-origin", "", "comma-separated CORS origins for browser clients; use * only for isolated test gateways")
+	proxyBasePort := flag.Int("proxy-base-port", 0, "base TCP port for per-device MeCom proxies (0 = disabled)")
 	flag.Parse()
 
 	cfg, err := loadConfig(*configPath)
@@ -61,10 +62,13 @@ func main() {
 	srv := newServer(cfg, *defaultLeaseTTL, logger)
 	srv.uiDir = *uiDir
 	srv.allowedOrigins = parseCSV(*allowOrigin)
+	srv.proxyBasePort = *proxyBasePort
 	srv.accessToken = strings.TrimSpace(os.Getenv("MECOMGW_ACCESS_TOKEN"))
 	if srv.accessToken != "" {
 		logger.Printf("access token gate enabled")
 	}
+
+	go srv.derivationWorker(ctx)
 
 	httpSrv := &http.Server{
 		Addr:              *listen,
@@ -117,6 +121,31 @@ type ChannelConfig struct {
 	Label      string `json:"label,omitempty"`
 	UserNote   string `json:"user_note,omitempty"`
 	HasCascade bool   `json:"has_cascade,omitempty"`
+}
+
+func deviceChannelConfig(cfg DeviceConfig, instance int) (ChannelConfig, bool) {
+	for _, ch := range cfg.Channels {
+		if ch.Instance == instance {
+			return ch, true
+		}
+	}
+	return ChannelConfig{}, false
+}
+
+func defaultMeerstetterChannelRole(instance int) string {
+	if instance%2 == 0 {
+		return "supply"
+	}
+	return "temp"
+}
+
+func effectiveDeviceChannelRole(cfg DeviceConfig, instance int) (string, string) {
+	if ch, ok := deviceChannelConfig(cfg, instance); ok {
+		if role := strings.ToLower(strings.TrimSpace(ch.Role)); role != "" {
+			return role, "config"
+		}
+	}
+	return defaultMeerstetterChannelRole(instance), "gateway-default"
 }
 
 func loadConfig(path string) (Config, error) {
@@ -215,12 +244,14 @@ type server struct {
 	defaultDeviceID string
 	commandLogMu    sync.Mutex
 	commandLog      []gatewayCommandActivity
-	graphHistoryMu  sync.Mutex
-	graphHistory    map[string]*graphTileHistory
-	logger          *log.Logger
+	graphHistoryMu      sync.Mutex
+	graphHistoryRaw     map[string]*graphTileHistory
+	graphHistoryDerived map[string]*graphTileHistory
+	logger              *log.Logger
 	uiDir           string
 	allowedOrigins  []string
 	accessToken     string
+	proxyBasePort   int
 }
 
 type deviceBinding struct {
@@ -229,6 +260,8 @@ type deviceBinding struct {
 	client    mecom.DeviceClient
 	commander *mecom.Commander
 	lastErr   error
+	proxy     *mecom.ProxyServer
+	ring      *mecom.RingReader
 }
 
 type deviceBindingSnapshot struct {
@@ -245,13 +278,14 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 		channelCount = 4
 	}
 	s := &server{
-		devices:         make(map[string]*deviceBinding, len(cfg.Devices)),
-		leases:          writelease.NewRegistry(),
-		defaultLeaseTTL: defaultTTL,
-		channelCount:    channelCount,
-		defaultDeviceID: cfg.DefaultDeviceID,
-		graphHistory:    make(map[string]*graphTileHistory),
-		logger:          logger,
+		devices:             make(map[string]*deviceBinding, len(cfg.Devices)),
+		leases:              writelease.NewRegistry(),
+		defaultLeaseTTL:     defaultTTL,
+		channelCount:        channelCount,
+		defaultDeviceID:     cfg.DefaultDeviceID,
+		graphHistoryRaw:     make(map[string]*graphTileHistory),
+		graphHistoryDerived: make(map[string]*graphTileHistory),
+		logger:              logger,
 	}
 	for _, dc := range cfg.Devices {
 		if dc.ChannelCount <= 0 {
@@ -291,7 +325,36 @@ func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 		cmdr.Authorizer = mecom.AuthorizerFunc(s.authorize)
 		b.commander = cmdr
 	}
+
+	// Start Proxy if enabled
+	if s.proxyBasePort > 0 && b.proxy == nil {
+		if mac, ok := client.(mecom.MeComASCIIClient); ok {
+			port := s.proxyBasePort + s.deviceIndex(b.cfg.ID)
+			b.proxy = mecom.NewProxyServer(fmt.Sprintf(":%d", port), mac.MeComClient())
+			if err := b.proxy.Start(); err != nil {
+				s.logger.Printf("device %q: proxy start failed: %v", b.cfg.ID, err)
+			} else {
+				s.logger.Printf("device %q: proxy listening on :%d", b.cfg.ID, port)
+			}
+		}
+	}
+
+	// Start RingReader if not already started
+	if b.ring == nil {
+		// Example: auto-oversample critical parameters if they exist
+		// For now, just a placeholder for future dynamic config
+		// b.ring = mecom.NewRingReader(client.(*mecom.Client), criticalParams, s.rawSamplesChan)
+		// b.ring.Start(context.Background())
+	}
+
 	return deviceBindingSnapshot{binding: b, client: b.client, commander: b.commander}, nil
+}
+
+func (s *server) deviceIndex(id string) int {
+	// This should be stable based on config order
+	// For now, just find it in devices map (need a stable way though)
+	// I'll add device_index to deviceBinding in a future step if needed.
+	return 0 
 }
 
 func (s *server) resetDeviceBinding(id string, failed mecom.ReadClient, cause error) {

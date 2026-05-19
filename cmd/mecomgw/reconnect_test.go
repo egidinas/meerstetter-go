@@ -27,6 +27,14 @@ func (f *reconnectFailingDevice) ReadBulk(context.Context, []mecom.Parameter) ([
 	return nil, f.err
 }
 
+func (f *reconnectFailingDevice) ReadFloat32(_ context.Context, _, _ int) (float64, error) {
+	return 0, f.err
+}
+
+func (f *reconnectFailingDevice) ReadInt32(_ context.Context, _, _ int) (int32, error) {
+	return 0, f.err
+}
+
 func (f *reconnectFailingDevice) WriteFloat32(context.Context, int, int, float32) error {
 	return mecom.ErrTransportNotSupported
 }
@@ -85,6 +93,14 @@ type reconnectFailingWriter struct {
 
 func (f *reconnectFailingWriter) ReadBulk(context.Context, []mecom.Parameter) ([]float64, error) {
 	return nil, mecom.ErrTransportNotSupported
+}
+
+func (f *reconnectFailingWriter) ReadFloat32(_ context.Context, _, _ int) (float64, error) {
+	return 0, f.err
+}
+
+func (f *reconnectFailingWriter) ReadInt32(_ context.Context, _, _ int) (int32, error) {
+	return 0, f.err
 }
 
 func (f *reconnectFailingWriter) WriteFloat32(context.Context, int, int, float32) error {
@@ -215,5 +231,61 @@ func TestGatewayPollTransportErrorClearsMemoizedClientAfterFailure(t *testing.T)
 	}
 	if !failing.closed {
 		t.Fatal("failing poll client was not closed")
+	}
+}
+
+func TestGatewayPollRecordsGraphHistory(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	s.devices["tec-75"].client = fakeGatewayDevice{byKey: map[string]float64{
+		gatewayCatalogueKey(1000, 1): 24.25,
+		gatewayCatalogueKey(3000, 1): 25.00,
+	}}
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+"/api/devices/tec-75/poll?params=1000:1,3000:1&interval=1h", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		t.Fatalf("GET poll status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+
+	reader := bufio.NewReader(resp.Body)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		if strings.HasPrefix(line, "data: ") {
+			break
+		}
+	}
+	cancel()
+	resp.Body.Close()
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/poll-history/live?series=tec-75:1000:1&series=tec-75:3000:1", http.StatusOK, &tile)
+	if len(tile.Series) != 2 {
+		t.Fatalf("series count = %d, want 2", len(tile.Series))
+	}
+	for _, series := range tile.Series {
+		if series.Quality != "ok" {
+			t.Fatalf("series %s quality = %q, want ok", series.SeriesID, series.Quality)
+		}
+		if len(series.Points) == 0 {
+			t.Fatalf("series %s has no tile points after poll", series.SeriesID)
+		}
+		if len(series.History.TS) == 0 || len(series.History.V) == 0 {
+			t.Fatalf("series %s has no history after poll: %+v", series.SeriesID, series.History)
+		}
 	}
 }

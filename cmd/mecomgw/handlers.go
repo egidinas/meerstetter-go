@@ -16,7 +16,7 @@ import (
 
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/mecom/writelease"
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 const gatewayAccessCookie = "mecomgw_access"
@@ -28,6 +28,12 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("/api/devices", s.handleDevices)
 	mux.HandleFunc("/api/catalogue", s.handleCatalogue)
 	mux.HandleFunc("/api/commands", s.handleCommandsList)
+	mux.HandleFunc("/api/graph/history/export", s.handleGraphHistoryExport)
+	mux.HandleFunc("/api/graph/history/import", s.handleGraphHistoryImport)
+	mux.HandleFunc("/api/graph/availability", s.handleGraphAvailability)
+	mux.HandleFunc("/api/log/export", s.handleLogExport)
+	mux.HandleFunc("/api/log/import", s.handleLogImport)
+	mux.HandleFunc("/api/graph/sparklines", s.handleGraphSparklines)
 	mux.HandleFunc("/api/graph/tiles/", s.handleGraphTileRoot)
 	mux.HandleFunc("/api/leases", s.handleLeasesList)
 	mux.HandleFunc("/api/devices/", s.handleDeviceRoot)
@@ -73,21 +79,24 @@ type deviceRouteView struct {
 }
 
 type gatewayCommandActivity struct {
-	Time           time.Time `json:"time"`
-	TargetID       string    `json:"target_id"`
-	DeviceID       string    `json:"device_id"`
-	ParamID        int       `json:"param_id,omitempty"`
-	Instance       int       `json:"instance,omitempty"`
-	SignalName     string    `json:"signal_name,omitempty"`
-	SignalUnit     string    `json:"signal_unit,omitempty"`
-	RequestedValue any       `json:"requested_value,omitempty"`
-	Status         string    `json:"status"`
-	Transport      string    `json:"transport,omitempty"`
-	LeaseHolder    string    `json:"lease_holder,omitempty"`
-	Error          string    `json:"error,omitempty"`
-	ErrorCategory  string    `json:"error_category,omitempty"`
-	HTTPStatus     int       `json:"http_status"`
-	IdempotencyKey string    `json:"idempotency_key,omitempty"`
+	Time            time.Time `json:"time"`
+	TargetID        string    `json:"target_id"`
+	DeviceID        string    `json:"device_id"`
+	ParamID         int       `json:"param_id,omitempty"`
+	Instance        int       `json:"instance,omitempty"`
+	SignalName      string    `json:"signal_name,omitempty"`
+	SignalUnit      string    `json:"signal_unit,omitempty"`
+	RequestedValue  any       `json:"requested_value,omitempty"`
+	ConfirmedValue  any       `json:"confirmed_value,omitempty"`
+	PrevValue       any       `json:"prev_value,omitempty"`
+	ReadbackMatched *bool     `json:"readback_matched,omitempty"`
+	Status          string    `json:"status"`
+	Transport       string    `json:"transport,omitempty"`
+	LeaseHolder     string    `json:"lease_holder,omitempty"`
+	Error           string    `json:"error,omitempty"`
+	ErrorCategory   string    `json:"error_category,omitempty"`
+	HTTPStatus      int       `json:"http_status"`
+	IdempotencyKey  string    `json:"idempotency_key,omitempty"`
 }
 
 type channelView struct {
@@ -151,24 +160,20 @@ func deviceSortRank(defaultDeviceID, id string) int {
 }
 
 func deviceChannelsView(cfg DeviceConfig, channelCount int) []channelView {
-	if len(cfg.Channels) == 0 {
-		return nil
-	}
-	out := make([]channelView, 0, len(cfg.Channels))
-	for _, ch := range cfg.Channels {
-		if ch.Instance < 1 || ch.Instance > channelCount {
+	out := make([]channelView, 0, channelCount)
+	for instance := 1; instance <= channelCount; instance++ {
+		ch, configured := deviceChannelConfig(cfg, instance)
+		if configured && (ch.Instance < 1 || ch.Instance > channelCount) {
 			continue
 		}
-		role := strings.ToLower(strings.TrimSpace(ch.Role))
+		role, source := effectiveDeviceChannelRole(cfg, instance)
 		v := channelView{
-			Instance:   ch.Instance,
+			Instance:   instance,
 			Role:       role,
+			RoleSource: source,
 			Label:      ch.Label,
 			UserNote:   ch.UserNote,
 			HasCascade: ch.HasCascade,
-		}
-		if role != "" {
-			v.RoleSource = "config"
 		}
 		out = append(out, v)
 	}
@@ -326,6 +331,8 @@ type gatewayReadValue struct {
 	Instance int      `json:"instance"`
 	Value    *float64 `json:"value"`
 	Quality  string   `json:"quality"`
+	At       string   `json:"at,omitempty"`
+	AgeMS    *int64   `json:"age_ms,omitempty"`
 }
 
 func gatewayCatalogueKey(id, instance int) string {
@@ -610,13 +617,57 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 	activity.IdempotencyKey = tc.IdempotencyKey
 	activity.LeaseHolder = s.leaseHolderForToken(token)
 	activity.ParamID, activity.Instance, activity.SignalName, activity.SignalUnit, activity.RequestedValue = gatewayCommandTargetFromTelecommand(req)
+
+	// Pre-check: Read current value before write for definitely validated status
+	if bound.client != nil && activity.ParamID != 0 {
+		ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
+		if vals, err := bound.client.ReadBulk(ctx, []mecom.Parameter{{ID: activity.ParamID, Instance: activity.Instance}}); err == nil && len(vals) == 1 {
+			activity.PrevValue = gatewayConfirmedWriteValue(mecom.Parameter{ID: activity.ParamID}, vals[0])
+		}
+		cancel()
+	}
+
 	ev, err := bound.commander.Send(tc)
 	activity.HTTPStatus = http.StatusOK
 	activity.Status = string(ev.Status)
+	if errors.Is(err, mecom.ErrReadbackMismatch) {
+		activity.Status = "readback_mismatch"
+	}
 	if ev.Error != "" {
 		activity.Error = ev.Error
 	}
 	if ev.Status == tmtc.CommandCompleted {
+		confirmed, matched, verifyErr := s.verifyGatewayWrite(r.Context(), bound.client, req)
+		activity.ConfirmedValue = confirmed
+		activity.ReadbackMatched = matched
+		if verifyErr != nil {
+			activity.Status = "verify_failed"
+			activity.HTTPStatus = httpStatusForError(verifyErr)
+			activity.Error = verifyErr.Error()
+			activity.ErrorCategory = gatewayCommandErrorCategory(verifyErr)
+			if shouldResetDeviceBinding(verifyErr) {
+				s.resetDeviceBinding(deviceID, bound.client, verifyErr)
+			}
+			s.recordCommandActivity(activity)
+			writeJSON(w, activity.HTTPStatus, map[string]any{"error": verifyErr.Error(), "event": ev, "confirmed_value": confirmed, "readback_matched": matched})
+			return
+		}
+		if matched != nil && !*matched {
+			activity.Status = "readback_mismatch"
+			activity.HTTPStatus = http.StatusConflict
+			activity.Error = fmt.Sprintf("write readback mismatch for parameter %d instance %d: requested %v confirmed %v", activity.ParamID, activity.Instance, activity.RequestedValue, confirmed)
+			activity.ErrorCategory = "readback"
+			s.recordCommandActivity(activity)
+			writeJSON(w, http.StatusConflict, map[string]any{"error": activity.Error, "event": ev, "confirmed_value": confirmed, "readback_matched": false})
+			return
+		}
+		if confirmed != nil || matched != nil || activity.PrevValue != nil {
+			ev.Result = map[string]any{
+				"confirmed_value":  confirmed,
+				"readback_matched": matched,
+				"prev_value":       activity.PrevValue,
+			}
+		}
 		activity.HTTPStatus = http.StatusOK
 		s.recordCommandActivity(activity)
 		writeJSON(w, http.StatusOK, ev)
@@ -674,6 +725,9 @@ func gatewayCommandHTTPStatus(status tmtc.CommandStatus, err error) int {
 		}
 		return http.StatusBadRequest
 	case tmtc.CommandFailed:
+		if errors.Is(err, mecom.ErrReadbackMismatch) {
+			return http.StatusConflict
+		}
 		return http.StatusBadRequest
 	default:
 		return http.StatusBadRequest
@@ -694,6 +748,16 @@ func gatewayCommandErrorCategory(err error) string {
 		return "gateway"
 	}
 }
+
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
 
 func (s *server) leaseHolderForToken(token string) string {
 	token = strings.TrimSpace(token)
@@ -725,6 +789,104 @@ func gatewayCommandTargetFromTelecommand(req writeRequest) (int, int, string, st
 		signalUnit = param.Unit
 	}
 	return paramID, instance, signalName, signalUnit, req.Arguments["value"]
+}
+
+func (s *server) verifyGatewayWrite(ctx context.Context, client mecom.ReadClient, req writeRequest) (any, *bool, error) {
+	param, want, ok, err := gatewayWriteParameterFromRequest(req)
+	if err != nil || !ok {
+		return nil, nil, err
+	}
+	if client == nil {
+		return nil, nil, fmt.Errorf("write readback unavailable: no read client")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	values, err := client.ReadBulk(ctx, []mecom.Parameter{param})
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(values) != 1 {
+		return nil, nil, fmt.Errorf("write readback returned %d values for parameter %d instance %d", len(values), param.ID, param.Instance)
+	}
+	confirmed := gatewayConfirmedWriteValue(param, values[0])
+	matched := gatewayWriteValueMatches(param, values[0], want)
+	return confirmed, boolPtr(matched), nil
+}
+
+func gatewayWriteParameterFromRequest(req writeRequest) (mecom.Parameter, float64, bool, error) {
+	if req.Arguments == nil {
+		return mecom.Parameter{}, 0, false, nil
+	}
+	paramID := intFromAny(req.Arguments["param"])
+	instance := intFromAny(req.Arguments["instance"])
+	if instance == 0 {
+		instance = 1
+	}
+	rawValue, hasValue := req.Arguments["value"]
+	if paramID == 0 || instance == 0 || !hasValue {
+		return mecom.Parameter{}, 0, false, nil
+	}
+	want, ok := floatFromAny(rawValue)
+	if !ok {
+		return mecom.Parameter{}, 0, false, nil
+	}
+	param, ok := gatewayParameterByID(paramID)
+	if !ok {
+		return mecom.Parameter{}, 0, false, fmt.Errorf("write readback unavailable: unknown parameter %d", paramID)
+	}
+	param.Instance = instance
+	switch {
+	case strings.Contains(strings.ToLower(req.Name), "int32"):
+		param.Type = mecom.DataTypeInt32
+	case strings.Contains(strings.ToLower(req.Name), "float32"):
+		param.Type = mecom.DataTypeFloat32
+	}
+	if param.Type != mecom.DataTypeInt32 && param.Type != mecom.DataTypeFloat32 {
+		return mecom.Parameter{}, 0, false, nil
+	}
+	return param, want, true, nil
+}
+
+func gatewayConfirmedWriteValue(param mecom.Parameter, value float64) any {
+	if param.Type == mecom.DataTypeInt32 {
+		return int32(math.Round(value))
+	}
+	return value
+}
+
+func gatewayWriteValueMatches(param mecom.Parameter, got, want float64) bool {
+	if param.Type == mecom.DataTypeInt32 {
+		return int32(math.Round(got)) == int32(math.Round(want))
+	}
+	tolerance := math.Max(1e-4, math.Abs(want)*1e-5)
+	return math.Abs(got-want) <= tolerance
+}
+
+func floatFromAny(v any) (float64, bool) {
+	switch x := v.(type) {
+	case float64:
+		return x, true
+	case float32:
+		return float64(x), true
+	case int:
+		return float64(x), true
+	case int32:
+		return float64(x), true
+	case int64:
+		return float64(x), true
+	case json.Number:
+		f, err := x.Float64()
+		return f, err == nil
+	case string:
+		f, err := strconv.ParseFloat(strings.TrimSpace(x), 64)
+		return f, err == nil
+	default:
+		return 0, false
+	}
+}
+
+func boolPtr(v bool) *bool {
+	return &v
 }
 
 func intFromAny(v any) int {
@@ -777,8 +939,10 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 func (s *server) readGatewayValues(deviceID string, ctx context.Context, client mecom.ReadClient, params []mecom.Parameter) ([]gatewayReadValue, error) {
 	values, err := client.ReadBulk(ctx, params)
 	if err == nil && len(values) == len(params) {
+		readAt := time.Now().UTC()
 		out := gatewayValuesFromFloats(params, values)
-		s.recordGatewayReadSamples(deviceID, out, time.Now().UTC())
+		stampGatewayReadValues(out, readAt, readAt)
+		s.recordGatewayReadSamples(deviceID, out, readAt)
 		return out, nil
 	}
 	bulkErr := err
@@ -792,7 +956,7 @@ func (s *server) readGatewayValues(deviceID string, ctx context.Context, client 
 	out := make([]gatewayReadValue, len(params))
 	okCount := 0
 	for i, p := range params {
-		out[i] = gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: "missing"}
+		out[i] = gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: gatewayQualityMissing}
 		single, singleErr := client.ReadBulk(ctx, []mecom.Parameter{p})
 		if singleErr != nil || len(single) != 1 {
 			continue
@@ -803,16 +967,37 @@ func (s *server) readGatewayValues(deviceID string, ctx context.Context, client 
 	if okCount == 0 {
 		return nil, bulkErr
 	}
-	s.recordGatewayReadSamples(deviceID, out, time.Now().UTC())
+	readAt := time.Now().UTC()
+	stampGatewayReadValues(out, readAt, readAt)
+	s.recordGatewayReadSamples(deviceID, out, readAt)
 	return out, nil
 }
 
 func (s *server) recordGatewayReadSamples(deviceID string, values []gatewayReadValue, at time.Time) {
 	for _, value := range values {
-		if value.Value == nil || value.Quality != "ok" {
+		if value.Value == nil {
 			continue
 		}
 		s.recordGraphSample(deviceID, value.ID, value.Instance, *value.Value, value.Quality, at)
+	}
+}
+
+func stampGatewayReadValues(values []gatewayReadValue, at time.Time, now time.Time) {
+	if at.IsZero() {
+		return
+	}
+	age := now.Sub(at).Milliseconds()
+	if age < 0 {
+		age = 0
+	}
+	ts := at.UTC().Format(time.RFC3339Nano)
+	for i := range values {
+		if values[i].Value == nil {
+			continue
+		}
+		ageMS := age
+		values[i].At = ts
+		values[i].AgeMS = &ageMS
 	}
 }
 
@@ -828,13 +1013,14 @@ func gatewayValuesFromFloats(params []mecom.Parameter, values []float64) []gatew
 }
 
 func gatewayValueFromFloat(p mecom.Parameter, value float64) gatewayReadValue {
-	out := gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: "ok"}
+	out := gatewayReadValue{ID: p.ID, Instance: p.Instance, Quality: gatewayQualityOK}
 	if math.IsNaN(value) || math.IsInf(value, 0) {
-		out.Quality = "nan"
+		out.Quality = gatewayQualityNaN
 		return out
 	}
 	v := value
 	out.Value = &v
+	out.Quality = gatewayQualityForFloat(p, value)
 	return out
 }
 
@@ -903,6 +1089,9 @@ type gatewayResetReadClient struct {
 
 func (c gatewayResetReadClient) ReadBulk(ctx context.Context, params []mecom.Parameter) ([]float64, error) {
 	values, err := c.client.ReadBulk(ctx, params)
+	if err == nil && len(values) == len(params) {
+		c.server.recordGatewayReadSamples(c.deviceID, gatewayValuesFromFloats(params, values), time.Now().UTC())
+	}
 	if err != nil && shouldResetDeviceBinding(err) {
 		c.server.resetDeviceBinding(c.deviceID, c.client, err)
 	}
@@ -919,6 +1108,22 @@ func (c gatewayResetReadClient) TriggerRingSync(ctx context.Context) error {
 
 func (c gatewayResetReadClient) ReadRingPointer(ctx context.Context) (uint32, error) {
 	return c.client.ReadRingPointer(ctx)
+}
+
+func (c gatewayResetReadClient) ReadFloat32(ctx context.Context, paramID, instance int) (float64, error) {
+	v, err := c.client.ReadFloat32(ctx, paramID, instance)
+	if err != nil && shouldResetDeviceBinding(err) {
+		c.server.resetDeviceBinding(c.deviceID, c.client, err)
+	}
+	return v, err
+}
+
+func (c gatewayResetReadClient) ReadInt32(ctx context.Context, paramID, instance int) (int32, error) {
+	v, err := c.client.ReadInt32(ctx, paramID, instance)
+	if err != nil && shouldResetDeviceBinding(err) {
+		c.server.resetDeviceBinding(c.deviceID, c.client, err)
+	}
+	return v, err
 }
 
 func (c gatewayResetReadClient) ReadRingChunk(ctx context.Context, offset uint32, maxBytes uint16) (mecom.RingReadResponse, error) {
@@ -967,15 +1172,19 @@ func parseParamsQuery(raw string) ([]mecom.Parameter, error) {
 }
 
 func gatewayParameterByID(id int) (mecom.Parameter, bool) {
-	for _, readout := range mecom.DefaultTECReadoutParameters(1) {
-		if readout.Parameter.ID == id {
-			param := readout.Parameter
-			return param, true
-		}
-	}
-	for _, param := range mecom.DefaultTECWriteParameters(1) {
-		if param.ID == id {
-			return param, true
+	params := mecom.DefaultTECCatalogueEntries(1)
+	for _, p := range params {
+		if p.ID == id {
+			return mecom.Parameter{
+				ID:       p.ID,
+				Instance: p.Instance,
+				Name:     p.RawName,
+				Unit:     p.Unit,
+				Type:     mecom.DataType(p.Type),
+				Writable: gatewayCatalogueWritable(p.ID),
+				Role:     p.Role,
+				Kind:     p.Kind,
+			}, true
 		}
 	}
 	return mecom.Parameter{}, false
@@ -997,6 +1206,8 @@ func httpStatusForError(err error) int {
 		return http.StatusConflict
 	case errors.Is(err, mecom.ErrTransportNotSupported):
 		return http.StatusNotImplemented
+	case errors.Is(err, mecom.ErrReadbackMismatch):
+		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError
 	}
