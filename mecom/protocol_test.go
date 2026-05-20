@@ -64,6 +64,30 @@ func TestBuildResetFrameReferenceVector(t *testing.T) {
 	}
 }
 
+func TestBuildSetBigDataStringFrameFormat(t *testing.T) {
+	frame, err := BuildSetBigDataStringFrame(0x00, 0x0003, 120, 1, 0, "SN76 note", true)
+	if err != nil {
+		t.Fatalf("BuildSetBigDataStringFrame: %v", err)
+	}
+	got := string(frame)
+	if !strings.HasPrefix(got, "#000003VB00780100000000000A01") {
+		t.Fatalf("frame prefix = %q", got)
+	}
+	if !strings.Contains(got, "534E3736206E6F746500") {
+		t.Fatalf("frame missing LATIN1 payload plus NUL: %q", got)
+	}
+	if got[len(got)-1] != '\r' {
+		t.Fatalf("frame must end with CR: %q", got)
+	}
+}
+
+func TestBuildSetBigDataStringFrameRejectsNonLatin1(t *testing.T) {
+	_, err := BuildSetBigDataStringFrame(0x00, 0x0003, 120, 1, 0, "snowman ☃", true)
+	if err == nil || !strings.Contains(err.Error(), "outside LATIN1") {
+		t.Fatalf("err=%v, want LATIN1 rejection", err)
+	}
+}
+
 func TestParseSingleResponseFloat(t *testing.T) {
 	got, err := ParseSingleResponse(responseFrame("!500001+41CC0000"), DataTypeFloat32)
 	if err != nil {
@@ -109,6 +133,17 @@ func TestClientReadFloat32(t *testing.T) {
 		t.Fatalf("value = %v", got)
 	}
 	if !strings.Contains(rw.written.String(), "?VR03E801") {
+		t.Fatalf("request = %q", rw.written.String())
+	}
+}
+
+func TestClientWriteBigDataString(t *testing.T) {
+	rw := &scriptedReadWriter{read: bytes.NewBuffer(responseFrame("!500001+"))}
+	client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})
+	if err := client.WriteBigDataString(context.Background(), 120, 1, "SN76"); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(rw.written.String(), "VB00780100000000000501534E373600") {
 		t.Fatalf("request = %q", rw.written.String())
 	}
 }

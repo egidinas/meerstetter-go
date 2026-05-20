@@ -31,7 +31,7 @@ import (
 	"time"
 
 	"github.com/egidinas/meerstetter-go/mecom"
-	"github.com/egidinas/meerstetter-go/sequencer"
+	"github.com/egidinas/signalforge/sequencer"
 )
 
 func main() {

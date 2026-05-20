@@ -17,6 +17,7 @@ EnvironmentFile=/etc/default/mecomvseriald
 
 ExecStart=/usr/local/bin/mecomvseriald \
   -listen ${MECOM_LISTEN} \
+  -address-zero ${MECOM_ADDRESS_ZERO} \
   -timeout ${MECOM_TIMEOUT} \
   -reconnect-delay ${MECOM_RECONNECT_DELAY} \
   -route ${MECOM_ROUTE_1} \

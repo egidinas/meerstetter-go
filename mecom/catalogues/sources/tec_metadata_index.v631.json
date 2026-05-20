@@ -1,0 +1,326 @@
+{
+  "schema_version": "mecom_tec_metadata_index.v1",
+  "sources": [
+    {
+      "id": "tec_default_config_5216o_xml",
+      "path": "Meerstetter TEC-Family Software v6.31 package:TEC Default Config 5216O.xml",
+      "method": "xml_default_config_parse",
+      "status": "harvested"
+    },
+    {
+      "id": "canopen_eds_v631",
+      "path": "Meerstetter TEC-Family Software v6.31 package:CanOpen.eds",
+      "method": "eds_ini_parse",
+      "status": "harvested"
+    },
+    {
+      "id": "coso_baml_tooltips",
+      "path": "CoSo WPF BAML resources:view/**/*.baml",
+      "method": "sfextract_and_strings_review",
+      "status": "harvested"
+    },
+    {
+      "id": "coso_ilspy_decompile",
+      "path": "CoSo ILSpy decompile:**/*.cs",
+      "method": "ilspycmd_static_review",
+      "status": "harvested"
+    },
+    {
+      "id": "coso_custom_lock_decompile",
+      "path": "CoSo custom-lock library ILSpy decompile:**/*.cs",
+      "method": "ilspycmd_static_review",
+      "status": "harvested"
+    }
+  ],
+  "hidden_candidates": [
+    {
+      "mepar_id": 202,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Input power-limit setting from advanced settings.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 203,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "Input voltage range, hardware-damage risk.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 204,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "PowerStage v3 hardware-test mode.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2050,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "UART or RS485 baudrate setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2051,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "RS485 address setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2052,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Reply delay setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2053,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Address-zero hardware-test setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2060,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Connection watchdog setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2070,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen node-ID setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2071,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen bitrate setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2072,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen interface enable setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 217,
+      "group": "big_data",
+      "visibility": "advanced",
+      "note": "FreeRTOS statistics big-data read.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 250,
+      "group": "custom_lock",
+      "visibility": "manufacturer",
+      "note": "Custom-lock big-data read/write payload.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 40000,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Output-stage temperature diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53000,
+      "group": "license",
+      "visibility": "license",
+      "note": "Vendor feature license key.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53001,
+      "group": "license",
+      "visibility": "license",
+      "note": "Vendor feature license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53010,
+      "group": "license",
+      "visibility": "license",
+      "note": "Temperature-estimator license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53015,
+      "group": "license",
+      "visibility": "license",
+      "note": "Cascade-control license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53020,
+      "group": "license",
+      "visibility": "license",
+      "note": "Unipolar and mixed-mode license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53100,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator enable.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53101,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator input source.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53102,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator ambient source.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6000,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Sensor input PGA gain.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6005,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Sensor type selection.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6200,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Fan controller enable.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6300,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Object active source selection.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6310,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Error-state auto-reset delay.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6320,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Output-stage limit error delay.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6330,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Device temperature mode.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65004,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage voltage U1A/U2A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65005,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage current I1A/I2A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65006,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage voltage U1B/U2B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65007,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage current I1B/I2B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65008,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Parallel common-load symmetry correction.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65009,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Relative PWM level diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65010,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Absolute PWM level A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65011,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Absolute PWM level B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65020,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Flash write-cycle counter.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65100,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "PAR_DEBUG diagnostic instances.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 9000,
+      "group": "firmware",
+      "visibility": "advanced",
+      "note": "Firmware updater status text.",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    {
+      "mepar_id": 9010,
+      "group": "firmware",
+      "visibility": "manufacturer",
+      "note": "Firmware update activation command.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    }
+  ],
+  "safety_policy": "Hidden, manufacturer, license, firmware-update, and custom-lock entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review.",
+  "manufacturer_gate_evidence": "CoSo contains manufacturer/settings gate logic; gate material is intentionally redacted from this public catalogue metadata."
+}

@@ -26,6 +26,7 @@ type DataType string
 const (
 	DataTypeFloat32 DataType = "float32"
 	DataTypeInt32   DataType = "int32"
+	DataTypeLatin1  DataType = "latin1"
 )
 
 // Parameter describes the minimum metadata needed to encode and decode values.
@@ -36,6 +37,8 @@ type Parameter struct {
 	Unit     string
 	Type     DataType
 	Writable bool
+	Role     string
+	Kind     string
 }
 
 const (
@@ -173,6 +176,31 @@ func BuildWriteStringFrame(addr int, seq uint16, paramID, instance int, value st
 	return buildWriteFrame(addr, seq, paramID, instance, strings.ToUpper(hex.EncodeToString([]byte(value))))
 }
 
+// BuildSetBigDataStringFrame constructs a VB frame for writing one LATIN1 big-data package.
+func BuildSetBigDataStringFrame(addr int, seq uint16, paramID, instance int, writeStart uint32, value string, isLast bool) ([]byte, error) {
+	data, err := encodeLatin1String(value, true)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > 0xFFFF {
+		return nil, fmt.Errorf("mecom: big-data string package too long: %d elements", len(data))
+	}
+	last := 0
+	if isLast {
+		last = 1
+	}
+	body := fmt.Sprintf(
+		"VB%04X%02X%08X%04X%02X%s",
+		paramID,
+		instance,
+		writeStart,
+		len(data),
+		last,
+		strings.ToUpper(hex.EncodeToString(data)),
+	)
+	return appendCRC(addr, seq, body), nil
+}
+
 // BuildSaveToFlashFrame constructs an SP frame for explicitly saving all parameter values to flash.
 func BuildSaveToFlashFrame(addr int, seq uint16) []byte {
 	return appendCRC(addr, seq, "SP")
@@ -199,6 +227,23 @@ func encodeInt32(v int32) string {
 
 func encodeFloat32(v float32) string {
 	return fmt.Sprintf("%08X", math.Float32bits(v))
+}
+
+func encodeLatin1String(value string, zeroTerminated bool) ([]byte, error) {
+	out := make([]byte, 0, len(value)+1)
+	for _, r := range value {
+		if r == 0 {
+			return nil, fmt.Errorf("mecom: LATIN1 string contains embedded NUL")
+		}
+		if r > 0xFF {
+			return nil, fmt.Errorf("mecom: rune %q is outside LATIN1", r)
+		}
+		out = append(out, byte(r))
+	}
+	if zeroTerminated {
+		out = append(out, 0)
+	}
+	return out, nil
 }
 
 // SplitFrames divides a raw buffer into CR-terminated MeCom frames.
@@ -717,6 +762,16 @@ func (c *Client) WriteString(ctx context.Context, paramID, instance int, value s
 	return ParseWriteResponse(raw)
 }
 
+func (c *Client) WriteBigDataString(ctx context.Context, paramID, instance int, value string) error {
+	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+		return BuildSetBigDataStringFrame(int(c.address), seq, paramID, instance, 0, value, true)
+	})
+	if err != nil {
+		return err
+	}
+	return ParseWriteResponse(raw)
+}
+
 func (c *Client) SaveToFlash(ctx context.Context) error {
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildSaveToFlashFrame(int(c.address), seq), nil
@@ -749,17 +804,28 @@ func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataTyp
 
 func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]byte, error)) ([]byte, error) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	frame, err := buildFrame(c.nextSeqLocked())
+	seq := c.nextSeqLocked()
+	c.mu.Unlock()
+
+	frame, err := buildFrame(seq)
 	if err != nil {
 		return nil, err
 	}
+	return c.roundTripRaw(ctx, frame)
+}
+
+func (c *Client) roundTripRaw(ctx context.Context, frame []byte) ([]byte, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	if _, err := c.rw.Write(frame); err != nil {
 		return nil, err
 	}
+
 	if deadlineRW, ok := c.rw.(interface{ SetReadDeadline(time.Time) error }); ok {
 		deadline := time.Now().Add(c.timeout)
 		if ctxDeadline, ok := ctx.Deadline(); ok && ctxDeadline.Before(deadline) {
@@ -770,6 +836,7 @@ func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]b
 		}
 		defer deadlineRW.SetReadDeadline(time.Time{})
 	}
+
 	raw, err := readFrame(c.rw)
 	if err != nil {
 		if ctxErr := ctx.Err(); ctxErr != nil {

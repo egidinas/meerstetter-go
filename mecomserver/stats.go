@@ -10,6 +10,8 @@ import (
 // monotonic since the broker started.
 type BrokerStats struct {
 	Address       byte      `json:"address"`
+	RouteID       string    `json:"route_id,omitempty"`
+	Priority      int       `json:"priority"`
 	Target        string    `json:"target"`
 	Connected     bool      `json:"connected"`
 	LastConnectAt time.Time `json:"last_connect_at,omitempty"`
@@ -28,8 +30,13 @@ type brokerStatsRecorder struct {
 	stats BrokerStats
 }
 
-func newBrokerStatsRecorder(addr byte, target string) *brokerStatsRecorder {
-	return &brokerStatsRecorder{stats: BrokerStats{Address: addr, Target: target}}
+func newBrokerStatsRecorder(addr byte, target, routeID string, priority int) *brokerStatsRecorder {
+	return &brokerStatsRecorder{stats: BrokerStats{
+		Address:  addr,
+		RouteID:  routeID,
+		Priority: priority,
+		Target:   target,
+	}}
 }
 
 func (r *brokerStatsRecorder) markConnected(target string) {

@@ -1,0 +1,1470 @@
+{
+  "schema_version": "mecom_tec_help.v1",
+  "source": "Meerstetter TEC Configuration Software v6.31 CoSo BAML/decompile review",
+  "parameters": {
+    "100": {
+      "mepar_id": 100,
+      "name": "Device Type",
+      "group": "Device identity",
+      "visibility": "manufacturer",
+      "help": "Device type identifier reported by the controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Manufacturer-level diagnostic or identity value; surface as read-only metadata unless separately reviewed."
+    },
+    "101": {
+      "mepar_id": 101,
+      "name": "Hardware Version",
+      "group": "Device identity",
+      "visibility": "manufacturer",
+      "help": "Hardware version identifier reported by the controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Manufacturer-level diagnostic or identity value; surface as read-only metadata unless separately reviewed."
+    },
+    "102": {
+      "mepar_id": 102,
+      "name": "Serial Number",
+      "group": "Device identity",
+      "visibility": "operator",
+      "help": "Controller serial number used to keep raw diagnostics tied to the physical unit.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "120": {
+      "mepar_id": 120,
+      "name": "User Notes",
+      "group": "Metadata",
+      "visibility": "operator",
+      "help": "User note string stored on the controller as non-volatile text metadata.",
+      "source_evidence": [
+        "repo:mecom/catalogues/tec.json"
+      ],
+      "access": "write",
+      "safety_note": "Writes change controller non-volatile metadata."
+    },
+    "202": {
+      "mepar_id": 202,
+      "name": "Max Input Power Limit",
+      "group": "Input protection",
+      "visibility": "advanced",
+      "help": "Input protection limit: the controller calculates a maximum input current using driver input voltage.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/advancedsettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced input-protection limit; changing it can alter current limiting from the measured driver input voltage."
+    },
+    "203": {
+      "mepar_id": 203,
+      "name": "Input Voltage Range",
+      "group": "Input protection",
+      "visibility": "manufacturer",
+      "help": "Absolute maximum supply-voltage configuration. Wrong values risk hardware damage.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Manufacturer setting; do not expose as routine operator write."
+    },
+    "204": {
+      "mepar_id": 204,
+      "name": "Power Stage v3 Mode",
+      "group": "Hardware test",
+      "visibility": "manufacturer",
+      "help": "Hardware-test related PowerStage v3 mode flag.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Manufacturer hardware test setting."
+    },
+    "2053": {
+      "mepar_id": 2053,
+      "name": "Device Address Zero",
+      "group": "Communication",
+      "visibility": "manufacturer",
+      "help": "Hardware-test address-zero option; CoSo notes this is usually zero and should not be changed without the TEC grandmaster.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Can break addressing and bus recovery."
+    },
+    "217": {
+      "mepar_id": 217,
+      "name": "FreeRTOS Statistics",
+      "group": "Big data",
+      "visibility": "advanced",
+      "help": "Read-only LATIN1 big-data diagnostics blob containing FreeRTOS statistics.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.TEC/MeSettingsWindow.cs:41"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "250": {
+      "mepar_id": 250,
+      "name": "Custom Lock Payload",
+      "group": "Custom lock",
+      "visibility": "manufacturer",
+      "help": "Raw custom-lock big-data payload used by CoSo to lock parameter controls and features.",
+      "source_evidence": [
+        "coso_custom_lock_decompile:MeSoft.CoSoG2.CustLock/CustLockManager.cs"
+      ],
+      "access": "read_write",
+      "safety_note": "Write changes the controller lock payload."
+    },
+    "1000": {
+      "mepar_id": 1000,
+      "name": "Object Temperature",
+      "group": "Thermal",
+      "visibility": "operator",
+      "help": "Measured temperature of the controlled object.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "1001": {
+      "mepar_id": 1001,
+      "name": "Sink Temperature",
+      "group": "Thermal",
+      "visibility": "operator",
+      "help": "Measured temperature of the heat sink.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "1010": {
+      "mepar_id": 1010,
+      "name": "Target Temperature: Nominal",
+      "group": "Thermal",
+      "visibility": "operator",
+      "help": "Nominal target temperature used in display-format examples.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read"
+    },
+    "1011": {
+      "mepar_id": 1011,
+      "name": "Nominal Temperature Ramp",
+      "group": "Thermal",
+      "visibility": "operator",
+      "help": "Effective nominal temperature for the PID controller, usually ramping between the current object temperature and the target.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "1020": {
+      "mepar_id": 1020,
+      "name": "Actual Output Current",
+      "group": "Power",
+      "visibility": "operator",
+      "help": "Measured output current of the TEC output stage.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read"
+    },
+    "1021": {
+      "mepar_id": 1021,
+      "name": "Actual Output Voltage",
+      "group": "Power",
+      "visibility": "operator",
+      "help": "Measured output voltage of the TEC output stage.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read"
+    },
+    "1022": {
+      "mepar_id": 1022,
+      "name": "Actual Output Power",
+      "group": "Power",
+      "visibility": "operator",
+      "help": "Derived or reported output power used for power-supply graphing and limits.",
+      "source_evidence": [
+        "repo:mecom/catalogues/tec.json"
+      ],
+      "access": "read"
+    },
+    "1200": {
+      "mepar_id": 1200,
+      "name": "Temperature Stable",
+      "group": "Status",
+      "visibility": "operator",
+      "help": "Stability indicator comparing measured temperature against the configured stability window and time.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "read"
+    },
+    "2000": {
+      "mepar_id": 2000,
+      "name": "Output Stage Input Selection",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Selects whether the output stage follows current or voltage input while in output-stage mode.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "2010": {
+      "mepar_id": 2010,
+      "name": "Output Enable",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Toggles the output stage of the TEC controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Energizes or disables the output stage."
+    },
+    "2020": {
+      "mepar_id": 2020,
+      "name": "Fixed Current",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Fixed output current command used when operating as a current-limited power supply.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "2021": {
+      "mepar_id": 2021,
+      "name": "Fixed Voltage",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Fixed output voltage command used when operating as a voltage-limited power supply.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "2030": {
+      "mepar_id": 2030,
+      "name": "Output Current Limit",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Output Current Limit restricts maximum output current and also limits the temperature PID controller to prevent integral windup.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "2031": {
+      "mepar_id": 2031,
+      "name": "Output Voltage Limit",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Output Voltage Limit restricts maximum output voltage. In temperature control mode it should not be set so low that the output stage continuously saturates.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "2032": {
+      "mepar_id": 2032,
+      "name": "Output Current Error Threshold",
+      "group": "Control",
+      "visibility": "advanced",
+      "help": "Overcurrent protection threshold. The controller enters error state and shuts off if output current exceeds this value.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "2033": {
+      "mepar_id": 2033,
+      "name": "Output Voltage Error Threshold",
+      "group": "Control",
+      "visibility": "advanced",
+      "help": "Overvoltage protection threshold. The controller enters error state and shuts off if output voltage exceeds this value.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "2040": {
+      "mepar_id": 2040,
+      "name": "Operating Mode",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "General operating mode selection for off, closed-loop TEC control, constant-voltage supply, or constant-current supply.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Changing mode can reset control behavior and should be tracked as a command."
+    },
+    "2050": {
+      "mepar_id": 2050,
+      "name": "Communication Baudrate",
+      "group": "Communication",
+      "visibility": "manufacturer",
+      "help": "UART or RS485 baudrate setting; wrong values can cut off serial communication.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Can make the device unreachable until recovered locally."
+    },
+    "2051": {
+      "mepar_id": 2051,
+      "name": "RS485 Address",
+      "group": "Communication",
+      "visibility": "manufacturer",
+      "help": "MeCom address setting. Wrong address values can make the controller disappear from the expected bus address.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Addressing change must be coordinated with bus discovery."
+    },
+    "2052": {
+      "mepar_id": 2052,
+      "name": "Reply Delay",
+      "group": "Communication",
+      "visibility": "manufacturer",
+      "help": "UART or RS485 reply-delay timing parameter for bus interoperability.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    "2060": {
+      "mepar_id": 2060,
+      "name": "Connect Watchdog",
+      "group": "Communication",
+      "visibility": "manufacturer",
+      "help": "Connection watchdog setting that can influence fail-safe behavior.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    "2070": {
+      "mepar_id": 2070,
+      "name": "CANopen Node ID",
+      "group": "CANopen",
+      "visibility": "manufacturer",
+      "help": "CANopen node-ID setting; changing it changes where the controller appears on the bus.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Can make the controller disappear on CANopen until rediscovered."
+    },
+    "2071": {
+      "mepar_id": 2071,
+      "name": "CANopen Bitrate",
+      "group": "CANopen",
+      "visibility": "manufacturer",
+      "help": "CANopen bitrate setting; wrong values disconnect the controller from the CAN network.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Can break bus communication."
+    },
+    "2072": {
+      "mepar_id": 2072,
+      "name": "CANopen Enable",
+      "group": "CANopen",
+      "visibility": "manufacturer",
+      "help": "CANopen interface enable flag.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    "3000": {
+      "mepar_id": 3000,
+      "name": "Target Temperature",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Define a target temperature that the load should be regulated to by the temperature controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "read_write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3002": {
+      "mepar_id": 3002,
+      "name": "Proximity Width",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Temperature band around target where the nominal temperature ramp changes to a sine-shaped approach.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3003": {
+      "mepar_id": 3003,
+      "name": "Coarse Temperature Ramp",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Temperature ramp rate used outside the proximity-width band.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3004": {
+      "mepar_id": 3004,
+      "name": "Ramp Start Point",
+      "group": "Control",
+      "visibility": "operator",
+      "help": "Selects whether a new ramp starts from object temperature, target temperature, or current ramp temperature.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3010": {
+      "mepar_id": 3010,
+      "name": "PID Kp",
+      "group": "PID controller",
+      "visibility": "operator",
+      "help": "Proportional gain of the temperature PID controller.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3011": {
+      "mepar_id": 3011,
+      "name": "PID Ti",
+      "group": "PID controller",
+      "visibility": "operator",
+      "help": "Integral time of the temperature PID controller.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3012": {
+      "mepar_id": 3012,
+      "name": "PID Td",
+      "group": "PID controller",
+      "visibility": "operator",
+      "help": "Derivative time of the temperature PID controller.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3013": {
+      "mepar_id": 3013,
+      "name": "PID D Part PT1",
+      "group": "PID controller",
+      "visibility": "operator",
+      "help": "PT1 damping for the derivative component of the temperature PID controller.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3020": {
+      "mepar_id": 3020,
+      "name": "Thermal Modelization",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Thermal model selection for Peltier or resistive-heater control behavior.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3030": {
+      "mepar_id": 3030,
+      "name": "Peltier Maximal Current",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Output Current Limit used by the Peltier thermal model to bound the nominal drive current.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3033": {
+      "mepar_id": 3033,
+      "name": "Peltier Maximal Temperature Delta",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Maximum temperature delta expected from the Peltier model.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3034": {
+      "mepar_id": 3034,
+      "name": "Peltier Polarity",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Polarity setting that determines whether positive drive cools or heats the controlled object.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3040": {
+      "mepar_id": 3040,
+      "name": "Resistive Heater Resistance",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Load resistance used by the resistive-heater model.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3041": {
+      "mepar_id": 3041,
+      "name": "Resistive Heater Maximal Current",
+      "group": "Thermal model",
+      "visibility": "operator",
+      "help": "Maximum current used by the resistive-heater thermal model.",
+      "source_evidence": [
+        "tec_default_config_5216o_xml:TEC Default Config 5216O.xml"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3050": {
+      "mepar_id": 3050,
+      "name": "Lower Boundary",
+      "group": "Heat/cool only",
+      "visibility": "operator",
+      "help": "Lower boundary for heat-only or cool-only Peltier operation.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "3051": {
+      "mepar_id": 3051,
+      "name": "Upper Boundary",
+      "group": "Heat/cool only",
+      "visibility": "operator",
+      "help": "Upper boundary for heat-only or cool-only Peltier operation.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/tectemperaturecontrollerwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "40000": {
+      "mepar_id": 40000,
+      "name": "Output Stage Temperature",
+      "group": "Thermal",
+      "visibility": "advanced",
+      "help": "Readable output-stage temperature. CoSo exposes individual power-stage temperatures in manufacturer diagnostics.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "4034": {
+      "mepar_id": 4034,
+      "name": "Sensor Type",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Read-only sensor type detected or configured for the temperature measurement input.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "5001": {
+      "mepar_id": 5001,
+      "name": "Temperature Calibration Offset",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Temperature calibration offset for the low-range input.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5002": {
+      "mepar_id": 5002,
+      "name": "Temperature Calibration Gain",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Temperature calibration gain for the low-range input.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5005": {
+      "mepar_id": 5005,
+      "name": "Temperature Filter PT1 Factor",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Low-range input PT1 filter factor. Smaller values filter more strongly but add delay.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5010": {
+      "mepar_id": 5010,
+      "name": "Lower Temperature Threshold",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Temperature limit error threshold for low measured temperatures.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5011": {
+      "mepar_id": 5011,
+      "name": "Upper Temperature Threshold",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Temperature limit error threshold for high measured temperatures.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5012": {
+      "mepar_id": 5012,
+      "name": "Maximum Temperature Change",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Throws an error if measured temperature changes faster than this configured limit.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "5013": {
+      "mepar_id": 5013,
+      "name": "Temperature Limit Errors",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Selects which low-range temperature measurement thresholds produce errors.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6000": {
+      "mepar_id": 6000,
+      "name": "ADC PGA Gain",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Programmable-gain amplifier gain for the sensor input path.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Hardware-specific calibration setting."
+    },
+    "6001": {
+      "mepar_id": 6001,
+      "name": "Current Source",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Sensor-current source setting; IDAC1 always flows through the instrumentation amplifier.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6002": {
+      "mepar_id": 6002,
+      "name": "Reference Series Resistor",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Reference series resistor used by the sensor measurement conversion.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6003": {
+      "mepar_id": 6003,
+      "name": "Sensor Offset",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Factory calibration offset for the sensor input.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6004": {
+      "mepar_id": 6004,
+      "name": "Sensor Gain",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Factory calibration gain for the sensor input.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6005": {
+      "mepar_id": 6005,
+      "name": "Temperature Sensor Type",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Sensor type selection; changing it can require matching hardware and calibration.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Hardware-specific setting."
+    },
+    "6007": {
+      "mepar_id": 6007,
+      "name": "PGA Bypass",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "PGA bypass option that can help measurement-noise behavior in some input configurations.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6008": {
+      "mepar_id": 6008,
+      "name": "Current Source 2 Output",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Selects the ADC pin used for the second current source.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6009": {
+      "mepar_id": 6009,
+      "name": "Measurement Type",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Selects resistance or voltage measurement type for the connected sensor.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/techrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6014": {
+      "mepar_id": 6014,
+      "name": "ADC Limit Errors",
+      "group": "Sensor input",
+      "visibility": "advanced",
+      "help": "Selects which ADC thresholds trigger sensor measurement errors.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/tec/teclrinputwindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6200": {
+      "mepar_id": 6200,
+      "name": "Fan Enable",
+      "group": "Fan controller",
+      "visibility": "advanced",
+      "help": "Fan-controller enable flag.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6210": {
+      "mepar_id": 6210,
+      "name": "Fan Temperature Source",
+      "group": "Fan controller",
+      "visibility": "advanced",
+      "help": "Temperature source selection for fan-control behavior.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6230": {
+      "mepar_id": 6230,
+      "name": "Fan PWM Frequency",
+      "group": "Fan controller",
+      "visibility": "advanced",
+      "help": "PWM frequency selection for fan control.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6300": {
+      "mepar_id": 6300,
+      "name": "Object Active Source",
+      "group": "Advanced control",
+      "visibility": "advanced",
+      "help": "Object active source selection for deciding which source drives object-temperature control.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6301": {
+      "mepar_id": 6301,
+      "name": "Control Cycle",
+      "group": "Advanced control",
+      "visibility": "advanced",
+      "help": "Temperature-control cycle selection affecting regulation timing.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6302": {
+      "mepar_id": 6302,
+      "name": "Object Observe Mode",
+      "group": "Advanced control",
+      "visibility": "advanced",
+      "help": "Object temperature observe-mode setting.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6303": {
+      "mepar_id": 6303,
+      "name": "Object Observe Mode Variant",
+      "group": "Advanced control",
+      "visibility": "advanced",
+      "help": "Second object observe-mode mapping recovered from CoSo import metadata.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6304": {
+      "mepar_id": 6304,
+      "name": "Sink Temperature Mode",
+      "group": "Advanced control",
+      "visibility": "advanced",
+      "help": "Sink temperature mode selection for external or fixed sink-temperature behavior.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6310": {
+      "mepar_id": 6310,
+      "name": "Error State Auto Reset Delay",
+      "group": "Safety",
+      "visibility": "advanced",
+      "help": "Delay before automatic restart after error state. Zero disables auto-reset; startup adds a delay.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/advancedsettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6320": {
+      "mepar_id": 6320,
+      "name": "Output Stage Controller Limit Error Delay",
+      "group": "Safety",
+      "visibility": "advanced",
+      "help": "Delay before output-stage controller-limit error 108 is raised. -1 disables the error and is not recommended.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/advancedsettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Safety-related error suppression timing."
+    },
+    "6330": {
+      "mepar_id": 6330,
+      "name": "Device Temperature Mode",
+      "group": "Safety",
+      "visibility": "advanced",
+      "help": "Selects standard or extended device temperature mode; extended mode widens temperature range with current limiting.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/advancedsettingswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6400": {
+      "mepar_id": 6400,
+      "name": "Voltage Conversion RT",
+      "group": "Sensor conversion",
+      "visibility": "advanced",
+      "help": "Voltage-conversion calibration coefficient for object-temperature input conversion.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6401": {
+      "mepar_id": 6401,
+      "name": "Voltage Conversion RU",
+      "group": "Sensor conversion",
+      "visibility": "advanced",
+      "help": "Voltage-conversion calibration coefficient for object-temperature input conversion.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "6402": {
+      "mepar_id": 6402,
+      "name": "Voltage Conversion Slope",
+      "group": "Sensor conversion",
+      "visibility": "advanced",
+      "help": "Voltage-conversion slope calibration for object-temperature input conversion.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53000": {
+      "mepar_id": 53000,
+      "name": "License Key",
+      "group": "License",
+      "visibility": "license",
+      "help": "License key field provided by Meerstetter for feature unlocks.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/licensewindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Vendor license payload."
+    },
+    "53001": {
+      "mepar_id": 53001,
+      "name": "License Key Status",
+      "group": "License",
+      "visibility": "license",
+      "help": "License key validation status including empty, valid, wrong structure, wrong signature, header failure, wrong device type, or unique ID mismatch.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/licensewindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Vendor license status metadata; surface read-only with provenance."
+    },
+    "53010": {
+      "mepar_id": 53010,
+      "name": "Temperature Estimator License Status",
+      "group": "License",
+      "visibility": "license",
+      "help": "Feature license status for the temperature estimator.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/licensewindow.baml:strings",
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Vendor license status metadata; surface read-only with provenance."
+    },
+    "53015": {
+      "mepar_id": 53015,
+      "name": "Cascade Temperature Control License Status",
+      "group": "License",
+      "visibility": "license",
+      "help": "Feature license status for cascade temperature control.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/licensewindow.baml:strings",
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Vendor license status metadata; surface read-only with provenance."
+    },
+    "53020": {
+      "mepar_id": 53020,
+      "name": "Unipolar and Mix Operating Mode License Status",
+      "group": "License",
+      "visibility": "license",
+      "help": "Feature license status for unipolar and mixed operating modes.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/licensewindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Vendor license status metadata; surface read-only with provenance."
+    },
+    "53100": {
+      "mepar_id": 53100,
+      "name": "Estimator Enable",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Enables the temperature estimator if a valid license is present.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53101": {
+      "mepar_id": 53101,
+      "name": "Estimator Model Input Temperature",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Selects the temperature input used by the estimator model, such as HR or LR sensors.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53102": {
+      "mepar_id": 53102,
+      "name": "Estimator Ambient Temperature",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Selects ambient temperature source for the estimator model, including fixed ambient temperature.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53103": {
+      "mepar_id": 53103,
+      "name": "Fixed Ambient Temperature",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Fixed ambient temperature used by the estimator when no sensor source is selected.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53104": {
+      "mepar_id": 53104,
+      "name": "Estimator Time Constant Damping",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Damping time constant for the temperature estimator model.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53105": {
+      "mepar_id": 53105,
+      "name": "Estimator Heat Loss Factor",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Heat-loss factor used by the temperature estimator model.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53106": {
+      "mepar_id": 53106,
+      "name": "Estimator Monitor Input",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Temperature-estimator monitor input value.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "53107": {
+      "mepar_id": 53107,
+      "name": "Estimator Monitor Output",
+      "group": "Extra functions",
+      "visibility": "advanced",
+      "help": "Temperature-estimator monitor output value.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "53120": {
+      "mepar_id": 53120,
+      "name": "Cascade Enable",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Enables cascade temperature control if a valid cascade license is present.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Changes control-loop topology."
+    },
+    "53121": {
+      "mepar_id": 53121,
+      "name": "Cascade Current Temperature Selection",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Selects the current temperature input of the outer cascade control loop, similar to object temperature of that loop.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53122": {
+      "mepar_id": 53122,
+      "name": "Cascade Sync Run With",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Selects the inner temperature-control instance synchronized with the cascade loop.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53123": {
+      "mepar_id": 53123,
+      "name": "Cascade Target Temperature",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Target temperature for the outer cascade loop when cascade temperature control is active.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53124": {
+      "mepar_id": 53124,
+      "name": "Cascade Coarse Temperature Ramp",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Coarse temperature ramp for cascade nominal-temperature generation.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53125": {
+      "mepar_id": 53125,
+      "name": "Cascade Proximity Width",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Proximity width for cascade nominal-temperature ramping.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53126": {
+      "mepar_id": 53126,
+      "name": "Cascade Ramp Start Point",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Selects whether cascade ramping starts from current temperature, target, or ramp value.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53128": {
+      "mepar_id": 53128,
+      "name": "Cascade PID Kp",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Proportional gain for the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53129": {
+      "mepar_id": 53129,
+      "name": "Cascade PID Ti",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Integral time for the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53130": {
+      "mepar_id": 53130,
+      "name": "Cascade PID Td",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Derivative time for the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53131": {
+      "mepar_id": 53131,
+      "name": "Cascade PID D Part PT1",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "PT1 damping for the derivative component of the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53132": {
+      "mepar_id": 53132,
+      "name": "Cascade I Freeze Triggered By",
+      "group": "Cascade",
+      "visibility": "advanced",
+      "help": "Freezes the outer PID integral action when the selected inner PID loop runs into limitation.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Advanced writable setting; require explicit operator intent, command logging, and confirmed readback before changing."
+    },
+    "53133": {
+      "mepar_id": 53133,
+      "name": "Cascade PID Upper Limit",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Upper output limit for the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53134": {
+      "mepar_id": 53134,
+      "name": "Cascade PID Lower Limit",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Lower output limit for the outer cascade PID controller.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53135": {
+      "mepar_id": 53135,
+      "name": "Cascade Range Around Target",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Limits cascade PID output around the target temperature by the configured range.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "write",
+      "safety_note": "Writable control parameter; log intended value, transport route, actual write result, and confirmed readback."
+    },
+    "53136": {
+      "mepar_id": 53136,
+      "name": "Cascade Current Temperature",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Monitor value for the cascade outer-loop current temperature.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "53137": {
+      "mepar_id": 53137,
+      "name": "Cascade Nominal Temperature Ramp",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Monitor value for the cascade nominal target after ramping.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "53138": {
+      "mepar_id": 53138,
+      "name": "Cascade PID Upper Limit Monitor",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Monitor value for the effective cascade PID upper limit.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "53139": {
+      "mepar_id": 53139,
+      "name": "Cascade PID Lower Limit Monitor",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Monitor value for the effective cascade PID lower limit.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "53140": {
+      "mepar_id": 53140,
+      "name": "Cascade Output",
+      "group": "Cascade",
+      "visibility": "operator",
+      "help": "Output of the outer cascade control loop.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/extrafunctionswindow.baml:strings"
+      ],
+      "access": "read"
+    },
+    "65020": {
+      "mepar_id": 65020,
+      "name": "MeParFlashV2 Write Cycles",
+      "group": "Diagnostics",
+      "visibility": "advanced",
+      "help": "Flash write-cycle counter; excessive cycles can force read-only behavior.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    "65100": {
+      "mepar_id": 65100,
+      "name": "PAR_DEBUG",
+      "group": "Diagnostics",
+      "visibility": "manufacturer",
+      "help": "Debug parameter family exposed as PAR_DEBUG0 through PAR_DEBUG4 instances.",
+      "source_evidence": [
+        "coso_baml_tooltips:view/misctop/mesettingswindow.baml:strings"
+      ],
+      "access": "read",
+      "safety_note": "Manufacturer-level diagnostic or identity value; surface as read-only metadata unless separately reviewed."
+    },
+    "9000": {
+      "mepar_id": 9000,
+      "name": "Firmware Update Status Text",
+      "group": "Firmware update",
+      "visibility": "advanced",
+      "help": "LATIN1 big-data status text reported by the firmware updater.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    "9001": {
+      "mepar_id": 9001,
+      "name": "Firmware Update Status",
+      "group": "Firmware update",
+      "visibility": "advanced",
+      "help": "Firmware updater status value.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    "9002": {
+      "mepar_id": 9002,
+      "name": "Firmware Update Progress",
+      "group": "Firmware update",
+      "visibility": "advanced",
+      "help": "Firmware updater progress value.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    "9003": {
+      "mepar_id": 9003,
+      "name": "Firmware Update Detail Status",
+      "group": "Firmware update",
+      "visibility": "advanced",
+      "help": "Additional firmware updater status value.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "read",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    "9010": {
+      "mepar_id": 9010,
+      "name": "Firmware Update Activate",
+      "group": "Firmware update",
+      "visibility": "manufacturer",
+      "help": "Firmware update activation command.",
+      "source_evidence": [
+        "coso_ilspy_decompile:MeSoft.CoSoG2.CoSo/MainWindow.cs and related decompile"
+      ],
+      "access": "write",
+      "safety_note": "Write triggers firmware-update state transition."
+    }
+  }
+}

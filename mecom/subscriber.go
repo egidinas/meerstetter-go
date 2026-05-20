@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 // SubscriberConfig configures one push-style telemetry stream.

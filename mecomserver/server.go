@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	defaultRequestTimeout    = 2 * time.Second
-	defaultReconnectDelay    = 500 * time.Millisecond
-	defaultClientIdleTimeout = 30 * time.Second
-	maxClientFrameBytes      = 4096
+	defaultRequestTimeout        = 2 * time.Second
+	defaultReconnectDelay        = 500 * time.Millisecond
+	defaultClientIdleTimeout     = 30 * time.Second
+	defaultCommandIdempotencyTTL = 30 * time.Second
+	maxClientFrameBytes          = 4096
 )
 
 // DownstreamDial opens the single owned connection to a MeCom device.
@@ -31,6 +32,7 @@ type Config struct {
 	RequestTimeout    time.Duration
 	ReconnectDelay    time.Duration
 	ClientIdleTimeout time.Duration
+	TraceFrames       bool
 	Logger            *log.Logger
 
 	// statsRecorder is set by RouterConfig/HubConfig wrappers to surface
@@ -39,6 +41,7 @@ type Config struct {
 }
 
 type request struct {
+	ctx    context.Context
 	frame  []byte
 	result chan response
 }
@@ -126,12 +129,15 @@ func handleClient(ctx context.Context, conn net.Conn, requests chan<- request, c
 	if cfg.ClientIdleTimeout <= 0 {
 		cfg.ClientIdleTimeout = defaultClientIdleTimeout
 	}
-	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, func([]byte) (chan<- request, error) {
+	if cfg.RequestTimeout <= 0 {
+		cfg.RequestTimeout = defaultRequestTimeout
+	}
+	handleClientWithSelector(ctx, conn, cfg.Logger, cfg.ClientIdleTimeout, cfg.RequestTimeout, cfg.TraceFrames, func([]byte) (chan<- request, error) {
 		return requests, nil
 	})
 }
 
-func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Logger, idleTimeout time.Duration, selectRequests func([]byte) (chan<- request, error)) {
+func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Logger, idleTimeout, requestTimeout time.Duration, traceFrames bool, selectRequests func([]byte) (chan<- request, error)) {
 	defer conn.Close()
 	done := make(chan struct{})
 	defer close(done)
@@ -152,38 +158,87 @@ func handleClientWithSelector(ctx context.Context, conn net.Conn, logger *log.Lo
 		if idleTimeout > 0 {
 			_ = conn.SetReadDeadline(time.Now().Add(idleTimeout))
 		}
-		frame, err := readBoundedFrame(reader, maxClientFrameBytes)
+		frame, err := readBoundedFramePartial(reader, maxClientFrameBytes)
 		if err != nil {
+			if traceFrames && logger != nil {
+				logger.Printf("client read failed remote=%s bytes=%s err=%v", conn.RemoteAddr(), describeBytes(frame), err)
+			}
 			return
 		}
 		if len(frame) == 0 {
 			continue
 		}
+		if traceFrames && logger != nil {
+			logger.Printf("client -> server remote=%s frame=%s", conn.RemoteAddr(), describeBytes(frame))
+		}
 		requests, err := selectRequests(frame)
 		if err != nil {
-			writeClientFrame(conn, deviceServerError(frame, err), idleTimeout)
+			resp := deviceServerError(frame, err)
+			if traceFrames && logger != nil {
+				logger.Printf("server -> client remote=%s frame=%s error=%v", conn.RemoteAddr(), describeBytes(resp), err)
+			}
+			if err := writeClientFrame(conn, resp, idleTimeout); err != nil {
+				return
+			}
 			continue
 		}
+		if requestTimeout <= 0 {
+			requestTimeout = defaultRequestTimeout
+		}
+		reqCtx, cancelReq := context.WithTimeout(ctx, requestTimeout)
 		result := make(chan response, 1)
 		select {
-		case requests <- request{frame: append([]byte(nil), frame...), result: result}:
+		case requests <- request{ctx: reqCtx, frame: append([]byte(nil), frame...), result: result}:
+		case <-reqCtx.Done():
+			cancelReq()
+			return
 		case <-ctx.Done():
+			cancelReq()
 			return
 		}
 		select {
 		case res := <-result:
+			cancelReq()
 			if res.err != nil {
-				writeClientFrame(conn, deviceServerError(frame, res.err), idleTimeout)
+				resp := deviceServerError(frame, res.err)
+				if traceFrames && logger != nil {
+					logger.Printf("server -> client remote=%s frame=%s error=%v", conn.RemoteAddr(), describeBytes(resp), res.err)
+				}
+				if err := writeClientFrame(conn, resp, idleTimeout); err != nil {
+					return
+				}
 				continue
 			}
-			writeClientFrame(conn, res.frame, idleTimeout)
+			if traceFrames && logger != nil {
+				logger.Printf("server -> client remote=%s frame=%s", conn.RemoteAddr(), describeBytes(res.frame))
+			}
+			if err := writeClientFrame(conn, res.frame, idleTimeout); err != nil {
+				return
+			}
+		case <-reqCtx.Done():
+			resp := deviceServerError(frame, reqCtx.Err())
+			if traceFrames && logger != nil {
+				logger.Printf("server -> client remote=%s frame=%s error=%v", conn.RemoteAddr(), describeBytes(resp), reqCtx.Err())
+			}
+			_ = writeClientFrame(conn, resp, idleTimeout)
+			cancelReq()
+			return
 		case <-ctx.Done():
+			cancelReq()
 			return
 		}
 	}
 }
 
 func readBoundedFrame(reader *bufio.Reader, maxBytes int) ([]byte, error) {
+	frame, err := readBoundedFramePartial(reader, maxBytes)
+	if err != nil {
+		return nil, err
+	}
+	return frame, nil
+}
+
+func readBoundedFramePartial(reader *bufio.Reader, maxBytes int) ([]byte, error) {
 	if maxBytes <= 0 {
 		return nil, fmt.Errorf("mecomserver: max frame size must be positive")
 	}
@@ -198,16 +253,17 @@ func readBoundedFrame(reader *bufio.Reader, maxBytes int) ([]byte, error) {
 			return frame, nil
 		}
 		if !errors.Is(err, bufio.ErrBufferFull) {
-			return nil, err
+			return frame, err
 		}
 	}
 }
 
-func writeClientFrame(conn net.Conn, frame []byte, timeout time.Duration) {
+func writeClientFrame(conn net.Conn, frame []byte, timeout time.Duration) error {
 	if timeout > 0 {
 		_ = conn.SetWriteDeadline(time.Now().Add(timeout))
 	}
-	_, _ = conn.Write(frame)
+	_, err := conn.Write(frame)
+	return err
 }
 
 func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
@@ -229,8 +285,18 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 			return
 		case req := <-requests:
 			cfg.statsRecorder.markFrameIn()
+			reqCtx := req.ctx
+			if reqCtx == nil {
+				reqCtx = ctx
+			}
+			select {
+			case <-reqCtx.Done():
+				req.result <- response{err: reqCtx.Err()}
+				continue
+			default:
+			}
 			if conn == nil {
-				dialCtx, cancel := context.WithTimeout(ctx, cfg.RequestTimeout)
+				dialCtx, cancel := context.WithTimeout(reqCtx, cfg.RequestTimeout)
 				nextConn, desc, err := cfg.Downstream(dialCtx)
 				cancel()
 				if err != nil {
@@ -247,7 +313,7 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 					cfg.Logger.Printf("downstream connected target=%s", description)
 				}
 			}
-			resp, err := exchange(conn, reader, req.frame, cfg.RequestTimeout)
+			resp, err := exchange(reqCtx, conn, reader, req.frame, cfg.RequestTimeout)
 			if err != nil {
 				if cfg.Logger != nil {
 					cfg.Logger.Printf("downstream exchange failed target=%s err=%v", description, err)
@@ -258,25 +324,80 @@ func runBroker(ctx context.Context, cfg Config, requests <-chan request) {
 				continue
 			}
 			cfg.statsRecorder.markFrameOut()
+			if cfg.TraceFrames && cfg.Logger != nil {
+				cfg.Logger.Printf("downstream exchange target=%s tx=%s rx=%s", description, describeBytes(req.frame), describeBytes(resp))
+			}
 			req.result <- response{frame: resp}
 		}
 	}
 }
 
-func exchange(conn net.Conn, reader *bufio.Reader, frame []byte, timeout time.Duration) ([]byte, error) {
+func exchange(ctx context.Context, conn net.Conn, reader *bufio.Reader, frame []byte, timeout time.Duration) ([]byte, error) {
 	if timeout <= 0 {
 		timeout = defaultRequestTimeout
 	}
-	_ = conn.SetWriteDeadline(time.Now().Add(timeout))
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	reqCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-reqCtx.Done():
+			_ = conn.Close()
+		case <-done:
+		}
+	}()
+	defer close(done)
+
+	deadline := time.Now().Add(timeout)
+	if ctxDeadline, ok := reqCtx.Deadline(); ok {
+		deadline = ctxDeadline
+	}
+	_ = conn.SetWriteDeadline(deadline)
 	if _, err := conn.Write(frame); err != nil {
+		if reqCtx.Err() != nil {
+			return nil, reqCtx.Err()
+		}
 		return nil, err
 	}
-	_ = conn.SetReadDeadline(time.Now().Add(timeout))
+	_ = conn.SetReadDeadline(deadline)
 	resp, err := reader.ReadBytes(mecom.FrameTerminator)
 	if err != nil {
+		if reqCtx.Err() != nil {
+			return nil, reqCtx.Err()
+		}
 		return nil, err
 	}
 	return append([]byte(nil), resp...), nil
+}
+
+func describeBytes(b []byte) string {
+	if len(b) == 0 {
+		return "<none>"
+	}
+	const max = 96
+	clipped := b
+	suffix := ""
+	if len(clipped) > max {
+		clipped = clipped[:max]
+		suffix = fmt.Sprintf("...(+%d bytes)", len(b)-max)
+	}
+	printable := make([]byte, 0, len(clipped))
+	for _, c := range clipped {
+		switch {
+		case c == '\r':
+			printable = append(printable, '\\', 'r')
+		case c == '\n':
+			printable = append(printable, '\\', 'n')
+		case c >= 32 && c <= 126:
+			printable = append(printable, c)
+		default:
+			printable = append(printable, '.')
+		}
+	}
+	return fmt.Sprintf("len=%d ascii=%q hex=% X%s", len(b), string(printable), clipped, suffix)
 }
 
 func sleepOrDone(ctx context.Context, d time.Duration) {

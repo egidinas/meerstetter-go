@@ -1,0 +1,47 @@
+[
+  {
+    "start": 100,
+    "end": 200,
+    "label": "0100 identity and device metadata"
+  },
+  {
+    "start": 1000,
+    "end": 1100,
+    "label": "1000 measured thermal and output values"
+  },
+  {
+    "start": 1100,
+    "end": 1300,
+    "label": "1100 thermal state and stability"
+  },
+  {
+    "start": 1500,
+    "end": 1600,
+    "label": "1500 driver input supply"
+  },
+  {
+    "start": 2000,
+    "end": 2100,
+    "label": "2000 output commands and limits"
+  },
+  {
+    "start": 3000,
+    "end": 3100,
+    "label": "3000 temperature-control setpoints"
+  },
+  {
+    "start": 4000,
+    "end": 4100,
+    "label": "4000 error state and counters"
+  },
+  {
+    "start": 40000,
+    "end": 41000,
+    "label": "40000 extended output-stage readout"
+  },
+  {
+    "start": 52000,
+    "end": 54000,
+    "label": "52000 cascade control"
+  }
+]

@@ -130,7 +130,13 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 		}
 		resp, err := canopen.ParseSDODownloadResponse(frame)
 		if err != nil {
-			return errors.Join(ErrWriteRejected, err)
+			var abort canopen.SDOAbortError
+			if errors.As(err, &abort) {
+				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+					return errors.Join(ErrWriteRejected, err)
+				}
+			}
+			continue
 		}
 		if resp.Index != object.index || resp.SubIndex != object.subIndex {
 			continue
@@ -192,7 +198,13 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 		}
 		resp, err := canopen.ParseSDOUploadResponse(frame)
 		if err != nil {
-			return math.NaN(), err
+			var abort canopen.SDOAbortError
+			if errors.As(err, &abort) {
+				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+					return math.NaN(), err
+				}
+			}
+			continue
 		}
 		if resp.Index != object.index || resp.SubIndex != object.subIndex {
 			continue
@@ -216,10 +228,7 @@ type canopenSDOObject struct {
 }
 
 func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
-	if instance <= 0 {
-		instance = 1
-	}
-	if instance > 0xff {
+	if instance <= 0 || instance > 0xff {
 		return canopenSDOObject{}, false
 	}
 	sub := byte(instance)
@@ -228,16 +237,38 @@ func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
 		return canopenSDOObject{index: 0x2100, subIndex: sub, kind: DataTypeFloat32}, true
 	case 1001: // sink temperature (sensor, read-only)
 		return canopenSDOObject{index: 0x2101, subIndex: sub, kind: DataTypeFloat32}, true
+	case 1020: // output stage actual current (read-only)
+		return canopenSDOObject{index: 0x2120, subIndex: sub, kind: DataTypeFloat32}, true
+	case 1021: // output stage actual voltage (read-only)
+		return canopenSDOObject{index: 0x2121, subIndex: sub, kind: DataTypeFloat32}, true
+	case 1022: // output stage actual power (read-only)
+		return canopenSDOObject{index: 0x2122, subIndex: sub, kind: DataTypeFloat32}, true
 	case 2010: // output stage enable (writable int32)
 		return canopenSDOObject{index: 0x2410, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 2020: // output stage fixed set current (writable float32)
+		return canopenSDOObject{index: 0x2420, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 2021: // output stage fixed set voltage (writable float32)
+		return canopenSDOObject{index: 0x2421, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 2030: // output stage current limitation (writable float32)
+		return canopenSDOObject{index: 0x2430, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 2031: // output stage voltage limitation (writable float32)
+		return canopenSDOObject{index: 0x2431, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 2032: // output stage current error threshold (writable float32)
+		return canopenSDOObject{index: 0x2432, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 2033: // output stage voltage error threshold (writable float32)
+		return canopenSDOObject{index: 0x2433, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
 	case 2040: // operating mode (writable int32)
 		return canopenSDOObject{index: 0x2440, subIndex: sub, kind: DataTypeInt32, writable: true}, true
 	case 3000: // nominal target temperature (writable float32 setpoint)
 		return canopenSDOObject{index: 0x2600, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
-	case 1020: // static current setpoint (writable float32)
-		return canopenSDOObject{index: 0x2420, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
-	case 1021: // static voltage setpoint (writable float32)
-		return canopenSDOObject{index: 0x2421, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
+	case 53120: // cascade temperature controller enable (writable int32)
+		return canopenSDOObject{index: 0x4420, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 53121: // cascade current temperature selection (writable int32)
+		return canopenSDOObject{index: 0x4421, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 53122: // cascade sync run-with channel (writable int32)
+		return canopenSDOObject{index: 0x4422, subIndex: sub, kind: DataTypeInt32, writable: true}, true
+	case 53123: // cascade target temperature (writable float32)
+		return canopenSDOObject{index: 0x4423, subIndex: sub, kind: DataTypeFloat32, writable: true}, true
 	default:
 		return canopenSDOObject{}, false
 	}

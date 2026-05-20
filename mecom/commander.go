@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/egidinas/meerstetter-go/tmtc"
+	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
 // Commander adapts any WriteClient into a tmtc.Commander. It is the bridge
@@ -19,14 +19,19 @@ import (
 // Recognised telecommand names:
 //   - "write_float32" / "set_float32"  args: param (int), instance (int, default 1), value (float)
 //   - "write_int32"   / "set_int32"    args: param (int), instance (int, default 1), value (int)
+//   - "write_string" / "set_string"    args: param (int), instance (int, default 1), value (string)
+//   - "write_big_data_string"          args: param (int), instance (int, default 1), value (string)
+//   - "write_user_note"                args: instance (int, default 1), value (string); writes TEC param 120
 //   - "reset"                          (requires ControlClient)
 //   - "save_to_flash" / "save"         (requires ControlClient)
 //
 // Unrecognised names return CommandRejected with the offending name.
 type Commander struct {
-	Writer  WriteClient
-	Control ControlClient
-	Timeout time.Duration
+	Writer       WriteClient
+	Reader       ReadClient
+	StringWriter StringWriteClient
+	Control      ControlClient
+	Timeout      time.Duration
 
 	// TargetID identifies the device this Commander writes to, used by
 	// Authorizer to look up the relevant lease. Optional.
@@ -59,6 +64,12 @@ func (f AuthorizerFunc) Authorize(targetID string, tc tmtc.Telecommand) error {
 // commands are rejected.
 func NewCommander(writer WriteClient, timeout time.Duration) *Commander {
 	c := &Commander{Writer: writer, Timeout: timeout}
+	if reader, ok := writer.(ReadClient); ok {
+		c.Reader = reader
+	}
+	if stringWriter, ok := writer.(StringWriteClient); ok {
+		c.StringWriter = stringWriter
+	}
 	if ctrl, ok := writer.(ControlClient); ok {
 		c.Control = ctrl
 	}
@@ -126,7 +137,16 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err := c.authorize(tc); err != nil {
 			return err
 		}
-		return c.Writer.WriteFloat32(ctx, paramID, instance, float32(value))
+		if err := c.Writer.WriteFloat32(ctx, paramID, instance, float32(value)); err != nil {
+			return err
+		}
+		if c.Reader != nil {
+			got, err := c.Reader.ReadFloat32(ctx, paramID, instance)
+			if err == nil && float32(got) != float32(value) {
+				return fmt.Errorf("%w: wrote %v, confirmed %v", ErrReadbackMismatch, float32(value), float32(got))
+			}
+		}
+		return nil
 
 	case "write_int32", "set_int32":
 		paramID, instance, err := paramAndInstance(tc.Arguments)
@@ -140,7 +160,71 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if err := c.authorize(tc); err != nil {
 			return err
 		}
-		return c.Writer.WriteInt32(ctx, paramID, instance, int32(value))
+		if err := c.Writer.WriteInt32(ctx, paramID, instance, int32(value)); err != nil {
+			return err
+		}
+		if c.Reader != nil {
+			got, err := c.Reader.ReadInt32(ctx, paramID, instance)
+			if err == nil && got != int32(value) {
+				return fmt.Errorf("readback_mismatch: wrote %v, confirmed %v", int32(value), got)
+			}
+		}
+		return nil
+
+	case "write_string", "set_string":
+		if c.StringWriter == nil {
+			return fmt.Errorf("%s: underlying client does not support string writes", tc.Name)
+		}
+		paramID, instance, err := paramAndInstance(tc.Arguments)
+		if err != nil {
+			return err
+		}
+		value, err := stringArg(tc.Arguments, "value")
+		if err != nil {
+			return err
+		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
+		return c.StringWriter.WriteString(ctx, paramID, instance, value)
+
+	case "write_big_data_string":
+		if c.StringWriter == nil {
+			return fmt.Errorf("write_big_data_string: underlying client does not support big-data string writes")
+		}
+		paramID, instance, err := paramAndInstance(tc.Arguments)
+		if err != nil {
+			return err
+		}
+		value, err := stringArg(tc.Arguments, "value")
+		if err != nil {
+			return err
+		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
+		return c.StringWriter.WriteBigDataString(ctx, paramID, instance, value)
+
+	case "write_user_note":
+		if c.StringWriter == nil {
+			return fmt.Errorf("write_user_note: underlying client does not support big-data string writes")
+		}
+		instance := 1
+		if _, ok := tc.Arguments["instance"]; ok {
+			v, err := intArg(tc.Arguments, "instance")
+			if err != nil {
+				return err
+			}
+			instance = v
+		}
+		value, err := stringArg(tc.Arguments, "value")
+		if err != nil {
+			return err
+		}
+		if err := c.authorize(tc); err != nil {
+			return err
+		}
+		return c.StringWriter.WriteBigDataString(ctx, 120, instance, value)
 
 	case "reset":
 		if c.Control == nil {
@@ -205,6 +289,21 @@ func paramAndInstance(args map[string]any) (int, int, error) {
 		instance = v
 	}
 	return paramID, instance, nil
+}
+
+func stringArg(args map[string]any, key string) (string, error) {
+	raw, ok := args[key]
+	if !ok {
+		return "", fmt.Errorf("missing %q argument", key)
+	}
+	switch v := raw.(type) {
+	case string:
+		return v, nil
+	case json.Number:
+		return v.String(), nil
+	default:
+		return fmt.Sprint(v), nil
+	}
 }
 
 func intArg(args map[string]any, key string) (int, error) {

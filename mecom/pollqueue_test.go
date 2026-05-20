@@ -40,6 +40,31 @@ func TestPollQueueManualPollGoesToFront(t *testing.T) {
 	}
 }
 
+func TestPollQueuePreservesNormalRoundRobinAcrossFrontPolls(t *testing.T) {
+	p1 := Parameter{ID: 1000, Instance: 1, Type: DataTypeFloat32}
+	p2 := Parameter{ID: 1001, Instance: 1, Type: DataTypeFloat32}
+	p3 := Parameter{ID: 1002, Instance: 1, Type: DataTypeFloat32}
+	manual := Parameter{ID: 5000, Instance: 4, Type: DataTypeInt32}
+	q := NewPollQueue([]Parameter{p1, p2, p3})
+
+	first := q.NextChunk(2)
+	q.EnqueueFront(manual)
+	second := q.NextChunk(3)
+	third := q.NextChunk(2)
+
+	got := []int{
+		first[0].ID, first[1].ID,
+		second[0].ID, second[1].ID, second[2].ID,
+		third[0].ID, third[1].ID,
+	}
+	want := []int{1000, 1001, 5000, 1002, 1000, 1001, 1002}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("round robin with front insertion = %#v, want %#v", got, want)
+		}
+	}
+}
+
 func TestPollQueueLatestReturnsValueWhenItComesAround(t *testing.T) {
 	param := Parameter{ID: 1022, Instance: 2, Type: DataTypeFloat32}
 	q := NewPollQueue([]Parameter{param})
@@ -67,6 +92,23 @@ func TestPollQueueInitializesLatestForAllRoundRobinParameters(t *testing.T) {
 		}
 		if !math.IsNaN(got.Value) || got.Error != "not_sampled" {
 			t.Fatalf("initialized latest = %#v, want NaN/not_sampled", got)
+		}
+	}
+}
+
+func BenchmarkPollQueueNextChunkLarge(b *testing.B) {
+	params := make([]Parameter, 4096)
+	for i := range params {
+		params[i] = Parameter{ID: 1000 + i, Instance: 1, Type: DataTypeFloat32}
+	}
+	q := NewPollQueue(params)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		chunk := q.NextChunk(len(params))
+		if len(chunk) != len(params) {
+			b.Fatalf("chunk length = %d, want %d", len(chunk), len(params))
 		}
 	}
 }

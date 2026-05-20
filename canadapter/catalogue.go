@@ -186,7 +186,7 @@ func RenderChecklist(profile Profile) string {
 func pixtendV2LProfile() Profile {
 	return Profile{
 		ID:              ProfilePiXtendV2L,
-		DisplayName:     "PiXtend V2-L MCP2515 on Raspberry Pi",
+		DisplayName:     "PiXtend CAN",
 		FirstClass:      true,
 		Maturity:        MaturityFirstClass,
 		Transport:       TransportSocketCAN,
@@ -335,7 +335,7 @@ func can327Profile() Profile {
 func kvaserUSBProfile() Profile {
 	return Profile{
 		ID:              ProfileKvaserUSB,
-		DisplayName:     "Kvaser USB adapter",
+		DisplayName:     "Kvaser USB CAN",
 		FirstClass:      true,
 		Maturity:        MaturityFirstClass,
 		Transport:       TransportKvaserCANlib,

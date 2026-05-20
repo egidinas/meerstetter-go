@@ -46,12 +46,57 @@ func TestRunVerifyFailsOnMismatchedReadback(t *testing.T) {
 		done <- err
 	}()
 
-	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{{ParamID: 1000, Instance: 1, Value: 7}}, 500*time.Millisecond, true, false, false)
+	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{intSetSpec(1000, 1, 7)}, 500*time.Millisecond, true, false, false)
 	if err == nil || !strings.Contains(err.Error(), "operation") {
 		t.Fatalf("run verify mismatch err = %v, want operation failure", err)
 	}
 	if err := <-done; err != nil {
 		t.Fatalf("test server failed: %v", err)
+	}
+}
+
+func TestRunWritesCatalogueFloatParameterAsFloatFrame(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+
+	requests := make(chan string, 1)
+	done := make(chan error, 1)
+	go func() {
+		conn, err := ln.Accept()
+		if err != nil {
+			done <- err
+			return
+		}
+		defer conn.Close()
+		reader := bufio.NewReader(conn)
+		req, err := reader.ReadString(mecom.FrameTerminator)
+		if err != nil {
+			done <- err
+			return
+		}
+		requests <- req
+		_, err = conn.Write(testResponseFrame("!000001+"))
+		done <- err
+	}()
+
+	specs, err := parseSetSpecs(setFlags{"2021:2=28.5"})
+	if err != nil {
+		t.Fatalf("parseSetSpecs: %v", err)
+	}
+	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, specs, 500*time.Millisecond, false, false, false)
+	if err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	if err := <-done; err != nil {
+		t.Fatalf("test server failed: %v", err)
+	}
+	got := <-requests
+	want := string(mecom.BuildWriteFloat32Frame(0, 1, 2021, 2, 28.5))
+	if got != want {
+		t.Fatalf("write request = %q, want float32 frame %q", got, want)
 	}
 }
 
@@ -105,7 +150,7 @@ func TestRunSkipsSaveAndResetAfterVerifyFailure(t *testing.T) {
 		done <- fmt.Errorf("unexpected request after failed verify: %v", err)
 	}()
 
-	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{{ParamID: 1000, Instance: 1, Value: 7}}, 500*time.Millisecond, true, true, true)
+	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{intSetSpec(1000, 1, 7)}, 500*time.Millisecond, true, true, true)
 	if err == nil || !strings.Contains(err.Error(), "operation") {
 		t.Fatalf("run err = %v, want operation failure", err)
 	}
@@ -167,7 +212,7 @@ func TestRunSkipsResetAfterSaveFailure(t *testing.T) {
 		done <- fmt.Errorf("unexpected request after failed save: %v", err)
 	}()
 
-	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{{ParamID: 1000, Instance: 1, Value: 7}}, 500*time.Millisecond, false, true, true)
+	err = run(context.Background(), []string{"tcp:" + ln.Addr().String()}, 0, []setSpec{intSetSpec(1000, 1, 7)}, 500*time.Millisecond, false, true, true)
 	if err == nil || !strings.Contains(err.Error(), "operation") {
 		t.Fatalf("run err = %v, want operation failure", err)
 	}
@@ -192,4 +237,8 @@ func TestValidateSetOptionsRejectsNonPositiveTimeout(t *testing.T) {
 
 func testResponseFrame(prefix string) []byte {
 	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
+}
+
+func intSetSpec(paramID, instance int, value int32) setSpec {
+	return setSpec{ParamID: paramID, Instance: instance, Type: mecom.DataTypeInt32, IntValue: value}
 }

@@ -14,6 +14,14 @@ type scriptedReadClient struct {
 	calls  int
 }
 
+func (s *scriptedReadClient) ReadFloat32(_ context.Context, _, _ int) (float64, error) {
+	return 0, nil
+}
+
+func (s *scriptedReadClient) ReadInt32(_ context.Context, _, _ int) (int32, error) {
+	return 0, nil
+}
+
 func (s *scriptedReadClient) ReadBulk(_ context.Context, params []Parameter) ([]float64, error) {
 	s.calls++
 	if s.err != nil {

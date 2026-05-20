@@ -24,6 +24,8 @@ const (
 // scheduler. Client satisfies this interface, but tests and CAN/serial
 // adapters can provide narrower implementations.
 type ReadClient interface {
+	ReadFloat32(context.Context, int, int) (float64, error)
+	ReadInt32(context.Context, int, int) (int32, error)
 	ReadBulk(context.Context, []Parameter) ([]float64, error)
 	ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error
 	TriggerRingSync(context.Context) error

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick } from "../components/atoms";
 import { CANONICAL_TILE_RENDERER, seriesRoleMeta } from "../lib/series";
+import { HeroGraph } from "./hero";
 
 const SEQ_LIBRARY = [
   {
@@ -28,7 +29,7 @@ const SEQ_LIBRARY = [
     targets: ["tec-75"],
     timeout: 360,
     steps: [
-      { id: "set-target",    kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.6 },
+      { id: "set-target",    kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.6 },
       { id: "enable-output", kind: "send_command", command_name: "write_int32",  arguments: { param: 2010, value: 1 }, await_ack: true, duration: 0.4 },
       { id: "wait-stable",   kind: "wait_stable",  duration: 8 },
       { id: "hold",          kind: "wait",         duration: 12 },
@@ -44,9 +45,9 @@ const SEQ_LIBRARY = [
     targets: ["tec-75"],
     timeout: 90,
     steps: [
-      { id: "set-baseline", kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 20 }, await_ack: true, duration: 0.6 },
+      { id: "set-baseline", kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 20 }, await_ack: true, duration: 0.6 },
       { id: "settle",       kind: "wait_stable",  duration: 8 },
-      { id: "step",         kind: "send_command", command_name: "set_float32", arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.4 },
+      { id: "step",         kind: "send_command", command_name: MecomAPI.commandNameFor(MecomAPI.paramById(3000)), arguments: { param: 3000, value: 25 }, await_ack: true, duration: 0.4 },
       { id: "capture",      kind: "wait",         duration: 16 },
       { id: "log",          kind: "log",          duration: 0.4 },
     ],
@@ -632,11 +633,12 @@ export function ArchiveView() {
   const [streamSel, setStreamSel] = useState({});
   const [format, setFormat] = useState("ndjson");
   const [range, setRange] = useState("15m");
+  const [importedTile, setImportedTile] = useState(null);
   const toast = useToast();
   const formats = [
     { id: "ndjson", label: "NDJSON" },
     { id: "arrow_ipc", label: "Arrow IPC" },
-    { id: "hdf5", label: "HDF5", planned: true },
+    { id: "hdf5", label: "HDF5" },
   ];
   const ranges = ["5m", "15m", "1h", "6h", "24h"];
 
@@ -644,13 +646,93 @@ export function ArchiveView() {
   function exportNow() {
     const picked = Object.entries(streamSel).filter(([, v]) => v).map(([k]) => k);
     if (!picked.length) { toast.push({ kind: "warn", title: "Pick at least one stream" }); return; }
-    if (format === "hdf5") { toast.push({ kind: "warn", title: "HDF5 is planned", body: "Stream contract preserved; writer not implemented." }); return; }
-    toast.push({ kind: "ok", title: "Export queued", body: `${picked.length} stream(s) · ${format} · range ${range}` });
+    
+    const url = `/api/log/export?format=${format}&range=${range}`;
+    window.open(url, "_blank");
+    
+    toast.push({ kind: "ok", title: "Export started", body: `${picked.length} stream(s) · ${format} · range ${range}` });
+  }
+
+  async function loadRange() {
+    try {
+      const tileId = "tec-all"; // Default or selectable
+      const t1 = new Date();
+      const t0 = new Date(t1.getTime() - parseRange(range));
+      const res = await fetch(`/api/graph/tiles/${tileId}/range?t0=${t0.toISOString()}&t1=${t1.toISOString()}`);
+      if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      const data = await res.json();
+      setImportedTile(data);
+      toast.push({ kind: "ok", title: "Range loaded", body: `Loaded ${data.series.length} series for ${range}` });
+    } catch (err) {
+      toast.push({ kind: "bad", title: "Load failed", body: err.message });
+    }
+  }
+
+  function parseRange(r) {
+    const unit = r.slice(-1);
+    const val = parseInt(r.slice(0, -1));
+    if (unit === "m") return val * 60 * 1000;
+    if (unit === "h") return val * 60 * 60 * 1000;
+    if (unit === "d") return val * 24 * 60 * 60 * 1000;
+    return 15 * 60 * 1000;
+  }
+
+  function handleFileImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const res = await fetch("/api/log/import", {
+          method: "POST",
+          body: ev.target.result,
+          headers: { "Content-Type": "application/vnd.apache.arrow.stream" }
+        });
+        if (!res.ok) throw new Error(`import failed: ${res.status}`);
+        const data = await res.json();
+        toast.push({ kind: "ok", title: "Import successful", body: `Imported ${data.imported_samples} samples from ${file.name}` });
+        // After import, try to load the range to see the data
+        loadRange();
+      } catch (err) {
+        toast.push({ kind: "bad", title: "Import failed", body: err.message });
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   return (
     <div className="arc">
-      <Panel title="Export archive" right={<span className="dim mono" style={{ fontSize: 11 }}>route GET /api/log/export</span>}>
+      <div className="arc-grid">
+        <div className="arc-left">
+          <Panel title="Campaign viewer" meta="Explore imported or historical data" flush>
+             <div style={{ padding: 12 }}>
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                    <label className="btn sm primary">
+                       Import .arrow / .ndjson
+                       <input type="file" style={{ display: "none" }} onChange={handleFileImport} accept=".arrow,.ndjson" />
+                    </label>
+                    <div style={{ flex: 1 }}></div>
+                    <select className="field sm" style={{ width: 100 }} value={range} onChange={(e) => setRange(e.target.value)}>
+                       {ranges.map((r) => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                    <button className="btn sm" onClick={loadRange}>Load Range</button>
+                </div>
+                <div className="campaign-placeholder">
+                   {importedTile ? (
+                      <HeroGraph wall={{ wall_id: "campaign", label: "Imported Campaign", series: [] }} role="temp" tile={importedTile} height={400} />
+                   ) : (
+                      <div style={{ padding: 48, textAlign: "center", color: "var(--muted)", border: "1px dashed var(--border)", borderRadius: 6 }}>
+                         <p>Select a historical range or import a campaign file to visualize data here.</p>
+                         <p style={{ fontSize: 11 }}>Supports SignalForge Arrow IPC and NDJSON telemetry streams.</p>
+                      </div>
+                   )}
+                </div>
+             </div>
+          </Panel>
+        </div>
+
+        <div className="arc-right">
+          <Panel title="Export archive" right={<span className="dim mono" style={{ fontSize: 11 }}>route GET /api/log/export</span>}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 10, alignItems: "end" }}>
           <div>
             <label className="lbl">Range</label>
@@ -708,14 +790,72 @@ export function ArchiveView() {
           ))}
         </div>
       </Panel>
-    </div>
+    </div></div></div>
   );
 }
 
 export function SettingsView() {
   useGatewayTick();
   const [s, setS] = useState(() => MecomAPI.settings());
+  const [gatewaySettings, setGatewaySettings] = useState(null);
+  const [gatewaySettingsError, setGatewaySettingsError] = useState("");
+  const [aliasJson, setAliasJson] = useState(() => JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+  const [aliasStatus, setAliasStatus] = useState("");
   function set(patch) { const next = MecomAPI.saveSettings(patch); setS(next); }
+  useEffect(() => {
+    let alive = true;
+    MecomAPI.gatewaySettings?.()
+      .then((data) => {
+        if (!alive) return;
+        setGatewaySettings(data || null);
+        setGatewaySettingsError("");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setGatewaySettings(null);
+        setGatewaySettingsError(err?.message || String(err));
+      });
+    return () => { alive = false; };
+  }, [s.gateway, s.bridgeDefaultTransport, s.bridgeFallbackTransport, s.bridgeRouteSelection, s.bridgeAddressZero]);
+  const bridgePolicy = gatewaySettings?.bridge || {
+    default_transport: s.bridgeDefaultTransport,
+    fallback_transport: s.bridgeFallbackTransport,
+    route_selection: s.bridgeRouteSelection,
+    address_zero: s.bridgeAddressZero,
+  };
+  const routeRows = Array.isArray(gatewaySettings?.routes) ? gatewaySettings.routes : [];
+  function SegmentRow({ label, field, value, options }) {
+    return (
+      <div>
+        <label className="lbl">{label}</label>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={"btn sm " + (value === option ? "primary" : "")}
+              onClick={() => set({ [field]: option })}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  function refreshAliasExport() {
+    setAliasJson(JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+    setAliasStatus("refreshed");
+  }
+  function importAliasOverlay() {
+    try {
+      const saved = MecomAPI.importChannelAliases?.(aliasJson);
+      setAliasJson(JSON.stringify(saved || MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
+      setAliasStatus("imported");
+    } catch (err) {
+      setAliasStatus(`import failed: ${err?.message || err}`);
+    }
+  }
   return (
     <div className="set">
       <Panel title="Gateway connection">
@@ -735,6 +875,66 @@ export function SettingsView() {
               Used as the <code>holder</code> in <code>POST /api/devices/&#123;id&#125;/lease</code>.
             </div>
           </div>
+        </div>
+      </Panel>
+
+      <Panel title="Bridge routing" meta={gatewaySettingsError ? "offline preference" : "gateway policy"}>
+        <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <Pill kind="ok">default · {bridgePolicy.default_transport || "serial"}</Pill>
+            <Pill kind={(bridgePolicy.fallback_transport || "can") === "disabled" ? "warn" : "ok"}>
+              fallback · {bridgePolicy.fallback_transport || "can"}
+            </Pill>
+            <Pill kind="info">{bridgePolicy.route_selection || "fixed-preference"}</Pill>
+            {gatewaySettingsError && <Chip kind="warn">settings endpoint unavailable</Chip>}
+          </div>
+          <SegmentRow
+            label="Default bus"
+            field="bridgeDefaultTransport"
+            value={s.bridgeDefaultTransport || bridgePolicy.default_transport || "serial"}
+            options={["serial", "can"]}
+          />
+          <SegmentRow
+            label="Fallback bus"
+            field="bridgeFallbackTransport"
+            value={s.bridgeFallbackTransport || bridgePolicy.fallback_transport || "can"}
+            options={["can", "serial", "disabled"]}
+          />
+          <SegmentRow
+            label="Route selection"
+            field="bridgeRouteSelection"
+            value={s.bridgeRouteSelection || bridgePolicy.route_selection || "fixed-preference"}
+            options={["fixed-preference", "dynamic"]}
+          />
+          <SegmentRow
+            label="Address-zero discovery"
+            field="bridgeAddressZero"
+            value={s.bridgeAddressZero || bridgePolicy.address_zero || "default-device"}
+            options={["default-device", "route-order", "disabled"]}
+          />
+          <div style={{ display: "grid", gap: 6, maxHeight: 190, overflow: "auto" }}>
+            {routeRows.length === 0 && <div className="dim small">No gateway route projection is available yet.</div>}
+            {routeRows.map((route, i) => (
+              <div
+                key={`${route.device_id || "device"}:${route.endpoint || "route"}:${i}`}
+                style={{ border: "1px solid var(--border)", borderRadius: 8, padding: 8, display: "grid", gap: 4 }}
+              >
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  <Chip kind={route.active ? "accent" : "warn"}>{route.active ? "active" : route.role || "standby"}</Chip>
+                  <span className="mono">{route.device_id}</span>
+                  <span className="dim mono small">addr {route.address}</span>
+                </div>
+                <div className="dim mono small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {(route.transport || "route")} · {route.endpoint}
+                </div>
+              </div>
+            ))}
+          </div>
+          {gatewaySettingsError && (
+            <div className="dim small mono">
+              Local preferences are still stored in this browser; runtime bridge changes require the gateway settings endpoint to be reachable.
+            </div>
+          )}
         </div>
       </Panel>
 
@@ -763,6 +963,26 @@ export function SettingsView() {
         </div>
       </Panel>
 
+      <Panel title="Channel alias overlay" meta="SignalForge semantic overlay">
+        <div style={{ display: "grid", gap: 8 }}>
+          <div className="dim small">
+            User aliases and fixture notes are stored as a separate overlay. The canonical MeCom signal catalogue and channel role defaults stay unchanged.
+          </div>
+          <textarea
+            className="field mono small"
+            style={{ minHeight: 180, resize: "vertical" }}
+            value={aliasJson}
+            onChange={(e) => setAliasJson(e.target.value)}
+            spellCheck={false}
+          />
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button className="btn sm" onClick={refreshAliasExport}>Refresh export</button>
+            <button className="btn sm primary" onClick={importAliasOverlay}>Import overlay JSON</button>
+            {aliasStatus && <Chip>{aliasStatus}</Chip>}
+          </div>
+        </div>
+      </Panel>
+
       <Panel title="Reference">
         <div className="mono small" style={{ lineHeight: 1.7, color: "var(--text-soft)" }}>
           <div>module · <code>github.com/egidinas/meerstetter-go</code></div>
@@ -785,6 +1005,7 @@ export function SettingsView() {
           <tbody style={{ color: "var(--text-soft)" }}>
             {[
               ["GET", "/api/healthz", "topbar"],
+              ["GET", "/api/settings", "bridge routing"],
               ["GET", "/api/devices", "fleet, workspace"],
               ["GET", "/api/catalogue", "discovery tree"],
               ["GET", "/api/leases", "fleet, workspace"],

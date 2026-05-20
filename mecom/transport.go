@@ -109,6 +109,13 @@ type serialConn struct {
 
 func (c *serialConn) LocalAddr() net.Addr                { return serialAddr(c.id) }
 func (c *serialConn) RemoteAddr() net.Addr               { return serialAddr(c.id) }
+func (c *serialConn) Read(b []byte) (int, error) {
+	n, err := c.Port.Read(b)
+	if n == 0 && err == nil {
+		return 0, context.DeadlineExceeded
+	}
+	return n, err
+}
 func (c *serialConn) SetDeadline(t time.Time) error      { return c.SetReadDeadline(t) }
 func (c *serialConn) SetWriteDeadline(_ time.Time) error { return nil }
 func (c *serialConn) SetReadDeadline(t time.Time) error {

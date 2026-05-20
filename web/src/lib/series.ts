@@ -4,8 +4,18 @@ export {
   seriesRoleMeta,
   seriesRoleColor,
   measuredElementWidth,
+  graphSeriesIdentityKey,
   emptyGraphTile,
   renderSeriesFromGraphTile,
   normalizeGraphTile,
+  pickTileLevel,
+  DEFAULT_TILE_LEVELS,
+  SharedTimeAxis,
+  HeroTopTimeAxis,
+  TimeAxisTrack,
+  Sparkline,
+  WriteLifecycleTrace,
+  HistoryController,
+  SemanticDiscoveryTree,
 } from "signalforge-web";
-export type { SeriesRoleMeta, RenderedTileSeries } from "signalforge-web";
+export type { SeriesRoleMeta, RenderedTileSeries, TileLevel, TileLevelSpec, WriteLifecyclePhase, SemanticDiscoveryNode, HistoryControllerProps } from "signalforge-web";

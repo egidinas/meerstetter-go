@@ -20,6 +20,7 @@ type PollResult struct {
 type PollQueue struct {
 	mu        sync.Mutex
 	normal    []Parameter
+	normalPos int
 	front     []Parameter
 	normalSet map[string]struct{}
 	frontSet  map[string]struct{}
@@ -91,10 +92,16 @@ func (q *PollQueue) NextChunk(max int) []Parameter {
 		delete(q.frontSet, ParameterKey(p))
 		out = append(out, p)
 	}
+	if len(q.normal) == 0 {
+		return out
+	}
 	normalLimit := len(q.normal)
-	for normalTaken := 0; normalTaken < normalLimit && len(out) < max && len(q.normal) > 0; normalTaken++ {
-		p := q.normal[0]
-		q.normal = append(q.normal[1:], p)
+	for normalTaken := 0; normalTaken < normalLimit && len(out) < max; normalTaken++ {
+		p := q.normal[q.normalPos]
+		q.normalPos++
+		if q.normalPos >= len(q.normal) {
+			q.normalPos = 0
+		}
 		out = append(out, p)
 	}
 	return out
