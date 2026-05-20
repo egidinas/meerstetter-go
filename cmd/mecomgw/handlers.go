@@ -25,6 +25,7 @@ func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/healthz", s.handleHealth)
 	mux.HandleFunc("/api/health", s.handleHealth)
+	mux.HandleFunc("/api/settings", s.handleSettings)
 	mux.HandleFunc("/api/devices", s.handleDevices)
 	mux.HandleFunc("/api/catalogue", s.handleCatalogue)
 	mux.HandleFunc("/api/commands", s.handleCommandsList)
@@ -79,6 +80,22 @@ type deviceRouteView struct {
 	Active    bool   `json:"active,omitempty"`
 }
 
+type gatewaySettingsView struct {
+	Bridge BridgeConfig          `json:"bridge"`
+	Routes []gatewayRouteSetting `json:"routes"`
+}
+
+type gatewayRouteSetting struct {
+	DeviceID  string `json:"device_id"`
+	Address   byte   `json:"address"`
+	Role      string `json:"role"`
+	Name      string `json:"name,omitempty"`
+	Endpoint  string `json:"endpoint"`
+	Transport string `json:"transport,omitempty"`
+	State     string `json:"state,omitempty"`
+	Active    bool   `json:"active,omitempty"`
+}
+
 type gatewayCommandActivity struct {
 	Time            time.Time `json:"time"`
 	TargetID        string    `json:"target_id"`
@@ -110,6 +127,17 @@ type channelView struct {
 	PowerControlEnabled bool   `json:"third_party_power_control_enabled,omitempty"`
 }
 
+func (s *server) handleSettings(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	writeJSON(w, http.StatusOK, gatewaySettingsView{
+		Bridge: s.bridge,
+		Routes: s.gatewayRouteSettings(),
+	})
+}
+
 func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 	views := make([]deviceView, 0, len(s.devices))
 	for _, b := range s.orderedDeviceBindings() {
@@ -134,6 +162,42 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 		views = append(views, v)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"devices": views})
+}
+
+func (s *server) gatewayRouteSettings() []gatewayRouteSetting {
+	out := make([]gatewayRouteSetting, 0, len(s.devices)*2)
+	for _, b := range s.orderedDeviceBindings() {
+		b.mu.Lock()
+		cfg := b.cfg
+		b.mu.Unlock()
+		active := activeDeviceRouteView(cfg)
+		out = append(out, gatewayRouteSetting{
+			DeviceID:  cfg.ID,
+			Address:   cfg.Address,
+			Role:      active.Role,
+			Name:      active.Name,
+			Endpoint:  active.Endpoint,
+			Transport: active.Transport,
+			State:     active.State,
+			Active:    active.Active,
+		})
+		for _, route := range deviceRouteCandidatesView(cfg) {
+			if route.Active && strings.TrimSpace(route.Endpoint) == strings.TrimSpace(active.Endpoint) {
+				continue
+			}
+			out = append(out, gatewayRouteSetting{
+				DeviceID:  cfg.ID,
+				Address:   cfg.Address,
+				Role:      route.Role,
+				Name:      route.Name,
+				Endpoint:  route.Endpoint,
+				Transport: route.Transport,
+				State:     route.State,
+				Active:    route.Active,
+			})
+		}
+	}
+	return out
 }
 
 func (s *server) orderedDeviceBindings() []*deviceBinding {
@@ -659,6 +723,11 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 			http.Error(w, activity.Error, activity.HTTPStatus)
 			return
 		}
+		if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(r.Context(), deviceID, bound.client, req, activity); blocked {
+			s.recordCommandActivity(blockedActivity)
+			writeJSON(w, blockedActivity.HTTPStatus, map[string]any{"error": blockedActivity.Error})
+			return
+		}
 
 		s.setVirtualParam(deviceID, activity.ParamID, activity.Instance, val)
 
@@ -687,6 +756,23 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 				},
 			},
 		})
+		return
+	}
+
+	if err := s.authorize(deviceID, tc); err != nil {
+		activity.Error = err.Error()
+		activity.ErrorCategory = gatewayCommandErrorCategory(err)
+		if activity.ErrorCategory == "" || activity.ErrorCategory == "gateway" {
+			activity.ErrorCategory = "lease"
+		}
+		activity.HTTPStatus = http.StatusLocked
+		s.recordCommandActivity(activity)
+		writeJSON(w, activity.HTTPStatus, map[string]any{"error": activity.Error})
+		return
+	}
+	if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(r.Context(), deviceID, bound.client, req, activity); blocked {
+		s.recordCommandActivity(blockedActivity)
+		writeJSON(w, blockedActivity.HTTPStatus, map[string]any{"error": blockedActivity.Error})
 		return
 	}
 
@@ -763,6 +849,42 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 	}
 	s.recordCommandActivity(activity)
 	writeJSON(w, http.StatusOK, ev)
+}
+
+func (s *server) gatewayWriteDeviceErrorBackoff(ctx context.Context, deviceID string, client mecom.ReadClient, req writeRequest, activity gatewayCommandActivity) (gatewayCommandActivity, bool) {
+	if client == nil {
+		return activity, false
+	}
+	readCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+	values, err := client.ReadBulk(readCtx, []mecom.Parameter{{ID: 105, Instance: 1, Type: mecom.DataTypeInt32}})
+	cancel()
+	if err != nil || len(values) != 1 {
+		return activity, false
+	}
+	errorNumber := values[0]
+	if errorNumber == 0 || math.IsNaN(errorNumber) {
+		return activity, false
+	}
+	if gatewayWriteAllowedDuringDeviceError(req, activity) {
+		return activity, false
+	}
+	roundedError := int(math.Round(errorNumber))
+	activity.Status = "blocked"
+	activity.HTTPStatus = http.StatusConflict
+	activity.ErrorCategory = "device_error"
+	activity.Error = fmt.Sprintf("device %s reports error %d; backing off %s param=%d instance=%d until the fault is assessed", deviceID, roundedError, req.Name, activity.ParamID, activity.Instance)
+	return activity, true
+}
+
+func gatewayWriteAllowedDuringDeviceError(req writeRequest, activity gatewayCommandActivity) bool {
+	if req.Name == "reset" {
+		return true
+	}
+	if activity.ParamID == 2035 {
+		value, ok := floatFromAny(req.Arguments["value"])
+		return ok && value == 0
+	}
+	return false
 }
 
 func (s *server) recordCommandActivity(activity gatewayCommandActivity) {

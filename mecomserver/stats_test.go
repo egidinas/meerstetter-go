@@ -72,6 +72,57 @@ func TestRouterStatsReflectsConnectAndFrames(t *testing.T) {
 	}
 }
 
+func TestRouterRouteStatsExposeDuplicateFallbackRoutes(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	cfg := &RouterConfig{
+		Routes: []Route{
+			{Address: 0x4b, Target: "serial:/dev/ttyUSB0", Downstream: func(context.Context) (net.Conn, string, error) {
+				return nil, "", errors.New("not dialed in this test")
+			}},
+			{Address: 0x4b, Target: "can:can0:0x4b", Downstream: func(context.Context) (net.Conn, string, error) {
+				return nil, "", errors.New("not dialed in this test")
+			}},
+		},
+	}
+	done := make(chan error, 1)
+	go func() { done <- ServeRouter(ctx, ln, cfg) }()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		<-done
+	}()
+
+	waitFor(t, time.Second, func() bool {
+		return len(cfg.RouteStats()) == 2
+	})
+	stats := cfg.RouteStats()
+	if len(stats) != 2 {
+		t.Fatalf("RouteStats len=%d, want 2: %+v", len(stats), stats)
+	}
+	if stats[0].Address != 0x4b || stats[1].Address != 0x4b {
+		t.Fatalf("RouteStats addresses = 0x%02X/0x%02X, want both 0x4B", stats[0].Address, stats[1].Address)
+	}
+	if stats[0].Target != "serial:/dev/ttyUSB0" || stats[1].Target != "can:can0:0x4b" {
+		t.Fatalf("RouteStats targets = %q/%q", stats[0].Target, stats[1].Target)
+	}
+	if stats[0].RouteID == "" || stats[1].RouteID == "" || stats[0].RouteID == stats[1].RouteID {
+		t.Fatalf("RouteStats route IDs not distinct: %+v", stats)
+	}
+	if stats[0].Priority != 0 || stats[1].Priority != 1 {
+		t.Fatalf("RouteStats priorities = %d/%d, want 0/1", stats[0].Priority, stats[1].Priority)
+	}
+
+	legacy := cfg.Stats()
+	if len(legacy) != 1 || legacy[0x4b].Target != "serial:/dev/ttyUSB0" {
+		t.Fatalf("legacy Stats changed compatibility contract: %+v", legacy)
+	}
+}
+
 func TestRouterStatsRecordsDialError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -118,5 +169,19 @@ func TestRouterStatsRecordsDialError(t *testing.T) {
 	}
 	if bs.LastError == "" {
 		t.Fatalf("LastError empty")
+	}
+}
+
+func waitFor(t *testing.T, timeout time.Duration, ok func() bool) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if ok() {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !ok() {
+		t.Fatalf("condition not met within %s", timeout)
 	}
 }

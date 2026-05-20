@@ -22,6 +22,15 @@ const LS_CHANNELS = "mecomgw.channels";
 const LS_CHANNELS_VERSION = "mecomgw.channels.version";
 const CHANNEL_ALIAS_NAMESPACE = "mecomgw.channelAliases";
 const CHANNEL_METADATA_VERSION = "2026-05-18-fixture-pattern-v1";
+const DEFAULT_SETTINGS = {
+  gateway: "",
+  holder: "design-claude",
+  scenario: "mixed",
+  bridgeDefaultTransport: "serial",
+  bridgeFallbackTransport: "can",
+  bridgeRouteSelection: "fixed-preference",
+  bridgeAddressZero: "default-device",
+};
 
 const MECOM_PARAMETER_FAMILIES = JSON.parse(protocolFamiliesJson)
   .map((family) => ({
@@ -76,12 +85,9 @@ function secondaryOperatorProjectionsForID(id) {
 
 function loadSettings() {
   try {
-    return Object.assign(
-      { gateway: "", holder: "design-claude", scenario: "mixed" },
-      JSON.parse(localStorage.getItem(LS_KEY) || "{}")
-    );
+    return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem(LS_KEY) || "{}"));
   } catch (_) {
-    return { gateway: "", holder: "design-claude", scenario: "mixed" };
+    return { ...DEFAULT_SETTINGS };
   }
 }
 function saveSettings(patch) {
@@ -625,6 +631,34 @@ function normalizeDeviceView(device) {
     routes,
     active_route: activeRoute || routes.find((route) => route.active) || null,
     route_candidates: routes,
+  };
+}
+
+function mockGatewaySettings() {
+  const settings = loadSettings();
+  return {
+    bridge: {
+      default_transport: settings.bridgeDefaultTransport,
+      fallback_transport: settings.bridgeFallbackTransport,
+      route_selection: settings.bridgeRouteSelection,
+      address_zero: settings.bridgeAddressZero,
+    },
+    routes: DEVICES_BASE.reduce((out, device) => {
+      const view = normalizeDeviceView(device);
+      (view.route_candidates || []).forEach((route) => {
+        out.push({
+          device_id: view.id,
+          address: view.address,
+          role: route.role,
+          name: route.name || route.label || "",
+          endpoint: route.endpoint || view.endpoint || "",
+          transport: route.transport || "",
+          state: route.state || "",
+          active: Boolean(route.active),
+        });
+      });
+      return out;
+    }, []),
   };
 }
 
@@ -1367,6 +1401,9 @@ const mockAPIImpl = {
   },
   settings: loadSettings,
   saveSettings,
+  gatewaySettings() {
+    return Promise.resolve(mockGatewaySettings());
+  },
   unitLabel,
   formatWithUnit,
   formatValue(v, unit, paramId?) {
@@ -1814,6 +1851,16 @@ export const MecomAPI = {
   liveError() {
     ensureLivePolling();
     return live.lastError;
+  },
+  async gatewaySettings() {
+    ensureLivePolling();
+    if (!live.active && !explicitBase()) return mockAPIImpl.gatewaySettings();
+    try {
+      return await fetchJSON("/api/settings");
+    } catch (err) {
+      if (!explicitBase()) return mockAPIImpl.gatewaySettings();
+      throw err;
+    }
   },
   devices() {
     ensureLivePolling();

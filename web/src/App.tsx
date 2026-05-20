@@ -7,6 +7,7 @@ import { seedAssignments } from "./views/assignments";
 import { FleetView, DeviceWorkspace, DeviceMini, CommandFeed, LeaseSummary } from "./views/main";
 import { SignalDictionaryView } from "./views/dict";
 import { SequencerView, PIDAdvisor, ArchiveView, SettingsView } from "./views/extra";
+import { HelpView } from "./views/help";
 
 const TWEAK_DEFAULTS = {
   scenario: "mixed",
@@ -63,6 +64,7 @@ function App() {
   else if (route === "/pid") view = "pid";
   else if (route === "/archive") view = "archive";
   else if (route === "/settings") view = "settings";
+  else if (route === "/help") view = "help";
 
   const settings = MecomAPI.settings();
   const isLive = MecomAPI.isLive && MecomAPI.isLive();
@@ -133,6 +135,9 @@ function App() {
             <a className={view === "settings" ? "active" : ""} href="#/settings">
               <span className="icon">⚙</span><span className="label">Settings</span>
             </a>
+            <a className={view === "help" ? "active" : ""} href="#/help">
+              <span className="icon">❓</span><span className="label">Help & Data Flow</span>
+            </a>
           </div>
           <div className="footer">
             <div className="rail-status">
@@ -164,6 +169,7 @@ function App() {
           {view === "pid"        && <PIDAdvisor deviceId={arg || fallbackDeviceId || "tec-76"} onDeviceChange={(id) => go(`/pid`)} />}
           {view === "archive"    && <ArchiveView />}
           {view === "settings"   && <SettingsView />}
+          {view === "help"       && <HelpView />}
         </main>
 
         <aside className="cmd-drawer" aria-label="Command and lease activity">

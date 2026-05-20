@@ -30,7 +30,12 @@ func (r *routeFlags) String() string {
 
 func (r routeFlags) addresses() []byte {
 	out := make([]byte, 0, len(r))
+	seen := make(map[byte]struct{}, len(r))
 	for _, route := range r {
+		if _, ok := seen[route.Address]; ok {
+			continue
+		}
+		seen[route.Address] = struct{}{}
 		out = append(out, route.Address)
 	}
 	return out
@@ -46,12 +51,8 @@ func (r *routeFlags) Set(v string) error {
 	if target == "" {
 		return fmt.Errorf("route target required")
 	}
-	ep, ok := mecom.ParseTarget(target)
-	if !ok {
-		return fmt.Errorf("invalid route target %q", target)
-	}
-	if ep.Network == "can" {
-		return fmt.Errorf("route target %q uses CAN; mecomvseriald only routes serial/TCP downstreams and needs a typed CAN bridge adapter", target)
+	if _, err := parseDaemonTarget(target); err != nil {
+		return fmt.Errorf("invalid route target %q: %w", target, err)
 	}
 	addr, err := parseAddress(addrText)
 	if err != nil {
@@ -66,6 +67,7 @@ func main() {
 	listen := flag.String("listen", "127.0.0.1:50000", "TCP listen address")
 	target := flag.String("target", "", "single downstream target for address-agnostic passthrough, e.g. serial:/dev/ttyUSB0@57600")
 	addressZeroFlag := flag.String("address-zero", "disabled", "route client requests addressed to 0: disabled, route-order, or a configured fixed device address")
+	routePolicyFlag := flag.String("route-policy", string(mecomserver.RouteSelectionFixedPreference), "duplicate-route policy: fixed-preference or dynamic")
 	timeout := flag.Duration("timeout", 2*time.Second, "per-request downstream timeout")
 	reconnectDelay := flag.Duration("reconnect-delay", 500*time.Millisecond, "delay after downstream dial failures")
 	traceFrames := flag.Bool("trace-frames", false, "log client and downstream frame bytes for short diagnostic captures")
@@ -73,6 +75,11 @@ func main() {
 	flag.Parse()
 
 	addressZero, err := parseAddressZeroMode(*addressZeroFlag)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+	routePolicy, err := parseRouteSelectionPolicy(*routePolicyFlag)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
@@ -92,9 +99,15 @@ func main() {
 	defer cancel()
 
 	if mode.target != "" {
+		downstream, err := downstreamForTarget(mode.target, *timeout)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
 		logger.Printf("listen=%s target=%s", *listen, mode.target)
 		err = mecomserver.ListenAndServe(ctx, *listen, mecomserver.Config{
 			Target:         mode.target,
+			Downstream:     downstream,
 			RequestTimeout: *timeout,
 			ReconnectDelay: *reconnectDelay,
 			TraceFrames:    *traceFrames,
@@ -111,13 +124,19 @@ func main() {
 	if addressZero.routeOrder {
 		addressZeroOrder = routes.addresses()
 	}
-	logger.Printf("listen=%s routes=%s address-zero=%s", *listen, routes.String(), addressZero.String())
+	routes, err = prepareRouteDownstreams(routes, *timeout)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+	logger.Printf("listen=%s routes=%s address-zero=%s route-policy=%s", *listen, routes.String(), addressZero.String(), routePolicy)
 	cfg := &mecomserver.RouterConfig{
 		Routes:           routes,
 		DefaultAddress:   addressZero.fixed,
 		AddressZeroOrder: addressZeroOrder,
 		RequestTimeout:   *timeout,
 		ReconnectDelay:   *reconnectDelay,
+		RouteSelection:   routePolicy,
 		TraceFrames:      *traceFrames,
 		Logger:           logger,
 	}
@@ -139,12 +158,8 @@ func selectServerMode(target string, routes routeFlags) (serverMode, error) {
 		if len(routes) > 0 {
 			return serverMode{}, fmt.Errorf("-target and -route are mutually exclusive")
 		}
-		ep, ok := mecom.ParseTarget(target)
-		if !ok {
-			return serverMode{}, fmt.Errorf("invalid target %q", target)
-		}
-		if ep.Network == "can" {
-			return serverMode{}, fmt.Errorf("target %q uses CAN; mecomvseriald only exposes serial/TCP downstreams and needs a typed CAN bridge adapter", target)
+		if _, err := parseDaemonTarget(target); err != nil {
+			return serverMode{}, fmt.Errorf("invalid target %q: %w", target, err)
 		}
 		return serverMode{target: target}, nil
 	}
@@ -152,6 +167,42 @@ func selectServerMode(target string, routes routeFlags) (serverMode, error) {
 		return serverMode{}, fmt.Errorf("at least one -route or one -target is required")
 	}
 	return serverMode{routes: routes}, nil
+}
+
+func downstreamForTarget(target string, timeout time.Duration) (mecomserver.DownstreamDial, error) {
+	ep, err := parseDaemonTarget(target)
+	if err != nil {
+		return nil, fmt.Errorf("invalid target %q: %w", target, err)
+	}
+	if ep.Network != "can" {
+		return nil, nil
+	}
+	return mecomserver.DialEndpointTarget(target, mecom.ClientConfig{Timeout: timeout}, socketCANDialer)
+}
+
+func prepareRouteDownstreams(routes routeFlags, timeout time.Duration) (routeFlags, error) {
+	out := append(routeFlags(nil), routes...)
+	for i := range out {
+		downstream, err := downstreamForTarget(out[i].Target, timeout)
+		if err != nil {
+			return nil, err
+		}
+		if downstream != nil {
+			out[i].Downstream = downstream
+		}
+	}
+	return out, nil
+}
+
+func parseDaemonTarget(target string) (mecom.Endpoint, error) {
+	ep, ok := mecom.ParseTarget(strings.TrimSpace(target))
+	if !ok {
+		return mecom.Endpoint{}, fmt.Errorf("empty endpoint")
+	}
+	if ep.Network == "can" && strings.TrimSpace(ep.Address) == "" {
+		return mecom.Endpoint{}, fmt.Errorf("CAN endpoint requires interface/node address")
+	}
+	return ep, nil
 }
 
 func parseAddress(v string) (byte, error) {
@@ -166,6 +217,17 @@ func parseAddress(v string) (byte, error) {
 		return 0, fmt.Errorf("address %d outside MeCom 1..254", n)
 	}
 	return byte(n), nil
+}
+
+func parseRouteSelectionPolicy(v string) (mecomserver.RouteSelectionPolicy, error) {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "", "fixed", string(mecomserver.RouteSelectionFixedPreference):
+		return mecomserver.RouteSelectionFixedPreference, nil
+	case string(mecomserver.RouteSelectionDynamic):
+		return mecomserver.RouteSelectionDynamic, nil
+	default:
+		return "", fmt.Errorf("invalid route policy %q: use %s or %s", v, mecomserver.RouteSelectionFixedPreference, mecomserver.RouteSelectionDynamic)
+	}
 }
 
 type addressZeroMode struct {

@@ -797,9 +797,52 @@ export function ArchiveView() {
 export function SettingsView() {
   useGatewayTick();
   const [s, setS] = useState(() => MecomAPI.settings());
+  const [gatewaySettings, setGatewaySettings] = useState(null);
+  const [gatewaySettingsError, setGatewaySettingsError] = useState("");
   const [aliasJson, setAliasJson] = useState(() => JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
   const [aliasStatus, setAliasStatus] = useState("");
   function set(patch) { const next = MecomAPI.saveSettings(patch); setS(next); }
+  useEffect(() => {
+    let alive = true;
+    MecomAPI.gatewaySettings?.()
+      .then((data) => {
+        if (!alive) return;
+        setGatewaySettings(data || null);
+        setGatewaySettingsError("");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setGatewaySettings(null);
+        setGatewaySettingsError(err?.message || String(err));
+      });
+    return () => { alive = false; };
+  }, [s.gateway, s.bridgeDefaultTransport, s.bridgeFallbackTransport, s.bridgeRouteSelection, s.bridgeAddressZero]);
+  const bridgePolicy = gatewaySettings?.bridge || {
+    default_transport: s.bridgeDefaultTransport,
+    fallback_transport: s.bridgeFallbackTransport,
+    route_selection: s.bridgeRouteSelection,
+    address_zero: s.bridgeAddressZero,
+  };
+  const routeRows = Array.isArray(gatewaySettings?.routes) ? gatewaySettings.routes : [];
+  function SegmentRow({ label, field, value, options }) {
+    return (
+      <div>
+        <label className="lbl">{label}</label>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={"btn sm " + (value === option ? "primary" : "")}
+              onClick={() => set({ [field]: option })}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
   function refreshAliasExport() {
     setAliasJson(JSON.stringify(MecomAPI.exportChannelAliases?.() || { entries: [] }, null, 2));
     setAliasStatus("refreshed");
@@ -832,6 +875,66 @@ export function SettingsView() {
               Used as the <code>holder</code> in <code>POST /api/devices/&#123;id&#125;/lease</code>.
             </div>
           </div>
+        </div>
+      </Panel>
+
+      <Panel title="Bridge routing" meta={gatewaySettingsError ? "offline preference" : "gateway policy"}>
+        <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <Pill kind="ok">default · {bridgePolicy.default_transport || "serial"}</Pill>
+            <Pill kind={(bridgePolicy.fallback_transport || "can") === "disabled" ? "warn" : "ok"}>
+              fallback · {bridgePolicy.fallback_transport || "can"}
+            </Pill>
+            <Pill kind="info">{bridgePolicy.route_selection || "fixed-preference"}</Pill>
+            {gatewaySettingsError && <Chip kind="warn">settings endpoint unavailable</Chip>}
+          </div>
+          <SegmentRow
+            label="Default bus"
+            field="bridgeDefaultTransport"
+            value={s.bridgeDefaultTransport || bridgePolicy.default_transport || "serial"}
+            options={["serial", "can"]}
+          />
+          <SegmentRow
+            label="Fallback bus"
+            field="bridgeFallbackTransport"
+            value={s.bridgeFallbackTransport || bridgePolicy.fallback_transport || "can"}
+            options={["can", "serial", "disabled"]}
+          />
+          <SegmentRow
+            label="Route selection"
+            field="bridgeRouteSelection"
+            value={s.bridgeRouteSelection || bridgePolicy.route_selection || "fixed-preference"}
+            options={["fixed-preference", "dynamic"]}
+          />
+          <SegmentRow
+            label="Address-zero discovery"
+            field="bridgeAddressZero"
+            value={s.bridgeAddressZero || bridgePolicy.address_zero || "default-device"}
+            options={["default-device", "route-order", "disabled"]}
+          />
+          <div style={{ display: "grid", gap: 6, maxHeight: 190, overflow: "auto" }}>
+            {routeRows.length === 0 && <div className="dim small">No gateway route projection is available yet.</div>}
+            {routeRows.map((route, i) => (
+              <div
+                key={`${route.device_id || "device"}:${route.endpoint || "route"}:${i}`}
+                style={{ border: "1px solid var(--border)", borderRadius: 8, padding: 8, display: "grid", gap: 4 }}
+              >
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  <Chip kind={route.active ? "accent" : "warn"}>{route.active ? "active" : route.role || "standby"}</Chip>
+                  <span className="mono">{route.device_id}</span>
+                  <span className="dim mono small">addr {route.address}</span>
+                </div>
+                <div className="dim mono small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {(route.transport || "route")} · {route.endpoint}
+                </div>
+              </div>
+            ))}
+          </div>
+          {gatewaySettingsError && (
+            <div className="dim small mono">
+              Local preferences are still stored in this browser; runtime bridge changes require the gateway settings endpoint to be reachable.
+            </div>
+          )}
         </div>
       </Panel>
 
@@ -902,6 +1005,7 @@ export function SettingsView() {
           <tbody style={{ color: "var(--text-soft)" }}>
             {[
               ["GET", "/api/healthz", "topbar"],
+              ["GET", "/api/settings", "bridge routing"],
               ["GET", "/api/devices", "fleet, workspace"],
               ["GET", "/api/catalogue", "discovery tree"],
               ["GET", "/api/leases", "fleet, workspace"],

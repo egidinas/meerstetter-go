@@ -92,7 +92,7 @@ MeCom client surface without changing catalogue, sequencer, or command code.
 | Serial endpoints | yes (`/dev/...`) | yes (`COM3@57600`) | Uses Go serial support; stable device naming is host-specific. |
 | `cmd/mecomprobe`, `cmd/mecomset`, `cmd/mecompoll`, `cmd/mecomrun` over TCP/serial | yes | yes | These commands do not require Linux when used with TCP/serial endpoints. |
 | `cmd/mecomvseriald` router logic | yes | yes | Portable as a process; `deploy/` service assets are Linux-specific. |
-| `socketcan` and stock `can:can0/...` binary dialer | yes | no | SocketCAN is Linux-only. |
+| `socketcan` and stock `can:can0/...` binary dialer | yes | no | SocketCAN is implemented natively for Linux. Included in `cmd/mecomvseriald`. |
 | CAN on Windows | adapter required | adapter required | The public API accepts an injected `mecom.CANDialer`; a Kvaser CANlib, PCAN, Vector, SLCAN, Ethernet-CAN, or TCP-CAN bridge adapter can implement it. Such adapters should remain optional until proven. |
 | `deploy/` systemd and udev files | yes | no | Use a Windows service wrapper or run interactively on Windows. |
 
@@ -100,6 +100,13 @@ For Windows hosts today, the proven routes are direct TCP, serial `COMx@baud`,
 or the single-port `mecomvseriald` device-server pattern. Native Windows CAN is
 not blocked by the library design, but it needs a concrete adapter package for
 the selected hardware driver.
+
+## Signal Catalogue and UI Projection
+
+The verified JSON assets that define the signal catalogue and frontend projection are provided in `web/src/data`:
+- `mecom-catalogue.json`: Defines the compiled MECOM parameter catalogue.
+- `mecom-operator-projection.json`: Maps MeCom parameter IDs onto semantic UI trees for operator screens.
+- `mecom-protocol-families.json`: Core semantic boundaries for protocol limits.
 
 ## Verification
 

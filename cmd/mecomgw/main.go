@@ -95,6 +95,18 @@ type Config struct {
 	Devices         []DeviceConfig `json:"devices"`
 	ChannelCount    int            `json:"channel_count,omitempty"`
 	DefaultDeviceID string         `json:"default_device_id,omitempty"`
+	Bridge          BridgeConfig   `json:"bridge,omitempty"`
+}
+
+// BridgeConfig describes the desired external MeCom bridge policy. The
+// gateway exposes it for the UI and operators; changing it does not implicitly
+// restart the live device server.
+type BridgeConfig struct {
+	Listen            string `json:"listen,omitempty"`
+	DefaultTransport  string `json:"default_transport,omitempty"`
+	FallbackTransport string `json:"fallback_transport,omitempty"`
+	RouteSelection    string `json:"route_selection,omitempty"`
+	AddressZero       string `json:"address_zero,omitempty"`
 }
 
 // DeviceConfig describes one upstream device.
@@ -170,6 +182,9 @@ func loadConfig(path string) (Config, error) {
 	if cfg.ChannelCount == 0 {
 		cfg.ChannelCount = 4
 	}
+	if cfg.Bridge, err = normalizeBridgeConfig(cfg.Bridge); err != nil {
+		return Config{}, err
+	}
 	if cfg.DefaultDeviceID != "" {
 		found := false
 		for _, d := range cfg.Devices {
@@ -238,6 +253,56 @@ func loadConfig(path string) (Config, error) {
 	return cfg, nil
 }
 
+func normalizeBridgeConfig(cfg BridgeConfig) (BridgeConfig, error) {
+	cfg.Listen = strings.TrimSpace(cfg.Listen)
+	cfg.DefaultTransport = strings.ToLower(strings.TrimSpace(cfg.DefaultTransport))
+	cfg.FallbackTransport = strings.ToLower(strings.TrimSpace(cfg.FallbackTransport))
+	cfg.RouteSelection = strings.ToLower(strings.TrimSpace(cfg.RouteSelection))
+	cfg.AddressZero = strings.ToLower(strings.TrimSpace(cfg.AddressZero))
+
+	if cfg.DefaultTransport == "" {
+		cfg.DefaultTransport = "serial"
+	}
+	switch cfg.DefaultTransport {
+	case "serial", "can":
+	default:
+		return BridgeConfig{}, fmt.Errorf("bridge.default_transport must be serial or can")
+	}
+
+	if cfg.FallbackTransport == "" {
+		cfg.FallbackTransport = "can"
+	}
+	switch cfg.FallbackTransport {
+	case "serial", "can", "disabled", "none":
+		if cfg.FallbackTransport == "none" {
+			cfg.FallbackTransport = "disabled"
+		}
+	default:
+		return BridgeConfig{}, fmt.Errorf("bridge.fallback_transport must be serial, can, or disabled")
+	}
+
+	if cfg.RouteSelection == "" {
+		cfg.RouteSelection = "fixed-preference"
+	}
+	switch cfg.RouteSelection {
+	case "fixed", "fixed-preference":
+		cfg.RouteSelection = "fixed-preference"
+	case "dynamic":
+	default:
+		return BridgeConfig{}, fmt.Errorf("bridge.route_selection must be fixed-preference or dynamic")
+	}
+
+	if cfg.AddressZero == "" {
+		cfg.AddressZero = "default-device"
+	}
+	switch cfg.AddressZero {
+	case "default-device", "disabled", "route-order":
+	default:
+		return BridgeConfig{}, fmt.Errorf("bridge.address_zero must be default-device, route-order, or disabled")
+	}
+	return cfg, nil
+}
+
 // server holds gateway runtime state. Device clients are opened lazily and
 // reset after transport failures so the next request can reconnect.
 type server struct {
@@ -256,6 +321,7 @@ type server struct {
 	allowedOrigins      []string
 	accessToken         string
 	proxyBasePort       int
+	bridge              BridgeConfig
 	virtualParamsMu     sync.Mutex
 	virtualParams       map[string]float64
 }
@@ -296,12 +362,17 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 	if channelCount <= 0 {
 		channelCount = 4
 	}
+	bridge, err := normalizeBridgeConfig(cfg.Bridge)
+	if err != nil {
+		bridge, _ = normalizeBridgeConfig(BridgeConfig{})
+	}
 	s := &server{
 		devices:             make(map[string]*deviceBinding, len(cfg.Devices)),
 		leases:              writelease.NewRegistry(),
 		defaultLeaseTTL:     defaultTTL,
 		channelCount:        channelCount,
 		defaultDeviceID:     cfg.DefaultDeviceID,
+		bridge:              bridge,
 		graphHistoryRaw:     make(map[string]*graphTileHistory),
 		graphHistoryDerived: make(map[string]*graphTileHistory),
 		logger:              logger,
@@ -391,6 +462,8 @@ func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 		}
 		return deviceBindingSnapshot{}, err
 	}
+
+	b.lastErr = nil
 
 	if chosenEndpoint != b.cfg.Endpoint {
 		s.logger.Printf("device %q: primary endpoint failed; fell back to redundant route %q", b.cfg.ID, chosenEndpoint)
@@ -702,6 +775,7 @@ func (s *server) runChannelPowerControl(ctx context.Context, deviceID string, in
 	}
 
 	params := []mecom.Parameter{
+		{ID: 105, Instance: 1},
 		{ID: 2010, Instance: instance},
 		{ID: 2021, Instance: instance},
 		{ID: 2030, Instance: instance},
@@ -710,13 +784,23 @@ func (s *server) runChannelPowerControl(ctx context.Context, deviceID string, in
 	readCtx, cancel := context.WithTimeout(ctx, 350*time.Millisecond)
 	vals, err := client.ReadBulk(readCtx, params)
 	cancel()
-	if err != nil || len(vals) != 3 {
+	if err != nil || len(vals) != 4 {
 		return
 	}
 
-	outEnable := vals[0]
-	vCmd := vals[1]
-	iLim := vals[2]
+	errorNumber := vals[0]
+	outEnable := vals[1]
+	vCmd := vals[2]
+	iLim := vals[3]
+
+	if errorNumber != 0 {
+		s.setVirtualParam(deviceID, 2035, instance, 0.0)
+		s.setVirtualParam(deviceID, 2036, instance, 0.0)
+		s.recordGraphSample(deviceID, 2036, instance, 0.0, gatewayQualityNaN, time.Now())
+		s.setPowerControlStatus(deviceID, instance, 2.0, gatewayQualityNaN)
+		s.setVirtualParam(deviceID, 2043, instance, 0.0)
+		return
+	}
 
 	if outEnable != 1.0 {
 		s.setVirtualParam(deviceID, 2036, instance, 0.0)

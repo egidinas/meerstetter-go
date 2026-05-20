@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	defaultRequestTimeout    = 2 * time.Second
-	defaultReconnectDelay    = 500 * time.Millisecond
-	defaultClientIdleTimeout = 30 * time.Second
-	maxClientFrameBytes      = 4096
+	defaultRequestTimeout        = 2 * time.Second
+	defaultReconnectDelay        = 500 * time.Millisecond
+	defaultClientIdleTimeout     = 30 * time.Second
+	defaultCommandIdempotencyTTL = 30 * time.Second
+	maxClientFrameBytes          = 4096
 )
 
 // DownstreamDial opens the single owned connection to a MeCom device.

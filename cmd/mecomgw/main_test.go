@@ -106,6 +106,100 @@ func TestLoadConfigValidatesRequiredFields(t *testing.T) {
 	}
 }
 
+func TestLoadConfigBridgePolicyDefaultsAndValidation(t *testing.T) {
+	dir := t.TempDir()
+	path := dir + "/gateway.json"
+	if err := os.WriteFile(path, []byte(`{
+		"bridge": {
+			"listen": "0.0.0.0:50000",
+			"default_transport": "can",
+			"fallback_transport": "serial",
+			"route_selection": "dynamic",
+			"address_zero": "default-device"
+		},
+		"devices": [
+			{"id":"tec-76","endpoint":"serial:/dev/ttyUSB0","address":76}
+		]
+	}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := loadConfig(path)
+	if err != nil {
+		t.Fatalf("loadConfig returned error: %v", err)
+	}
+	if cfg.Bridge.Listen != "0.0.0.0:50000" ||
+		cfg.Bridge.DefaultTransport != "can" ||
+		cfg.Bridge.FallbackTransport != "serial" ||
+		cfg.Bridge.RouteSelection != "dynamic" ||
+		cfg.Bridge.AddressZero != "default-device" {
+		t.Fatalf("bridge config was not normalized: %+v", cfg.Bridge)
+	}
+
+	defaultsPath := dir + "/defaults.json"
+	if err := os.WriteFile(defaultsPath, []byte(`{"devices":[{"id":"tec-76","endpoint":"serial:/dev/ttyUSB0","address":76}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = loadConfig(defaultsPath)
+	if err != nil {
+		t.Fatalf("loadConfig defaults returned error: %v", err)
+	}
+	if cfg.Bridge.DefaultTransport != "serial" || cfg.Bridge.FallbackTransport != "can" || cfg.Bridge.RouteSelection != "fixed-preference" {
+		t.Fatalf("bridge defaults = %+v", cfg.Bridge)
+	}
+
+	badPath := dir + "/bad.json"
+	if err := os.WriteFile(badPath, []byte(`{
+		"bridge": {"default_transport":"spi"},
+		"devices":[{"id":"tec-76","endpoint":"serial:/dev/ttyUSB0","address":76}]
+	}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := loadConfig(badPath); err == nil || !strings.Contains(err.Error(), "default_transport") {
+		t.Fatalf("loadConfig accepted invalid bridge default_transport: %v", err)
+	}
+}
+
+func TestGatewaySettingsEndpointExposesBridgePolicy(t *testing.T) {
+	s := newServer(Config{
+		Bridge: BridgeConfig{
+			Listen:            "0.0.0.0:50000",
+			DefaultTransport:  "serial",
+			FallbackTransport: "can",
+			RouteSelection:    "dynamic",
+			AddressZero:       "default-device",
+		},
+		DefaultDeviceID: "tec-76",
+		Devices: []DeviceConfig{
+			{ID: "tec-76", Endpoint: "serial:/dev/ttyUSB0", Address: 76, Routes: []RouteConfig{
+				{Name: "can fallback", Role: "fallback", Endpoint: "can:can0:0x4c", Transport: "can", State: "standby"},
+			}},
+		},
+	}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var got struct {
+		Bridge BridgeConfig `json:"bridge"`
+		Routes []struct {
+			DeviceID  string `json:"device_id"`
+			Address   byte   `json:"address"`
+			Transport string `json:"transport"`
+			Endpoint  string `json:"endpoint"`
+			Role      string `json:"role"`
+		} `json:"routes"`
+	}
+	getJSON(t, ts.URL+"/api/settings", http.StatusOK, &got)
+	if got.Bridge.DefaultTransport != "serial" || got.Bridge.FallbackTransport != "can" || got.Bridge.RouteSelection != "dynamic" {
+		t.Fatalf("unexpected bridge settings response: %+v", got.Bridge)
+	}
+	if len(got.Routes) != 2 {
+		t.Fatalf("routes len = %d, want primary + fallback: %+v", len(got.Routes), got.Routes)
+	}
+	if got.Routes[0].DeviceID != "tec-76" || got.Routes[0].Transport != "serial" || got.Routes[1].Transport != "can" {
+		t.Fatalf("unexpected route projection: %+v", got.Routes)
+	}
+}
+
 func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
 	ts := httptest.NewServer(s.routes())
@@ -1415,6 +1509,56 @@ func TestGatewayRecordsCommandActivity(t *testing.T) {
 	}
 }
 
+func TestGatewayBacksOffNormalWriteWhenDeviceReportsError(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:       "tec-76",
+		Endpoint: "can:can0/0x4c",
+		Address:  76,
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	fw := &recordingWriteClient{
+		readback: map[string]float64{
+			gatewayCatalogueKey(105, 1): 104,
+		},
+	}
+	s.devices["tec-76"].client = fw
+	s.devices["tec-76"].commander = mecom.NewCommander(fw, time.Second)
+	s.devices["tec-76"].commander.TargetID = "tec-76"
+	s.devices["tec-76"].commander.Authorizer = mecom.AuthorizerFunc(s.authorize)
+	s.leases.Acquire("tec-76", "operator", time.Minute)
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	body := `{"name":"write_int32","arguments":{"param":2010,"instance":2,"value":1},"metadata":{"lease_token":"ignored"}}`
+	req, err := http.NewRequest(http.MethodPost, ts.URL+"/api/devices/tec-76/write", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", s.leases.List()[0].Token)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("write status = %d, want 409 device-error backoff", resp.StatusCode)
+	}
+	if len(fw.writes) != 0 {
+		t.Fatalf("gateway wrote %d frame(s) while device was in error, want 0", len(fw.writes))
+	}
+
+	var commands struct {
+		Commands []gatewayCommandActivity `json:"commands"`
+	}
+	getJSON(t, ts.URL+"/api/commands", http.StatusOK, &commands)
+	if len(commands.Commands) != 1 {
+		t.Fatalf("commands len = %d, want 1", len(commands.Commands))
+	}
+	got := commands.Commands[0]
+	if got.Status != "blocked" || got.ErrorCategory != "device_error" || got.HTTPStatus != http.StatusConflict {
+		t.Fatalf("unexpected blocked command activity: %+v", got)
+	}
+}
+
 func TestGatewayRecordsTemperatureTargetWriteMetadata(t *testing.T) {
 	s := newServer(Config{Devices: []DeviceConfig{{
 		ID:       "tec-76",
@@ -1880,6 +2024,7 @@ func stablePowerControlReadback() map[string]float64 {
 	return map[string]float64{
 		gatewayCatalogueKey(1021, 1): 10,
 		gatewayCatalogueKey(1020, 1): 2,
+		gatewayCatalogueKey(105, 1):  0,
 		gatewayCatalogueKey(2010, 1): 1,
 		gatewayCatalogueKey(2021, 1): 0,
 		gatewayCatalogueKey(2030, 1): 0,
@@ -1967,6 +2112,7 @@ func TestPowerControlEnabledWritesSlewedSetpoints(t *testing.T) {
 
 func TestPowerControlUsesBufferedHistoryForResistance(t *testing.T) {
 	s, fw := newPowerControlTestServer(true, map[string]float64{
+		gatewayCatalogueKey(105, 1):  0,
 		gatewayCatalogueKey(2010, 1): 1,
 		gatewayCatalogueKey(2021, 1): 0,
 		gatewayCatalogueKey(2030, 1): 0,
@@ -2000,6 +2146,7 @@ func TestPowerControlRejectsNonOhmicSamplesWithGraceWindow(t *testing.T) {
 	s, fw := newPowerControlTestServer(true, map[string]float64{
 		gatewayCatalogueKey(1021, 1): 10,
 		gatewayCatalogueKey(1020, 1): 20,
+		gatewayCatalogueKey(105, 1):  0,
 		gatewayCatalogueKey(2010, 1): 1,
 		gatewayCatalogueKey(2021, 1): 7,
 		gatewayCatalogueKey(2030, 1): 3,
@@ -2034,6 +2181,25 @@ func TestPowerControlRejectsNonOhmicSamplesWithGraceWindow(t *testing.T) {
 	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
 	if got := s.getVirtualParam("tec-75", 2043, 1, -1); got != 0 {
 		t.Fatalf("recovered non-ohmic count = %v, want reset 0", got)
+	}
+}
+
+func TestPowerControlBacksOffOnDeviceError(t *testing.T) {
+	readback := stablePowerControlReadback()
+	readback[gatewayCatalogueKey(105, 1)] = 104
+	s, fw := newPowerControlTestServer(true, readback)
+	s.setVirtualParam("tec-75", 2035, 1, 100)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+
+	if len(fw.writes) != 0 {
+		t.Fatalf("device-error guard wrote setpoints: %+v", fw.writes)
+	}
+	if got := s.getVirtualParam("tec-75", 2035, 1, -1); got != 0 {
+		t.Fatalf("device-error guard target = %v, want disarmed 0", got)
+	}
+	if got := s.getVirtualParam("tec-75", 2038, 1, -1); got != 2 {
+		t.Fatalf("device-error guard status = %v, want fallback 2", got)
 	}
 }
 

@@ -42,6 +42,25 @@ func TestCANopenClientReadFloat32(t *testing.T) {
 	}
 }
 
+func TestCANopenClientReadFloat32SkipsUnrelatedSDOAbort(t *testing.T) {
+	var value [4]byte
+	binary.LittleEndian.PutUint32(value[:], math.Float32bits(24.25))
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x80, 0x99, 0x99, 0x01, 0x00, 0x00, 0x02, 0x06}},
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x43, 0x00, 0x21, 0x01, value[0], value[1], value[2], value[3]}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	got, err := client.ReadFloat32(context.Background(), 1000, 1)
+	if err != nil {
+		t.Fatalf("ReadFloat32 returned error: %v", err)
+	}
+	if math.Abs(got-24.25) > 0.001 {
+		t.Fatalf("ReadFloat32=%f, want 24.25", got)
+	}
+}
+
 func TestCANopenClientReadBulkKeepsUnsupportedSlots(t *testing.T) {
 	var value [4]byte
 	binary.LittleEndian.PutUint32(value[:], math.Float32bits(11.5))
@@ -98,6 +117,19 @@ func TestCANopenClientWriteFloat32SetsNominalTarget(t *testing.T) {
 	gotValue := math.Float32frombits(binary.LittleEndian.Uint32(sent.Data[4:8]))
 	if math.Abs(float64(gotValue)-25.0) > 0.001 {
 		t.Fatalf("payload=%f, want 25.0", gotValue)
+	}
+}
+
+func TestCANopenClientWriteFloat32SkipsUnrelatedSDOAbort(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x80, 0x99, 0x99, 0x01, 0x00, 0x00, 0x02, 0x06}},
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x60, 0x00, 0x26, 0x01, 0, 0, 0, 0}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if err := client.WriteFloat32(context.Background(), 3000, 1, 25.0); err != nil {
+		t.Fatalf("WriteFloat32 returned error: %v", err)
 	}
 }
 

@@ -58,6 +58,28 @@ func TestParseAddressZeroModeAllowsDisabledRouteOrderAndDefaultDevice(t *testing
 	}
 }
 
+func TestParseRouteSelectionPolicy(t *testing.T) {
+	for _, input := range []string{"", "fixed", "fixed-preference"} {
+		got, err := parseRouteSelectionPolicy(input)
+		if err != nil {
+			t.Fatalf("parseRouteSelectionPolicy(%q) returned error: %v", input, err)
+		}
+		if got != "" && got != "fixed-preference" {
+			t.Fatalf("parseRouteSelectionPolicy(%q) = %q, want fixed-preference or empty default", input, got)
+		}
+	}
+	got, err := parseRouteSelectionPolicy("dynamic")
+	if err != nil {
+		t.Fatalf("parseRouteSelectionPolicy(dynamic) returned error: %v", err)
+	}
+	if got != "dynamic" {
+		t.Fatalf("parseRouteSelectionPolicy(dynamic) = %q, want dynamic", got)
+	}
+	if _, err := parseRouteSelectionPolicy("round-robin"); err == nil {
+		t.Fatal("parseRouteSelectionPolicy accepted unknown policy")
+	}
+}
+
 func TestRouteFlagsSet(t *testing.T) {
 	var routes routeFlags
 	if err := routes.Set("0x4b=serial:COM3@57600"); err != nil {
@@ -81,21 +103,53 @@ func TestRouteFlagsSet(t *testing.T) {
 	if got := routes.String(); !strings.Contains(got, "0x4C=tcp:127.0.0.1:50001") {
 		t.Fatalf("String() = %q", got)
 	}
-	if err := routes.Set("0x4d=can:can0/0x4b"); err == nil {
-		t.Fatal("Set accepted CAN target")
+	if err := routes.Set("0x4d=can:can0/0x4d"); err != nil {
+		t.Fatalf("Set returned error for CAN target: %v", err)
+	}
+	if len(routes) != 3 {
+		t.Fatalf("routes = %d, want 3", len(routes))
+	}
+	if routes[2].Address != 0x4d || routes[2].Target != "can:can0/0x4d" {
+		t.Fatalf("route = %+v", routes[2])
+	}
+	if got := routes.String(); !strings.Contains(got, "0x4D=can:can0/0x4d") {
+		t.Fatalf("String() = %q", got)
+	}
+}
+
+func TestRouteFlagsAddressesDeduplicatesDuplicateTransports(t *testing.T) {
+	routes := routeFlags{
+		{Address: 0x4b, Target: "serial:COM3@57600"},
+		{Address: 0x4b, Target: "can:can0/0x4b"},
+		{Address: 0x4c, Target: "serial:COM4@57600"},
+		{Address: 0x4c, Target: "can:can0/0x4c"},
+	}
+	got := routes.addresses()
+	want := []byte{0x4b, 0x4c}
+	if len(got) != len(want) {
+		t.Fatalf("addresses() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("addresses() = %v, want %v", got, want)
+		}
 	}
 }
 
 func TestSelectServerModeAcceptsSingleTarget(t *testing.T) {
-	mode, err := selectServerMode("serial:COM3@57600", nil)
-	if err != nil {
-		t.Fatalf("selectServerMode returned error: %v", err)
-	}
-	if mode.target != "serial:COM3@57600" {
-		t.Fatalf("target = %q, want serial:COM3@57600", mode.target)
-	}
-	if len(mode.routes) != 0 {
-		t.Fatalf("routes = %d, want 0", len(mode.routes))
+	for _, target := range []string{"serial:COM3@57600", "can:can0/0x4b"} {
+		t.Run(target, func(t *testing.T) {
+			mode, err := selectServerMode(target, nil)
+			if err != nil {
+				t.Fatalf("selectServerMode returned error: %v", err)
+			}
+			if mode.target != target {
+				t.Fatalf("target = %q, want %q", mode.target, target)
+			}
+			if len(mode.routes) != 0 {
+				t.Fatalf("routes = %d, want 0", len(mode.routes))
+			}
+		})
 	}
 }
 
@@ -122,7 +176,6 @@ func TestSelectServerModeRejectsInvalidCombinations(t *testing.T) {
 		"empty":        {"", nil},
 		"target-route": {"serial:COM3@57600", routes},
 		"bad-target":   {"can:", nil},
-		"can-target":   {"can:can0/0x4b", nil},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

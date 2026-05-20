@@ -130,7 +130,13 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 		}
 		resp, err := canopen.ParseSDODownloadResponse(frame)
 		if err != nil {
-			return errors.Join(ErrWriteRejected, err)
+			var abort canopen.SDOAbortError
+			if errors.As(err, &abort) {
+				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+					return errors.Join(ErrWriteRejected, err)
+				}
+			}
+			continue
 		}
 		if resp.Index != object.index || resp.SubIndex != object.subIndex {
 			continue
@@ -192,7 +198,13 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 		}
 		resp, err := canopen.ParseSDOUploadResponse(frame)
 		if err != nil {
-			return math.NaN(), err
+			var abort canopen.SDOAbortError
+			if errors.As(err, &abort) {
+				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+					return math.NaN(), err
+				}
+			}
+			continue
 		}
 		if resp.Index != object.index || resp.SubIndex != object.subIndex {
 			continue
