@@ -305,7 +305,7 @@ func TestServeRouterRoutesAddressZeroByConnectionRouteOrder(t *testing.T) {
 	defer routeBClient.Close()
 	defer routeBServer.Close()
 
-	seenA := serveDownstreamPipe(t, routeAServer, 1)
+	seenA := serveDownstreamPipe(t, routeAServer, 8)
 	seenB := serveDownstreamPipe(t, routeBServer, 1)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -349,15 +349,34 @@ func TestServeRouterRoutesAddressZeroByConnectionRouteOrder(t *testing.T) {
 	clientA.Close()
 
 	reqB := []byte("#000002?VR03E8010000\r")
-	clientB := dialClient(t, ln.Addr().String())
-	defer clientB.Close()
-	if _, err := clientB.Write(reqB); err != nil {
-		t.Fatalf("write B: %v", err)
+	for attempt := 1; attempt <= 8; attempt++ {
+		clientB := dialClient(t, ln.Addr().String())
+		if _, err := clientB.Write(reqB); err != nil {
+			_ = clientB.Close()
+			t.Fatalf("write B attempt %d: %v", attempt, err)
+		}
+		select {
+		case got := <-seenB:
+			if !bytes.Equal(got, reqB) {
+				_ = clientB.Close()
+				t.Fatalf("route B got %q, want unchanged frame %q", got, reqB)
+			}
+			_ = readFrame(t, clientB)
+			_ = clientB.Close()
+			return
+		case got := <-seenA:
+			_ = readFrame(t, clientB)
+			_ = clientB.Close()
+			if !bytes.Equal(got, reqB) {
+				t.Fatalf("route A got %q during release wait, want unchanged frame %q", got, reqB)
+			}
+			time.Sleep(10 * time.Millisecond)
+		case <-time.After(250 * time.Millisecond):
+			_ = clientB.Close()
+			t.Fatal("timed out waiting for downstream frame")
+		}
 	}
-	if got := receiveSeen(t, seenB); !bytes.Equal(got, reqB) {
-		t.Fatalf("route B got %q, want unchanged frame %q", got, reqB)
-	}
-	_ = readFrame(t, clientB)
+	t.Fatal("address-zero lease stayed on route A after client close")
 }
 
 func TestServeRouterKeepsAddressZeroStickyForConcurrentRemoteConnections(t *testing.T) {

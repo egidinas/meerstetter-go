@@ -19,9 +19,11 @@ jobs:
           - goos: linux
             goarch: amd64
             suffix: linux-amd64
+            ext: ''
           - goos: linux
             goarch: arm64
             suffix: linux-arm64
+            ext: ''
           - goos: windows
             goarch: amd64
             suffix: windows-amd64
@@ -32,6 +34,9 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Prepare dist directory
+        run: mkdir -p dist
 
       - name: Build mecomgw
         env:
@@ -57,14 +62,51 @@ jobs:
           name: binaries-${{ matrix.suffix }}
           path: dist/
 
+  web:
+    name: Build browser UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Test web
+        working-directory: web
+        run: npm test
+
+      - name: Build web
+        working-directory: web
+        run: npm run build
+
+      - name: Package web UI
+        run: |
+          mkdir -p dist
+          cd web/dist
+          python3 -m zipfile -c "../../dist/meerstetter-go-console-${{ github.ref_name }}.zip" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-ui
+          path: dist/meerstetter-go-console-${{ github.ref_name }}.zip
+
   release:
     name: Create GitHub Release
-    needs: build
+    needs:
+      - build
+      - web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: binaries-*
+          pattern: "*"
           merge-multiple: true
           path: dist/
 
@@ -76,11 +118,12 @@ jobs:
           body: |
             ## Binaries
 
-            | Binary | Platform |
-            |--------|----------|
-            | `mecomgw` | HTTP gateway + browser UI — connect at `http://localhost:8080` |
-            | `mecomvseriald` | Serial/TCP device server — sits between hardware and the gateway |
+            | Asset | Use |
+            |-------|-----|
+            | `mecomgw` | HTTP gateway. Extract `meerstetter-go-console-${{ github.ref_name }}.zip` and pass it with `-ui-dir`; then connect at `http://localhost:8080`. |
+            | `mecomvseriald` | Serial/TCP device server - sits between hardware and the gateway |
             | `teccanprobe` | CAN bus probe for Raspberry Pi / PiXtend (Linux only) |
+            | `meerstetter-go-console-${{ github.ref_name }}.zip` | Static browser UI bundle for `mecomgw -ui-dir` |
 
             **Quick start**: see [deploy/README.md](https://github.com/${{ github.repository }}/blob/main/deploy/README.md) for wiring `mecomvseriald` and `mecomgw` together.
 

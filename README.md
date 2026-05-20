@@ -64,8 +64,8 @@ its HTTP/SSE endpoints. Features:
   operator/expert visibility, help text, and semantic counterpart links.
 - **Help view**: inline operator reference.
 
-The UI is bundled and served by `mecomgw -ui-dir web/dist`. A pre-built bundle
-is not committed; see **Building the UI** below.
+The UI is bundled and served by `mecomgw -ui-dir web/dist`. Release tags attach
+a pre-built browser bundle; source checkouts can build it from `web/`.
 
 ### Diagnostic commands
 
@@ -260,4 +260,4 @@ scripts/            Build and catalogue harvest scripts
 
 - [`go.bug.st/serial`](https://github.com/bugst/go-serial) — serial port support
 - [`apache/arrow-go`](https://github.com/apache/arrow-go) — Arrow IPC for graph history export
-- [`egidinas/signalforge`](https://github.com/egidinas/signalforge) — reusable graph, source-catalogue, and control-program contracts (local replace directive during development)
+- [`egidinas/signalforge`](https://github.com/egidinas/signalforge) — reusable graph, source-catalogue, and control-program contracts

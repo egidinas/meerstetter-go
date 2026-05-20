@@ -93,6 +93,14 @@ type deviceBridgeRequest struct {
 	payload string
 }
 
+const (
+	deviceBridgeFirmwareIdentification = "8065-TEC SW G01     "
+	deviceBridgeBoardIdentification    = "00000000"
+
+	deviceBridgeFirmwareVersionIntParam   = 103
+	deviceBridgeFirmwareVersionFloatParam = 112
+)
+
 func handleDeviceClientFrame(client mecom.DeviceClient, raw []byte, timeout time.Duration) []byte {
 	req, err := parseDeviceBridgeRequest(raw)
 	if err != nil {
@@ -112,11 +120,25 @@ func handleDeviceClientFrame(client mecom.DeviceClient, raw []byte, timeout time
 	if err != nil {
 		return deviceBridgeNACK(req.address, req.seq, nackCodeForError(err))
 	}
+	if isDeviceBridgeInfoProbe(req.payload) {
+		return deviceBridgeInfo(req.address, req.seq, payload)
+	}
+	if isDeviceBridgeRead(req.payload) {
+		return deviceBridgeData(req.address, req.seq, payload)
+	}
 	return deviceBridgeOK(req.address, req.seq, payload)
 }
 
 func parseDeviceBridgeRequest(raw []byte) (deviceBridgeRequest, error) {
 	frame := bytes.TrimSuffix(bytes.TrimSpace(raw), []byte{mecom.FrameTerminator})
+	if len(frame) >= 2 && frame[0] == '?' {
+		return deviceBridgeRequest{
+			raw:     append([]byte(nil), raw...),
+			address: 0,
+			seq:     0,
+			payload: strings.ToUpper(string(frame)),
+		}, nil
+	}
 	if len(frame) < 11 || frame[0] != '#' {
 		return deviceBridgeRequest{}, fmt.Errorf("mecomserver: invalid request frame %q", string(frame))
 	}
@@ -157,6 +179,10 @@ func verifyDeviceBridgeCRC(frame []byte) error {
 
 func deviceBridgePayload(ctx context.Context, client mecom.DeviceClient, payload string) (string, error) {
 	switch {
+	case payload == "?IF":
+		return deviceBridgeFirmwareIdentification, nil
+	case payload == "?BI" || payload == "?BID" || payload == "?BIF":
+		return deviceBridgeBoardIdentification, nil
 	case strings.HasPrefix(payload, "?VR"):
 		return deviceBridgeSingleRead(ctx, client, payload)
 	case strings.HasPrefix(payload, "?VX"):
@@ -180,6 +206,14 @@ func deviceBridgePayload(ctx context.Context, client mecom.DeviceClient, payload
 	}
 }
 
+func isDeviceBridgeInfoProbe(payload string) bool {
+	return payload == "?IF" || payload == "?BI" || payload == "?BID" || payload == "?BIF"
+}
+
+func isDeviceBridgeRead(payload string) bool {
+	return strings.HasPrefix(payload, "?VR") || strings.HasPrefix(payload, "?VX")
+}
+
 func deviceBridgeSingleRead(ctx context.Context, client mecom.DeviceClient, payload string) (string, error) {
 	if len(payload) != len("?VR000000") {
 		return "", fmt.Errorf("%w: invalid ?VR payload length %d", mecom.ErrInvalidArgument, len(payload))
@@ -197,6 +231,13 @@ func deviceBridgeSingleRead(ctx context.Context, client mecom.DeviceClient, payl
 		}
 		return fmt.Sprintf("%08X", uint32(value)), nil
 	case mecom.DataTypeFloat32, "":
+		if paramID == deviceBridgeFirmwareVersionFloatParam {
+			value, err := deviceBridgeFirmwareVersionFloat(ctx, client, instance)
+			if err != nil {
+				return "", err
+			}
+			return fmt.Sprintf("%08X", math.Float32bits(float32(value))), nil
+		}
 		value, err := client.ReadFloat32(ctx, paramID, instance)
 		if err != nil {
 			return "", err
@@ -227,12 +268,32 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 		}
 		params = append(params, mecom.Parameter{ID: paramID, Instance: instance, Type: deviceBridgeParameterType(paramID)})
 	}
-	values, err := client.ReadBulk(ctx, params)
-	if err != nil {
-		return "", err
+	values := make([]float64, len(params))
+	downstreamParams := make([]mecom.Parameter, 0, len(params))
+	downstreamIndexes := make([]int, 0, len(params))
+	for i, param := range params {
+		if param.ID == deviceBridgeFirmwareVersionFloatParam {
+			value, err := deviceBridgeFirmwareVersionFloat(ctx, client, param.Instance)
+			if err != nil {
+				return "", err
+			}
+			values[i] = value
+			continue
+		}
+		downstreamIndexes = append(downstreamIndexes, i)
+		downstreamParams = append(downstreamParams, param)
 	}
-	if len(values) != len(params) {
-		return "", fmt.Errorf("%w: bulk read returned %d values for %d parameters", mecom.ErrInvalidArgument, len(values), len(params))
+	if len(downstreamParams) > 0 {
+		downstreamValues, err := client.ReadBulk(ctx, downstreamParams)
+		if err != nil {
+			return "", err
+		}
+		if len(downstreamValues) != len(downstreamParams) {
+			return "", fmt.Errorf("%w: bulk read returned %d values for %d parameters", mecom.ErrInvalidArgument, len(downstreamValues), len(downstreamParams))
+		}
+		for i, value := range downstreamValues {
+			values[downstreamIndexes[i]] = value
+		}
 	}
 	var out strings.Builder
 	for i, value := range values {
@@ -249,6 +310,14 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 		}
 	}
 	return out.String(), nil
+}
+
+func deviceBridgeFirmwareVersionFloat(ctx context.Context, client mecom.DeviceClient, instance int) (float64, error) {
+	version, err := client.ReadInt32(ctx, deviceBridgeFirmwareVersionIntParam, instance)
+	if err != nil {
+		return 0, err
+	}
+	return float64(version) / 100.0, nil
 }
 
 func deviceBridgeWrite(ctx context.Context, client mecom.DeviceClient, payload string) error {
@@ -319,6 +388,15 @@ func deviceBridgeOK(addr byte, seq uint16, payload string) []byte {
 	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
 }
 
+func deviceBridgeInfo(addr byte, seq uint16, payload string) []byte {
+	return deviceBridgeData(addr, seq, payload)
+}
+
+func deviceBridgeData(addr byte, seq uint16, payload string) []byte {
+	prefix := fmt.Sprintf("!%02X%04X%s", addr, seq, payload)
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
+}
+
 func deviceBridgeNACK(addr byte, seq uint16, code byte) []byte {
 	prefix := fmt.Sprintf("!%02X%04X-%02X", addr, seq, code)
 	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
@@ -364,7 +442,8 @@ func buildDefaultDeviceBridgeParameterTypes() map[int]mecom.DataType {
 		}
 	}
 	out[102] = mecom.DataTypeInt32
-	out[103] = mecom.DataTypeInt32
+	out[deviceBridgeFirmwareVersionIntParam] = mecom.DataTypeInt32
+	out[deviceBridgeFirmwareVersionFloatParam] = mecom.DataTypeFloat32
 	out[104] = mecom.DataTypeInt32
 	out[105] = mecom.DataTypeInt32
 	return out
