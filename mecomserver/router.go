@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"sort"
@@ -497,52 +498,66 @@ func routeFrame(ctx context.Context, frame []byte, candidates []*routeBroker, re
 	}
 	readFrame := isMeComReadFrame(frame)
 	var lastErr error
+candidateLoop:
 	for i, candidate := range candidates {
-		reqCtx, cancelReq := context.WithTimeout(ctx, requestTimeout)
-		result := make(chan response, 1)
-		select {
-		case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), frame...), result: result}:
-		case <-reqCtx.Done():
-			lastErr = reqCtx.Err()
-			cancelReq()
-			if readFrame && i+1 < len(candidates) && ctx.Err() == nil {
-				continue
-			}
-			return nil, lastErr
-		case <-ctx.Done():
-			cancelReq()
-			return nil, ctx.Err()
+		attempts := 1
+		if readFrame {
+			attempts = 2
 		}
-		select {
-		case res := <-result:
-			cancelReq()
-			if res.err == nil {
-				return res.frame, nil
+		for attempt := 0; attempt < attempts; attempt++ {
+			reqCtx, cancelReq := context.WithTimeout(ctx, requestTimeout)
+			result := make(chan response, 1)
+			select {
+			case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), frame...), result: result}:
+			case <-reqCtx.Done():
+				lastErr = reqCtx.Err()
+				cancelReq()
+				if readFrame && i+1 < len(candidates) && ctx.Err() == nil {
+					continue candidateLoop
+				}
+				return nil, lastErr
+			case <-ctx.Done():
+				cancelReq()
+				return nil, ctx.Err()
 			}
-			lastErr = res.err
-			if traceFrames && logger != nil {
-				logger.Printf("route candidate failed remote=%s address=0x%02X target=%s read=%t err=%v", remote, candidate.address, candidate.target, readFrame, res.err)
+			select {
+			case res := <-result:
+				cancelReq()
+				if res.err == nil {
+					return res.frame, nil
+				}
+				lastErr = res.err
+				if traceFrames && logger != nil {
+					logger.Printf("route candidate failed remote=%s address=0x%02X target=%s read=%t err=%v", remote, candidate.address, candidate.target, readFrame, res.err)
+				}
+				if readFrame && isTransientRouteReadError(res.err) && attempt+1 < attempts && ctx.Err() == nil {
+					continue
+				}
+				if readFrame && i+1 < len(candidates) {
+					continue candidateLoop
+				}
+				return nil, res.err
+			case <-reqCtx.Done():
+				lastErr = reqCtx.Err()
+				cancelReq()
+				if readFrame && i+1 < len(candidates) && ctx.Err() == nil {
+					continue candidateLoop
+				}
+				return nil, lastErr
+			case <-ctx.Done():
+				cancelReq()
+				return nil, ctx.Err()
 			}
-			if readFrame && i+1 < len(candidates) {
-				continue
-			}
-			return nil, res.err
-		case <-reqCtx.Done():
-			lastErr = reqCtx.Err()
-			cancelReq()
-			if readFrame && i+1 < len(candidates) && ctx.Err() == nil {
-				continue
-			}
-			return nil, lastErr
-		case <-ctx.Done():
-			cancelReq()
-			return nil, ctx.Err()
 		}
 	}
 	if lastErr == nil {
 		lastErr = fmt.Errorf("no downstream route candidates")
 	}
 	return nil, lastErr
+}
+
+func isTransientRouteReadError(err error) bool {
+	return errors.Is(err, io.ErrClosedPipe) || errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed)
 }
 
 func isMeComReadFrame(frame []byte) bool {
@@ -557,9 +572,9 @@ func isMeComReadFrame(frame []byte) bool {
 }
 
 type addressZeroSelector struct {
-	fixed byte
-	order []byte
-	next  atomic.Uint64
+	fixed  byte
+	order  []byte
+	next   atomic.Uint64
 	mu     sync.Mutex
 	leases map[string]*addressZeroRemoteLease
 }

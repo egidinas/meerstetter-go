@@ -233,6 +233,26 @@ func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
 	}
 	sub := byte(instance)
 	switch paramID {
+	case 102: // system serial number (read-only int32)
+		if instance != 1 {
+			return canopenSDOObject{}, false
+		}
+		return canopenSDOObject{index: 0x2002, subIndex: 0x01, kind: DataTypeInt32}, true
+	case 103: // firmware version integer (read-only int32)
+		if instance != 1 {
+			return canopenSDOObject{}, false
+		}
+		return canopenSDOObject{index: 0x2003, subIndex: 0x01, kind: DataTypeInt32}, true
+	case 104: // device status (read-only int32)
+		if instance != 1 {
+			return canopenSDOObject{}, false
+		}
+		return canopenSDOObject{index: 0x2004, subIndex: 0x01, kind: DataTypeInt32}, true
+	case 105: // error number (read-only int32)
+		if instance != 1 {
+			return canopenSDOObject{}, false
+		}
+		return canopenSDOObject{index: 0x2005, subIndex: 0x01, kind: DataTypeInt32}, true
 	case 1000: // object temperature (sensor, read-only)
 		return canopenSDOObject{index: 0x2100, subIndex: sub, kind: DataTypeFloat32}, true
 	case 1001: // sink temperature (sensor, read-only)

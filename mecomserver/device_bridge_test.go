@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"math"
-	"strings"
 	"testing"
 	"time"
 
@@ -129,6 +128,60 @@ func TestDeviceClientBridgeTranslatesSingleRead(t *testing.T) {
 	}
 }
 
+func TestDeviceClientBridgePassesSingleFloatNaN(t *testing.T) {
+	ctx := context.Background()
+	fake := &fakeDeviceClient{
+		floats: map[fakeParamKey]float64{{id: 1000, instance: 1}: math.NaN()},
+		ints:   map[fakeParamKey]int32{},
+	}
+	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+		return fake, nil
+	}, 200*time.Millisecond)(ctx)
+	if err != nil {
+		t.Fatalf("DialDeviceClient returned error: %v", err)
+	}
+	defer conn.Close()
+
+	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
+	got, err := client.ReadFloat32(ctx, 1000, 1)
+	if err != nil {
+		t.Fatalf("ReadFloat32 returned error: %v", err)
+	}
+	if !math.IsNaN(got) {
+		t.Fatalf("ReadFloat32 = %v, want NaN", got)
+	}
+}
+
+func TestDeviceClientBridgeTranslatesSystemInt32Read(t *testing.T) {
+	ctx := context.Background()
+	fake := &fakeDeviceClient{
+		floats: map[fakeParamKey]float64{},
+		ints:   map[fakeParamKey]int32{{id: 104, instance: 1}: 1},
+	}
+	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+		return fake, nil
+	}, 200*time.Millisecond)(ctx)
+	if err != nil {
+		t.Fatalf("DialDeviceClient returned error: %v", err)
+	}
+	defer conn.Close()
+
+	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
+	got, err := client.ReadInt32(ctx, 104, 1)
+	if err != nil {
+		t.Fatalf("ReadInt32 returned error: %v", err)
+	}
+	if got != 1 {
+		t.Fatalf("ReadInt32 = %v, want 1", got)
+	}
+	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: 104, instance: 1}) {
+		t.Fatalf("readInts = %+v", fake.readInts)
+	}
+	if len(fake.readFloats) != 0 {
+		t.Fatalf("readFloats = %+v, want none", fake.readFloats)
+	}
+}
+
 func TestDeviceClientBridgeTranslatesBulkReadTypes(t *testing.T) {
 	ctx := context.Background()
 	fake := &fakeDeviceClient{
@@ -163,7 +216,7 @@ func TestDeviceClientBridgeTranslatesBulkReadTypes(t *testing.T) {
 	}
 }
 
-func TestDeviceClientBridgeNACKsBulkReadNaN(t *testing.T) {
+func TestDeviceClientBridgePassesBulkFloatNaN(t *testing.T) {
 	ctx := context.Background()
 	fake := &fakeDeviceClient{
 		floats: map[fakeParamKey]float64{{id: 1000, instance: 1}: math.NaN()},
@@ -178,9 +231,12 @@ func TestDeviceClientBridgeNACKsBulkReadNaN(t *testing.T) {
 	defer conn.Close()
 
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
-	_, err = client.ReadBulk(ctx, []mecom.Parameter{{ID: 1000, Instance: 1, Type: mecom.DataTypeFloat32}})
-	if err == nil || !strings.Contains(err.Error(), "PAR_NOT_AVAILABLE") {
-		t.Fatalf("ReadBulk error = %v, want PAR_NOT_AVAILABLE NACK", err)
+	got, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 1000, Instance: 1, Type: mecom.DataTypeFloat32}})
+	if err != nil {
+		t.Fatalf("ReadBulk returned error: %v", err)
+	}
+	if len(got) != 1 || !math.IsNaN(got[0]) {
+		t.Fatalf("ReadBulk = %v, want [NaN]", got)
 	}
 }
 

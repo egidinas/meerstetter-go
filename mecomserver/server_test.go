@@ -691,6 +691,62 @@ func TestOrderRouteCandidatesDynamicKeepsConfiguredPrimaryForWrites(t *testing.T
 	}
 }
 
+func TestRouteFrameRetriesTransientReadOnSameCandidate(t *testing.T) {
+	candidate := testRouteBroker(0x50, "can-primary")
+	reqFrame := []byte("#500001?IF03E8010000\r")
+	reply := []byte("!500001-010000\r")
+	seen := make(chan []byte, 2)
+	go func() {
+		for i := 0; i < 2; i++ {
+			req := <-candidate.requests
+			seen <- append([]byte(nil), req.frame...)
+			if i == 0 {
+				req.result <- response{err: io.ErrClosedPipe}
+				continue
+			}
+			req.result <- response{frame: reply}
+		}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, reply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
+		t.Fatalf("first routed frame = %q, want %q", got, reqFrame)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
+		t.Fatalf("retry routed frame = %q, want %q", got, reqFrame)
+	}
+}
+
+func TestRouteFrameDoesNotRetryTransientWriteOnSameCandidate(t *testing.T) {
+	candidate := testRouteBroker(0x50, "can-primary")
+	reqFrame := []byte("#500001VS07DA0100000000\r")
+	seen := make(chan []byte, 2)
+	go func() {
+		req := <-candidate.requests
+		seen <- append([]byte(nil), req.frame...)
+		req.result <- response{err: io.ErrClosedPipe}
+	}()
+
+	_, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if !errors.Is(err, io.ErrClosedPipe) {
+		t.Fatalf("routeFrame error = %v, want io.ErrClosedPipe", err)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
+		t.Fatalf("routed write frame = %q, want %q", got, reqFrame)
+	}
+	select {
+	case got := <-seen:
+		t.Fatalf("write was retried: %q", got)
+	case <-time.After(50 * time.Millisecond):
+	}
+}
+
 func TestServeRouterRejectsUnknownAddress(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

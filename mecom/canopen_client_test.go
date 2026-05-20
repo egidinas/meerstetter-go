@@ -196,6 +196,36 @@ func TestCANopenClientReadsOutputStageActuals(t *testing.T) {
 	}
 }
 
+func TestCANopenClientReadsSystemInt32Objects(t *testing.T) {
+	tests := []struct {
+		name      string
+		paramID   int
+		wantIndex uint16
+		wantValue int32
+	}{
+		{name: "serial number", paramID: 102, wantIndex: 0x2002, wantValue: 75},
+		{name: "firmware int", paramID: 103, wantIndex: 0x2003, wantValue: 631},
+		{name: "device status", paramID: 104, wantIndex: 0x2004, wantValue: 1},
+		{name: "error number", paramID: 105, wantIndex: 0x2005, wantValue: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &fakeCANTransceiver{
+				replies: []canopen.Frame{sdoInt32UploadReply(0x4b, tt.wantIndex, 0x01, tt.wantValue)},
+			}
+			client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+			got, err := client.ReadInt32(context.Background(), tt.paramID, 1)
+			if err != nil {
+				t.Fatalf("ReadInt32 returned error: %v", err)
+			}
+			if got != tt.wantValue {
+				t.Fatalf("ReadInt32=%d, want %d", got, tt.wantValue)
+			}
+			assertSDOUploadRequest(t, fake.sent, 0x4b, tt.wantIndex, 0x01)
+		})
+	}
+}
+
 func TestCANopenClientReadsChannelSpecificObjects(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -381,6 +411,16 @@ func TestCANopenClientRingCaptureUnsupported(t *testing.T) {
 func sdoFloatUploadReply(node byte, index uint16, subIndex byte, value float32) canopen.Frame {
 	var data [8]byte
 	binary.LittleEndian.PutUint32(data[4:8], math.Float32bits(value))
+	data[0] = 0x43
+	data[1] = byte(index)
+	data[2] = byte(index >> 8)
+	data[3] = subIndex
+	return canopen.Frame{ID: 0x580 + uint32(node), DLC: 8, Data: data}
+}
+
+func sdoInt32UploadReply(node byte, index uint16, subIndex byte, value int32) canopen.Frame {
+	var data [8]byte
+	binary.LittleEndian.PutUint32(data[4:8], uint32(value))
 	data[0] = 0x43
 	data[1] = byte(index)
 	data[2] = byte(index >> 8)

@@ -201,9 +201,6 @@ func deviceBridgeSingleRead(ctx context.Context, client mecom.DeviceClient, payl
 		if err != nil {
 			return "", err
 		}
-		if math.IsNaN(value) {
-			return "", fmt.Errorf("%w: parameter %d instance %d returned NaN", mecom.ErrUnknownParameter, paramID, instance)
-		}
 		return fmt.Sprintf("%08X", math.Float32bits(float32(value))), nil
 	default:
 		return "", fmt.Errorf("%w: single read of %s parameter %d", mecom.ErrTransportNotSupported, typ, paramID)
@@ -239,11 +236,11 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 	}
 	var out strings.Builder
 	for i, value := range values {
-		if math.IsNaN(value) {
-			return "", fmt.Errorf("%w: parameter %d instance %d returned NaN", mecom.ErrUnknownParameter, params[i].ID, params[i].Instance)
-		}
 		switch params[i].Type {
 		case mecom.DataTypeInt32:
+			if math.IsNaN(value) {
+				return "", fmt.Errorf("%w: int32 parameter %d instance %d returned NaN", mecom.ErrUnknownParameter, params[i].ID, params[i].Instance)
+			}
 			fmt.Fprintf(&out, "%08X", uint32(int32(value)))
 		case mecom.DataTypeFloat32, "":
 			fmt.Fprintf(&out, "%08X", math.Float32bits(float32(value)))
@@ -366,6 +363,10 @@ func buildDefaultDeviceBridgeParameterTypes() map[int]mecom.DataType {
 			out[param.ID] = param.Type
 		}
 	}
+	out[102] = mecom.DataTypeInt32
+	out[103] = mecom.DataTypeInt32
+	out[104] = mecom.DataTypeInt32
+	out[105] = mecom.DataTypeInt32
 	return out
 }
 
