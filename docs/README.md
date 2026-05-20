@@ -1,120 +1,63 @@
-# Meerstetter-Go Implementation Guide
+# Documentation
 
-This repository contains reusable Go primitives for Meerstetter TEC and LDD
-communication. It is deliberately smaller than an application: it should be
-safe to share, easy to test, and independent from Loom, Gossamer, or any lab
-deployment.
+Start here to understand the project or to integrate with it.
 
-## Protocol Layers
+## For the Meerstetter team
 
-### MeCom
+If you want to evaluate the gateway or wire your own UI on top of it:
 
-Package: `mecom`
+| Document | What it covers |
+|---|---|
+| [`../README.md`](../README.md) | Project overview, quick-start, full feature and limitation list |
+| [`../deploy/README.md`](../deploy/README.md) | How to run the device server and gateway on real hardware |
+| [`gateway/openapi.yaml`](gateway/openapi.yaml) | **Authoritative HTTP API reference** — every route, request/response shape, SSE events |
+| [`gateway/types.d.ts`](gateway/types.d.ts) | TypeScript types matching the gateway JSON responses (use directly in a browser client) |
+| [`rpi_pixtend_bootstrap.md`](rpi_pixtend_bootstrap.md) | Complete bring-up guide for Raspberry Pi + PiXtend V2-L CAN interface |
 
-MeCom is a strict request-response protocol over serial-like transports. The
-host sends `#` client frames, the device replies with `!` server frames, and
-every frame is terminated by `\r`.
+## Protocol and package reference
 
-The package owns:
+| Document | What it covers |
+|---|---|
+| [`gateway/readout_scheduling.md`](gateway/readout_scheduling.md) | Which routes support ring/CRTVStream readout vs. polled readout — read before implementing a display refresh loop |
+| [`gateway/UI_GRAPH_WALL_CONTRACT.md`](gateway/UI_GRAPH_WALL_CONTRACT.md) | Graph wall tile contracts and the SSE streaming shape used by the graph tile endpoints |
+| [`lut_tmtc_automation.md`](lut_tmtc_automation.md) | `mecomautomation` package — how LUT preload telecommands are generated |
+| [`tmtc_signalforge_boundary.md`](tmtc_signalforge_boundary.md) | Where `meerstetter-go` ends and the SignalForge ecosystem begins; the only import boundary between them |
+| [`SYNERGY.md`](SYNERGY.md) | Apache Arrow IPC data standard and schema used for high-performance telemetry export |
+| [`public_variant_readiness.md`](public_variant_readiness.md) | Gates for what belongs in this public repository vs. a private deployment repo |
 
-- CRC-16-CCITT calculation for frame integrity.
-- Single reads with `?VR`.
-- Bulk reads with `?VX`.
-- Writes with `VS`.
-- Float32, int32, and string payload encoding.
-- NACK decoding into named Go errors.
-- A small synchronous client over `io.ReadWriter`.
+## Reference data
 
-Applications should use the synchronous client behind one serialized owner per
-physical connection. Multiple UI sessions may subscribe to decoded telemetry,
-but they should not concurrently write to the same serial/TCP downstream
-without an explicit command arbiter.
+| File | What it covers |
+|---|---|
+| [`reference/tec_can_parameters_seed.go`](reference/tec_can_parameters_seed.go) | Seed fragment from TEC CAN parameter discovery. Not part of the build — the live catalogue is in `mecom` and `mecomdict`. |
 
-### Transport Helpers
+## Protocol overview
 
-Package surface: `mecom.ParseEndpoint`, `mecom.Open`
+### MeCom (serial / TCP / CAN)
 
-The MeCom package exposes endpoint parsing and TCP/serial opening directly, so
-the public module does not depend on private shared transport packages.
-Supported endpoint shapes are:
+`mecom` is a strict request-response protocol. The host sends `#` frames, the
+device replies with `!` frames, every frame terminated by `\r`.
 
-- `tcp:host:port`
-- bare `host:port`
-- `serial:/dev/ttyUSB0@57600`
-- `COM3@57600`
-- `can:can0/0x23`
+The package owns CRC-16-CCITT framing, single reads (`?VR`), bulk reads
+(`?VX`), writes (`VS`), float32/int32/string encoding, NACK decoding, and a
+synchronous client over `io.ReadWriter`.
 
-The parser defaults serial endpoints to `115200` baud when no rate is supplied.
-Real deployments should pin controller-specific rates explicitly. CAN endpoints
-are parsed as targets, but the concrete bus owner is selected by the
-application because SocketCAN, Kvaser, and remote CAN bridges have different
-ownership rules.
+Supported endpoint shapes for `mecom.ParseEndpoint`:
+
+```
+tcp:host:port
+host:port
+serial:/dev/ttyUSB0@57600
+COM3@57600
+can:can0/0x23
+```
+
+Multiple UI sessions may subscribe to decoded telemetry, but must not write to
+the same connection concurrently without a command arbiter.
 
 ### CANopen
 
-Packages: `canopen`, `canopen/eds`, `objectdict`
-
-Meerstetter TEC controllers can expose values through CANopen. The EDS parser
-builds a protocol-neutral `objectdict.Dictionary`, so applications can present
-the same target tree for MeCom and CANopen entries.
-
-The core CANopen package currently owns minimal classic-CAN frame primitives and
-expedited SDO upload/download request construction. Host-specific adapters such
-as SocketCAN, Kvaser CANlib, or a remote bridge belong at the application
-boundary.
-
-## Raspberry Pi / PiXtend V2-L
-
-For complete bring-up instructions — OS prerequisites, device-tree overlays,
-SocketCAN interface configuration, passive bus verification, and `teccanprobe`
-usage — see [rpi_pixtend_bootstrap.md](rpi_pixtend_bootstrap.md).
-
-The PiXtend V2-L profile (`pixtend-v2l`) is the default adapter profile in
-`teccanprobe` and includes preflight checks for SPI, the `pixtendv2l` kernel
-overlay, and MCP2515 driver binding. Run `teccanprobe -checklist` to confirm
-hardware state before opening the CAN socket.
-
-## Runtime Contracts
-
-### Telemetry and Telecommand
-
-Package: `tmtc`
-
-Rich decoded telemetry is the default contract. Raw bytes may be attached as
-evidence, but they are compatibility data, not the primary API.
-
-Telecommands are idempotent by default. If a caller does not provide an
-idempotency key, the library derives one from the target, command name, and raw
-payload. Commands should emit acknowledged status events:
-
-- accepted,
-- sent,
-- acked,
-- completed,
-- rejected,
-- failed.
-
-### Catalogue and Automation
-
-Packages: `mecomdict`, `mecomautomation`, `sequencer`
-
-The public catalogue identifies protocol targets, value kinds, units, read/write
-capability, and Meerstetter parameter metadata. Automation helpers adapt public
-SignalForge control programs into MeCom LUT preload commands. Starting outputs,
-changing controller authority, or binding to operator workflows remains an
-application decision.
-
-### Application Boundary
-
-Keep these pieces outside this repository:
-
-- vendor PDFs and large extracted text dumps,
-- lab endpoint lists,
-- hardware captures,
-- NATS subject naming,
-- product-specific REST/UI surfaces,
-- Kvaser process ownership and driver-specific recovery policy,
-- deployment units and private route checks.
-
-This repository owns reusable protocol and contract code. Applications own live
-device access, lease policy, route supervision, and UI/backend integration.
+`canopen` / `canopen/eds` / `objectdict` — TEC controllers can expose values
+through CANopen. The EDS parser builds a protocol-neutral `objectdict.Dictionary`
+so MeCom and CANopen targets share the same tree shape. Concrete bus adapters
+(SocketCAN, Kvaser, remote bridge) live at the application boundary.
