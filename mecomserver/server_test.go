@@ -125,6 +125,37 @@ func TestExchangeCancelsBlockedDownstreamRead(t *testing.T) {
 	}
 }
 
+func TestExchangeKeepsDownstreamOpenAfterSuccessfulReply(t *testing.T) {
+	downstreamClient, downstreamServer := net.Pipe()
+	defer downstreamClient.Close()
+	defer downstreamServer.Close()
+
+	go func() {
+		reader := bufio.NewReader(downstreamServer)
+		for {
+			frame, err := reader.ReadBytes(mecom.FrameTerminator)
+			if err != nil {
+				return
+			}
+			reply := []byte("!" + string(frame[1:len(frame)-1]) + "+0000\r")
+			_, _ = downstreamServer.Write(reply)
+		}
+	}()
+
+	reader := bufio.NewReader(downstreamClient)
+	req := []byte("#500001?VR03E8010000\r")
+	for i := 0; i < 50; i++ {
+		resp, err := exchange(context.Background(), downstreamClient, reader, req, time.Second)
+		if err != nil {
+			t.Fatalf("exchange %d returned error: %v", i, err)
+		}
+		if !bytes.Contains(resp, []byte("500001?VR03E8010000+")) {
+			t.Fatalf("exchange %d got wrong response: %q", i, resp)
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
 func TestRequestAddress(t *testing.T) {
 	addr, err := RequestAddress([]byte("#4B0001?VR03E8010000\r"))
 	if err != nil {

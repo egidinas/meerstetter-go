@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: linux-amd64
+          - goos: linux
+            goarch: arm64
+            suffix: linux-arm64
+          - goos: windows
+            goarch: amd64
+            suffix: windows-amd64
+            ext: .exe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build mecomgw
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -trimpath -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o dist/mecomgw-${{ matrix.suffix }}${{ matrix.ext }} ./cmd/mecomgw
+
+      - name: Build mecomvseriald
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -trimpath -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o dist/mecomvseriald-${{ matrix.suffix }}${{ matrix.ext }} ./cmd/mecomvseriald
+
+      - name: Build teccanprobe (Linux only)
+        if: matrix.goos == 'linux'
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -trimpath -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o dist/teccanprobe-${{ matrix.suffix }} ./cmd/teccanprobe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.suffix }}
+          path: dist/
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          body: |
+            ## Binaries
+
+            | Binary | Platform |
+            |--------|----------|
+            | `mecomgw` | HTTP gateway + browser UI — connect at `http://localhost:8080` |
+            | `mecomvseriald` | Serial/TCP device server — sits between hardware and the gateway |
+            | `teccanprobe` | CAN bus probe for Raspberry Pi / PiXtend (Linux only) |
+
+            **Quick start**: see [deploy/README.md](https://github.com/${{ github.repository }}/blob/main/deploy/README.md) for wiring `mecomvseriald` and `mecomgw` together.
+
+            **HDF5 export** (`?format=hdf5`) requires `libhdf5` on the host and is only available in the Linux builds.

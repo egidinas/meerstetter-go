@@ -345,6 +345,11 @@ func exchange(ctx context.Context, conn net.Conn, reader *bufio.Reader, frame []
 	go func() {
 		select {
 		case <-reqCtx.Done():
+			select {
+			case <-done:
+				return
+			default:
+			}
 			_ = conn.Close()
 		case <-done:
 		}
