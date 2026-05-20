@@ -315,6 +315,7 @@ func TestServeRouterRoutesAddressZeroByConnectionRouteOrder(t *testing.T) {
 		t.Fatalf("route A got %q, want unchanged frame %q", got, reqA)
 	}
 	_ = readFrame(t, clientA)
+	clientA.Close()
 
 	reqB := []byte("#000002?VR03E8010000\r")
 	clientB := dialClient(t, ln.Addr().String())
@@ -325,6 +326,74 @@ func TestServeRouterRoutesAddressZeroByConnectionRouteOrder(t *testing.T) {
 	if got := receiveSeen(t, seenB); !bytes.Equal(got, reqB) {
 		t.Fatalf("route B got %q, want unchanged frame %q", got, reqB)
 	}
+	_ = readFrame(t, clientB)
+}
+
+func TestServeRouterKeepsAddressZeroStickyForConcurrentRemoteConnections(t *testing.T) {
+	routeAClient, routeAServer := net.Pipe()
+	defer routeAClient.Close()
+	defer routeAServer.Close()
+	routeBClient, routeBServer := net.Pipe()
+	defer routeBClient.Close()
+	defer routeBServer.Close()
+
+	seenA := serveDownstreamPipe(t, routeAServer, 2)
+	seenB := serveDownstreamPipe(t, routeBServer, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, &RouterConfig{
+			AddressZeroOrder: []byte{0x50, 0x51},
+			Routes: []Route{
+				{Address: 0x50, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeAClient, "pipe-a", nil
+				}},
+				{Address: 0x51, Downstream: func(context.Context) (net.Conn, string, error) {
+					return routeBClient, "pipe-b", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	reqA := []byte("#000001?VR03E8010000\r")
+	clientA := dialClient(t, ln.Addr().String())
+	defer clientA.Close()
+	if _, err := clientA.Write(reqA); err != nil {
+		t.Fatalf("write A: %v", err)
+	}
+	if got := receiveSeen(t, seenA); !bytes.Equal(got, reqA) {
+		t.Fatalf("route A got %q, want unchanged frame %q", got, reqA)
+	}
+
+	reqB := []byte("#000002?VR03E8010000\r")
+	clientB := dialClient(t, ln.Addr().String())
+	defer clientB.Close()
+	if _, err := clientB.Write(reqB); err != nil {
+		t.Fatalf("write B: %v", err)
+	}
+	if got := receiveSeen(t, seenA); !bytes.Equal(got, reqB) {
+		t.Fatalf("second concurrent route got %q, want sticky route A frame %q", got, reqB)
+	}
+	select {
+	case got := <-seenB:
+		t.Fatalf("route B unexpectedly received concurrent address-zero frame %q", got)
+	case <-time.After(50 * time.Millisecond):
+	}
+
+	_ = readFrame(t, clientA)
 	_ = readFrame(t, clientB)
 }
 
