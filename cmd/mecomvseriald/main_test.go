@@ -51,10 +51,88 @@ func TestParseAddressZeroModeAllowsDisabledRouteOrderAndDefaultDevice(t *testing
 	if !got.routeOrder {
 		t.Fatalf("parseAddressZeroMode(route-order) = %+v, want route order", got)
 	}
+	for _, input := range []string{"auto-first", "auto", "first"} {
+		got, err := parseAddressZeroMode(input)
+		if err != nil {
+			t.Fatalf("parseAddressZeroMode(%q) returned error: %v", input, err)
+		}
+		if !got.autoFirst {
+			t.Fatalf("parseAddressZeroMode(%q) = %+v, want auto-first", input, got)
+		}
+	}
 	for _, input := range []string{"255", "not-an-address"} {
 		if _, err := parseAddressZeroMode(input); err == nil {
 			t.Fatalf("parseAddressZeroMode(%q) returned nil error", input)
 		}
+	}
+}
+
+func TestResolveAddressZeroModeUsesConfiguredRouteOrder(t *testing.T) {
+	routes := routeFlags{
+		{Address: 0x5a, Target: "serial:COM9@57600"},
+		{Address: 0x5b, Target: "tcp:127.0.0.1:15010"},
+		{Address: 0x5a, Target: "can:can0/0x5a"},
+	}
+
+	autoFirst, err := parseAddressZeroMode("auto-first")
+	if err != nil {
+		t.Fatalf("parseAddressZeroMode(auto-first) returned error: %v", err)
+	}
+	fixed, order, err := resolveAddressZeroMode(autoFirst, routes)
+	if err != nil {
+		t.Fatalf("resolveAddressZeroMode(auto-first) returned error: %v", err)
+	}
+	if fixed != 0x5a {
+		t.Fatalf("fixed = 0x%02X, want first configured address 0x5A", fixed)
+	}
+	if len(order) != 0 {
+		t.Fatalf("order = %v, want nil/empty for auto-first", order)
+	}
+
+	routeOrder, err := parseAddressZeroMode("route-order")
+	if err != nil {
+		t.Fatalf("parseAddressZeroMode(route-order) returned error: %v", err)
+	}
+	fixed, order, err = resolveAddressZeroMode(routeOrder, routes)
+	if err != nil {
+		t.Fatalf("resolveAddressZeroMode(route-order) returned error: %v", err)
+	}
+	if fixed != 0 {
+		t.Fatalf("fixed = 0x%02X, want disabled fixed address", fixed)
+	}
+	wantOrder := []byte{0x5a, 0x5b}
+	if len(order) != len(wantOrder) {
+		t.Fatalf("order = %v, want %v", order, wantOrder)
+	}
+	for i := range wantOrder {
+		if order[i] != wantOrder[i] {
+			t.Fatalf("order = %v, want %v", order, wantOrder)
+		}
+	}
+
+	fixedMode, err := parseAddressZeroMode("0x5b")
+	if err != nil {
+		t.Fatalf("parseAddressZeroMode(0x5b) returned error: %v", err)
+	}
+	fixed, order, err = resolveAddressZeroMode(fixedMode, routes)
+	if err != nil {
+		t.Fatalf("resolveAddressZeroMode(fixed) returned error: %v", err)
+	}
+	if fixed != 0x5b {
+		t.Fatalf("fixed = 0x%02X, want 0x5B", fixed)
+	}
+	if len(order) != 0 {
+		t.Fatalf("order = %v, want nil/empty for fixed mode", order)
+	}
+}
+
+func TestResolveAddressZeroModeRejectsAutoFirstWithoutRoutes(t *testing.T) {
+	autoFirst, err := parseAddressZeroMode("auto-first")
+	if err != nil {
+		t.Fatalf("parseAddressZeroMode(auto-first) returned error: %v", err)
+	}
+	if _, _, err := resolveAddressZeroMode(autoFirst, nil); err == nil {
+		t.Fatal("resolveAddressZeroMode(auto-first, nil) returned nil error")
 	}
 }
 

@@ -1,0 +1,24 @@
+[Unit]
+Description=Meerstetter config-driven serial/CAN route launcher
+Documentation=https://github.com/egidinas/meerstetter-go/blob/main/deploy/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Install deploy/start-meerstetter-serial-bridges.sh as this wrapper path, then
+# copy deploy/serial-bridges.env.example to /etc/meerstetter/serial-bridges.env.
+Environment=MEERSTETTER_SERIAL_BRIDGES_CONFIG=/etc/meerstetter/serial-bridges.env
+EnvironmentFile=/etc/meerstetter/serial-bridges.env
+ExecStart=/bin/bash /usr/local/bin/meerstetter-serial-bridges start
+ExecStop=/bin/bash /usr/local/bin/meerstetter-serial-bridges stop
+Restart=always
+RestartSec=3s
+
+# Set these when running under a dedicated non-root account.
+# User=meerstetter
+# Group=dialout
+# SupplementaryGroups=dialout
+
+[Install]
+WantedBy=multi-user.target

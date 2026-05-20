@@ -672,6 +672,7 @@ func DecodeBinaryCANFrame(f canopen.Frame, dataType DataType) (float64, error) {
 type ClientConfig struct {
 	Address byte
 	Timeout time.Duration
+	SDOMap  *CANopenSDOMap
 }
 
 // Client sends one request at a time over a shared io.ReadWriter.

@@ -11,6 +11,7 @@ MECOM_RECONNECT_DELAY=500ms
 # How to handle legacy/discovery clients that send MeCom address 0.
 # Public default is disabled. Site deployments may choose:
 # - disabled: reject address-zero requests;
+# - auto-first: resolve to the first active configured route in the wrapper;
 # - route-order: assign new address-zero clients through the configured routes;
 # - a fixed configured MeCom address, for example 0x4C.
 MECOM_ADDRESS_ZERO=disabled

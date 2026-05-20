@@ -419,6 +419,142 @@
       "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.4423", "catalogues/tec.json#write_parameters.53123"]
     }
   ],
+  "protocol_inventory": [
+    {
+      "command": "RS",
+      "status": "native_control",
+      "bridge_behavior": "Forwarded to ControlClient.Reset when available; otherwise NACKs as unsupported.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#2.1", "mecomserver/device_bridge.go#deviceBridgePayload"]
+    },
+    {
+      "command": "?IF",
+      "status": "synthesized_identity",
+      "bridge_behavior": "Returns the CoSo-compatible TEC firmware identification string for CAN-backed routes.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#2.2", "CoSo connection log: Device 8065-TEC SW G01"]
+    },
+    {
+      "command": "?VR",
+      "status": "canopen_mapped_numeric_read",
+      "bridge_behavior": "Reads one numeric MeCom parameter through the canonical MeCom-ID to CANopen SDO map; documented compatibility exceptions are listed in bridge_transforms.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.1", "catalogues/sources/tec_canopen_sdo_map.v631.json#mappings"]
+    },
+    {
+      "command": "VS",
+      "status": "canopen_mapped_numeric_or_latin1_write",
+      "bridge_behavior": "Writes mapped numeric parameters through WriteClient and LATIN1 values through StringWriteClient when available.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.2", "catalogues/tec.json#write_parameters"]
+    },
+    {
+      "command": "?VM",
+      "status": "synthesized_metadata",
+      "bridge_behavior": "Returns metadata with MeParType, flags, instance count, element count, bounds, and a zero actual value from the runtime parameter catalogue.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.3", "mecomserver/device_bridge.go#deviceBridgeMetadata"]
+    },
+    {
+      "command": "?VB",
+      "status": "synthesized_big_data_read",
+      "bridge_behavior": "Returns an empty but well-formed LATIN1 big-data response for User Notes ID 120 on CAN-backed CoSo routes.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.4", "catalogues/tec.json#write_parameters.120"]
+    },
+    {
+      "command": "VB",
+      "status": "string_big_data_write",
+      "bridge_behavior": "Accepts single-package LATIN1 big-data writes through StringWriteClient when available.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.5", "mecom/protocol.go#BuildSetBigDataStringFrame"]
+    },
+    {
+      "command": "?VX",
+      "status": "canopen_mapped_bulk_read",
+      "bridge_behavior": "Reads multiple numeric MeCom parameters through the canonical runtime map, preserving requested parameter order.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.6", "mecomserver/device_bridge.go#deviceBridgeBulkRead"]
+    },
+    {
+      "command": "?VL",
+      "status": "synthesized_legacy_limits",
+      "bridge_behavior": "Returns legacy type and bounds metadata for compatibility with older MeCom clients.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.7", "mecomserver/device_bridge.go#deviceBridgeLimits"]
+    },
+    {
+      "command": "SP",
+      "status": "native_control",
+      "bridge_behavior": "Forwarded to ControlClient.SaveToFlash when available; otherwise NACKs as unsupported.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.8", "mecomserver/device_bridge.go#deviceBridgePayload"]
+    },
+    {
+      "command": "?RS0000",
+      "status": "empty_ring_pointer_when_unsupported",
+      "bridge_behavior": "Forwards to ring-capable clients; CANopen routes that report unsupported return pointer zero so CoSo ring stream setup does not abort.",
+      "source_evidence": ["mecom/protocol.go#BuildRingPointerFrame", "mecom/canopen_client.go#ReadRingPointer"]
+    },
+    {
+      "command": "?RS0001",
+      "status": "empty_ring_chunk_when_unsupported",
+      "bridge_behavior": "Forwards to ring-capable clients; CANopen routes that report unsupported return an empty ring chunk with all-data-read status.",
+      "source_evidence": ["mecom/protocol.go#BuildRingReadFrame", "mecom/canopen_client.go#ReadRingChunk"]
+    },
+    {
+      "command": "?RS0002",
+      "status": "empty_ring_capture_config_when_unsupported",
+      "bridge_behavior": "Forwards capture configuration to ring-capable clients; CANopen routes that report unsupported return a zero status byte.",
+      "source_evidence": ["mecom/protocol.go#BuildRingCaptureConfigFrame", "mecom/canopen_client.go#ConfigureRingCapture"]
+    },
+    {
+      "command": "?RS0003",
+      "status": "dummy_ring_trigger_sync_when_unsupported",
+      "bridge_behavior": "Forwards trigger sync to ring-capable clients; CANopen routes that report unsupported return the documented dummy data byte 00.",
+      "source_evidence": ["TEC-Family-Communication-Protocol-5136AT#2.3.1.4", "mecom/protocol.go#BuildRingTriggerSyncFrame", "mecom/canopen_client.go#TriggerRingSync"]
+    }
+  ],
+  "bridge_transforms": [
+    {
+      "mecom_id": 112,
+      "name": "System: Firmware Version Float",
+      "value_type": "float32",
+      "trigger": "read_float32",
+      "runtime": {
+        "kind": "synthesize_float32_from_int32",
+        "source_mecom_id": 103,
+        "scale": 0.01
+      },
+      "bridge_behavior": "Synthesizes the CoSo firmware float from integer firmware ID 103 divided by 100 when the CAN-backed route cannot satisfy the float path directly.",
+      "source_evidence": ["MeCom Protocol Specification 5117F#3.2.1", "catalogues/sources/tec_canopen_sdo_map.v631.json#mappings.103", "mecomserver/device_bridge.go#deviceBridgeSynthesizedFloat32"]
+    },
+    {
+      "mecom_id": 115,
+      "name": "System: Random Startup Value",
+      "value_type": "int32",
+      "trigger": "read_int32",
+      "runtime": {
+        "kind": "mask_int32",
+        "int32_mask": "0x00FFFFFF"
+      },
+      "bridge_behavior": "Masks the raw device startup marker to a 24-bit startup value for MeSoft/CoSo compatibility, preserving reboot-change semantics while avoiding the observed ConvertToNr out-of-range path.",
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.200F", "CoSo log: Get INT32 Value ID 115 out of range", "mecomserver/device_bridge.go#deviceBridgeCompatibleInt32Value"]
+    },
+    {
+      "mecom_id": 120,
+      "name": "System: User Notes",
+      "value_type": "latin1",
+      "trigger": "metadata_big_data",
+      "runtime": {
+        "kind": "latin1_big_data"
+      },
+      "bridge_behavior": "Treats User Notes as LATIN1 metadata/big-data rather than an INT32 SDO read so CoSo metadata and notes paths receive well-formed empty responses on CAN-backed routes.",
+      "source_evidence": ["catalogues/tec.json#write_parameters.120", "MeCom Protocol Specification 5117F#3.2.3", "MeCom Protocol Specification 5117F#3.2.4", "mecomserver/device_bridge.go#deviceBridgeBigDataRead"]
+    },
+    {
+      "mecom_id": 1200,
+      "name": "Status: Temperature Stable",
+      "value_type": "int32",
+      "trigger": "read_int32",
+      "runtime": {
+        "kind": "constant_int32",
+        "int32_value": 0
+      },
+      "bridge_behavior": "Returns the conservative non-stable state for CoSo status polling when the CAN-backed route cannot satisfy MeCom ID 1200 directly, avoiding a fatal INT32 miss in mixed ?VX status batches.",
+      "source_evidence": ["catalogues/tec.json#readout_parameters.1200", "live CoSo trace 2026-05-20 ?VX32: ID 1200 instances 1..4 returned -05 over CAN-backed bridge", "mecomserver/device_bridge.go#deviceBridgeTransformConstantInt32"]
+    }
+  ],
   "unsupported": [
     {
       "id": 120,

@@ -66,7 +66,7 @@ func main() {
 	var routes routeFlags
 	listen := flag.String("listen", "127.0.0.1:50000", "TCP listen address")
 	target := flag.String("target", "", "single downstream target for address-agnostic passthrough, e.g. serial:/dev/ttyUSB0@57600")
-	addressZeroFlag := flag.String("address-zero", "disabled", "route client requests addressed to 0: disabled, route-order, or a configured fixed device address")
+	addressZeroFlag := flag.String("address-zero", "disabled", "route client requests addressed to 0: disabled, auto-first, route-order, or a configured fixed device address")
 	routePolicyFlag := flag.String("route-policy", string(mecomserver.RouteSelectionFixedPreference), "duplicate-route policy: fixed-preference or dynamic")
 	timeout := flag.Duration("timeout", 2*time.Second, "per-request downstream timeout")
 	reconnectDelay := flag.Duration("reconnect-delay", 500*time.Millisecond, "delay after downstream dial failures")
@@ -89,7 +89,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	if (addressZero.fixed != 0 || addressZero.routeOrder) && mode.target != "" {
+	if (addressZero.fixed != 0 || addressZero.routeOrder || addressZero.autoFirst) && mode.target != "" {
 		fmt.Fprintln(os.Stderr, "-address-zero requires routed -route mode")
 		os.Exit(2)
 	}
@@ -120,11 +120,12 @@ func main() {
 		return
 	}
 
-	addressZeroOrder := []byte(nil)
-	if addressZero.routeOrder {
-		addressZeroOrder = routes.addresses()
-	}
 	routes, err = prepareRouteDownstreams(routes, *timeout)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+	defaultAddress, addressZeroOrder, err := resolveAddressZeroMode(addressZero, routes)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
@@ -132,7 +133,7 @@ func main() {
 	logger.Printf("listen=%s routes=%s address-zero=%s route-policy=%s", *listen, routes.String(), addressZero.String(), routePolicy)
 	cfg := &mecomserver.RouterConfig{
 		Routes:           routes,
-		DefaultAddress:   addressZero.fixed,
+		DefaultAddress:   defaultAddress,
 		AddressZeroOrder: addressZeroOrder,
 		RequestTimeout:   *timeout,
 		ReconnectDelay:   *reconnectDelay,
@@ -233,11 +234,15 @@ func parseRouteSelectionPolicy(v string) (mecomserver.RouteSelectionPolicy, erro
 type addressZeroMode struct {
 	fixed      byte
 	routeOrder bool
+	autoFirst  bool
 }
 
 func (m addressZeroMode) String() string {
 	if m.routeOrder {
 		return "route-order"
+	}
+	if m.autoFirst {
+		return "auto-first"
 	}
 	if m.fixed != 0 {
 		return fmt.Sprintf("0x%02X", m.fixed)
@@ -250,12 +255,14 @@ func parseAddressZeroMode(v string) (addressZeroMode, error) {
 	switch strings.ToLower(v) {
 	case "", "0", "disabled", "off", "none":
 		return addressZeroMode{}, nil
+	case "auto-first", "auto", "first":
+		return addressZeroMode{autoFirst: true}, nil
 	case "route-order", "routes", "round-robin":
 		return addressZeroMode{routeOrder: true}, nil
 	}
 	n, err := strconv.ParseUint(strings.TrimSpace(v), 0, 8)
 	if err != nil {
-		return addressZeroMode{}, fmt.Errorf("invalid address-zero mode %q: use disabled, route-order, or a MeCom address: %w", v, err)
+		return addressZeroMode{}, fmt.Errorf("invalid address-zero mode %q: use disabled, auto-first, route-order, or a MeCom address: %w", v, err)
 	}
 	if n == 0 {
 		return addressZeroMode{}, nil
@@ -264,4 +271,19 @@ func parseAddressZeroMode(v string) (addressZeroMode, error) {
 		return addressZeroMode{}, fmt.Errorf("address-zero default address %d outside MeCom 0..254", n)
 	}
 	return addressZeroMode{fixed: byte(n)}, nil
+}
+
+func resolveAddressZeroMode(mode addressZeroMode, routes routeFlags) (byte, []byte, error) {
+	switch {
+	case mode.routeOrder:
+		return 0, routes.addresses(), nil
+	case mode.autoFirst:
+		addresses := routes.addresses()
+		if len(addresses) == 0 {
+			return 0, nil, fmt.Errorf("address-zero auto-first requires at least one active route")
+		}
+		return addresses[0], nil, nil
+	default:
+		return mode.fixed, nil, nil
+	}
 }

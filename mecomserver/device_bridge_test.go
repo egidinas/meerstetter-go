@@ -32,6 +32,18 @@ type fakeStringWrite struct {
 	value string
 }
 
+func deviceBridgeTestTransform(t *testing.T, id int, kind string) mecom.BridgeTransform {
+	t.Helper()
+	transform, ok := mecom.CANopenBridgeTransform(id)
+	if !ok {
+		t.Fatalf("missing bridge transform for MeCom ID %d", id)
+	}
+	if transform.Kind != kind {
+		t.Fatalf("bridge transform %d kind = %q, want %q", id, transform.Kind, kind)
+	}
+	return transform
+}
+
 func deviceBridgeTestFrame(addr byte, seq uint16, payload string) []byte {
 	body := []byte(fmt.Sprintf("#%02X%04X%s", addr, seq, payload))
 	return []byte(fmt.Sprintf("%s%04X%c", body, mecom.CRC16(body), mecom.FrameTerminator))
@@ -46,14 +58,14 @@ type fakeDeviceClient struct {
 	floats map[fakeParamKey]float64
 	ints   map[fakeParamKey]int32
 
-	readFloats  []fakeParamKey
-	readInts    []fakeParamKey
-	bulkReads   [][]mecom.Parameter
-	floatWrites []fakeFloatWrite
-	intWrites   []fakeIntWrite
-	stringWrites []fakeStringWrite
+	readFloats    []fakeParamKey
+	readInts      []fakeParamKey
+	bulkReads     [][]mecom.Parameter
+	floatWrites   []fakeFloatWrite
+	intWrites     []fakeIntWrite
+	stringWrites  []fakeStringWrite
 	bigDataWrites []fakeStringWrite
-	closed      bool
+	closed        bool
 }
 
 func (f *fakeDeviceClient) ReadFloat32(_ context.Context, id, instance int) (float64, error) {
@@ -157,68 +169,76 @@ func TestDeviceClientBridgeTranslatesSingleRead(t *testing.T) {
 }
 
 func TestDeviceClientBridgeAnswersFirmwareIdentification(t *testing.T) {
-	ctx := context.Background()
-	fake := &fakeDeviceClient{
-		floats: map[fakeParamKey]float64{},
-		ints:   map[fakeParamKey]int32{},
-	}
-	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
-		return fake, nil
-	}, 200*time.Millisecond)(ctx)
-	if err != nil {
-		t.Fatalf("DialDeviceClient returned error: %v", err)
-	}
-	defer conn.Close()
+	for _, payload := range []string{"?IF", "?VI"} {
+		t.Run(payload, func(t *testing.T) {
+			ctx := context.Background()
+			fake := &fakeDeviceClient{
+				floats: map[fakeParamKey]float64{},
+				ints:   map[fakeParamKey]int32{},
+			}
+			conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+				return fake, nil
+			}, 200*time.Millisecond)(ctx)
+			if err != nil {
+				t.Fatalf("DialDeviceClient returned error: %v", err)
+			}
+			defer conn.Close()
 
-	req := deviceBridgeTestFrame(0x4b, 1, "?IF")
-	if _, err := conn.Write(req); err != nil {
-		t.Fatalf("write ?IF frame: %v", err)
-	}
-	buf := make([]byte, 128)
-	if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
-		t.Fatalf("SetReadDeadline: %v", err)
-	}
-	n, err := conn.Read(buf)
-	if err != nil {
-		t.Fatalf("read ?IF response: %v", err)
-	}
-	want := deviceBridgeInfoTestFrame(0x4b, 1, deviceBridgeFirmwareIdentification)
-	if !bytes.Equal(buf[:n], want) {
-		t.Fatalf("?IF response = %q, want %q", string(buf[:n]), string(want))
-	}
-	if len(fake.readFloats) != 0 || len(fake.readInts) != 0 || len(fake.bulkReads) != 0 {
-		t.Fatalf("?IF should not hit typed parameter reads: floats=%v ints=%v bulk=%v", fake.readFloats, fake.readInts, fake.bulkReads)
+			req := deviceBridgeTestFrame(0x4b, 1, payload)
+			if _, err := conn.Write(req); err != nil {
+				t.Fatalf("write %s frame: %v", payload, err)
+			}
+			buf := make([]byte, 128)
+			if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+				t.Fatalf("SetReadDeadline: %v", err)
+			}
+			n, err := conn.Read(buf)
+			if err != nil {
+				t.Fatalf("read %s response: %v", payload, err)
+			}
+			want := deviceBridgeInfoTestFrame(0x4b, 1, deviceBridgeFirmwareIdentification)
+			if !bytes.Equal(buf[:n], want) {
+				t.Fatalf("%s response = %q, want %q", payload, string(buf[:n]), string(want))
+			}
+			if len(fake.readFloats) != 0 || len(fake.readInts) != 0 || len(fake.bulkReads) != 0 {
+				t.Fatalf("%s should not hit typed parameter reads: floats=%v ints=%v bulk=%v", payload, fake.readFloats, fake.readInts, fake.bulkReads)
+			}
+		})
 	}
 }
 
 func TestDeviceClientBridgeAnswersBareFirmwareIdentification(t *testing.T) {
-	ctx := context.Background()
-	fake := &fakeDeviceClient{
-		floats: map[fakeParamKey]float64{},
-		ints:   map[fakeParamKey]int32{},
-	}
-	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
-		return fake, nil
-	}, 200*time.Millisecond)(ctx)
-	if err != nil {
-		t.Fatalf("DialDeviceClient returned error: %v", err)
-	}
-	defer conn.Close()
+	for _, payload := range []string{"?IF", "?VI"} {
+		t.Run(payload, func(t *testing.T) {
+			ctx := context.Background()
+			fake := &fakeDeviceClient{
+				floats: map[fakeParamKey]float64{},
+				ints:   map[fakeParamKey]int32{},
+			}
+			conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+				return fake, nil
+			}, 200*time.Millisecond)(ctx)
+			if err != nil {
+				t.Fatalf("DialDeviceClient returned error: %v", err)
+			}
+			defer conn.Close()
 
-	if _, err := conn.Write([]byte("?IF\r")); err != nil {
-		t.Fatalf("write bare ?IF frame: %v", err)
-	}
-	buf := make([]byte, 128)
-	if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
-		t.Fatalf("SetReadDeadline: %v", err)
-	}
-	n, err := conn.Read(buf)
-	if err != nil {
-		t.Fatalf("read bare ?IF response: %v", err)
-	}
-	want := deviceBridgeInfoTestFrame(0, 0, deviceBridgeFirmwareIdentification)
-	if !bytes.Equal(buf[:n], want) {
-		t.Fatalf("bare ?IF response = %q, want %q", string(buf[:n]), string(want))
+			if _, err := conn.Write([]byte(payload + "\r")); err != nil {
+				t.Fatalf("write bare %s frame: %v", payload, err)
+			}
+			buf := make([]byte, 128)
+			if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+				t.Fatalf("SetReadDeadline: %v", err)
+			}
+			n, err := conn.Read(buf)
+			if err != nil {
+				t.Fatalf("read bare %s response: %v", payload, err)
+			}
+			want := deviceBridgeInfoTestFrame(0, 0, deviceBridgeFirmwareIdentification)
+			if !bytes.Equal(buf[:n], want) {
+				t.Fatalf("bare %s response = %q, want %q", payload, string(buf[:n]), string(want))
+			}
+		})
 	}
 }
 
@@ -303,10 +323,11 @@ func TestDeviceClientBridgeMatchesSerialSingleReadFraming(t *testing.T) {
 
 func TestDeviceClientBridgeSynthesizesFirmwareFloatFromIntegerParam(t *testing.T) {
 	ctx := context.Background()
+	firmware := deviceBridgeTestTransform(t, 112, "synthesize_float32_from_int32")
 	fake := &fakeDeviceClient{
 		floats: map[fakeParamKey]float64{},
 		ints: map[fakeParamKey]int32{
-			{id: deviceBridgeFirmwareVersionIntParam, instance: 1}: 631,
+			{id: firmware.SourceMeComID, instance: 1}: 631,
 		},
 	}
 	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
@@ -318,14 +339,14 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatFromIntegerParam(t *testing.T
 	defer conn.Close()
 
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4b, Timeout: time.Second})
-	got, err := client.ReadFloat32(ctx, deviceBridgeFirmwareVersionFloatParam, 1)
+	got, err := client.ReadFloat32(ctx, firmware.MeComID, 1)
 	if err != nil {
 		t.Fatalf("ReadFloat32 firmware version returned error: %v", err)
 	}
 	if math.Abs(got-6.31) > 0.001 {
 		t.Fatalf("ReadFloat32 firmware version = %v, want 6.31", got)
 	}
-	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: deviceBridgeFirmwareVersionIntParam, instance: 1}) {
+	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: firmware.SourceMeComID, instance: 1}) {
 		t.Fatalf("readInts = %+v, want firmware int parameter read", fake.readInts)
 	}
 	if len(fake.readFloats) != 0 {
@@ -335,10 +356,11 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatFromIntegerParam(t *testing.T
 
 func TestDeviceClientBridgeSynthesizesFirmwareFloatInBulkRead(t *testing.T) {
 	ctx := context.Background()
+	firmware := deviceBridgeTestTransform(t, 112, "synthesize_float32_from_int32")
 	fake := &fakeDeviceClient{
 		floats: map[fakeParamKey]float64{{id: 1000, instance: 1}: 12.5},
 		ints: map[fakeParamKey]int32{
-			{id: deviceBridgeFirmwareVersionIntParam, instance: 1}: 631,
+			{id: firmware.SourceMeComID, instance: 1}: 631,
 		},
 	}
 	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
@@ -351,7 +373,7 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatInBulkRead(t *testing.T) {
 
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4b, Timeout: time.Second})
 	params := []mecom.Parameter{
-		{ID: deviceBridgeFirmwareVersionFloatParam, Instance: 1, Type: mecom.DataTypeFloat32},
+		{ID: firmware.MeComID, Instance: 1, Type: mecom.DataTypeFloat32},
 		{ID: 1000, Instance: 1, Type: mecom.DataTypeFloat32},
 	}
 	got, err := client.ReadBulk(ctx, params)
@@ -367,7 +389,7 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatInBulkRead(t *testing.T) {
 	if len(fake.bulkReads[0]) != 1 || fake.bulkReads[0][0].ID != 1000 {
 		t.Fatalf("bulk read parameters = %+v", fake.bulkReads[0])
 	}
-	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: deviceBridgeFirmwareVersionIntParam, instance: 1}) {
+	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: firmware.SourceMeComID, instance: 1}) {
 		t.Fatalf("readInts = %+v, want firmware int parameter read", fake.readInts)
 	}
 	if len(fake.readFloats) != 0 {
@@ -377,10 +399,11 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatInBulkRead(t *testing.T) {
 
 func TestDeviceClientBridgeSynthesizesFirmwareFloatOnlyBulkRead(t *testing.T) {
 	ctx := context.Background()
+	firmware := deviceBridgeTestTransform(t, 112, "synthesize_float32_from_int32")
 	fake := &fakeDeviceClient{
 		floats: map[fakeParamKey]float64{},
 		ints: map[fakeParamKey]int32{
-			{id: deviceBridgeFirmwareVersionIntParam, instance: 1}: 631,
+			{id: firmware.SourceMeComID, instance: 1}: 631,
 		},
 	}
 	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
@@ -393,7 +416,7 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatOnlyBulkRead(t *testing.T) {
 
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4b, Timeout: time.Second})
 	got, err := client.ReadBulk(ctx, []mecom.Parameter{
-		{ID: deviceBridgeFirmwareVersionFloatParam, Instance: 1, Type: mecom.DataTypeFloat32},
+		{ID: firmware.MeComID, Instance: 1, Type: mecom.DataTypeFloat32},
 	})
 	if err != nil {
 		t.Fatalf("ReadBulk returned error: %v", err)
@@ -404,7 +427,7 @@ func TestDeviceClientBridgeSynthesizesFirmwareFloatOnlyBulkRead(t *testing.T) {
 	if len(fake.bulkReads) != 0 {
 		t.Fatalf("bulkReads = %+v, want none", fake.bulkReads)
 	}
-	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: deviceBridgeFirmwareVersionIntParam, instance: 1}) {
+	if len(fake.readInts) != 1 || fake.readInts[0] != (fakeParamKey{id: firmware.SourceMeComID, instance: 1}) {
 		t.Fatalf("readInts = %+v, want firmware int parameter read", fake.readInts)
 	}
 }
@@ -473,6 +496,94 @@ func TestDeviceClientBridgeTranslatesSystemInt32Read(t *testing.T) {
 				t.Fatalf("readFloats = %+v, want none", fake.readFloats)
 			}
 		})
+	}
+}
+
+func TestDeviceClientBridgeMasksLargeRandomStartupValueForMeSoftCompatibility(t *testing.T) {
+	ctx := context.Background()
+	startup := deviceBridgeTestTransform(t, 115, "mask_int32")
+	fake := &fakeDeviceClient{
+		floats: map[fakeParamKey]float64{},
+		ints: map[fakeParamKey]int32{
+			{id: startup.MeComID, instance: 1}: 0x5296260A,
+			{id: 2010, instance: 1}:            1,
+		},
+	}
+	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+		return fake, nil
+	}, 200*time.Millisecond)(ctx)
+	if err != nil {
+		t.Fatalf("DialDeviceClient returned error: %v", err)
+	}
+	defer conn.Close()
+
+	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4b, Timeout: time.Second})
+	got, err := client.ReadInt32(ctx, startup.MeComID, 1)
+	if err != nil {
+		t.Fatalf("ReadInt32 random startup value returned error: %v", err)
+	}
+	wantMasked := int32(0x5296260A & startup.Int32Mask)
+	if got != wantMasked {
+		t.Fatalf("ReadInt32 random startup value = %08X, want %08X", uint32(got), uint32(wantMasked))
+	}
+
+	bulk, err := client.ReadBulk(ctx, []mecom.Parameter{
+		{ID: startup.MeComID, Instance: 1, Type: mecom.DataTypeInt32},
+		{ID: 2010, Instance: 1, Type: mecom.DataTypeInt32},
+	})
+	if err != nil {
+		t.Fatalf("ReadBulk returned error: %v", err)
+	}
+	if len(bulk) != 2 || int32(bulk[0]) != wantMasked || bulk[1] != 1 {
+		t.Fatalf("ReadBulk = %v, want [%08X 1]", bulk, uint32(wantMasked))
+	}
+}
+
+func TestDeviceClientBridgeUsesConstantInt32TransformForMissingCANStatus(t *testing.T) {
+	ctx := context.Background()
+	stable := deviceBridgeTestTransform(t, 1200, "constant_int32")
+	fake := &fakeDeviceClient{
+		floats: map[fakeParamKey]float64{{id: 1000, instance: 1}: math.NaN()},
+		ints:   map[fakeParamKey]int32{},
+	}
+	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
+		return fake, nil
+	}, 200*time.Millisecond)(ctx)
+	if err != nil {
+		t.Fatalf("DialDeviceClient returned error: %v", err)
+	}
+	defer conn.Close()
+
+	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4b, Timeout: time.Second})
+	got, err := client.ReadInt32(ctx, stable.MeComID, 3)
+	if err != nil {
+		t.Fatalf("ReadInt32 stable status returned error: %v", err)
+	}
+	if got != stable.Int32Value {
+		t.Fatalf("ReadInt32 stable status = %d, want %d", got, stable.Int32Value)
+	}
+	if len(fake.readInts) != 0 || len(fake.readFloats) != 0 || len(fake.bulkReads) != 0 {
+		t.Fatalf("constant status should not hit CAN reads: ints=%v floats=%v bulk=%v", fake.readInts, fake.readFloats, fake.bulkReads)
+	}
+
+	bulk, err := client.ReadBulk(ctx, []mecom.Parameter{
+		{ID: stable.MeComID, Instance: 4, Type: mecom.DataTypeInt32},
+		{ID: 1000, Instance: 1, Type: mecom.DataTypeFloat32},
+	})
+	if err != nil {
+		t.Fatalf("ReadBulk returned error: %v", err)
+	}
+	if len(bulk) != 2 || int32(bulk[0]) != stable.Int32Value || !math.IsNaN(bulk[1]) {
+		t.Fatalf("ReadBulk = %v, want [%d NaN]", bulk, stable.Int32Value)
+	}
+	if len(fake.bulkReads) != 1 {
+		t.Fatalf("bulkReads = %d, want 1", len(fake.bulkReads))
+	}
+	if len(fake.bulkReads[0]) != 1 || fake.bulkReads[0][0].ID != 1000 {
+		t.Fatalf("bulk read parameters = %+v, want only downstream float miss", fake.bulkReads[0])
+	}
+	if len(fake.readInts) != 0 || len(fake.readFloats) != 0 {
+		t.Fatalf("constant status should not hit typed reads: ints=%v floats=%v", fake.readInts, fake.readFloats)
 	}
 }
 
@@ -587,7 +698,13 @@ func TestDeviceClientBridgeAnswersMetadataAndEmptyBigDataForUserNotes(t *testing
 			name:    "metadata",
 			seq:     0x22,
 			payload: "?VM007801",
-			want:    "030301000001000000000000000000000000000000",
+			want:    "03030100000100000000",
+		},
+		{
+			name:    "limits",
+			seq:     0x24,
+			payload: "?VL007801",
+			want:    "030000",
 		},
 		{
 			name:    "big-data-read-empty",
@@ -678,7 +795,7 @@ func TestDeviceClientBridgeEmulatesUnsupportedRingReadoutForCANBackedRoutes(t *t
 		{name: "pointer", seq: 0x30, payload: "?RS0000", wantData: "00000000"},
 		{name: "read-empty", seq: 0x31, payload: "?RS000100000000FFFF", wantData: "000000"},
 		{name: "configure-empty", seq: 0x32, payload: "?RS0002000100", wantData: "00"},
-		{name: "trigger-sync", seq: 0x33, payload: "?RS0003", wantOK: true},
+		{name: "trigger-sync", seq: 0x33, payload: "?RS0003", wantData: "00"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if _, err := conn.Write(deviceBridgeTestFrame(0x4b, tc.seq, tc.payload)); err != nil {

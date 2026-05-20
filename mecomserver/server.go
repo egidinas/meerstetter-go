@@ -382,7 +382,7 @@ func describeBytes(b []byte) string {
 	if len(b) == 0 {
 		return "<none>"
 	}
-	const max = 96
+	const max = 512
 	clipped := b
 	suffix := ""
 	if len(clipped) > max {

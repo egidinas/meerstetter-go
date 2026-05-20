@@ -16,13 +16,14 @@ import (
 // ErrUnknownParameter, which it wraps.
 var ErrCANopenObjectNotMapped = fmt.Errorf("%w: CANopen object mapping not available", ErrUnknownParameter)
 
-// CANopenClient reads the TEC controller's CANopen SDO object dictionary while
+// CANopenClient reads the controller's CANopen SDO object dictionary while
 // presenting the same read interface as the MeCom polling scheduler.
 type CANopenClient struct {
 	rw      CANTransceiver
 	node    byte
 	timeout time.Duration
 	mu      sync.Mutex
+	sdoMap  *CANopenSDOMap
 }
 
 func NewCANopenClient(rw CANTransceiver, cfg ClientConfig) *CANopenClient {
@@ -34,6 +35,7 @@ func NewCANopenClient(rw CANTransceiver, cfg ClientConfig) *CANopenClient {
 		rw:      rw,
 		node:    cfg.Address,
 		timeout: timeout,
+		sdoMap:  cfg.SDOMap,
 	}
 }
 
@@ -65,14 +67,14 @@ func (c *CANopenClient) ReadBulk(ctx context.Context, params []Parameter) ([]flo
 // expedited SDO download. The parameter must be present in the MeCom↔CANopen
 // mapping and marked writable.
 func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
-	object, ok := canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
 	if !ok {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
-	if !object.writable {
+	if !object.Writable {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrParameterReadOnly, paramID, instance)
 	}
-	if object.kind != DataTypeFloat32 {
+	if object.Kind != DataTypeFloat32 {
 		return fmt.Errorf("%w: parameter %d instance %d is not float32", ErrInvalidArgument, paramID, instance)
 	}
 	var buf [4]byte
@@ -82,14 +84,14 @@ func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int,
 
 // WriteInt32 writes a 32-bit signed integer value via an expedited SDO download.
 func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
-	object, ok := canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
 	if !ok {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
-	if !object.writable {
+	if !object.Writable {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrParameterReadOnly, paramID, instance)
 	}
-	if object.kind != DataTypeInt32 {
+	if object.Kind != DataTypeInt32 {
 		return fmt.Errorf("%w: parameter %d instance %d is not int32", ErrInvalidArgument, paramID, instance)
 	}
 	var buf [4]byte
@@ -97,8 +99,8 @@ func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, v
 	return c.writeSDO(ctx, object, buf[:])
 }
 
-func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, value []byte) error {
-	req, err := canopen.SDODownloadExpeditedRequest(c.node, object.index, object.subIndex, value)
+func (c *CANopenClient) writeSDO(ctx context.Context, object CANopenSDOObject, value []byte) error {
+	req, err := canopen.SDODownloadExpeditedRequest(c.node, object.Index, object.SubIndex, value)
 	if err != nil {
 		return err
 	}
@@ -116,7 +118,7 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 	for {
 		wait := time.Until(deadline)
 		if wait <= 0 {
-			return fmt.Errorf("%w: write 0x%04X:%02X", ErrTimeout, object.index, object.subIndex)
+			return fmt.Errorf("%w: write 0x%04X:%02X", ErrTimeout, object.Index, object.SubIndex)
 		}
 		if err := ctx.Err(); err != nil {
 			return err
@@ -132,13 +134,13 @@ func (c *CANopenClient) writeSDO(ctx context.Context, object canopenSDOObject, v
 		if err != nil {
 			var abort canopen.SDOAbortError
 			if errors.As(err, &abort) {
-				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+				if abort.Index == object.Index && abort.SubIndex == object.SubIndex {
 					return errors.Join(ErrWriteRejected, err)
 				}
 			}
 			continue
 		}
-		if resp.Index != object.index || resp.SubIndex != object.subIndex {
+		if resp.Index != object.Index || resp.SubIndex != object.SubIndex {
 			continue
 		}
 		return nil
@@ -162,11 +164,11 @@ func (c *CANopenClient) ReadRingChunk(context.Context, uint32, uint16) (RingRead
 }
 
 func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) (float64, error) {
-	object, ok := canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
 	if !ok {
 		return math.NaN(), fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
-	req, err := canopen.SDOUploadRequest(c.node, object.index, object.subIndex)
+	req, err := canopen.SDOUploadRequest(c.node, object.Index, object.SubIndex)
 	if err != nil {
 		return math.NaN(), err
 	}
@@ -184,7 +186,7 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	for {
 		wait := time.Until(deadline)
 		if wait <= 0 {
-			return math.NaN(), fmt.Errorf("%w: read 0x%04X:%02X", ErrTimeout, object.index, object.subIndex)
+			return math.NaN(), fmt.Errorf("%w: read 0x%04X:%02X", ErrTimeout, object.Index, object.SubIndex)
 		}
 		if err := ctx.Err(); err != nil {
 			return math.NaN(), err
@@ -200,16 +202,16 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 		if err != nil {
 			var abort canopen.SDOAbortError
 			if errors.As(err, &abort) {
-				if abort.Index == object.index && abort.SubIndex == object.subIndex {
+				if abort.Index == object.Index && abort.SubIndex == object.SubIndex {
 					return math.NaN(), err
 				}
 			}
 			continue
 		}
-		if resp.Index != object.index || resp.SubIndex != object.subIndex {
+		if resp.Index != object.Index || resp.SubIndex != object.SubIndex {
 			continue
 		}
-		switch object.kind {
+		switch object.Kind {
 		case DataTypeInt32:
 			value, err := resp.Int32()
 			return float64(value), err
@@ -220,13 +222,22 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	}
 }
 
-type canopenSDOObject struct {
-	index    uint16
-	subIndex byte
-	kind     DataType
-	writable bool
+func (c *CANopenClient) canopenSDOObjectForMeCom(paramID, instance int) (CANopenSDOObject, bool) {
+	if c.sdoMap != nil {
+		return c.sdoMap.ObjectForMeCom(paramID, instance)
+	}
+	return defaultCANopenSDOMap.ObjectForMeCom(paramID, instance)
 }
 
-func canopenSDOObjectForMeCom(paramID, instance int) (canopenSDOObject, bool) {
-	return defaultCANopenSDOMap.objectForMeCom(paramID, instance)
+func (c *CANopenClient) ParameterType(id int) DataType {
+	var m CANopenSDOMap
+	if c.sdoMap != nil {
+		m = *c.sdoMap
+	} else {
+		m = defaultCANopenSDOMap
+	}
+	if typ, ok := m.ParameterType(id); ok {
+		return typ
+	}
+	return ""
 }

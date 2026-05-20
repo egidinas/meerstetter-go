@@ -773,6 +773,54 @@ func TestRouteFrameRetriesTransientReadOnSameCandidate(t *testing.T) {
 	}
 }
 
+func TestRouteFrameRewritesLegacyFirmwareVersionProbe(t *testing.T) {
+	candidate := testRouteBroker(0x50, "serial-primary")
+	reqFrame := testMeComFrame(0x50, 1, "?VI")
+	wantFrame := testMeComFrame(0x50, 1, "?IF")
+	reply := []byte("!5000018065-TEC SW G01     0907\r")
+	seen := make(chan []byte, 1)
+	go func() {
+		req := <-candidate.requests
+		seen <- append([]byte(nil), req.frame...)
+		req.result <- response{frame: reply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, reply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, wantFrame) {
+		t.Fatalf("routed firmware probe = %q, want %q", got, wantFrame)
+	}
+}
+
+func TestRouteFrameRewritesBareLegacyFirmwareVersionProbe(t *testing.T) {
+	candidate := testRouteBroker(0x50, "serial-primary")
+	reqFrame := []byte("?VI\r")
+	wantFrame := []byte("?IF\r")
+	reply := []byte("!0000008065-TEC SW G01     50F5\r")
+	seen := make(chan []byte, 1)
+	go func() {
+		req := <-candidate.requests
+		seen <- append([]byte(nil), req.frame...)
+		req.result <- response{frame: reply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, reply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, wantFrame) {
+		t.Fatalf("bare routed firmware probe = %q, want %q", got, wantFrame)
+	}
+}
+
 func TestRouteFrameDoesNotRetryTransientWriteOnSameCandidate(t *testing.T) {
 	candidate := testRouteBroker(0x50, "can-primary")
 	reqFrame := []byte("#500001VS07DA0100000000\r")
@@ -1029,4 +1077,9 @@ func containsFrame(frames [][]byte, want []byte) bool {
 		}
 	}
 	return false
+}
+
+func testMeComFrame(addr byte, seq uint16, payload string) []byte {
+	prefix := []byte(fmt.Sprintf("#%02X%04X%s", addr, seq, payload))
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16(prefix), mecom.FrameTerminator))
 }

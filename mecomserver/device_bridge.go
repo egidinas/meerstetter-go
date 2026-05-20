@@ -97,8 +97,15 @@ const (
 	deviceBridgeFirmwareIdentification = "8065-TEC SW G01     "
 	deviceBridgeBoardIdentification    = "00000000"
 
-	deviceBridgeFirmwareVersionIntParam   = 103
-	deviceBridgeFirmwareVersionFloatParam = 112
+	deviceBridgeMetadataReadFlag    = 0x01
+	deviceBridgeMetadataWriteFlag   = 0x02
+	deviceBridgeBigDataMaxElements  = 0x100
+	deviceBridgeMaxChannelInstances = 4
+	deviceBridgeMaxCascadeInstances = 0xFF
+
+	deviceBridgeTransformSynthesizeFloat32FromInt32 = "synthesize_float32_from_int32"
+	deviceBridgeTransformMaskInt32                  = "mask_int32"
+	deviceBridgeTransformConstantInt32              = "constant_int32"
 )
 
 func handleDeviceClientFrame(client mecom.DeviceClient, raw []byte, timeout time.Duration) []byte {
@@ -179,14 +186,24 @@ func verifyDeviceBridgeCRC(frame []byte) error {
 
 func deviceBridgePayload(ctx context.Context, client mecom.DeviceClient, payload string) (string, error) {
 	switch {
-	case payload == "?IF":
+	case payload == "?IF" || payload == "?VI":
 		return deviceBridgeFirmwareIdentification, nil
 	case payload == "?BI" || payload == "?BID" || payload == "?BIF":
 		return deviceBridgeBoardIdentification, nil
+	case strings.HasPrefix(payload, "?VM"):
+		return deviceBridgeMetadata(payload)
+	case strings.HasPrefix(payload, "?VB"):
+		return deviceBridgeBigDataRead(payload)
+	case strings.HasPrefix(payload, "?VL"):
+		return deviceBridgeLimits(payload)
+	case strings.HasPrefix(payload, "?RS"):
+		return deviceBridgeRingPayload(ctx, client, payload)
 	case strings.HasPrefix(payload, "?VR"):
 		return deviceBridgeSingleRead(ctx, client, payload)
 	case strings.HasPrefix(payload, "?VX"):
 		return deviceBridgeBulkRead(ctx, client, payload)
+	case strings.HasPrefix(payload, "VB"):
+		return "", deviceBridgeBigDataWrite(ctx, client, payload)
 	case strings.HasPrefix(payload, "VS"):
 		return "", deviceBridgeWrite(ctx, client, payload)
 	case payload == "SP":
@@ -207,11 +224,88 @@ func deviceBridgePayload(ctx context.Context, client mecom.DeviceClient, payload
 }
 
 func isDeviceBridgeInfoProbe(payload string) bool {
-	return payload == "?IF" || payload == "?BI" || payload == "?BID" || payload == "?BIF"
+	return payload == "?IF" || payload == "?VI" || payload == "?BI" || payload == "?BID" || payload == "?BIF"
 }
 
 func isDeviceBridgeRead(payload string) bool {
-	return strings.HasPrefix(payload, "?VR") || strings.HasPrefix(payload, "?VX")
+	return strings.HasPrefix(payload, "?VR") ||
+		strings.HasPrefix(payload, "?VX") ||
+		strings.HasPrefix(payload, "?VM") ||
+		strings.HasPrefix(payload, "?VB") ||
+		strings.HasPrefix(payload, "?VL") ||
+		strings.HasPrefix(payload, "?RS")
+}
+
+func deviceBridgeMetadata(payload string) (string, error) {
+	if len(payload) != len("?VM000000") {
+		return "", fmt.Errorf("%w: invalid ?VM payload length %d", mecom.ErrInvalidArgument, len(payload))
+	}
+	paramID, _, err := parseDeviceBridgeParameter(payload[3:])
+	if err != nil {
+		return "", err
+	}
+	typ := deviceBridgeParameterType(paramID)
+	meParType, err := deviceBridgeMeParType(typ)
+	if err != nil {
+		return "", err
+	}
+	flags := byte(deviceBridgeMetadataReadFlag)
+	if deviceBridgeParameterWritable(paramID) {
+		flags |= deviceBridgeMetadataWriteFlag
+	}
+	minimum, maximum, actual, err := deviceBridgeParameterBounds(typ)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%02X%02X%02X%08X%s%s%s",
+		meParType,
+		flags,
+		deviceBridgeParameterMaxInstances(paramID),
+		deviceBridgeParameterMaxElements(typ),
+		minimum,
+		maximum,
+		actual,
+	), nil
+}
+
+func deviceBridgeLimits(payload string) (string, error) {
+	if len(payload) != len("?VL000000") {
+		return "", fmt.Errorf("%w: invalid ?VL payload length %d", mecom.ErrInvalidArgument, len(payload))
+	}
+	paramID, _, err := parseDeviceBridgeParameter(payload[3:])
+	if err != nil {
+		return "", err
+	}
+	typ := deviceBridgeParameterType(paramID)
+	meParType, err := deviceBridgeMeParType(typ)
+	if err != nil {
+		return "", err
+	}
+	minimum, maximum, _, err := deviceBridgeParameterBounds(typ)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%02X%s%s", meParType, minimum, maximum), nil
+}
+
+func deviceBridgeBigDataRead(payload string) (string, error) {
+	if len(payload) != len("?VB000000000000000000") {
+		return "", fmt.Errorf("%w: invalid ?VB payload length %d", mecom.ErrInvalidArgument, len(payload))
+	}
+	paramID, instance, err := parseDeviceBridgeParameter(payload[3:9])
+	if err != nil {
+		return "", err
+	}
+	if _, err := parseDeviceBridgeHexUint(payload[9:17], "big-data read start", 32); err != nil {
+		return "", err
+	}
+	if _, err := parseDeviceBridgeHexUint(payload[17:21], "big-data max elements", 16); err != nil {
+		return "", err
+	}
+	if deviceBridgeParameterType(paramID) != mecom.DataTypeLatin1 {
+		return "", fmt.Errorf("%w: big-data read of non-LATIN1 parameter %d instance %d", mecom.ErrTransportNotSupported, paramID, instance)
+	}
+	return "000000", nil
 }
 
 func deviceBridgeSingleRead(ctx context.Context, client mecom.DeviceClient, payload string) (string, error) {
@@ -225,14 +319,18 @@ func deviceBridgeSingleRead(ctx context.Context, client mecom.DeviceClient, payl
 	typ := deviceBridgeParameterType(paramID)
 	switch typ {
 	case mecom.DataTypeInt32:
+		if transform, ok := deviceBridgeTransform(paramID, deviceBridgeTransformConstantInt32); ok {
+			return fmt.Sprintf("%08X", uint32(transform.Int32Value)), nil
+		}
 		value, err := client.ReadInt32(ctx, paramID, instance)
 		if err != nil {
 			return "", err
 		}
+		value = deviceBridgeCompatibleInt32Value(paramID, value)
 		return fmt.Sprintf("%08X", uint32(value)), nil
 	case mecom.DataTypeFloat32, "":
-		if paramID == deviceBridgeFirmwareVersionFloatParam {
-			value, err := deviceBridgeFirmwareVersionFloat(ctx, client, instance)
+		if transform, ok := deviceBridgeTransform(paramID, deviceBridgeTransformSynthesizeFloat32FromInt32); ok {
+			value, err := deviceBridgeSynthesizedFloat32(ctx, client, transform, instance)
 			if err != nil {
 				return "", err
 			}
@@ -272,8 +370,12 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 	downstreamParams := make([]mecom.Parameter, 0, len(params))
 	downstreamIndexes := make([]int, 0, len(params))
 	for i, param := range params {
-		if param.ID == deviceBridgeFirmwareVersionFloatParam {
-			value, err := deviceBridgeFirmwareVersionFloat(ctx, client, param.Instance)
+		if transform, ok := deviceBridgeTransform(param.ID, deviceBridgeTransformConstantInt32); ok {
+			values[i] = float64(transform.Int32Value)
+			continue
+		}
+		if transform, ok := deviceBridgeTransform(param.ID, deviceBridgeTransformSynthesizeFloat32FromInt32); ok {
+			value, err := deviceBridgeSynthesizedFloat32(ctx, client, transform, param.Instance)
 			if err != nil {
 				return "", err
 			}
@@ -302,7 +404,8 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 			if math.IsNaN(value) {
 				return "", fmt.Errorf("%w: int32 parameter %d instance %d returned NaN", mecom.ErrUnknownParameter, params[i].ID, params[i].Instance)
 			}
-			fmt.Fprintf(&out, "%08X", uint32(int32(value)))
+			intValue := deviceBridgeCompatibleInt32Value(params[i].ID, int32(value))
+			fmt.Fprintf(&out, "%08X", uint32(intValue))
 		case mecom.DataTypeFloat32, "":
 			fmt.Fprintf(&out, "%08X", math.Float32bits(float32(value)))
 		default:
@@ -312,12 +415,65 @@ func deviceBridgeBulkRead(ctx context.Context, client mecom.DeviceClient, payloa
 	return out.String(), nil
 }
 
-func deviceBridgeFirmwareVersionFloat(ctx context.Context, client mecom.DeviceClient, instance int) (float64, error) {
-	version, err := client.ReadInt32(ctx, deviceBridgeFirmwareVersionIntParam, instance)
+func deviceBridgeCompatibleInt32Value(paramID int, value int32) int32 {
+	if transform, ok := deviceBridgeTransform(paramID, deviceBridgeTransformMaskInt32); ok {
+		return int32(uint32(value) & transform.Int32Mask)
+	}
+	return value
+}
+
+func deviceBridgeSynthesizedFloat32(ctx context.Context, client mecom.DeviceClient, transform mecom.BridgeTransform, instance int) (float64, error) {
+	version, err := client.ReadInt32(ctx, transform.SourceMeComID, instance)
 	if err != nil {
 		return 0, err
 	}
-	return float64(version) / 100.0, nil
+	return float64(version) * transform.Scale, nil
+}
+
+func deviceBridgeTransform(paramID int, kind string) (mecom.BridgeTransform, bool) {
+	transform, ok := mecom.CANopenBridgeTransform(paramID)
+	return transform, ok && transform.Kind == kind
+}
+
+func deviceBridgeBigDataWrite(ctx context.Context, client mecom.DeviceClient, payload string) error {
+	if len(payload) < len("VB00000000000000000000") {
+		return fmt.Errorf("%w: invalid VB payload length %d", mecom.ErrInvalidArgument, len(payload))
+	}
+	paramID, instance, err := parseDeviceBridgeParameter(payload[2:8])
+	if err != nil {
+		return err
+	}
+	start64, err := parseDeviceBridgeHexUint(payload[8:16], "big-data write start", 32)
+	if err != nil {
+		return err
+	}
+	count64, err := parseDeviceBridgeHexUint(payload[16:20], "big-data element count", 16)
+	if err != nil {
+		return err
+	}
+	isLast64, err := parseDeviceBridgeHexUint(payload[20:22], "big-data final flag", 8)
+	if err != nil {
+		return err
+	}
+	valueHex := payload[22:]
+	if len(valueHex) != int(count64)*2 {
+		return fmt.Errorf("%w: VB element count %d does not match payload hex length %d", mecom.ErrInvalidArgument, count64, len(valueHex))
+	}
+	if deviceBridgeParameterType(paramID) != mecom.DataTypeLatin1 {
+		return fmt.Errorf("%w: big-data write of non-LATIN1 parameter %d", mecom.ErrTransportNotSupported, paramID)
+	}
+	if start64 != 0 || isLast64 != 1 {
+		return fmt.Errorf("%w: multi-package big-data writes are not supported", mecom.ErrTransportNotSupported)
+	}
+	stringClient, ok := client.(mecom.StringWriteClient)
+	if !ok {
+		return mecom.ErrTransportNotSupported
+	}
+	data, err := hex.DecodeString(valueHex)
+	if err != nil {
+		return fmt.Errorf("%w: invalid LATIN1 big-data value for parameter %d: %v", mecom.ErrInvalidArgument, paramID, err)
+	}
+	return stringClient.WriteBigDataString(ctx, paramID, instance, string(bytes.TrimRight(data, "\x00")))
 }
 
 func deviceBridgeWrite(ctx context.Context, client mecom.DeviceClient, payload string) error {
@@ -368,6 +524,101 @@ func deviceBridgeWrite(ctx context.Context, client mecom.DeviceClient, payload s
 	}
 }
 
+func deviceBridgeRingPayload(ctx context.Context, client mecom.DeviceClient, payload string) (string, error) {
+	if len(payload) < len("?RS0000") {
+		return "", fmt.Errorf("%w: invalid ?RS payload length %d", mecom.ErrInvalidArgument, len(payload))
+	}
+	command := payload[3:7]
+	switch command {
+	case "0000":
+		if len(payload) != len("?RS0000") {
+			return "", fmt.Errorf("%w: invalid ring pointer payload length %d", mecom.ErrInvalidArgument, len(payload))
+		}
+		pointer, err := client.ReadRingPointer(ctx)
+		if errors.Is(err, mecom.ErrTransportNotSupported) {
+			return "00000000", nil
+		}
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%08X", pointer), nil
+	case "0001":
+		if len(payload) != len("?RS0001000000000000") {
+			return "", fmt.Errorf("%w: invalid ring read payload length %d", mecom.ErrInvalidArgument, len(payload))
+		}
+		start, err := parseDeviceBridgeHexUint(payload[7:15], "ring read start", 32)
+		if err != nil {
+			return "", err
+		}
+		maxBytes, err := parseDeviceBridgeHexUint(payload[15:19], "ring read max bytes", 16)
+		if err != nil {
+			return "", err
+		}
+		resp, err := client.ReadRingChunk(ctx, uint32(start), uint16(maxBytes))
+		if errors.Is(err, mecom.ErrTransportNotSupported) {
+			return "000000", nil
+		}
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%04X%02X%s", resp.BytesAdded, resp.Status, strings.ToUpper(hex.EncodeToString(resp.Data))), nil
+	case "0002":
+		if len(payload) < len("?RS0002000000") {
+			return "", fmt.Errorf("%w: invalid ring capture-config payload length %d", mecom.ErrInvalidArgument, len(payload))
+		}
+		captureID, err := parseDeviceBridgeHexUint(payload[7:11], "ring capture id", 16)
+		if err != nil {
+			return "", err
+		}
+		count64, err := parseDeviceBridgeHexUint(payload[11:13], "ring capture count", 8)
+		if err != nil {
+			return "", err
+		}
+		count := int(count64)
+		if len(payload) != 13+count*10 {
+			return "", fmt.Errorf("%w: ring capture count %d does not match payload length %d", mecom.ErrInvalidArgument, count, len(payload))
+		}
+		params := make([]mecom.RingCaptureParameter, 0, count)
+		for i := 0; i < count; i++ {
+			off := 13 + i*10
+			paramID, instance, err := parseDeviceBridgeParameter(payload[off : off+6])
+			if err != nil {
+				return "", err
+			}
+			inhibit, err := parseDeviceBridgeHexUint(payload[off+6:off+10], "ring inhibit time", 16)
+			if err != nil {
+				return "", err
+			}
+			params = append(params, mecom.RingCaptureParameter{
+				Parameter: mecom.Parameter{
+					ID:       paramID,
+					Instance: instance,
+					Type:     deviceBridgeParameterType(paramID),
+				},
+				InhibitTime10us: uint16(inhibit),
+			})
+		}
+		if err := client.ConfigureRingCapture(ctx, uint16(captureID), params); errors.Is(err, mecom.ErrTransportNotSupported) {
+			return "00", nil
+		} else if err != nil {
+			return "", err
+		}
+		return "00", nil
+	case "0003":
+		if len(payload) != len("?RS0003") {
+			return "", fmt.Errorf("%w: invalid ring trigger-sync payload length %d", mecom.ErrInvalidArgument, len(payload))
+		}
+		if err := client.TriggerRingSync(ctx); errors.Is(err, mecom.ErrTransportNotSupported) {
+			return "00", nil
+		} else if err != nil {
+			return "", err
+		}
+		return "00", nil
+	default:
+		return "", fmt.Errorf("%w: ring command %s", mecom.ErrTransportNotSupported, command)
+	}
+}
+
 func parseDeviceBridgeParameter(payload string) (int, int, error) {
 	if len(payload) != 6 {
 		return 0, 0, fmt.Errorf("%w: parameter payload %q must be 6 hex chars", mecom.ErrInvalidArgument, payload)
@@ -381,6 +632,62 @@ func parseDeviceBridgeParameter(payload string) (int, int, error) {
 		return 0, 0, fmt.Errorf("%w: invalid parameter instance %q: %v", mecom.ErrInvalidArgument, payload[4:], err)
 	}
 	return int(paramID), int(instance), nil
+}
+
+func parseDeviceBridgeHexUint(value, name string, bitSize int) (uint64, error) {
+	out, err := strconv.ParseUint(value, 16, bitSize)
+	if err != nil {
+		return 0, fmt.Errorf("%w: invalid %s %q: %v", mecom.ErrInvalidArgument, name, value, err)
+	}
+	return out, nil
+}
+
+func deviceBridgeMeParType(typ mecom.DataType) (byte, error) {
+	switch typ {
+	case mecom.DataTypeFloat32, "":
+		return 0, nil
+	case mecom.DataTypeInt32:
+		return 1, nil
+	case mecom.DataTypeLatin1:
+		return 3, nil
+	default:
+		return 0, fmt.Errorf("%w: unsupported metadata type %s", mecom.ErrTransportNotSupported, typ)
+	}
+}
+
+func deviceBridgeParameterBounds(typ mecom.DataType) (string, string, string, error) {
+	switch typ {
+	case mecom.DataTypeFloat32, "":
+		return "FF800000", "7F800000", "00000000", nil
+	case mecom.DataTypeInt32:
+		return "80000000", "7FFFFFFF", "00000000", nil
+	case mecom.DataTypeLatin1:
+		return "00", "00", "00", nil
+	default:
+		return "", "", "", fmt.Errorf("%w: unsupported bounds type %s", mecom.ErrTransportNotSupported, typ)
+	}
+}
+
+func deviceBridgeParameterMaxElements(typ mecom.DataType) uint32 {
+	if typ == mecom.DataTypeLatin1 {
+		return deviceBridgeBigDataMaxElements
+	}
+	return 1
+}
+
+func deviceBridgeParameterMaxInstances(id int) byte {
+	switch {
+	case id >= 53120 && id <= 53123:
+		return deviceBridgeMaxCascadeInstances
+	case id >= 1000:
+		return deviceBridgeMaxChannelInstances
+	default:
+		return 1
+	}
+}
+
+func deviceBridgeParameterWritable(id int) bool {
+	return mecom.TECParameterWritable(id)
 }
 
 func deviceBridgeOK(addr byte, seq uint16, payload string) []byte {
@@ -444,8 +751,11 @@ func buildDefaultDeviceBridgeParameterTypes() map[int]mecom.DataType {
 	for id, typ := range mecom.CANopenMappedParameterTypes() {
 		out[id] = typ
 	}
-	out[deviceBridgeFirmwareVersionIntParam] = mecom.DataTypeInt32
-	out[deviceBridgeFirmwareVersionFloatParam] = mecom.DataTypeFloat32
+	for id, transform := range mecom.CANopenBridgeTransforms() {
+		if transform.Type != "" {
+			out[id] = transform.Type
+		}
+	}
 	return out
 }
 

@@ -14,6 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/egidinas/meerstetter-go/mecom"
 )
 
 // Route maps one MeCom device address to one downstream target. Multiple
@@ -136,34 +138,9 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 	if ln == nil {
 		return fmt.Errorf("mecomserver: listener required")
 	}
-	if cfg.RequestTimeout <= 0 {
-		cfg.RequestTimeout = defaultRequestTimeout
-	}
-	if cfg.ReconnectDelay <= 0 {
-		cfg.ReconnectDelay = defaultReconnectDelay
-	}
-	if cfg.ClientIdleTimeout <= 0 {
-		cfg.ClientIdleTimeout = defaultClientIdleTimeout
-	}
-	if cfg.CommandIdempotencyTTL == 0 {
-		cfg.CommandIdempotencyTTL = defaultCommandIdempotencyTTL
-	}
-
-	routes, err := prepareRoutes(ctx, cfg)
+	rt, err := NewRouterRuntime(ctx, cfg)
 	if err != nil {
 		return err
-	}
-	addressZero, err := newAddressZeroSelector(cfg, routes)
-	if err != nil {
-		return err
-	}
-	commandCache := newCommandIdempotencyCache(cfg.CommandIdempotencyTTL)
-	clientCfg := routedClientConfig{
-		RequestTimeout:    cfg.RequestTimeout,
-		ClientIdleTimeout: cfg.ClientIdleTimeout,
-		RouteSelection:    cfg.RouteSelection,
-		TraceFrames:       cfg.TraceFrames,
-		Logger:            cfg.Logger,
 	}
 	go func() {
 		<-ctx.Done()
@@ -181,10 +158,10 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 			}
 			continue
 		}
-		clientAddressZero, releaseAddressZero := addressZero.Lease(conn.RemoteAddr())
+		clientAddressZero, releaseAddressZero := rt.addressZero.Lease(conn.RemoteAddr())
 		go func() {
 			defer releaseAddressZero()
-			handleRoutedClient(ctx, conn, routes, clientCfg, clientAddressZero, commandCache)
+			handleRoutedClient(ctx, conn, rt.routes, rt.clientCfg, clientAddressZero, rt.commandCache)
 		}()
 	}
 }
@@ -530,11 +507,47 @@ func normalizeRouteSelectionPolicy(policy RouteSelectionPolicy) (RouteSelectionP
 	}
 }
 
+var routeRequestAliases = map[string]string{
+	"?VI": "?IF",
+}
+
+func rewriteRouteCompatibilityFrame(frame []byte) []byte {
+	s := strings.TrimSpace(string(frame))
+	if s == "" {
+		return frame
+	}
+	if strings.HasPrefix(s, "?") {
+		replacement, ok := routeRequestAliases[strings.ToUpper(s)]
+		if !ok {
+			return frame
+		}
+		return []byte(replacement + string(mecom.FrameTerminator))
+	}
+	if s[0] != '#' {
+		return frame
+	}
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil {
+		return frame
+	}
+	replacement, ok := routeRequestAliases[req.payload]
+	if !ok {
+		return frame
+	}
+	return routedRequestFrame(req.address, req.seq, replacement)
+}
+
+func routedRequestFrame(addr byte, seq uint16, payload string) []byte {
+	prefix := []byte(fmt.Sprintf("#%02X%04X%s", addr, seq, strings.ToUpper(payload)))
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16(prefix), mecom.FrameTerminator))
+}
+
 func routeFrame(ctx context.Context, frame []byte, candidates []*routeBroker, requestTimeout time.Duration, traceFrames bool, logger *log.Logger, remote string) ([]byte, error) {
 	if requestTimeout <= 0 {
 		requestTimeout = defaultRequestTimeout
 	}
 	readFrame := isMeComReadFrame(frame)
+	routedFrame := rewriteRouteCompatibilityFrame(frame)
 	var lastErr error
 candidateLoop:
 	for i, candidate := range candidates {
@@ -546,7 +559,7 @@ candidateLoop:
 			reqCtx, cancelReq := context.WithTimeout(ctx, requestTimeout)
 			result := make(chan response, 1)
 			select {
-			case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), frame...), result: result}:
+			case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), routedFrame...), result: result}:
 			case <-reqCtx.Done():
 				lastErr = reqCtx.Err()
 				cancelReq()
