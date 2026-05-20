@@ -17,6 +17,7 @@ type RingReader struct {
 	mu          sync.Mutex
 	lastPointer uint32
 	quit        chan struct{}
+	stopOnce    sync.Once
 }
 
 func NewRingReader(client *Client, config []RingCaptureParameter, samples chan<- RingSample) *RingReader {
@@ -51,7 +52,9 @@ func (r *RingReader) Start(ctx context.Context) error {
 }
 
 func (r *RingReader) Stop() {
-	close(r.quit)
+	r.stopOnce.Do(func() {
+		close(r.quit)
+	})
 }
 
 func (r *RingReader) poll() {
@@ -84,7 +87,7 @@ func (r *RingReader) fetch() {
 	}
 
 	// Calculate how much to read
-	// Note: MeCom ring is circular, but for simplicity we assume it doesn't wrap 
+	// Note: MeCom ring is circular, but for simplicity we assume it doesn't wrap
 	// in 200ms. A more robust implementation would handle wrapping.
 	diff := uint32(0)
 	if ptr > r.lastPointer {
@@ -114,7 +117,14 @@ func (r *RingReader) fetch() {
 		} else {
 			for _, f := range frames {
 				for _, s := range f.Samples {
-					r.Samples <- s
+					if r.Samples == nil {
+						continue
+					}
+					select {
+					case <-r.quit:
+						return
+					case r.Samples <- s:
+					}
 				}
 			}
 		}

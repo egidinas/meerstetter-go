@@ -621,6 +621,7 @@ function normalizeDeviceView(device) {
   }
   return {
     ...merged,
+    third_party_power_control_enabled: Boolean(merged.third_party_power_control_enabled || merged.thirdPartyPowerControlEnabled),
     routes,
     active_route: activeRoute || routes.find((route) => route.active) || null,
     route_candidates: routes,
@@ -873,12 +874,29 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
     if (inst < 1 || inst > maxInst) return;
     const base = defaultChannelFor(ch.device_id, inst);
     const dev = deviceById.get(ch.device_id);
-    byKey.set(`${ch.device_id}/${inst}`, { ...base, ...ch, instance: inst, endpoint: dev && dev.endpoint });
+    const powerControlEnabled = Boolean(
+      ch.third_party_power_control_enabled
+      || ch.thirdPartyPowerControlEnabled
+      || dev && (dev.third_party_power_control_enabled || dev.thirdPartyPowerControlEnabled)
+    );
+    byKey.set(`${ch.device_id}/${inst}`, {
+      ...base,
+      ...ch,
+      instance: inst,
+      endpoint: dev && dev.endpoint,
+      third_party_power_control_enabled: powerControlEnabled,
+    });
   });
   (Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).forEach((d) => {
     for (let inst = 1; inst <= channelCountForDevice(d); inst++) {
       const key = `${d.id}/${inst}`;
-      if (!byKey.has(key)) byKey.set(key, { ...defaultChannelFor(d.id, inst), endpoint: d.endpoint });
+      if (!byKey.has(key)) {
+        byKey.set(key, {
+          ...defaultChannelFor(d.id, inst),
+          endpoint: d.endpoint,
+          third_party_power_control_enabled: Boolean(d.third_party_power_control_enabled || d.thirdPartyPowerControlEnabled),
+        });
+      }
     }
   });
   const sorted = Array.from(byKey.values()).sort((a, b) => {

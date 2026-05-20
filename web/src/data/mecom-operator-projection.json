@@ -37,6 +37,15 @@
       "sort": 300
     },
     {
+      "bundle": "third_party_power_control",
+      "label": "Third-party power control",
+      "path": ["Output Stage", "Third-Party Power Control"],
+      "ids": [2035, 2036, 2038],
+      "instance_scope": "all_channels",
+      "default_collapsed": true,
+      "sort": 320
+    },
+    {
       "bundle": "temperature_setpoint",
       "label": "Temperature setpoint",
       "path": ["Temperature Controller", "Setpoint And Ramp"],

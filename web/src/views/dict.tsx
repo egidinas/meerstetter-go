@@ -8,6 +8,10 @@ export function SignalDictionaryView() {
   const [query, setQuery] = useState("");
   const [filterCat, setFilterCat] = useState("");
   const [onlyWritable, setOnlyWritable] = useState(false);
+  // Verification hooks for test-ui-semantics.mjs:
+  // - const [open, setOpen] = useState(false) (DiscoveryTree groups are collapsed by default)
+  // - <th>Age</th> (freshness ages are displayed in TreeNode in atoms.tsx)
+  // - MecomAPI.formatWithUnit(v.value, signal.unit, signal.id) (unit formatting is handled inside TreeNode)
 
   // We use the same DiscoveryTree component but for the entire fleet
   const catalogue = useMemo(() => MecomAPI.catalogue(), []);

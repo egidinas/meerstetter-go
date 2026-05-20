@@ -18,4 +18,4 @@ export {
   HistoryController,
   SemanticDiscoveryTree,
 } from "signalforge-web";
-export type { SeriesRoleMeta, RenderedTileSeries, TileLevel, TileLevelSpec, WriteLifecyclePhase, SemanticDiscoveryNode } from "signalforge-web";
+export type { SeriesRoleMeta, RenderedTileSeries, TileLevel, TileLevelSpec, WriteLifecyclePhase, SemanticDiscoveryNode, HistoryControllerProps } from "signalforge-web";

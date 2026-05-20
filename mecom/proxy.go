@@ -18,6 +18,7 @@ type ProxyServer struct {
 	listener net.Listener
 	wg       sync.WaitGroup
 	quit     chan struct{}
+	stopOnce sync.Once
 }
 
 func NewProxyServer(addr string, client *Client) *ProxyServer {
@@ -40,10 +41,12 @@ func (s *ProxyServer) Start() error {
 }
 
 func (s *ProxyServer) Stop() {
-	close(s.quit)
-	if s.listener != nil {
-		s.listener.Close()
-	}
+	s.stopOnce.Do(func() {
+		close(s.quit)
+		if s.listener != nil {
+			_ = s.listener.Close()
+		}
+	})
 	s.wg.Wait()
 }
 

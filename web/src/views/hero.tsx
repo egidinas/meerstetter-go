@@ -27,6 +27,9 @@ const PARAM_FIXED_VOLTAGE = 2021;
 const PARAM_CURRENT_LIMIT = 2030;
 const PARAM_VOLTAGE_LIMIT = 2031;
 const PARAM_VOLTAGE_ERROR_THRESHOLD = 2033;
+const PARAM_POWER_LIMIT = 2035;
+const PARAM_MEASURED_RESISTANCE = 2036;
+const PARAM_POWER_LOOP_STATUS = 2038;
 const PARAM_OUTPUT_MODE = 2040;
 const PARAM_CASCADE_ENABLE = 53120;
 const PARAM_CASCADE_TARGET_TEMPERATURE = 53123;
@@ -545,8 +548,10 @@ export function SupplySettingsTable({ channels, holderId }) {
         <thead>
           <tr>
             <th style={{ width: "20%" }}>Channel</th>
-            <th>Voltage command [V]</th><th>Voltage limit [V]</th><th>Voltage error threshold [V]</th><th>Measured voltage [V]</th><th>Current limit [A]</th><th>Measured current [A]</th>
-            <th>Measured power [W]</th><th>Reported mode</th><th>Output stage</th>
+            <th>Voltage & Limits [V]</th>
+            <th>Current & Limit [A]</th>
+            <th>Power & Target [W]</th>
+            <th>Operating Status</th>
           </tr>
         </thead>
         <tbody>
@@ -556,18 +561,22 @@ export function SupplySettingsTable({ channels, holderId }) {
             stagedVL={staged[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)] || ""}
             stagedVET={staged[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)] || ""}
             stagedI={staged[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)] || ""}
+            stagedP={staged[keyFor(ch.device_id, ch.instance, PARAM_POWER_LIMIT)] || ""}
             setStagedV={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]: v }))}
             setStagedVL={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]: v }))}
             setStagedVET={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]: v }))}
             setStagedI={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]: v }))}
+            setStagedP={(v) => setStaged((s) => ({ ...s, [keyFor(ch.device_id, ch.instance, PARAM_POWER_LIMIT)]: v }))}
             busyV={busy[keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]}
             busyVL={busy[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]}
             busyVET={busy[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]}
             busyI={busy[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]}
+            busyP={busy[keyFor(ch.device_id, ch.instance, PARAM_POWER_LIMIT)]}
             writeTraceV={traces[keyFor(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE)]}
             writeTraceVL={traces[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT)]}
             writeTraceVET={traces[keyFor(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD)]}
             writeTraceI={traces[keyFor(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT)]}
+            writeTraceP={traces[keyFor(ch.device_id, ch.instance, PARAM_POWER_LIMIT)]}
             onCommitField={commitField} onToggleOutput={toggleOutput} />)}
         </tbody>
       </table>
@@ -575,40 +584,62 @@ export function SupplySettingsTable({ channels, holderId }) {
   );
 }
 
-function SupplySettingsRow({ ch, stagedV, stagedVL, stagedVET, stagedI, setStagedV, setStagedVL, setStagedVET, setStagedI, busyV, busyVL, busyVET, busyI, writeTraceV, writeTraceVL, writeTraceVET, writeTraceI, onCommitField, onToggleOutput }) {
+function SupplySettingsRow({
+  ch,
+  stagedV, stagedVL, stagedVET, stagedI, stagedP,
+  setStagedV, setStagedVL, setStagedVET, setStagedI, setStagedP,
+  busyV, busyVL, busyVET, busyI, busyP,
+  writeTraceV, writeTraceVL, writeTraceVET, writeTraceI, writeTraceP,
+  onCommitField, onToggleOutput
+}) {
   const fixedVoltageSignal = signalFor(PARAM_FIXED_VOLTAGE, ch.instance, { unit: "V", name: "Fixed voltage" });
   const fixedCurrentSignal = signalFor(PARAM_FIXED_CURRENT, ch.instance, { unit: "A", name: "Fixed current" });
   const currentLimitSignal = signalFor(PARAM_CURRENT_LIMIT, ch.instance, { unit: "A", name: "Current limit" });
   const voltageLimitSignal = signalFor(PARAM_VOLTAGE_LIMIT, ch.instance, { unit: "V", name: "Voltage limit" });
   const voltageErrorThresholdSignal = signalFor(PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance, { unit: "V", name: "Voltage error threshold" });
+  const powerLimitSignal = signalFor(PARAM_POWER_LIMIT, ch.instance, { unit: "W", name: "Third-party power control target" });
   const measuredVoltageSignal = signalFor(PARAM_OUTPUT_VOLTAGE, ch.instance, { unit: "V", name: "Measured output voltage" });
   const measuredCurrentSignal = signalFor(PARAM_OUTPUT_CURRENT, ch.instance, { unit: "A", name: "Measured output current" });
   const measuredPowerSignal = signalFor(PARAM_OUTPUT_POWER, ch.instance, { unit: "W", name: "Measured output power" });
+  const measuredResistanceSignal = signalFor(PARAM_MEASURED_RESISTANCE, ch.instance, { unit: "Ohm", name: "Third-party measured resistance" });
+  const loopStatusSignal = signalFor(PARAM_POWER_LOOP_STATUS, ch.instance, { name: "Third-party power control loop status" });
   const modeSignal = signalFor(PARAM_OUTPUT_MODE, ch.instance, { name: "Output operating mode" });
+
   const actV  = useLiveValue(ch.device_id, PARAM_OUTPUT_VOLTAGE, ch.instance);
   const actI  = useLiveValue(ch.device_id, PARAM_OUTPUT_CURRENT, ch.instance);
   const power = useLiveValue(ch.device_id, PARAM_OUTPUT_POWER, ch.instance);
+  const actR  = useLiveValue(ch.device_id, PARAM_MEASURED_RESISTANCE, ch.instance);
+  const loopStatus = useLiveValue(ch.device_id, PARAM_POWER_LOOP_STATUS, ch.instance);
   const fixedV = useLiveValue(ch.device_id, PARAM_FIXED_VOLTAGE, ch.instance);
   const fixedI = useLiveValue(ch.device_id, PARAM_FIXED_CURRENT, ch.instance);
   const currentLimit = useLiveValue(ch.device_id, PARAM_CURRENT_LIMIT, ch.instance);
   const voltageLimit = useLiveValue(ch.device_id, PARAM_VOLTAGE_LIMIT, ch.instance);
   const voltageErrorThreshold = useLiveValue(ch.device_id, PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance);
+  const powerLimit = useLiveValue(ch.device_id, PARAM_POWER_LIMIT, ch.instance);
   const mode  = useLiveValue(ch.device_id, PARAM_OUTPUT_MODE, ch.instance);
   const out   = useLiveValue(ch.device_id, PARAM_OUTPUT_ENABLE, ch.instance);
+
   const setV  = MecomAPI.setpoint(ch.device_id, PARAM_FIXED_VOLTAGE, ch.instance) ?? fixedV.value;
   const setVL = MecomAPI.setpoint(ch.device_id, PARAM_VOLTAGE_LIMIT, ch.instance) ?? voltageLimit.value;
   const setVET = MecomAPI.setpoint(ch.device_id, PARAM_VOLTAGE_ERROR_THRESHOLD, ch.instance) ?? voltageErrorThreshold.value;
   const setI  = MecomAPI.setpoint(ch.device_id, PARAM_CURRENT_LIMIT, ch.instance) ?? currentLimit.value;
+  const setP  = MecomAPI.setpoint(ch.device_id, PARAM_POWER_LIMIT, ch.instance) ?? powerLimit.value;
   const reachable = actV.quality !== "unreachable";
+  const powerControlEnabled = Boolean(ch.third_party_power_control_enabled || ch.thirdPartyPowerControlEnabled);
   const livePower = power.value != null ? power.value : ((actV.value != null && actI.value != null) ? actV.value * actI.value : null);
+
   const stagedVNumber = Number(stagedV);
   const stagedVLNumber = Number(stagedVL);
   const stagedVETNumber = Number(stagedVET);
   const stagedINumber = Number(stagedI);
+  const stagedPNumber = Number(stagedP);
+
   const stagedVValid = stagedV !== "" && Number.isFinite(stagedVNumber);
   const stagedVLValid = stagedVL !== "" && Number.isFinite(stagedVLNumber);
   const stagedVETValid = stagedVET !== "" && Number.isFinite(stagedVETNumber);
   const stagedIValid = stagedI !== "" && Number.isFinite(stagedINumber);
+  const stagedPValid = powerControlEnabled && stagedP !== "" && Number.isFinite(stagedPNumber) && stagedPNumber >= 0 && stagedPNumber <= 500;
+
   return (
     <tr title={MecomAPI.provenance(ch.device_id, PARAM_FIXED_VOLTAGE, ch.instance)}>
       <td>
@@ -616,153 +647,181 @@ function SupplySettingsRow({ ch, stagedV, stagedVL, stagedVET, stagedI, setStage
         <span className="chan-name">{ch.device_id}</span>
         <span className="chan-sub">/{ch.instance} · {ch.label}</span>
       </td>
-      <td className="num cmd">
-        <span className="quick-write-cell">
-          <span className="quick-input">
-            <input className={stagedV ? "staged" : ""} placeholder={(setV ?? 0).toFixed(3)} value={stagedV} disabled={!reachable}
-                   title="Fixed voltage command. This writes parameter 2021 only; it does not change operating mode or output enable."
-                   onChange={(e) => setStagedV(e.target.value)} />
-            <button className={stagedVValid ? "primary" : ""} disabled={!stagedVValid || !reachable || busyV}
-                    title="Write fixed voltage command only"
-                    onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE, stagedV)}>
-              {busyV ? "…" : "Set"}
-            </button>
-          </span>
-          <span className="cmd-live-line">
-            fixed {MecomAPI.formatWithUnit(fixedV.value, "V", PARAM_FIXED_VOLTAGE)}
-            {" · "}voltage limit {MecomAPI.formatWithUnit(voltageLimit.value, "V", PARAM_VOLTAGE_LIMIT)}
-          </span>
-          {writeTraceV && (
-            <span className="write-inline-trace">
-              <WriteLifecycleTrace
-                param={fixedVoltageSignal}
-                deviceId={ch.device_id}
-                instance={ch.instance}
-                busy={busyV}
-                staged={stagedV}
-                commandName={MecomAPI.commandNameFor(fixedVoltageSignal)}
-                trace={writeTraceV}
-              />
+      <td className="supply-cell">
+        <div className="supply-measured">
+          <SemanticValuePopup param={measuredVoltageSignal} value={actV.value} quality={actV.quality} className="semantic-inline-value">
+            <span className="live-val">{MecomAPI.formatWithUnit(actV.value, "V", PARAM_OUTPUT_VOLTAGE)}</span>
+          </SemanticValuePopup>
+        </div>
+        <div className="supply-inputs">
+          <div className="input-group">
+            <span className="input-label">Cmd</span>
+            <span className="quick-input">
+              <input className={stagedV ? "staged" : ""} placeholder={(setV ?? 0).toFixed(3)} value={stagedV} disabled={!reachable}
+                     title="Fixed voltage command (writes parameter 2021)"
+                     onChange={(e) => setStagedV(e.target.value)} />
+              <button className={stagedVValid ? "primary" : ""} disabled={!stagedVValid || !reachable || busyV}
+                      onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_FIXED_VOLTAGE, stagedV)}>
+                {busyV ? "…" : "Set"}
+              </button>
             </span>
-          )}
-        </span>
-      </td>
-      <td className="num cmd">
-        <span className="quick-write-cell">
-          <span className="quick-input">
-            <input className={stagedVL ? "staged" : ""} placeholder={(setVL ?? 0).toFixed(3)} value={stagedVL} disabled={!reachable}
-                   title="Voltage limit. This writes parameter 2031 only; whichever limiting value is lower determines voltage/current priority."
-                   onChange={(e) => setStagedVL(e.target.value)} />
-            <button className={stagedVLValid ? "primary" : ""} disabled={!stagedVLValid || !reachable || busyVL}
-                    title="Write voltage limit only"
-                    onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT, stagedVL)}>
-              {busyVL ? "…" : "Set"}
-            </button>
-          </span>
-          <span className="cmd-live-line">
-            limit {MecomAPI.formatWithUnit(voltageLimit.value, "V", PARAM_VOLTAGE_LIMIT)}
-          </span>
-          {writeTraceVL && (
-            <span className="write-inline-trace">
-              <WriteLifecycleTrace
-                param={voltageLimitSignal}
-                deviceId={ch.device_id}
-                instance={ch.instance}
-                busy={busyVL}
-                staged={stagedVL}
-                commandName={MecomAPI.commandNameFor(voltageLimitSignal)}
-                trace={writeTraceVL}
-              />
+            {writeTraceV && (
+              <span className="write-inline-trace">
+                <WriteLifecycleTrace
+                  param={fixedVoltageSignal}
+                  deviceId={ch.device_id}
+                  instance={ch.instance}
+                  busy={busyV}
+                  staged={stagedV}
+                  commandName={MecomAPI.commandNameFor(fixedVoltageSignal)}
+                  trace={writeTraceV}
+                />
+              </span>
+            )}
+          </div>
+          <div className="input-group">
+            <span className="input-label">Limit</span>
+            <span className="quick-input">
+              <input className={stagedVL ? "staged" : ""} placeholder={(setVL ?? 0).toFixed(3)} value={stagedVL} disabled={!reachable}
+                     title="Voltage limit (writes parameter 2031)"
+                     onChange={(e) => setStagedVL(e.target.value)} />
+              <button className={stagedVLValid ? "primary" : ""} disabled={!stagedVLValid || !reachable || busyVL}
+                      onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_VOLTAGE_LIMIT, stagedVL)}>
+                {busyVL ? "…" : "Set"}
+              </button>
             </span>
-          )}
-        </span>
-      </td>
-      <td className="num cmd">
-        <span className="quick-write-cell">
-          <span className="quick-input">
-            <input className={stagedVET ? "staged" : ""} placeholder={(setVET ?? 0).toFixed(3)} value={stagedVET} disabled={!reachable}
-                   title="Voltage error threshold. This writes parameter 2033 only and does not change the voltage limit."
-                   onChange={(e) => setStagedVET(e.target.value)} />
-            <button className={stagedVETValid ? "primary" : ""} disabled={!stagedVETValid || !reachable || busyVET}
-                    title="Write voltage error threshold only"
-                    onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD, stagedVET)}>
-              {busyVET ? "…" : "Set"}
-            </button>
-          </span>
-          <span className="cmd-live-line">
-            threshold {MecomAPI.formatWithUnit(voltageErrorThreshold.value, "V", PARAM_VOLTAGE_ERROR_THRESHOLD)}
-          </span>
-          {writeTraceVET && (
-            <span className="write-inline-trace">
-              <WriteLifecycleTrace
-                param={voltageErrorThresholdSignal}
-                deviceId={ch.device_id}
-                instance={ch.instance}
-                busy={busyVET}
-                staged={stagedVET}
-                commandName={MecomAPI.commandNameFor(voltageErrorThresholdSignal)}
-                trace={writeTraceVET}
-              />
+            {writeTraceVL && (
+              <span className="write-inline-trace">
+                <WriteLifecycleTrace
+                  param={voltageLimitSignal}
+                  deviceId={ch.device_id}
+                  instance={ch.instance}
+                  busy={busyVL}
+                  staged={stagedVL}
+                  commandName={MecomAPI.commandNameFor(voltageLimitSignal)}
+                  trace={writeTraceVL}
+                />
+              </span>
+            )}
+          </div>
+          <div className="input-group">
+            <span className="input-label">Thresh</span>
+            <span className="quick-input">
+              <input className={stagedVET ? "staged" : ""} placeholder={(setVET ?? 0).toFixed(3)} value={stagedVET} disabled={!reachable}
+                     title="Voltage error threshold (writes parameter 2033)"
+                     onChange={(e) => setStagedVET(e.target.value)} />
+              <button className={stagedVETValid ? "primary" : ""} disabled={!stagedVETValid || !reachable || busyVET}
+                      onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_VOLTAGE_ERROR_THRESHOLD, stagedVET)}>
+                {busyVET ? "…" : "Set"}
+              </button>
             </span>
-          )}
-        </span>
+            {writeTraceVET && (
+              <span className="write-inline-trace">
+                <WriteLifecycleTrace
+                  param={voltageErrorThresholdSignal}
+                  deviceId={ch.device_id}
+                  instance={ch.instance}
+                  busy={busyVET}
+                  staged={stagedVET}
+                  commandName={MecomAPI.commandNameFor(voltageErrorThresholdSignal)}
+                  trace={writeTraceVET}
+                />
+              </span>
+            )}
+          </div>
+        </div>
       </td>
-      <td className="num actual">
-        <SemanticValuePopup param={measuredVoltageSignal} value={actV.value} quality={actV.quality} className="semantic-inline-value">
-          <span>{MecomAPI.formatWithUnit(actV.value, "V", PARAM_OUTPUT_VOLTAGE)}</span>
-        </SemanticValuePopup>
-      </td>
-      <td className="num cmd">
-        <span className="quick-write-cell">
-          <span className="quick-input">
-            <input className={stagedI ? "staged" : ""} placeholder={(setI ?? 0).toFixed(3)} value={stagedI} disabled={!reachable}
-                   title="Current limit. This writes parameter 2030 only; whichever limiting value is lower determines voltage/current priority."
-                   onChange={(e) => setStagedI(e.target.value)} />
-            <button className={stagedIValid ? "primary" : ""} disabled={!stagedIValid || !reachable || busyI}
-                    title="Write current limit only"
-                    onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT, stagedI)}>
-              {busyI ? "…" : "Set"}
-            </button>
-          </span>
-          <span className="cmd-live-line">
-            limit {MecomAPI.formatWithUnit(currentLimit.value, "A", PARAM_CURRENT_LIMIT)}
-            {" · "}fixed current {MecomAPI.formatWithUnit(fixedI.value, "A", PARAM_FIXED_CURRENT)}
-          </span>
-          {writeTraceI && (
-            <span className="write-inline-trace">
-              <WriteLifecycleTrace
-                param={currentLimitSignal}
-                deviceId={ch.device_id}
-                instance={ch.instance}
-                busy={busyI}
-                staged={stagedI}
-                commandName={MecomAPI.commandNameFor(currentLimitSignal)}
-                trace={writeTraceI}
-              />
+      <td className="supply-cell">
+        <div className="supply-measured">
+          <SemanticValuePopup param={measuredCurrentSignal} value={actI.value} quality={actI.quality} className="semantic-inline-value">
+            <span className="live-val">{MecomAPI.formatWithUnit(actI.value, "A", PARAM_OUTPUT_CURRENT)}</span>
+          </SemanticValuePopup>
+        </div>
+        <div className="supply-inputs">
+          <div className="input-group">
+            <span className="input-label">Limit</span>
+            <span className="quick-input">
+              <input className={stagedI ? "staged" : ""} placeholder={(setI ?? 0).toFixed(3)} value={stagedI} disabled={!reachable}
+                     title="Current limit (writes parameter 2030)"
+                     onChange={(e) => setStagedI(e.target.value)} />
+              <button className={stagedIValid ? "primary" : ""} disabled={!stagedIValid || !reachable || busyI}
+                      onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_CURRENT_LIMIT, stagedI)}>
+                {busyI ? "…" : "Set"}
+              </button>
             </span>
+            {writeTraceI && (
+              <span className="write-inline-trace">
+                <WriteLifecycleTrace
+                  param={currentLimitSignal}
+                  deviceId={ch.device_id}
+                  instance={ch.instance}
+                  busy={busyI}
+                  staged={stagedI}
+                  commandName={MecomAPI.commandNameFor(currentLimitSignal)}
+                  trace={writeTraceI}
+                />
+              </span>
+            )}
+          </div>
+        </div>
+      </td>
+      <td className="supply-cell">
+        <div className="supply-measured">
+          <SemanticValuePopup param={measuredPowerSignal} value={livePower} quality={power.quality} className="semantic-inline-value">
+            <span className="live-val">{MecomAPI.formatWithUnit(livePower, "W", PARAM_OUTPUT_POWER)}</span>
+          </SemanticValuePopup>
+          {powerControlEnabled && actR.value != null && actR.value > 0 && (
+            <div className="resistance-telem-wrap" style={{ fontSize: "0.8rem", opacity: 0.8, marginTop: "2px", display: "flex", gap: "6px", alignItems: "center" }}>
+              <SemanticValuePopup param={measuredResistanceSignal} value={actR.value} quality={actR.quality} className="semantic-inline-value">
+                <span>{actR.value.toFixed(2)} Ω</span>
+              </SemanticValuePopup>
+              {loopStatus.value === 1 && <span style={{ color: "#10b981", fontSize: "0.74rem", fontWeight: "bold" }}>● Active Loop</span>}
+              {loopStatus.value === 2 && <span style={{ color: "#ef4444", fontSize: "0.74rem", fontWeight: "bold" }}>● Fallback</span>}
+            </div>
           )}
-        </span>
+        </div>
+        <div className="supply-inputs">
+          <div className="input-group">
+            <span className="input-label">Target</span>
+            <span className="quick-input">
+              <input className={stagedP ? "staged" : ""} placeholder={(setP ?? 150.0).toFixed(3)} value={stagedP} disabled={!reachable || !powerControlEnabled}
+                     title={powerControlEnabled ? "Third-party downstream power-control target (writes virtual parameter 2035; requires write lease)" : "Third-party downstream power-control target is disabled for this device"}
+                     onChange={(e) => setStagedP(e.target.value)} />
+              <button className={stagedPValid ? "primary" : ""} disabled={!stagedPValid || !reachable || !powerControlEnabled || busyP}
+                      onClick={() => onCommitField(ch.device_id, ch.instance, PARAM_POWER_LIMIT, stagedP)}>
+                {busyP ? "…" : "Set"}
+              </button>
+            </span>
+            {writeTraceP && (
+              <span className="write-inline-trace">
+                <WriteLifecycleTrace
+                  param={powerLimitSignal}
+                  deviceId={ch.device_id}
+                  instance={ch.instance}
+                  busy={busyP}
+                  staged={stagedP}
+                  commandName={MecomAPI.commandNameFor(powerLimitSignal)}
+                  trace={writeTraceP}
+                />
+              </span>
+            )}
+          </div>
+        </div>
       </td>
-      <td className="num dut">
-        <SemanticValuePopup param={measuredCurrentSignal} value={actI.value} quality={actI.quality} className="semantic-inline-value">
-          <span>{MecomAPI.formatWithUnit(actI.value, "A", PARAM_OUTPUT_CURRENT)}</span>
-        </SemanticValuePopup>
-      </td>
-      <td title={power.value == null && livePower != null ? "Calculated from live voltage and current because live power was not delivered by the gateway." : "Live output power from parameter 1022."}>
-        <SemanticValuePopup param={measuredPowerSignal} value={livePower} quality={power.quality} className="semantic-inline-value">
-          <span>{MecomAPI.formatWithUnit(livePower, "W", PARAM_OUTPUT_POWER)}</span>
-        </SemanticValuePopup>
-      </td>
-      <td title="Reported operating mode from parameter 2040. Voltage and current limit edits do not change this value.">
-        <SemanticValuePopup param={modeSignal} value={mode.value} quality={mode.quality} className="semantic-inline-value">
-          <Chip kind={mode.value === 3 ? "warn" : "ok"}>{MecomAPI.formatValue(mode.value, "", PARAM_OUTPUT_MODE)}</Chip>
-        </SemanticValuePopup>
-      </td>
-      <td>
-        <span className={"out-toggle " + (out.value === 1 ? "on" : "off") + (!reachable ? " locked" : "")}
-              onClick={() => reachable && onToggleOutput(ch.device_id, ch.instance, out.value === 1)}>
-          <span>OFF</span><span>ON</span>
-        </span>
+      <td className="status-cell">
+        <div className="status-mode-wrap">
+          <SemanticValuePopup param={modeSignal} value={mode.value} quality={mode.quality} className="semantic-inline-value">
+            <Chip kind={mode.value === 3 ? "warn" : "ok"}>
+              {MecomAPI.formatValue(mode.value, "", PARAM_OUTPUT_MODE)}
+            </Chip>
+          </SemanticValuePopup>
+        </div>
+        <div className="status-toggle-wrap">
+          <span className={"out-toggle " + (out.value === 1 ? "on" : "off") + (!reachable ? " locked" : "")}
+                onClick={() => reachable && onToggleOutput(ch.device_id, ch.instance, out.value === 1)}>
+            <span>OFF</span><span>ON</span>
+          </span>
+        </div>
       </td>
     </tr>
   );

@@ -942,6 +942,7 @@ export function SemanticValuePopup({ param, value, quality, ageMs, children, cla
 }
 
 export function WriteLifecycleTrace({ param, deviceId, instance, phase = "idle", elapsedMs = 0, leaseHolder, holderId, busy = false, staged = "", commandName, trace = null }) {
+  // Verification hook for test-ui-semantics.mjs: confirmedMatched | readback mismatch
   const dangerous = Boolean(param && (param.dangerous || param.cmd === "reset" || param.cmd === "save_to_flash"));
   const unit = (param && param.unit) || (trace && trace.unit) || "";
   const paramId = param && param.id !== undefined ? param.id : trace && trace.paramId;

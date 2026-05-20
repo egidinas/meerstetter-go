@@ -57,16 +57,17 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 type deviceView struct {
-	ID              string            `json:"id"`
-	Label           string            `json:"label,omitempty"`
-	Endpoint        string            `json:"endpoint"`
-	ActiveRoute     deviceRouteView   `json:"active_route"`
-	RouteCandidates []deviceRouteView `json:"route_candidates,omitempty"`
-	Address         byte              `json:"address"`
-	ChannelCount    int               `json:"channel_count"`
-	Channels        []channelView     `json:"channels,omitempty"`
-	Bound           bool              `json:"bound"`
-	LastErr         string            `json:"last_error,omitempty"`
+	ID                  string            `json:"id"`
+	Label               string            `json:"label,omitempty"`
+	Endpoint            string            `json:"endpoint"`
+	ActiveRoute         deviceRouteView   `json:"active_route"`
+	RouteCandidates     []deviceRouteView `json:"route_candidates,omitempty"`
+	Address             byte              `json:"address"`
+	ChannelCount        int               `json:"channel_count"`
+	Channels            []channelView     `json:"channels,omitempty"`
+	Bound               bool              `json:"bound"`
+	PowerControlEnabled bool              `json:"third_party_power_control_enabled,omitempty"`
+	LastErr             string            `json:"last_error,omitempty"`
 }
 
 type deviceRouteView struct {
@@ -100,12 +101,13 @@ type gatewayCommandActivity struct {
 }
 
 type channelView struct {
-	Instance   int    `json:"instance"`
-	Role       string `json:"role,omitempty"`
-	RoleSource string `json:"role_source,omitempty"`
-	Label      string `json:"label,omitempty"`
-	UserNote   string `json:"user_note,omitempty"`
-	HasCascade bool   `json:"has_cascade,omitempty"`
+	Instance            int    `json:"instance"`
+	Role                string `json:"role,omitempty"`
+	RoleSource          string `json:"role_source,omitempty"`
+	Label               string `json:"label,omitempty"`
+	UserNote            string `json:"user_note,omitempty"`
+	HasCascade          bool   `json:"has_cascade,omitempty"`
+	PowerControlEnabled bool   `json:"third_party_power_control_enabled,omitempty"`
 }
 
 func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
@@ -114,15 +116,16 @@ func (s *server) handleDevices(w http.ResponseWriter, _ *http.Request) {
 		b.mu.Lock()
 		channelCount := effectiveChannelCount(b.cfg.ChannelCount, s.channelCount)
 		v := deviceView{
-			ID:              b.cfg.ID,
-			Label:           b.cfg.Label,
-			Endpoint:        b.cfg.Endpoint,
-			ActiveRoute:     activeDeviceRouteView(b.cfg),
-			RouteCandidates: deviceRouteCandidatesView(b.cfg),
-			Address:         b.cfg.Address,
-			ChannelCount:    channelCount,
-			Channels:        deviceChannelsView(b.cfg, channelCount),
-			Bound:           b.client != nil,
+			ID:                  b.cfg.ID,
+			Label:               b.cfg.Label,
+			Endpoint:            b.cfg.Endpoint,
+			ActiveRoute:         activeDeviceRouteView(b.cfg),
+			RouteCandidates:     deviceRouteCandidatesView(b.cfg),
+			Address:             b.cfg.Address,
+			ChannelCount:        channelCount,
+			Channels:            deviceChannelsView(b.cfg, channelCount),
+			Bound:               b.client != nil,
+			PowerControlEnabled: b.cfg.PowerControlEnabled,
 		}
 		if b.lastErr != nil {
 			v.LastErr = b.lastErr.Error()
@@ -168,12 +171,13 @@ func deviceChannelsView(cfg DeviceConfig, channelCount int) []channelView {
 		}
 		role, source := effectiveDeviceChannelRole(cfg, instance)
 		v := channelView{
-			Instance:   instance,
-			Role:       role,
-			RoleSource: source,
-			Label:      ch.Label,
-			UserNote:   ch.UserNote,
-			HasCascade: ch.HasCascade,
+			Instance:            instance,
+			Role:                role,
+			RoleSource:          source,
+			Label:               ch.Label,
+			UserNote:            ch.UserNote,
+			HasCascade:          ch.HasCascade,
+			PowerControlEnabled: cfg.PowerControlEnabled,
 		}
 		out = append(out, v)
 	}
@@ -618,6 +622,74 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 	activity.LeaseHolder = s.leaseHolderForToken(token)
 	activity.ParamID, activity.Instance, activity.SignalName, activity.SignalUnit, activity.RequestedValue = gatewayCommandTargetFromTelecommand(req)
 
+	if activity.ParamID == 2035 {
+		if bound.binding == nil || !bound.binding.cfg.PowerControlEnabled {
+			activity.Error = "third-party power control is disabled for this device"
+			activity.ErrorCategory = "authorization"
+			activity.HTTPStatus = http.StatusForbidden
+			s.recordCommandActivity(activity)
+			http.Error(w, activity.Error, activity.HTTPStatus)
+			return
+		}
+		if err := s.authorize(deviceID, tc); err != nil {
+			activity.Error = err.Error()
+			activity.ErrorCategory = gatewayCommandErrorCategory(err)
+			if activity.ErrorCategory == "" || activity.ErrorCategory == "gateway" {
+				activity.ErrorCategory = "lease"
+			}
+			activity.HTTPStatus = http.StatusLocked
+			s.recordCommandActivity(activity)
+			writeJSON(w, activity.HTTPStatus, map[string]any{"error": activity.Error})
+			return
+		}
+		val, ok := floatFromAny(req.Arguments["value"])
+		if !ok {
+			activity.Error = "invalid power control target value: must be a number"
+			activity.ErrorCategory = "validation"
+			activity.HTTPStatus = http.StatusBadRequest
+			s.recordCommandActivity(activity)
+			http.Error(w, activity.Error, activity.HTTPStatus)
+			return
+		}
+		if val < 0 || val > 500 {
+			activity.Error = "power control target out of safe bounds (0 - 500 W)"
+			activity.ErrorCategory = "validation"
+			activity.HTTPStatus = http.StatusBadRequest
+			s.recordCommandActivity(activity)
+			http.Error(w, activity.Error, activity.HTTPStatus)
+			return
+		}
+
+		s.setVirtualParam(deviceID, activity.ParamID, activity.Instance, val)
+
+		activity.HTTPStatus = http.StatusOK
+		activity.Status = "completed"
+		confirmed := val
+		matched := true
+		activity.ConfirmedValue = confirmed
+		activity.ReadbackMatched = &matched
+		s.recordCommandActivity(activity)
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"confirmed_value":  confirmed,
+			"readback_matched": true,
+			"prev_value":       activity.PrevValue,
+			"event": tmtc.CommandEvent{
+				CommandID:      tc.ID,
+				SessionID:      tc.SessionID,
+				Status:         tmtc.CommandCompleted,
+				Time:           time.Now(),
+				IdempotencyKey: tc.IdempotencyKey,
+				Result: map[string]any{
+					"confirmed_value":  confirmed,
+					"readback_matched": true,
+					"prev_value":       activity.PrevValue,
+				},
+			},
+		})
+		return
+	}
+
 	// Pre-check: Read current value before write for definitely validated status
 	if bound.client != nil && activity.ParamID != 0 {
 		ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
@@ -637,7 +709,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 		activity.Error = ev.Error
 	}
 	if ev.Status == tmtc.CommandCompleted {
-		confirmed, matched, verifyErr := s.verifyGatewayWrite(r.Context(), bound.client, req)
+		confirmed, matched, verifyErr := s.verifyGatewayWrite(r.Context(), deviceID, bound.client, req)
 		activity.ConfirmedValue = confirmed
 		activity.ReadbackMatched = matched
 		if verifyErr != nil {
@@ -758,7 +830,6 @@ func containsString(slice []string, s string) bool {
 	return false
 }
 
-
 func (s *server) leaseHolderForToken(token string) string {
 	token = strings.TrimSpace(token)
 	if token == "" {
@@ -784,17 +855,47 @@ func gatewayCommandTargetFromTelecommand(req writeRequest) (int, int, string, st
 		}
 	}
 	signalName, signalUnit := "", ""
-	if param, ok := gatewayParameterByID(paramID); ok {
+	if param, ok := gatewayWriteParameterByID(paramID); ok {
+		signalName = param.Name
+		signalUnit = param.Unit
+	} else if param, ok := gatewayParameterByID(paramID); ok {
 		signalName = param.Name
 		signalUnit = param.Unit
 	}
 	return paramID, instance, signalName, signalUnit, req.Arguments["value"]
 }
 
-func (s *server) verifyGatewayWrite(ctx context.Context, client mecom.ReadClient, req writeRequest) (any, *bool, error) {
+func gatewayWriteParameterByID(id int) (mecom.Parameter, bool) {
+	if id == 2035 {
+		return mecom.Parameter{
+			ID:       2035,
+			Instance: 1,
+			Name:     "Third-Party Power Control Target",
+			Unit:     "W",
+			Type:     mecom.DataTypeFloat32,
+			Writable: true,
+			Role:     "control",
+			Kind:     "setpoint",
+		}, true
+	}
+	params := mecom.DefaultTECWriteParameters(1)
+	for _, p := range params {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return mecom.Parameter{}, false
+}
+
+func (s *server) verifyGatewayWrite(ctx context.Context, deviceID string, client mecom.ReadClient, req writeRequest) (any, *bool, error) {
 	param, want, ok, err := gatewayWriteParameterFromRequest(req)
 	if err != nil || !ok {
 		return nil, nil, err
+	}
+	if param.ID == 2035 {
+		confirmed := s.getVirtualParam(deviceID, param.ID, param.Instance, 0.0)
+		matched := gatewayWriteValueMatches(param, confirmed, want)
+		return confirmed, boolPtr(matched), nil
 	}
 	if client == nil {
 		return nil, nil, fmt.Errorf("write readback unavailable: no read client")
@@ -1081,6 +1182,10 @@ func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID 
 	}
 }
 
+func isVirtualParam(id int) bool {
+	return id == 2035 || id == 2036 || id == 2038
+}
+
 type gatewayResetReadClient struct {
 	server   *server
 	deviceID string
@@ -1088,14 +1193,35 @@ type gatewayResetReadClient struct {
 }
 
 func (c gatewayResetReadClient) ReadBulk(ctx context.Context, params []mecom.Parameter) ([]float64, error) {
-	values, err := c.client.ReadBulk(ctx, params)
-	if err == nil && len(values) == len(params) {
-		c.server.recordGatewayReadSamples(c.deviceID, gatewayValuesFromFloats(params, values), time.Now().UTC())
+	physicalParams := make([]mecom.Parameter, 0, len(params))
+	for _, p := range params {
+		if !isVirtualParam(p.ID) {
+			physicalParams = append(physicalParams, p)
+		}
 	}
-	if err != nil && shouldResetDeviceBinding(err) {
-		c.server.resetDeviceBinding(c.deviceID, c.client, err)
+	var physicalValues []float64
+	var err error
+	if len(physicalParams) > 0 {
+		physicalValues, err = c.client.ReadBulk(ctx, physicalParams)
+		if err != nil {
+			if shouldResetDeviceBinding(err) {
+				c.server.resetDeviceBinding(c.deviceID, c.client, err)
+			}
+			return nil, err
+		}
 	}
-	return values, err
+	values := make([]float64, len(params))
+	physIdx := 0
+	for i, p := range params {
+		if isVirtualParam(p.ID) {
+			values[i] = c.server.getVirtualParam(c.deviceID, p.ID, p.Instance, 0.0)
+		} else {
+			values[i] = physicalValues[physIdx]
+			physIdx++
+		}
+	}
+	c.server.recordGatewayReadSamples(c.deviceID, gatewayValuesFromFloats(params, values), time.Now().UTC())
+	return values, nil
 }
 
 func (c gatewayResetReadClient) ConfigureRingCapture(ctx context.Context, captureID uint16, params []mecom.RingCaptureParameter) error {
@@ -1111,6 +1237,9 @@ func (c gatewayResetReadClient) ReadRingPointer(ctx context.Context) (uint32, er
 }
 
 func (c gatewayResetReadClient) ReadFloat32(ctx context.Context, paramID, instance int) (float64, error) {
+	if isVirtualParam(paramID) {
+		return c.server.getVirtualParam(c.deviceID, paramID, instance, 0.0), nil
+	}
 	v, err := c.client.ReadFloat32(ctx, paramID, instance)
 	if err != nil && shouldResetDeviceBinding(err) {
 		c.server.resetDeviceBinding(c.deviceID, c.client, err)
@@ -1119,6 +1248,9 @@ func (c gatewayResetReadClient) ReadFloat32(ctx context.Context, paramID, instan
 }
 
 func (c gatewayResetReadClient) ReadInt32(ctx context.Context, paramID, instance int) (int32, error) {
+	if isVirtualParam(paramID) {
+		return int32(c.server.getVirtualParam(c.deviceID, paramID, instance, 0.0)), nil
+	}
 	v, err := c.client.ReadInt32(ctx, paramID, instance)
 	if err != nil && shouldResetDeviceBinding(err) {
 		c.server.resetDeviceBinding(c.deviceID, c.client, err)
@@ -1172,6 +1304,42 @@ func parseParamsQuery(raw string) ([]mecom.Parameter, error) {
 }
 
 func gatewayParameterByID(id int) (mecom.Parameter, bool) {
+	if id == 2035 {
+		return mecom.Parameter{
+			ID:       2035,
+			Instance: 1,
+			Name:     "Third-Party Power Control Target",
+			Unit:     "W",
+			Type:     mecom.DataTypeFloat32,
+			Writable: true,
+			Role:     "control",
+			Kind:     "setpoint",
+		}, true
+	}
+	if id == 2036 {
+		return mecom.Parameter{
+			ID:       2036,
+			Instance: 1,
+			Name:     "Third-Party Measured Resistance",
+			Unit:     "Ohm",
+			Type:     mecom.DataTypeFloat32,
+			Writable: false,
+			Role:     "monitor",
+			Kind:     "telemetry",
+		}, true
+	}
+	if id == 2038 {
+		return mecom.Parameter{
+			ID:       2038,
+			Instance: 1,
+			Name:     "Third-Party Power Control Status",
+			Unit:     "",
+			Type:     mecom.DataTypeFloat32,
+			Writable: false,
+			Role:     "monitor",
+			Kind:     "telemetry",
+		}, true
+	}
 	params := mecom.DefaultTECCatalogueEntries(1)
 	for _, p := range params {
 		if p.ID == id {

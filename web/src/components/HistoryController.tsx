@@ -1,6 +1,7 @@
-import { HistoryController as SharedHistoryController } from "../lib/series";
+import { HistoryController as SharedHistoryController, HistoryControllerProps } from "../lib/series";
+import { MecomAPI } from "../api/mecom";
 
-export function HistoryController({ onRangeChange, isLive, onSetLive }) {
+export function HistoryController({ onRangeChange, isLive, onSetLive }: HistoryControllerProps) {
   return (
     <SharedHistoryController
       onRangeChange={onRangeChange}

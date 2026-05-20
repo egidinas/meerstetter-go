@@ -19,7 +19,7 @@ func (s *server) handleLogExport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	manifest := DefaultArchiveManifest()
-	
+
 	// For now, we only support NDJSON format as implemented.
 	format := r.URL.Query().Get("format")
 	if format == "arrow" {
@@ -67,7 +67,7 @@ func (s *server) handleLogImport(w http.ResponseWriter, r *http.Request) {
 
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32<<20)) // 32MB limit
 	importedSamples := 0
-	
+
 	for dec.More() {
 		var row struct {
 			Stream    string  `json:"stream"`
@@ -90,7 +90,7 @@ func (s *server) handleLogImport(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				continue
 			}
-			
+
 			deviceID := firstNonEmpty(row.DeviceID, row.TargetID)
 			instance := intFromAny(row.Instance)
 			if instance == 0 {
@@ -102,9 +102,12 @@ func (s *server) handleLogImport(w http.ResponseWriter, r *http.Request) {
 			if paramID == 0 && row.Parameter != "" {
 				// Simple heuristic for common params
 				switch strings.ToLower(row.Parameter) {
-				case "object temperature": paramID = 1000
-				case "sink temperature": paramID = 1001
-				case "target object temperature": paramID = 3000
+				case "object temperature":
+					paramID = 1000
+				case "sink temperature":
+					paramID = 1001
+				case "target object temperature":
+					paramID = 3000
 				}
 			}
 
@@ -122,7 +125,7 @@ func (s *server) exportObjectDictionarySnapshots(enc *json.Encoder) {
 	now := time.Now().UTC()
 	channels := s.catalogueChannelCount()
 	params := mecom.DefaultTECCatalogueEntries(channels)
-	
+
 	for _, p := range params {
 		for _, b := range s.devices {
 			snapshot := map[string]any{
@@ -178,22 +181,22 @@ func (s *server) exportTelemetrySamples(enc *json.Encoder) {
 		if err != nil {
 			continue
 		}
-		
+
 		h := s.lookupGraphHistory(series.DeviceID, series.ParamID, series.Instance, int(defaultGraphHistoryRetention.Milliseconds()), time.Now().UTC())
 		def, _ := gatewayParameterByID(series.ParamID)
 
 		for i := range h.TS {
 			sample := map[string]any{
-				"stream":       "telemetry_samples",
-				"seq":          seq,
-				"time":         h.TS[i],
-				"target_id":    series.DeviceID,
-				"device_id":    series.DeviceID,
-				"instance":     fmt.Sprintf("%d", series.Instance),
-				"parameter":    def.Name,
-				"value":        h.V[i],
-				"quality":      gatewayQualityOK, // TODO: improve quality tracking in history
-				"source_path":  s.graphHistoryEndpoint(series.DeviceID),
+				"stream":      "telemetry_samples",
+				"seq":         seq,
+				"time":        h.TS[i],
+				"target_id":   series.DeviceID,
+				"device_id":   series.DeviceID,
+				"instance":    fmt.Sprintf("%d", series.Instance),
+				"parameter":   def.Name,
+				"value":       h.V[i],
+				"quality":     gatewayQualityOK, // TODO: improve quality tracking in history
+				"source_path": s.graphHistoryEndpoint(series.DeviceID),
 			}
 			_ = enc.Encode(sample)
 			seq++
@@ -201,30 +204,52 @@ func (s *server) exportTelemetrySamples(enc *json.Encoder) {
 	}
 }
 func (s *server) handleHDF5Export(w http.ResponseWriter, r *http.Request) {
-	tmpFile := "/home/svc_pmg_testbed_b/meerstetter-go/scratch/export_" + time.Now().Format("20060102_150405") + ".h5"
+	tmpFile, err := newHDF5ExportTempFile()
+	if err != nil {
+		http.Error(w, "HDF5 temp file failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer os.Remove(tmpFile)
+
 	writer, err := hdf5.NewHDF5Writer(tmpFile)
 	if err != nil {
 		http.Error(w, "HDF5 init failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if err := writer.Create(); err != nil {
+		_ = writer.Close()
 		http.Error(w, "HDF5 create failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer writer.Close()
 
 	// Export Telemetry
 	if err := s.exportTelemetryToHDF5(writer); err != nil {
+		_ = writer.Close()
 		http.Error(w, "HDF5 telemetry export failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		http.Error(w, "HDF5 close failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/x-hdf5")
 	w.Header().Set("Content-Disposition", "attachment; filename=\"export.h5\"")
 	http.ServeFile(w, r, tmpFile)
-	os.Remove(tmpFile)
+}
+
+func newHDF5ExportTempFile() (string, error) {
+	file, err := os.CreateTemp("", "mecomgw-export-*.h5")
+	if err != nil {
+		return "", err
+	}
+	name := file.Name()
+	if err := file.Close(); err != nil {
+		_ = os.Remove(name)
+		return "", err
+	}
+	return name, nil
 }
 
 func (s *server) exportTelemetryToHDF5(w *hdf5.HDF5Writer) error {
@@ -246,15 +271,15 @@ func (s *server) exportTelemetryToHDF5(w *hdf5.HDF5Writer) error {
 		if err != nil {
 			continue
 		}
-		
+
 		h := s.lookupGraphHistory(series.DeviceID, series.ParamID, series.Instance, int(defaultGraphHistoryRetention.Milliseconds()), time.Now().UTC())
-		
+
 		groupName := fmt.Sprintf("%s_%d_%d", series.DeviceID, series.ParamID, series.Instance)
 		sgid, err := w.CreateGroup("telemetry/" + groupName)
 		if err != nil {
 			continue
 		}
-		
+
 		// Write TS as int64 (UnixNano)
 		ts := make([]int64, len(h.TS))
 		for i, tStr := range h.TS {
@@ -265,7 +290,7 @@ func (s *server) exportTelemetryToHDF5(w *hdf5.HDF5Writer) error {
 		}
 		w.WriteInt64Dataset(sgid, "timestamps", ts)
 		w.WriteFloat64Dataset(sgid, "values", h.V)
-		
+
 		w.CloseGroup(sgid)
 	}
 	return nil

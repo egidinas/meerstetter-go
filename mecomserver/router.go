@@ -121,6 +121,11 @@ func RequestAddress(frame []byte) (byte, error) {
 		return 0, fmt.Errorf("short MeCom frame")
 	}
 	if frame[0] != '#' {
+		if frame[0] == '?' {
+			// Route unaddressed MeCom requests like ?VR identification probes to
+			// the default device so service tools can identify the host.
+			return 0, nil
+		}
 		return 0, fmt.Errorf("not a MeCom request frame")
 	}
 	n, err := strconv.ParseUint(string(frame[1:3]), 16, 8)

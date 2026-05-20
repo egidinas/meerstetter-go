@@ -12,15 +12,12 @@ assert.ok(
   `catalogue has ${catalogue.length} entries; target is at least ${MIN_EXPECTED_ENTRIES}. Expand the public-safe JSON seed before shipping.`,
 );
 
-const requiredIds = [1000, 1001, 1020, 1021, 2020, 2021, 2030, 40000];
-for (const id of requiredIds) {
-  const entry = catalogue.find((item) => item.id === id);
-  assert.ok(entry, `catalogue is missing required parameter ${id}`);
-  assert.ok(entry.unit !== undefined, `parameter ${id} is missing unit`);
-  assert.ok(entry.group, `parameter ${id} is missing group`);
-  assert.ok(entry.subgroup !== undefined, `parameter ${id} is missing subgroup`);
-  assert.ok(entry.role, `parameter ${id} is missing role`);
-  assert.ok(entry.source_status, `parameter ${id} is missing source_status`);
+for (const entry of catalogue) {
+  assert.ok(entry.unit !== undefined, `parameter ${entry.id} is missing unit`);
+  assert.ok(entry.group && entry.group.trim().length > 0, `parameter ${entry.id} (${entry.raw_name || entry.sid}) is missing 'group' needed for default projection`);
+  assert.ok(entry.subgroup !== undefined && entry.subgroup !== null, `parameter ${entry.id} (${entry.raw_name || entry.sid}) is missing 'subgroup' needed for default projection`);
+  assert.ok(entry.role && entry.role.trim().length > 0, `parameter ${entry.id} is missing role`);
+  assert.ok(entry.source_status && entry.source_status.trim().length > 0, `parameter ${entry.id} is missing source_status`);
 }
 
 const readWritePairs = [
@@ -36,9 +33,36 @@ for (const [readId, writeId] of readWritePairs) {
   const writeEntry = catalogue.find((item) => item.id === writeId);
   if (readEntry && writeEntry) {
     assert.ok(
-      readEntry.counterparts?.write?.includes(writeId) || writeEntry.counterparts?.read?.includes(readId),
+      readEntry.counterparts?.write?.includes(writeId) || writeEntry.counterparts?.read?.includes(readId) ||
+      readEntry.counterparts?.setpoint?.includes(writeId) || writeEntry.counterparts?.measured?.includes(readId),
       `expected counterpart relationship between ${readId} and ${writeId}`,
     );
+  }
+}
+
+// Global counterparts validation to ensure all targets exist and mutual back-references exist for primary telemetry/control pairs
+for (const entry of catalogue) {
+  if (entry.counterparts) {
+    assert.ok(typeof entry.counterparts === "object" && entry.counterparts !== null, `parameter ${entry.id} counterparts must be an object`);
+    for (const [relation, targetIds] of Object.entries(entry.counterparts)) {
+      assert.ok(Array.isArray(targetIds), `parameter ${entry.id} counterparts.${relation} must be an array`);
+      for (const targetId of targetIds.map(Number)) {
+        const targetEntry = catalogue.find((item) => item.id === targetId);
+        assert.ok(targetEntry, `parameter ${entry.id} counterparts.${relation} lists unknown parameter ${targetId}`);
+
+        // Ensure that for primary read-write (telemetry-control) relationships, the link is mutual.
+        const isTelemetryToControl = (entry.role === "monitor" && targetEntry.role === "control") || (entry.role === "control" && targetEntry.role === "monitor");
+        if (isTelemetryToControl && (relation === "measured" || relation === "read" || relation === "telemetry" || relation === "write" || relation === "setpoint")) {
+          const targetCounterparts = targetEntry.counterparts;
+          assert.ok(targetCounterparts, `parameter ${targetId} is counterparts target for ${entry.id}, but has no counterparts map itself`);
+          const allTargetCounterpartIds = Object.values(targetCounterparts).flat().map(Number);
+          assert.ok(
+            allTargetCounterpartIds.includes(Number(entry.id)),
+            `mutual link missing: parameter ${entry.id} points to ${targetId}, but parameter ${targetId} counterparts [${allTargetCounterpartIds.join(", ")}] does not point back to ${entry.id}`
+          );
+        }
+      }
+    }
   }
 }
 

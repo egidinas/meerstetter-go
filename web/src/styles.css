@@ -2581,6 +2581,47 @@ hr.sep {
 .hero-settings .out-toggle.off span:first-child { background: var(--panel-2); color: var(--text); }
 .hero-settings .out-toggle.locked { opacity: 0.5; }
 
+.hero-settings .supply-cell {
+  vertical-align: top;
+  padding: 8px 12px;
+}
+.hero-settings .supply-measured {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+.hero-settings .supply-measured .live-val {
+  color: var(--text);
+}
+.hero-settings .supply-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-settings .input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hero-settings .input-label {
+  display: inline-block;
+  width: 75px;
+  color: var(--muted);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hero-settings .status-cell {
+  vertical-align: top;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
 /* ========================================================
    Fleet: hero row + device strip
    ======================================================== */

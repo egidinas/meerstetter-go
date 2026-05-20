@@ -242,11 +242,46 @@
       "preferred_readout": "mecom_vx_round_robin_queue",
       "group": "Status",
       "subgroup": "Stability",
-      "applicable_modes": ["temp"],
       "enum": {
         "0": "Drifting",
         "1": "Stable"
       }
+    },
+    {
+      "id": 2036,
+      "sid": "measured_resistance_ohm",
+      "raw_name": "MeasuredResistance",
+      "display": "third-party measured resistance",
+      "unit": "Ohm",
+      "type": "float32",
+      "category": "electrical",
+      "role": "monitor",
+      "semantic_role": "third_party_measured_resistance",
+      "source_parameter_name": "Third-Party Measured Resistance",
+      "readout_priority": "high",
+      "priority_component": "resistance",
+      "group": "Power",
+      "subgroup": "Output",
+      "applicable_modes": ["temp", "supply"],
+      "counterparts": {
+        "setpoint": [2035]
+      }
+    },
+    {
+      "id": 2038,
+      "sid": "power_control_status",
+      "raw_name": "PowerControlStatus",
+      "display": "third-party power control status",
+      "unit": "",
+      "type": "float32",
+      "category": "electrical",
+      "role": "monitor",
+      "semantic_role": "third_party_power_control_status",
+      "source_parameter_name": "Third-Party Power Control Status",
+      "readout_priority": "high",
+      "group": "Power",
+      "subgroup": "Output",
+      "applicable_modes": ["temp", "supply"]
     }
   ],
   "write_parameters": [
@@ -598,6 +633,31 @@
         "enable": [53120],
         "selection": [53121],
         "control_loop_target": [3000]
+      }
+    },
+    {
+      "id": 2035,
+      "sid": "power_control_target_w",
+      "raw_name": "PowerControlTarget",
+      "display": "third-party power control target",
+      "unit": "W",
+      "type": "float32",
+      "category": "control",
+      "role": "control",
+      "semantic_role": "third_party_power_control_target",
+      "source_parameter_name": "Third-Party Power Control Target",
+      "writable": true,
+      "command": "write_float32",
+      "min": 0,
+      "max": 500,
+      "group": "Control",
+      "subgroup": "Output limits",
+      "applicable_modes": ["temp", "supply"],
+      "counterparts": {
+        "measured": [1022],
+        "voltage": [1021],
+        "current": [1020],
+        "resistance": [2036]
       }
     }
   ],

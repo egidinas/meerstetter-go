@@ -570,12 +570,16 @@
       "mode": [
         2040
       ],
+      "control": [
+        2035
+      ],
       "write": [
         2040,
         2020,
         2021,
         2030,
-        2031
+        2031,
+        2035
       ]
     },
     "kind": "continuous",
@@ -1601,6 +1605,120 @@
     "default_value": 22.8,
     "default_value_text": "22.8",
     "default_kind": "number"
+  },
+  {
+    "id": 2035,
+    "sid": "power_control_target_w",
+    "raw_name": "PowerControlTarget",
+    "display": "third-party power control target",
+    "unit": "W",
+    "type": "float32",
+    "category": "control",
+    "role": "control",
+    "semantic_role": "third_party_power_control_target",
+    "source_parameter_name": "Third-Party Power Control Target",
+    "writable": true,
+    "command": "write_float32",
+    "min": 0,
+    "max": 500,
+    "group": "Control",
+    "subgroup": "Output limits",
+    "applicable_modes": [
+      "temp",
+      "supply"
+    ],
+    "counterparts": {
+      "measured": [
+        1022
+      ],
+      "voltage": [
+        1021
+      ],
+      "current": [
+        1020
+      ],
+      "resistance": [
+        2036
+      ]
+    },
+    "kind": "setpoint",
+    "name": "Third-Party Power Control Target",
+    "source_status": "downstream_extension",
+    "applicableModes": [
+      "temp",
+      "supply"
+    ],
+    "hover_help": "Downstream virtual target for a third-party closed-loop power-control extension. It is disabled by default and requires explicit device opt-in plus a write lease.",
+    "help_text": "Downstream virtual target for a third-party closed-loop power-control extension. It is not a native Meerstetter parameter; it is disabled by default and requires explicit device opt-in plus a write lease.",
+    "visibility": "operator",
+    "default_source": "tec_default_config_5216o.v631.json",
+    "default_value": 150.0,
+    "default_value_text": "150.0",
+    "default_kind": "number"
+  },
+  {
+    "id": 2036,
+    "sid": "measured_resistance_ohm",
+    "raw_name": "MeasuredResistance",
+    "display": "third-party measured resistance",
+    "unit": "Ohm",
+    "type": "float32",
+    "category": "electrical",
+    "role": "monitor",
+    "semantic_role": "third_party_measured_resistance",
+    "source_parameter_name": "Third-Party Measured Resistance",
+    "readout_priority": "high",
+    "priority_component": "resistance",
+    "group": "Power",
+    "subgroup": "Output",
+    "applicable_modes": [
+      "temp",
+      "supply"
+    ],
+    "counterparts": {
+      "setpoint": [
+        2035
+      ]
+    },
+    "kind": "telemetry",
+    "name": "Third-Party Measured Resistance",
+    "source_status": "downstream_extension",
+    "applicableModes": [
+      "temp",
+      "supply"
+    ],
+    "hover_help": "Downstream virtual telemetry calculated from output voltage and current by the third-party power-control extension.",
+    "help_text": "Downstream virtual telemetry calculated from output voltage and current by the third-party power-control extension. It is not a native Meerstetter parameter.",
+    "visibility": "operator"
+  },
+  {
+    "id": 2038,
+    "sid": "power_control_status",
+    "raw_name": "PowerControlStatus",
+    "display": "third-party power control status",
+    "unit": "",
+    "type": "float32",
+    "category": "electrical",
+    "role": "monitor",
+    "semantic_role": "third_party_power_control_status",
+    "source_parameter_name": "Third-Party Power Control Status",
+    "readout_priority": "high",
+    "group": "Power",
+    "subgroup": "Output",
+    "applicable_modes": [
+      "temp",
+      "supply"
+    ],
+    "kind": "telemetry",
+    "name": "Third-Party Power Control Status",
+    "source_status": "downstream_extension",
+    "applicableModes": [
+      "temp",
+      "supply"
+    ],
+    "hover_help": "Downstream virtual status for the third-party closed-loop power-control extension: 0 = Standby, 1 = Active Closed Loop, 2 = Fallback (Non-ohmic).",
+    "help_text": "Downstream virtual status for the third-party closed-loop power-control extension: 0 = Standby, 1 = Active Closed Loop, 2 = Fallback (Non-ohmic). It is not a native Meerstetter parameter.",
+    "visibility": "operator"
   },
   {
     "id": 2040,
@@ -9282,7 +9400,12 @@
     ],
     "hover_help": "Readable output-stage temperature. CoSo exposes individual power-stage temperatures in manufacturer diagnostics.",
     "help_text": "Readable output-stage temperature. CoSo exposes individual power-stage temperatures in manufacturer diagnostics.",
-    "visibility": "advanced"
+    "visibility": "advanced",
+    "counterparts": {
+      "control": [
+        2010
+      ]
+    }
   },
   {
     "id": 52010,

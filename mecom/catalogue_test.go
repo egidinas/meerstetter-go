@@ -20,7 +20,7 @@ func TestBuildMeComTECCatalogueUsesChannelCountWithoutEightSpotAssumption(t *tes
 	if catalogue.SourceID != "bench_mecom" || catalogue.SourceFamily != graphsem.SourceFamilyMeComTec {
 		t.Fatalf("catalogue identity = %q/%q", catalogue.SourceID, catalogue.SourceFamily)
 	}
-	if got, want := len(catalogue.Entries), 42; got != want {
+	if got, want := len(catalogue.Entries), 48; got != want {
 		t.Fatalf("entry count = %d, want %d", got, want)
 	}
 	for _, entry := range catalogue.Entries {

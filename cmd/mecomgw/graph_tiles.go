@@ -33,16 +33,18 @@ const (
 )
 
 type graphTileRawSample struct {
-	At    time.Time
-	Value float64
+	At              time.Time
+	Value           float64
+	NeedsDerivation bool
 }
 
 type graphTileHistory struct {
-	mu           sync.Mutex
-	raw          []graphTileRawSample // 15m high-res (CRTVStream)
-	pyramid      *tilehistory.Pyramid // Multi-level derived history (LOD)
-	lastRawPurge time.Time
-	hotLatest    time.Time
+	mu               sync.Mutex
+	raw              []graphTileRawSample // 15m high-res (CRTVStream)
+	pyramid          *tilehistory.Pyramid // Multi-level derived history (LOD)
+	lastRawPurge     time.Time
+	hotLatest        time.Time
+	lastDerivedRawAt time.Time
 }
 
 type graphTileRequestSeries struct {
@@ -442,7 +444,7 @@ func (s *server) handleGraphTileRoot(w http.ResponseWriter, r *http.Request) {
 	t1Raw := q.Get("t1")
 	var t0, t1 time.Time
 	customRange := false
-	
+
 	if t0Raw != "" && t1Raw != "" {
 		var err0, err1 error
 		t0, err0 = parseGraphHistoryTimestamp(t0Raw)
@@ -460,14 +462,14 @@ func (s *server) handleGraphTileRoot(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	
+
 	var tile graphTileResponse
 	if customRange {
 		tile, err = s.buildGraphTileRange(tileID, t0, t1, reqSeries)
 	} else {
 		tile, err = s.buildGraphTile(tileID, level, reqSeries)
 	}
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), httpStatusForError(err))
 		return
@@ -480,28 +482,28 @@ func (s *server) handleGraphAvailability(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	s.graphHistoryMu.Lock()
 	defer s.graphHistoryMu.Unlock()
-	
+
 	type availabilityItem struct {
 		ID       string    `json:"id"`
 		Earliest time.Time `json:"earliest"`
 		Latest   time.Time `json:"latest"`
 		Count    int       `json:"count"`
 	}
-	
+
 	out := make([]availabilityItem, 0, len(s.graphHistoryDerived))
 	for key, h := range s.graphHistoryDerived {
 		h.mu.Lock()
 		earliest := h.pyramid.Earliest()
 		latest := h.pyramid.Latest()
 		h.mu.Unlock()
-		
+
 		if earliest.IsZero() {
 			continue
 		}
-		
+
 		out = append(out, availabilityItem{
 			ID:       key,
 			Earliest: earliest,
@@ -509,7 +511,7 @@ func (s *server) handleGraphAvailability(w http.ResponseWriter, r *http.Request)
 			Count:    0, // Not tracked at top level
 		})
 	}
-	
+
 	writeJSON(w, http.StatusOK, map[string]any{"availability": out})
 }
 
@@ -551,7 +553,7 @@ func (s *server) handleGraphTileArrow(w http.ResponseWriter, r *http.Request, ti
 	for _, req := range seriesReq {
 		h := s.lookupGraphHistory(req.DeviceID, req.ParamID, req.Instance, window, now)
 		param, _ := gatewayParameterByID(req.ParamID)
-		
+
 		sensorID := fmt.Sprintf("%s:%d:%d", req.DeviceID, req.ParamID, req.Instance)
 		unit := param.Unit
 		if unit == "" {
@@ -560,7 +562,7 @@ func (s *server) handleGraphTileArrow(w http.ResponseWriter, r *http.Request, ti
 
 		for i := range h.TS {
 			at, _ := parseGraphHistoryTimestamp(h.TS[i])
-			
+
 			tsBuilder.Append(at.UnixNano())
 			_ = sensorBuilder.AppendString(sensorID)
 			valueBuilder.Append(h.V[i])
@@ -777,8 +779,11 @@ func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, le
 			SeriesID:         tileSeriesKeyFromRequest(item),
 			Label:            compactSeriesLabel(item.DeviceID, item.Instance, def),
 			FullLabel:        fmt.Sprintf("device %s · param %d · instance %d · %s", item.DeviceID, item.ParamID, item.Instance, seriesPathLabel(def)),
+			Color:            gatewayParameterColor(def),
 			Unit:             unit,
 			History:          normalizeGraphTileHistorySet(history),
+			Role:             def.Role,
+			Kind:             def.Kind,
 			AxisID:           graphAxisIDForUnit(unit, ""),
 			DefaultVisible:   defaultVisible,
 			VisibilityReason: visibilityReason,
@@ -1095,19 +1100,32 @@ func (s *server) lookupGraphHistory(deviceID string, paramID, instance, windowMs
 func (s *server) lookupGraphRange(deviceID string, paramID, instance int, t0, t1 time.Time) graphTileHistorySet {
 	key := fmt.Sprintf("%s:%d:%d", deviceID, paramID, instance)
 	s.graphHistoryMu.Lock()
-	h := s.graphHistoryDerived[key]
-	if h == nil {
-		h = s.graphHistoryRaw[key]
-	}
+	derived := s.graphHistoryDerived[key]
+	raw := s.graphHistoryRaw[key]
 	s.graphHistoryMu.Unlock()
+
+	window := t1.Sub(t0)
+	if window <= 15*time.Minute && raw != nil {
+		raw.mu.Lock()
+		if len(raw.raw) > 0 {
+			out := raw.hotHistoryLocked(t0)
+			raw.mu.Unlock()
+			return out
+		}
+		raw.mu.Unlock()
+	}
+
+	h := derived
+	if h == nil {
+		h = raw
+	}
 	if h == nil {
 		return normalizeGraphTileHistorySet(graphTileHistorySet{})
 	}
-	
+
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	window := t1.Sub(t0)
 	if window <= 15*time.Minute && len(h.raw) > 0 {
 		return h.hotHistoryLocked(t0)
 	}
@@ -1137,6 +1155,10 @@ func newGraphTileHistory() *graphTileHistory {
 }
 
 func (h *graphTileHistory) addSampleLocked(at time.Time, value float64, isRaw bool) {
+	h.addSampleWithDerivationLocked(at, value, isRaw, false)
+}
+
+func (h *graphTileHistory) addSampleWithDerivationLocked(at time.Time, value float64, isRaw, needsDerivation bool) {
 	if !isFiniteFloat(value) {
 		return
 	}
@@ -1148,11 +1170,24 @@ func (h *graphTileHistory) addSampleLocked(at time.Time, value float64, isRaw bo
 		h.hotLatest = at
 	}
 	if isRaw {
-		h.raw = append(h.raw, graphTileRawSample{At: at, Value: value})
+		h.insertRawSampleLocked(graphTileRawSample{At: at, Value: value, NeedsDerivation: needsDerivation})
 		h.trimRawLocked()
 	} else {
 		h.pyramid.Add(at, value)
 	}
+}
+
+func (h *graphTileHistory) insertRawSampleLocked(sample graphTileRawSample) {
+	if len(h.raw) == 0 || !sample.At.Before(h.raw[len(h.raw)-1].At) {
+		h.raw = append(h.raw, sample)
+		return
+	}
+	idx := sort.Search(len(h.raw), func(i int) bool {
+		return !h.raw[i].At.Before(sample.At)
+	})
+	h.raw = append(h.raw, graphTileRawSample{})
+	copy(h.raw[idx+1:], h.raw[idx:])
+	h.raw[idx] = sample
 }
 
 func (h *graphTileHistory) trimRawLocked() {
@@ -1160,27 +1195,24 @@ func (h *graphTileHistory) trimRawLocked() {
 		return
 	}
 	cutoff := h.hotLatest.Add(-15 * time.Minute)
-	keep := h.raw[:0]
-	for _, sample := range h.raw {
-		if sample.At.Before(cutoff) {
-			continue
-		}
-		keep = append(keep, sample)
+	idx := sort.Search(len(h.raw), func(i int) bool {
+		return !h.raw[i].At.Before(cutoff)
+	})
+	if idx == 0 {
+		return
 	}
-	h.raw = keep
+	kept := copy(h.raw, h.raw[idx:])
+	for i := kept; i < len(h.raw); i++ {
+		h.raw[i] = graphTileRawSample{}
+	}
+	h.raw = h.raw[:kept]
 }
 
 func (h *graphTileHistory) hotHistoryLocked(cutoff time.Time) graphTileHistorySet {
-	samples := make([]graphTileRawSample, 0, len(h.raw))
-	for _, sample := range h.raw {
-		if sample.At.Before(cutoff) {
-			continue
-		}
-		samples = append(samples, sample)
-	}
-	sort.SliceStable(samples, func(i, j int) bool {
-		return samples[i].At.Before(samples[j].At)
+	idx := sort.Search(len(h.raw), func(i int) bool {
+		return !h.raw[i].At.Before(cutoff)
 	})
+	samples := h.raw[idx:]
 	out := graphTileHistorySet{TS: make([]string, 0, len(samples)), V: make([]float64, 0, len(samples))}
 	for _, sample := range samples {
 		out.TS = append(out.TS, sample.At.Format(time.RFC3339Nano))
@@ -1259,15 +1291,23 @@ func (s *server) recordGraphSample(deviceID string, paramID, instance int, value
 	}
 	key := fmt.Sprintf("%s:%d:%d", deviceID, paramID, instance)
 	s.graphHistoryMu.Lock()
-	h := s.graphHistoryDerived[key]
-	if h == nil {
-		h = newGraphTileHistory()
-		s.graphHistoryDerived[key] = h
+	derived := s.graphHistoryDerived[key]
+	if derived == nil {
+		derived = newGraphTileHistory()
+		s.graphHistoryDerived[key] = derived
+	}
+	raw := s.graphHistoryRaw[key]
+	if raw == nil {
+		raw = newGraphTileHistory()
+		s.graphHistoryRaw[key] = raw
 	}
 	s.graphHistoryMu.Unlock()
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.addSampleLocked(at, value, false)
+	derived.mu.Lock()
+	derived.addSampleLocked(at, value, false)
+	derived.mu.Unlock()
+	raw.mu.Lock()
+	raw.addSampleLocked(at, value, true)
+	raw.mu.Unlock()
 }
 
 func (s *server) recordGraphRawSample(deviceID string, paramID, instance int, value float64, at time.Time) {
@@ -1284,7 +1324,7 @@ func (s *server) recordGraphRawSample(deviceID string, paramID, instance int, va
 	s.graphHistoryMu.Unlock()
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	h.addSampleLocked(at, value, true)
+	h.addSampleWithDerivationLocked(at, value, true, true)
 }
 
 func (s *server) readLiveSample(ctx context.Context, deviceID string, paramID, instance int) (float64, bool) {
@@ -1384,7 +1424,7 @@ func (s *server) writeGraphTileArrowRange(w io.Writer, tileID string, t0, t1 tim
 func (s *server) buildGraphTileRange(tileID string, t0, t1 time.Time, req []graphTileRequestSeries) (graphTileResponse, error) {
 	now := time.Now().UTC()
 	series, levelNames := s.graphTileSeriesRange(tileID, req, t0, t1)
-	
+
 	pointCount := 0
 	for _, item := range series {
 		pointCount += len(item.History.TS)
@@ -1429,14 +1469,14 @@ func (s *server) graphTileSeriesRange(tileID string, req []graphTileRequestSerie
 	for _, r := range req {
 		h := s.lookupGraphRange(r.DeviceID, r.ParamID, r.Instance, t0, t1)
 		param, _ := gatewayParameterByID(r.ParamID)
-		
+
 		item := graphTileItem{
 			ID:        fmt.Sprintf("%s:%d:%d", r.DeviceID, r.ParamID, r.Instance),
 			SeriesID:  fmt.Sprintf("%s:%d:%d", r.DeviceID, r.ParamID, r.Instance),
 			TargetID:  r.DeviceID,
 			Label:     param.Name,
 			FullLabel: fmt.Sprintf("%s / %s", r.DeviceID, param.Name),
-			Color:     gatewayParameterColor(r.ParamID),
+			Color:     gatewayParameterColor(param),
 			Unit:      param.Unit,
 			History:   h,
 			Role:      mecom.RoleForParam(param.ID),
@@ -1473,9 +1513,9 @@ func (s *server) graphTileAxes(tileID string, series []graphTileItem) []tileAxis
 	axes := make([]tileAxis, 0, len(units))
 	for unit := range units {
 		axes = append(axes, tileAxis{
-			ID:    gatewayParameterAxisID(unit),
-			Unit:  unit,
-			Side:  "left",
+			ID:   gatewayParameterAxisID(unit),
+			Unit: unit,
+			Side: "left",
 		})
 	}
 	if len(axes) == 0 {
@@ -1484,9 +1524,31 @@ func (s *server) graphTileAxes(tileID string, series []graphTileItem) []tileAxis
 	return axes
 }
 
-func gatewayParameterColor(paramID int) string {
-	colors := []string{"#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"}
-	return colors[paramID%len(colors)]
+func gatewayParameterColor(param mecom.Parameter) string {
+	token := strings.ToLower(strings.Join([]string{param.Name, param.Unit, param.Role, param.Kind}, " "))
+	switch {
+	case strings.Contains(token, "fault") || strings.Contains(token, "error") || strings.Contains(token, "alarm"):
+		return "#ff315f"
+	case strings.Contains(token, "target") || strings.Contains(token, "setpoint") || strings.Contains(token, "control") || param.Writable:
+		return "#ffd400"
+	case strings.Contains(token, "power") || param.Unit == "W":
+		return "#ff7a35"
+	case strings.Contains(token, "voltage") || param.Unit == "V":
+		return "#7aa2ff"
+	case strings.Contains(token, "current") || param.Unit == "A":
+		return "#31d6ff"
+	case strings.Contains(token, "temperature") || strings.Contains(token, "temp") || param.Unit == "degC":
+		return "#00c8ff"
+	case strings.Contains(token, "state") || strings.Contains(token, "status"):
+		return "#8bd3a5"
+	case strings.Contains(token, "counter") || strings.Contains(token, "count"):
+		return "#b8a6ff"
+	}
+	colors := []string{"#31d6ff", "#ffb000", "#ff5c93", "#00d084", "#b079ff", "#ff7a35"}
+	if param.ID < 0 {
+		return colors[0]
+	}
+	return colors[param.ID%len(colors)]
 }
 
 func gatewayParameterAxisID(unit string) string {
@@ -1495,7 +1557,6 @@ func gatewayParameterAxisID(unit string) string {
 	}
 	return "axis-" + unit
 }
-
 
 func seriesLatestPointIsDetached(paramID int, unit string, points []graphTilePoint) bool {
 	if len(points) == 0 {
@@ -1570,6 +1631,10 @@ func (s *server) derivationWorker(ctx context.Context) {
 }
 
 func (s *server) processDerivations() {
+	s.processDerivationsAt(time.Now())
+}
+
+func (s *server) processDerivationsAt(now time.Time) {
 	s.graphHistoryMu.Lock()
 	// Get all keys from raw history
 	keys := make([]string, 0, len(s.graphHistoryRaw))
@@ -1593,20 +1658,24 @@ func (s *server) processDerivations() {
 			rawH.mu.Unlock()
 			continue
 		}
-		
-		// Take samples from the last 2 seconds
-		cutoff := time.Now().Add(-2 * time.Second)
+
+		// Take raw-only samples from the last 2 seconds. Samples already written
+		// through recordGraphSample have already seeded the LOD pyramid.
+		cutoff := now.Add(-2 * time.Second)
 		var sum float64
 		var count int
 		var latestAt time.Time
 		for _, sample := range rawH.raw {
-			if sample.At.After(cutoff) {
+			if sample.NeedsDerivation && sample.At.After(cutoff) && sample.At.After(rawH.lastDerivedRawAt) {
 				sum += sample.Value
 				count++
 				if sample.At.After(latestAt) {
 					latestAt = sample.At
 				}
 			}
+		}
+		if count > 0 {
+			rawH.lastDerivedRawAt = latestAt
 		}
 		rawH.mu.Unlock()
 

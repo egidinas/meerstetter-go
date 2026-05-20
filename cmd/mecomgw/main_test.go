@@ -18,8 +18,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/arrow-go/v18/arrow"
+	"github.com/apache/arrow-go/v18/arrow/array"
+	"github.com/apache/arrow-go/v18/arrow/ipc"
+	"github.com/apache/arrow-go/v18/arrow/memory"
 	"github.com/egidinas/meerstetter-go/mecom"
 	"github.com/egidinas/meerstetter-go/mecom/writelease"
+	"github.com/egidinas/signalforge/arrowtelemetry"
 	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
@@ -48,7 +53,7 @@ func TestLoadConfigValidatesRequiredFields(t *testing.T) {
 	}
 
 	explicit := dir + "/explicit.json"
-	if err := os.WriteFile(explicit, []byte(`{"channel_count":3,"devices":[{"id":"tec-75","endpoint":"tcp:127.0.0.1:50000","address":75,"routes":[{"role":"warm","endpoint":"tcp:127.0.0.1:50002","transport":"tcp","state":"standby"},{"role":"fallback","endpoint":"serial:/dev/ttyUSB0","transport":"serial","state":"offline"}],"channels":[{"instance":1,"role":"temp","label":"Zone A","user_note":"Fixture note","has_cascade":true}]},{"id":"tec-76","endpoint":"tcp:127.0.0.1:50001","address":76,"channel_count":6}]}`), 0o600); err != nil {
+	if err := os.WriteFile(explicit, []byte(`{"channel_count":3,"devices":[{"id":"tec-75","endpoint":"tcp:127.0.0.1:50000","address":75,"third_party_power_control_enabled":true,"routes":[{"role":"warm","endpoint":"tcp:127.0.0.1:50002","transport":"tcp","state":"standby"},{"role":"fallback","endpoint":"serial:/dev/ttyUSB0","transport":"serial","state":"offline"}],"channels":[{"instance":1,"role":"temp","label":"Zone A","user_note":"Fixture note","has_cascade":true}]},{"id":"tec-76","endpoint":"tcp:127.0.0.1:50001","address":76,"channel_count":6}]}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err = loadConfig(explicit)
@@ -63,6 +68,9 @@ func TestLoadConfigValidatesRequiredFields(t *testing.T) {
 	}
 	if got := cfg.Devices[0].Channels[0]; got.Instance != 1 || got.Role != "temp" || got.Label != "Zone A" || got.UserNote != "Fixture note" || !got.HasCascade {
 		t.Fatalf("explicit channel metadata = %+v", got)
+	}
+	if !cfg.Devices[0].PowerControlEnabled {
+		t.Fatal("third-party power-control opt-in was not loaded")
 	}
 
 	bad := dir + "/bad.json"
@@ -196,6 +204,37 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	}
 }
 
+func TestGatewayDevicesExposePowerControlOptIn(t *testing.T) {
+	s := newServer(Config{Devices: []DeviceConfig{{
+		ID:                  "tec-75",
+		Endpoint:            "tcp:127.0.0.1:50000",
+		Address:             75,
+		ChannelCount:        1,
+		PowerControlEnabled: true,
+		Channels: []ChannelConfig{{
+			Instance: 1,
+			Role:     "supply",
+			Label:    "Power channel",
+		}},
+	}}}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var devices struct {
+		Devices []deviceView `json:"devices"`
+	}
+	getJSON(t, ts.URL+"/api/devices", http.StatusOK, &devices)
+	if len(devices.Devices) != 1 {
+		t.Fatalf("devices response = %+v, want one device", devices)
+	}
+	if !devices.Devices[0].PowerControlEnabled {
+		t.Fatalf("device opt-in flag missing: %+v", devices.Devices[0])
+	}
+	if len(devices.Devices[0].Channels) != 1 || !devices.Devices[0].Channels[0].PowerControlEnabled {
+		t.Fatalf("channel opt-in flag missing: %+v", devices.Devices[0].Channels)
+	}
+}
+
 func TestGatewayCatalogueUsesConfiguredChannelInventory(t *testing.T) {
 	s := newServer(Config{
 		ChannelCount: 3,
@@ -287,6 +326,56 @@ func TestGatewayOrdersDefaultDeviceFirst(t *testing.T) {
 	getJSON(t, ts.URL+"/api/devices", http.StatusOK, &devices)
 	if got := devices.Devices[0].ID; got != "tec-77" {
 		t.Fatalf("default_device_id first device = %q, want tec-77", got)
+	}
+}
+
+func TestGatewayProxyBasePortUsesStableConfigOrder(t *testing.T) {
+	s := newServer(Config{
+		Devices: []DeviceConfig{
+			{ID: "tec-75", Endpoint: "tcp:127.0.0.1:50000", Address: 75},
+			{ID: "tec-76", Endpoint: "tcp:127.0.0.1:50001", Address: 76},
+			{ID: "tec-77", Endpoint: "tcp:127.0.0.1:50002", Address: 77},
+		},
+	}, time.Minute, log.New(io.Discard, "", 0))
+
+	if got := s.deviceIndex("tec-75"); got != 0 {
+		t.Fatalf("deviceIndex(tec-75) = %d, want 0", got)
+	}
+	if got := s.deviceIndex("tec-76"); got != 1 {
+		t.Fatalf("deviceIndex(tec-76) = %d, want 1", got)
+	}
+	if got := s.deviceIndex("tec-77"); got != 2 {
+		t.Fatalf("deviceIndex(tec-77) = %d, want 2", got)
+	}
+}
+
+func TestGatewayResetDeviceBindingStopsProxyAndClearsBinding(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	b := s.devices["tec-75"]
+	client := &fakeReadClient{}
+	b.client = client
+	b.commander = &mecom.Commander{}
+	b.proxy = mecom.NewProxyServer("127.0.0.1:0", &mecom.Client{})
+	if err := b.proxy.Start(); err != nil {
+		t.Fatalf("proxy start: %v", err)
+	}
+
+	s.resetDeviceBinding("tec-75", client, errors.New("boom"))
+
+	if !client.closed {
+		t.Fatal("expected client to be closed")
+	}
+	if b.client != nil {
+		t.Fatalf("client not cleared: %+v", b.client)
+	}
+	if b.commander != nil {
+		t.Fatalf("commander not cleared: %+v", b.commander)
+	}
+	if b.proxy != nil {
+		t.Fatalf("proxy not cleared: %+v", b.proxy)
+	}
+	if b.lastErr == nil || b.lastErr.Error() != "boom" {
+		t.Fatalf("lastErr = %v, want boom", b.lastErr)
 	}
 }
 
@@ -414,6 +503,89 @@ func TestGatewayGraphHistoryKeepsHotRawSamplesAndReducesLongRangeHistory(t *test
 	if long.V[0] != 10.5 {
 		t.Fatalf("3-day history mean = %v, want 10.5", long.V[0])
 	}
+}
+
+func TestGraphDerivationsIgnoreSamplesAlreadyRecordedInPyramid(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	base := time.Date(2026, 5, 19, 12, 0, 0, 100_000_000, time.UTC)
+	s.recordGraphSample("tec-75", 1000, 1, 20.0, "ok", base)
+	s.recordGraphSample("tec-75", 1000, 1, 1.0, "ok", base.Add(1600*time.Millisecond))
+
+	s.processDerivationsAt(base.Add(3500 * time.Millisecond))
+
+	assertLongGraphMean(t, s, 10.5, base.Add(4*time.Second))
+}
+
+func TestGraphDerivationsProcessRawSamplesOnce(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	base := time.Date(2026, 5, 19, 12, 0, 0, 100_000_000, time.UTC)
+	s.recordGraphRawSample("tec-75", 1000, 1, 20.0, base)
+	s.recordGraphRawSample("tec-75", 1000, 1, 1.0, base.Add(1600*time.Millisecond))
+
+	s.processDerivationsAt(base.Add(1800 * time.Millisecond))
+	s.processDerivationsAt(base.Add(3500 * time.Millisecond))
+
+	assertLongGraphMean(t, s, 10.5, base.Add(4*time.Second))
+}
+
+func assertLongGraphMean(t *testing.T, s *server, want float64, now time.Time) {
+	t.Helper()
+	long := s.lookupGraphHistory("tec-75", 1000, 1, 3*24*60*60*1000, now)
+	if len(long.TS) != 1 || len(long.V) != 1 {
+		t.Fatalf("3-day history = %+v, want one mean bucket", long)
+	}
+	if math.Abs(long.V[0]-want) > 1e-9 {
+		t.Fatalf("3-day history mean = %v, want %v", long.V[0], want)
+	}
+}
+
+func TestGraphHotHistoryKeepsRawSamplesOrderedAndTrimmed(t *testing.T) {
+	h := newGraphTileHistory()
+	base := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
+	h.mu.Lock()
+	for _, sample := range []struct {
+		offset time.Duration
+		value  float64
+	}{
+		{20 * time.Minute, 20},
+		{0, 0},
+		{10 * time.Minute, 10},
+		{5 * time.Minute, 5},
+	} {
+		h.addSampleLocked(base.Add(sample.offset), sample.value, true)
+	}
+	hot := h.hotHistoryLocked(base.Add(4 * time.Minute))
+	h.mu.Unlock()
+
+	if got, want := hot.V, []float64{5, 10, 20}; !equalFloatSlices(got, want) {
+		t.Fatalf("hot values = %+v, want %+v", got, want)
+	}
+	if len(hot.TS) != 3 {
+		t.Fatalf("hot timestamp count = %d, want 3", len(hot.TS))
+	}
+	prev := time.Time{}
+	for _, raw := range hot.TS {
+		ts, err := time.Parse(time.RFC3339Nano, raw)
+		if err != nil {
+			t.Fatalf("parse timestamp %q: %v", raw, err)
+		}
+		if !prev.IsZero() && ts.Before(prev) {
+			t.Fatalf("timestamps not ordered: %+v", hot.TS)
+		}
+		prev = ts
+	}
+}
+
+func equalFloatSlices(a, b []float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func TestGatewayGraphTileDuplicatesSingleHistoryPointChronologically(t *testing.T) {
@@ -613,6 +785,109 @@ func TestGatewayGraphHistoryExportEmptyIsOk(t *testing.T) {
 	getJSON(t, ts.URL+"/api/graph/history/export?series=tec-75:1000:1", http.StatusOK, &exported)
 	if exported.SchemaVersion != "signalforge.graph_tile.v1" || exported.SeriesCount != 0 || exported.SampleCount != 0 || len(exported.Series) != 0 {
 		t.Fatalf("empty export = %+v, want empty successful archive", exported)
+	}
+}
+
+func TestGatewayArrowImportSeedsTileCache(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := buildArrowTelemetryStream(t, []arrowImportTestRow{
+		{At: now, SensorID: "tec-75:1000:1", Value: 21.25, Quality: gatewayQualityOK},
+	})
+	raw := postArrow(t, ts.URL+"/api/log/import", body, http.StatusOK)
+	var imported struct {
+		ImportedSamples int `json:"imported_samples"`
+	}
+	if err := json.Unmarshal(raw, &imported); err != nil {
+		t.Fatal(err)
+	}
+	if imported.ImportedSamples != 1 {
+		t.Fatalf("imported samples = %d, want 1", imported.ImportedSamples)
+	}
+
+	hot := s.lookupGraphHistory("tec-75", 1000, 1, 15*60*1000, now.Add(time.Second))
+	if len(hot.TS) != 1 || len(hot.V) != 1 || hot.V[0] != 21.25 {
+		t.Fatalf("imported Arrow history = %+v, want one valid sample", hot)
+	}
+}
+
+func TestGatewayArrowImportRejectsWrongSchema(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	postArrow(t, ts.URL+"/api/log/import", buildWrongArrowStream(t), http.StatusBadRequest)
+}
+
+func TestGatewayArrowImportRejectsTooManySamplesAtomically(t *testing.T) {
+	oldLimit := arrowImportSampleLimit
+	arrowImportSampleLimit = 1
+	t.Cleanup(func() { arrowImportSampleLimit = oldLimit })
+
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := buildArrowTelemetryStream(t, []arrowImportTestRow{
+		{At: now.Add(-time.Second), SensorID: "tec-75:1000:1", Value: 21.25, Quality: gatewayQualityOK},
+		{At: now, SensorID: "tec-75:1000:1", Value: 21.5, Quality: gatewayQualityOK},
+	})
+	postArrow(t, ts.URL+"/api/log/import", body, http.StatusRequestEntityTooLarge)
+
+	hot := s.lookupGraphHistory("tec-75", 1000, 1, 15*60*1000, now.Add(time.Second))
+	if len(hot.TS) != 0 || len(hot.V) != 0 {
+		t.Fatalf("rejected Arrow import persisted history: %+v", hot)
+	}
+}
+
+func TestGatewayArrowImportRejectsOversizedBody(t *testing.T) {
+	oldLimit := arrowImportByteLimit
+	arrowImportByteLimit = 8
+	t.Cleanup(func() { arrowImportByteLimit = oldLimit })
+
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	now := time.Now().UTC().Truncate(time.Second)
+	body := buildArrowTelemetryStream(t, []arrowImportTestRow{
+		{At: now, SensorID: "tec-75:1000:1", Value: 21.25, Quality: gatewayQualityOK},
+	})
+	postArrow(t, ts.URL+"/api/log/import", body, http.StatusRequestEntityTooLarge)
+
+	hot := s.lookupGraphHistory("tec-75", 1000, 1, 15*60*1000, now.Add(time.Second))
+	if len(hot.TS) != 0 || len(hot.V) != 0 {
+		t.Fatalf("oversized Arrow import persisted history: %+v", hot)
+	}
+}
+
+func TestHDF5ExportTempFilesAreUniqueAndCleanable(t *testing.T) {
+	first, err := newHDF5ExportTempFile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(first)
+	second, err := newHDF5ExportTempFile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(second)
+
+	if first == second {
+		t.Fatalf("temp files collided: %q", first)
+	}
+	if strings.Contains(first, "/meerstetter-go/scratch/") || strings.Contains(second, "/meerstetter-go/scratch/") {
+		t.Fatalf("temp files use repository scratch path: %q %q", first, second)
+	}
+	if _, err := os.Stat(first); err != nil {
+		t.Fatalf("first temp file is not cleanable: %v", err)
+	}
+	if _, err := os.Stat(second); err != nil {
+		t.Fatalf("second temp file is not cleanable: %v", err)
 	}
 }
 
@@ -1468,25 +1743,43 @@ type recordingWriteClient struct {
 	value        int32
 	floatValue   float32
 	readback     map[string]float64
+	readCount    int
+	writeErr     error
+	writes       []recordedWrite
+}
+
+type recordedWrite struct {
+	paramID  int
+	instance int
+	value    float64
 }
 
 func (c *recordingWriteClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
+	if c.writeErr != nil {
+		return c.writeErr
+	}
 	c.lastParamID = paramID
 	c.lastInstance = instance
 	c.value = int32(value)
 	c.floatValue = value
+	c.writes = append(c.writes, recordedWrite{paramID: paramID, instance: instance, value: float64(value)})
 	return nil
 }
 
 func (c *recordingWriteClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
+	if c.writeErr != nil {
+		return c.writeErr
+	}
 	c.lastParamID = paramID
 	c.lastInstance = instance
 	c.value = value
 	c.floatValue = float32(value)
+	c.writes = append(c.writes, recordedWrite{paramID: paramID, instance: instance, value: float64(value)})
 	return nil
 }
 
 func (c *recordingWriteClient) ReadBulk(ctx context.Context, params []mecom.Parameter) ([]float64, error) {
+	c.readCount++
 	values := make([]float64, 0, len(params))
 	for _, p := range params {
 		if c.readback != nil {
@@ -1559,6 +1852,247 @@ func TestAuthorizeRequiresMatchingLeaseToken(t *testing.T) {
 	}
 	if err := s.authorize("tec-76", tmtc.Telecommand{Metadata: map[string]string{"lease_token": lease.Token}}); !errors.Is(err, writelease.ErrUnknownDevice) {
 		t.Fatalf("authorize wrong device err = %v, want ErrUnknownDevice", err)
+	}
+}
+
+func newPowerControlTestServer(enabled bool, readback map[string]float64) (*server, *recordingWriteClient) {
+	cfg := Config{Devices: []DeviceConfig{{
+		ID:                  "tec-75",
+		Endpoint:            "tcp:127.0.0.1:50000",
+		Address:             75,
+		ChannelCount:        1,
+		PowerControlEnabled: enabled,
+		Channels: []ChannelConfig{{
+			Instance: 1,
+			Role:     "supply",
+		}},
+	}}}
+	s := newServer(cfg, time.Minute, log.New(io.Discard, "", 0))
+	fw := &recordingWriteClient{readback: readback}
+	s.devices["tec-75"].client = fw
+	s.devices["tec-75"].commander = mecom.NewCommander(fw, time.Second)
+	s.devices["tec-75"].commander.TargetID = "tec-75"
+	s.devices["tec-75"].commander.Authorizer = mecom.AuthorizerFunc(s.authorize)
+	return s, fw
+}
+
+func stablePowerControlReadback() map[string]float64 {
+	return map[string]float64{
+		gatewayCatalogueKey(1021, 1): 10,
+		gatewayCatalogueKey(1020, 1): 2,
+		gatewayCatalogueKey(2010, 1): 1,
+		gatewayCatalogueKey(2021, 1): 0,
+		gatewayCatalogueKey(2030, 1): 0,
+	}
+}
+
+func TestPowerControlRequiresExplicitDeviceOptIn(t *testing.T) {
+	s, fw := newPowerControlTestServer(false, stablePowerControlReadback())
+	s.setVirtualParam("tec-75", 2035, 1, 100)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+
+	if len(fw.writes) != 0 {
+		t.Fatalf("power control wrote without opt-in: %+v", fw.writes)
+	}
+}
+
+func TestPowerControlSamplingRequiresExplicitDeviceOptIn(t *testing.T) {
+	s, _ := newPowerControlTestServer(false, stablePowerControlReadback())
+
+	snap, err := s.bind("tec-75")
+	if err != nil {
+		t.Fatalf("bind: %v", err)
+	}
+	if snap.binding.ring != nil {
+		t.Fatal("ring reader started when power control was disabled")
+	}
+
+	s.devices["tec-75"].cfg.PowerControlEnabled = true
+
+	snap2, err2 := s.bind("tec-75")
+	if err2 != nil {
+		t.Fatalf("bind enabled: %v", err2)
+	}
+	if snap2.binding.ring != nil {
+		t.Fatal("ring reader unexpectedly non-nil")
+	}
+}
+
+func TestPowerControlRingReceiverStopsOnBindingReset(t *testing.T) {
+	s, _ := newPowerControlTestServer(true, stablePowerControlReadback())
+	bound := s.devices["tec-75"]
+	samples := make(chan mecom.RingSample)
+	bound.samplesChan = samples
+	bound.ringStop = make(chan struct{})
+	bound.ring = mecom.NewRingReader(nil, []mecom.RingCaptureParameter{
+		{Parameter: mecom.Parameter{ID: 1021, Instance: 1}},
+	}, samples)
+
+	done := make(chan struct{})
+	stop := bound.ringStop
+	go func() {
+		s.runDeviceRingReceiver("tec-75", bound, samples, stop)
+		close(done)
+	}()
+
+	s.resetDeviceBinding("tec-75", nil, errors.New("reset"))
+
+	select {
+	case <-done:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("ring receiver did not stop after binding reset")
+	}
+}
+
+func TestPowerControlEnabledWritesSlewedSetpoints(t *testing.T) {
+	s, fw := newPowerControlTestServer(true, stablePowerControlReadback())
+	s.setVirtualParam("tec-75", 2035, 1, 100)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+
+	if len(fw.writes) != 2 {
+		t.Fatalf("writes len = %d, want 2: %+v", len(fw.writes), fw.writes)
+	}
+	if fw.writes[0].paramID != 2021 || math.Abs(fw.writes[0].value-5.0) > 1e-6 {
+		t.Fatalf("voltage write = %+v, want 2021:1=5.0", fw.writes[0])
+	}
+	if fw.writes[1].paramID != 2030 || math.Abs(fw.writes[1].value-2.0) > 1e-6 {
+		t.Fatalf("current write = %+v, want 2030:1=2.0", fw.writes[1])
+	}
+	if got := s.getVirtualParam("tec-75", 2038, 1, -1); got != 1 {
+		t.Fatalf("loop status = %v, want active 1", got)
+	}
+}
+
+func TestPowerControlUsesBufferedHistoryForResistance(t *testing.T) {
+	s, fw := newPowerControlTestServer(true, map[string]float64{
+		gatewayCatalogueKey(2010, 1): 1,
+		gatewayCatalogueKey(2021, 1): 0,
+		gatewayCatalogueKey(2030, 1): 0,
+	})
+	s.devices["tec-75"].mu.Lock()
+	s.devices["tec-75"].powerHistory[1] = []powerControlSample{
+		{v: 7.8, i: 2},
+		{v: 8.0, i: 2},
+		{v: 8.2, i: 2},
+	}
+	s.devices["tec-75"].mu.Unlock()
+	s.setVirtualParam("tec-75", 2035, 1, 64)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+
+	if len(fw.writes) != 2 {
+		t.Fatalf("writes len = %d, want buffered control writes: %+v", len(fw.writes), fw.writes)
+	}
+	if fw.readCount != 1 {
+		t.Fatalf("read count = %d, want only output/control readback without voltage/current fallback", fw.readCount)
+	}
+	if fw.writes[0].paramID != 2021 || math.Abs(fw.writes[0].value-5.0) > 1e-6 {
+		t.Fatalf("voltage write = %+v, want 2021:1=5.0 from buffered R=4", fw.writes[0])
+	}
+	if fw.writes[1].paramID != 2030 || math.Abs(fw.writes[1].value-1.92) > 1e-6 {
+		t.Fatalf("current write = %+v, want 2030:1=1.92 from buffered R=4", fw.writes[1])
+	}
+}
+
+func TestPowerControlRejectsNonOhmicSamplesWithGraceWindow(t *testing.T) {
+	s, fw := newPowerControlTestServer(true, map[string]float64{
+		gatewayCatalogueKey(1021, 1): 10,
+		gatewayCatalogueKey(1020, 1): 20,
+		gatewayCatalogueKey(2010, 1): 1,
+		gatewayCatalogueKey(2021, 1): 7,
+		gatewayCatalogueKey(2030, 1): 3,
+	})
+	s.setVirtualParam("tec-75", 2035, 1, 100)
+	s.setVirtualParam("tec-75", 2037, 1, 5)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+	if len(fw.writes) != 0 {
+		t.Fatalf("non-ohmic grace sample wrote setpoints: %+v", fw.writes)
+	}
+	if got := s.getVirtualParam("tec-75", 2038, 1, -1); got != 1 {
+		t.Fatalf("first non-ohmic status = %v, want active grace 1", got)
+	}
+	if got := s.getVirtualParam("tec-75", 2043, 1, 0); got != 1 {
+		t.Fatalf("non-ohmic count = %v, want 1", got)
+	}
+	if got := s.getVirtualParam("tec-75", 2037, 1, 0); got != 5 {
+		t.Fatalf("accepted resistance changed on rejected sample = %v, want frozen 5", got)
+	}
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+	if got := s.getVirtualParam("tec-75", 2038, 1, -1); got != 2 {
+		t.Fatalf("third non-ohmic status = %v, want fallback 2", got)
+	}
+	if got := s.getVirtualParam("tec-75", 2037, 1, 0); got != 5 {
+		t.Fatalf("accepted resistance changed during fallback = %v, want frozen 5", got)
+	}
+
+	fw.readback = stablePowerControlReadback()
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+	if got := s.getVirtualParam("tec-75", 2043, 1, -1); got != 0 {
+		t.Fatalf("recovered non-ohmic count = %v, want reset 0", got)
+	}
+}
+
+func TestPowerControlWriteErrorFallsBackAndResetsBinding(t *testing.T) {
+	s, fw := newPowerControlTestServer(true, stablePowerControlReadback())
+	fw.writeErr = mecom.ErrUnreachable
+	s.setVirtualParam("tec-75", 2035, 1, 100)
+
+	s.runDevicePowerControl(context.Background(), "tec-75", s.devices["tec-75"])
+
+	if got := s.getVirtualParam("tec-75", 2038, 1, -1); got != 2 {
+		t.Fatalf("write-error status = %v, want fallback 2", got)
+	}
+	if s.devices["tec-75"].client != nil {
+		t.Fatalf("write-error binding still has client, want reset")
+	}
+}
+
+func TestPowerControlTargetWriteRequiresOptInAndLease(t *testing.T) {
+	s, _ := newPowerControlTestServer(false, stablePowerControlReadback())
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	body := `{"name":"write_float32","arguments":{"param":2035,"instance":1,"value":100}}`
+	resp, err := http.Post(ts.URL+"/api/devices/tec-75/write", "application/json", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("disabled power target write status = %d, want 403", resp.StatusCode)
+	}
+
+	s.devices["tec-75"].cfg.PowerControlEnabled = true
+	resp, err = http.Post(ts.URL+"/api/devices/tec-75/write", "application/json", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusLocked {
+		t.Fatalf("unleased power target write status = %d, want 423", resp.StatusCode)
+	}
+
+	lease, err := s.leases.Acquire("tec-75", "operator", time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest(http.MethodPost, ts.URL+"/api/devices/tec-75/write", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Lease-Token", lease.Token)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("leased power target write status = %d, want 200", resp.StatusCode)
 	}
 }
 
@@ -1863,6 +2397,28 @@ func testConfig() Config {
 	}}}
 }
 
+type fakeReadClient struct {
+	closed bool
+}
+
+func (f *fakeReadClient) ReadFloat32(context.Context, int, int) (float64, error) { return 0, nil }
+func (f *fakeReadClient) ReadInt32(context.Context, int, int) (int32, error)     { return 0, nil }
+func (f *fakeReadClient) ReadBulk(context.Context, []mecom.Parameter) ([]float64, error) {
+	return nil, nil
+}
+func (f *fakeReadClient) ConfigureRingCapture(context.Context, uint16, []mecom.RingCaptureParameter) error {
+	return nil
+}
+func (f *fakeReadClient) TriggerRingSync(context.Context) error           { return nil }
+func (f *fakeReadClient) ReadRingPointer(context.Context) (uint32, error) { return 0, nil }
+func (f *fakeReadClient) ReadRingChunk(context.Context, uint32, uint16) (mecom.RingReadResponse, error) {
+	return mecom.RingReadResponse{}, nil
+}
+func (f *fakeReadClient) Close() error {
+	f.closed = true
+	return nil
+}
+
 func getJSON(t *testing.T, url string, wantStatus int, out any) {
 	t.Helper()
 	resp, err := http.Get(url)
@@ -1896,6 +2452,91 @@ func postJSON(t *testing.T, url string, body string, wantStatus int) []byte {
 		t.Fatalf("POST %s status = %d, want %d; body=%s", url, resp.StatusCode, wantStatus, string(raw))
 	}
 	return raw
+}
+
+func postArrow(t *testing.T, url string, body []byte, wantStatus int) []byte {
+	t.Helper()
+	resp, err := http.Post(url, arrowtelemetry.TransportMIME, bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != wantStatus {
+		t.Fatalf("POST %s status = %d, want %d; body=%s", url, resp.StatusCode, wantStatus, string(raw))
+	}
+	return raw
+}
+
+type arrowImportTestRow struct {
+	At       time.Time
+	SensorID string
+	Value    float64
+	Quality  string
+}
+
+func buildArrowTelemetryStream(t *testing.T, rows []arrowImportTestRow) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	writer := ipc.NewWriter(&buf, ipc.WithSchema(arrowtelemetry.TelemetrySchema))
+	defer writer.Close()
+
+	builder := array.NewRecordBuilder(memory.DefaultAllocator, arrowtelemetry.TelemetrySchema)
+	defer builder.Release()
+
+	tsBuilder := builder.Field(0).(*array.Int64Builder)
+	sensorBuilder := builder.Field(1).(*array.BinaryDictionaryBuilder)
+	valueBuilder := builder.Field(2).(*array.Float64Builder)
+	unitBuilder := builder.Field(3).(*array.BinaryDictionaryBuilder)
+	campaignBuilder := builder.Field(4).(*array.BinaryDictionaryBuilder)
+	sourceBuilder := builder.Field(5).(*array.BinaryDictionaryBuilder)
+	roleBuilder := builder.Field(6).(*array.BinaryDictionaryBuilder)
+	kindBuilder := builder.Field(7).(*array.BinaryDictionaryBuilder)
+	familyBuilder := builder.Field(8).(*array.BinaryDictionaryBuilder)
+	qualityBuilder := builder.Field(9).(*array.BinaryDictionaryBuilder)
+	stateBuilder := builder.Field(10).(*array.BinaryDictionaryBuilder)
+
+	for _, row := range rows {
+		tsBuilder.Append(row.At.UnixNano())
+		_ = sensorBuilder.AppendString(row.SensorID)
+		valueBuilder.Append(row.Value)
+		_ = unitBuilder.AppendString("degC")
+		_ = campaignBuilder.AppendString("test")
+		_ = sourceBuilder.AppendString("test")
+		_ = roleBuilder.AppendString("telemetry")
+		_ = kindBuilder.AppendString("temperature")
+		_ = familyBuilder.AppendString("mecom")
+		_ = qualityBuilder.AppendString(row.Quality)
+		stateBuilder.AppendNull()
+	}
+	record := builder.NewRecord()
+	if err := writer.Write(record); err != nil {
+		record.Release()
+		t.Fatal(err)
+	}
+	record.Release()
+	return buf.Bytes()
+}
+
+func buildWrongArrowStream(t *testing.T) []byte {
+	t.Helper()
+	schema := arrow.NewSchema([]arrow.Field{{Name: "timestamp_ns", Type: arrow.PrimitiveTypes.Int64}}, nil)
+	var buf bytes.Buffer
+	writer := ipc.NewWriter(&buf, ipc.WithSchema(schema))
+	defer writer.Close()
+	builder := array.NewRecordBuilder(memory.DefaultAllocator, schema)
+	defer builder.Release()
+	builder.Field(0).(*array.Int64Builder).Append(time.Now().UnixNano())
+	record := builder.NewRecord()
+	if err := writer.Write(record); err != nil {
+		record.Release()
+		t.Fatal(err)
+	}
+	record.Release()
+	return buf.Bytes()
 }
 
 func postLease(t *testing.T, url string, body string) writelease.Lease {

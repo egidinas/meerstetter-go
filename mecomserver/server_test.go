@@ -132,6 +132,13 @@ func TestRequestAddress(t *testing.T) {
 	if addr != 0x4B {
 		t.Fatalf("address = 0x%02X, want 0x4B", addr)
 	}
+	addr, err = RequestAddress([]byte("?VR03E8010000\r"))
+	if err != nil {
+		t.Fatalf("RequestAddress rejected unaddressed request: %v", err)
+	}
+	if addr != 0 {
+		t.Fatalf("unaddressed request address = 0x%02X, want 0", addr)
+	}
 	if _, err := RequestAddress([]byte("!4B0001+0000\r")); err == nil {
 		t.Fatal("RequestAddress accepted a response frame")
 	}
@@ -205,7 +212,7 @@ func TestServeRouterRoutesAddressZeroToDefaultAddress(t *testing.T) {
 	routeClient, routeServer := net.Pipe()
 	defer routeClient.Close()
 	defer routeServer.Close()
-	seen := serveDownstreamPipe(t, routeServer, 1)
+	seen := serveDownstreamPipe(t, routeServer, 2)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -244,6 +251,17 @@ func TestServeRouterRoutesAddressZeroToDefaultAddress(t *testing.T) {
 	}
 	if reply := readFrame(t, client); !bytes.Contains(reply, []byte("000001?VR03E8010000+")) {
 		t.Fatalf("client got wrong default route reply: %q", reply)
+	}
+
+	bareReq := []byte("?VR03E8010000\r")
+	if _, err := client.Write(bareReq); err != nil {
+		t.Fatalf("write bare request: %v", err)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, bareReq) {
+		t.Fatalf("default route got bare request %q, want %q", got, bareReq)
+	}
+	if reply := readFrame(t, client); !bytes.Contains(reply, []byte("VR03E8010000+")) {
+		t.Fatalf("client got wrong bare-request default route reply: %q", reply)
 	}
 }
 

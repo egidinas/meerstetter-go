@@ -22,7 +22,7 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	if len(client.configured) != 1 {
 		t.Fatalf("configured calls = %d, want 1", len(client.configured))
 	}
-	if got, want := len(client.configured[0]), 9; got != want {
+	if got, want := len(client.configured[0]), 11; got != want {
 		t.Fatalf("ring capture slots = %d, want high-priority slots %d", got, want)
 	}
 	for _, p := range client.configured[0] {
