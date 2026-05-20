@@ -3,6 +3,7 @@ package mecom
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"math"
 	"testing"
 	"time"
@@ -78,5 +79,58 @@ func TestCANClientReadFloat32SkipsUnmatchedBinaryResponses(t *testing.T) {
 	}
 	if math.Abs(got-12.25) > 0.001 {
 		t.Fatalf("ReadFloat32=%f, want 12.25", got)
+	}
+}
+
+func TestCANClientRejectsOutOfRangeParameterAddressBeforeSend(t *testing.T) {
+	tests := []struct {
+		name string
+		op   func(*CANClient) error
+	}{
+		{
+			name: "negative param",
+			op: func(c *CANClient) error {
+				_, err := c.ReadFloat32(context.Background(), -1, 1)
+				return err
+			},
+		},
+		{
+			name: "too large param",
+			op: func(c *CANClient) error {
+				_, err := c.ReadFloat32(context.Background(), 0x10000, 1)
+				return err
+			},
+		},
+		{
+			name: "zero instance",
+			op: func(c *CANClient) error {
+				_, err := c.ReadFloat32(context.Background(), 1000, 0)
+				return err
+			},
+		},
+		{
+			name: "invalid bulk member",
+			op: func(c *CANClient) error {
+				_, err := c.ReadBulk(context.Background(), []Parameter{
+					{ID: 1000, Instance: 1, Type: DataTypeFloat32},
+					{ID: 1000, Instance: 0, Type: DataTypeFloat32},
+				})
+				return err
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &fakeCANTransceiver{}
+			client := NewCANClient(fake, ClientConfig{Address: 0x1f, Timeout: time.Second})
+			err := tt.op(client)
+			if !errors.Is(err, ErrInvalidArgument) {
+				t.Fatalf("err=%v, want ErrInvalidArgument", err)
+			}
+			if len(fake.sent) != 0 {
+				t.Fatalf("sent frames=%d, want 0", len(fake.sent))
+			}
+		})
 	}
 }

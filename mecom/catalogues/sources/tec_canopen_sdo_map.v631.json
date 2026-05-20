@@ -1,0 +1,434 @@
+{
+  "schema_version": "mecom_tec_canopen_sdo_map.v1",
+  "source_policy": "Runtime CANopen SDO routing uses MeCom parameter IDs as the primary key. CANopen object indexes and decimal object IDs are aliases, not replacement MeCom IDs.",
+  "mappings": [
+    {
+      "mecom_id": 100,
+      "name": "System: Device Type",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2000", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2000" },
+        { "space": "canopen_object_decimal", "id": 8192 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2000"]
+    },
+    {
+      "mecom_id": 101,
+      "name": "System: Hardware Version",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2001", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2001" },
+        { "space": "canopen_object_decimal", "id": 8193 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2001"]
+    },
+    {
+      "mecom_id": 102,
+      "name": "System: Serial Number",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2002", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2002" },
+        { "space": "canopen_object_decimal", "id": 8194 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2002"]
+    },
+    {
+      "mecom_id": 103,
+      "name": "System: Firmware Version",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2003", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2003" },
+        { "space": "canopen_object_decimal", "id": 8195 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2003"]
+    },
+    {
+      "mecom_id": 104,
+      "name": "System: Device Status",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2004", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2004" },
+        { "space": "canopen_object_decimal", "id": 8196 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2004"]
+    },
+    {
+      "mecom_id": 105,
+      "name": "System: Error Number",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2005", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2005" },
+        { "space": "canopen_object_decimal", "id": 8197 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2005"]
+    },
+    {
+      "mecom_id": 106,
+      "name": "System: Error Instance",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2006", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2006" },
+        { "space": "canopen_object_decimal", "id": 8198 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2006"]
+    },
+    {
+      "mecom_id": 107,
+      "name": "System: Error Parameter",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2007", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2007" },
+        { "space": "canopen_object_decimal", "id": 8199 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2007"]
+    },
+    {
+      "mecom_id": 109,
+      "name": "System: Flash Status",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x2009", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2009" },
+        { "space": "canopen_object_decimal", "id": 8201 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2009"]
+    },
+    {
+      "mecom_id": 111,
+      "name": "System: Device Reset Command",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x200B", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x200B" },
+        { "space": "canopen_object_decimal", "id": 8203 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.200B"]
+    },
+    {
+      "mecom_id": 112,
+      "name": "System: Firmware Version Float",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x200C", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x200C" },
+        { "space": "canopen_object_decimal", "id": 8204 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.200C"]
+    },
+    {
+      "mecom_id": 115,
+      "name": "System: Random Startup Value",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "fixed", "fixed": 1 },
+      "canopen": { "index": "0x200F", "subindex": "0x01", "subindex_mode": "fixed", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x200F" },
+        { "space": "canopen_object_decimal", "id": 8207 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.200F"]
+    },
+    {
+      "mecom_id": 1000,
+      "name": "Object Temperature",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2100", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2100" },
+        { "space": "canopen_object_decimal", "id": 8448 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2100", "catalogues/tec.json#readout_parameters.1000"]
+    },
+    {
+      "mecom_id": 1001,
+      "name": "Sink Temperature",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2101", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2101" },
+        { "space": "canopen_object_decimal", "id": 8449 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2101", "catalogues/tec.json#readout_parameters.1001"]
+    },
+    {
+      "mecom_id": 1020,
+      "name": "Output Stage Actual Current",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2120", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2120" },
+        { "space": "canopen_object_decimal", "id": 8480 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2120", "catalogues/tec.json#readout_parameters.1020"]
+    },
+    {
+      "mecom_id": 1021,
+      "name": "Output Stage Actual Voltage",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2121", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2121" },
+        { "space": "canopen_object_decimal", "id": 8481 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2121", "catalogues/tec.json#readout_parameters.1021"]
+    },
+    {
+      "mecom_id": 1022,
+      "name": "Output Stage Actual Power",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2122", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2122" },
+        { "space": "canopen_object_decimal", "id": 8482 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2122", "catalogues/tec.json#readout_parameters.1022"]
+    },
+    {
+      "mecom_id": 2010,
+      "name": "Output Stage Enable",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2410", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2410" },
+        { "space": "canopen_object_decimal", "id": 9232 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2410", "catalogues/tec.json#write_parameters.2010"]
+    },
+    {
+      "mecom_id": 2020,
+      "name": "Output Stage Fixed Current",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2420", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2420" },
+        { "space": "canopen_object_decimal", "id": 9248 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2420", "catalogues/tec.json#write_parameters.2020"]
+    },
+    {
+      "mecom_id": 2021,
+      "name": "Output Stage Fixed Voltage",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2421", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2421" },
+        { "space": "canopen_object_decimal", "id": 9249 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2421", "catalogues/tec.json#write_parameters.2021"]
+    },
+    {
+      "mecom_id": 2030,
+      "name": "Output Stage Current Limitation",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2430", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2430" },
+        { "space": "canopen_object_decimal", "id": 9264 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2430", "catalogues/tec.json#write_parameters.2030"]
+    },
+    {
+      "mecom_id": 2031,
+      "name": "Output Stage Voltage Limitation",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2431", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2431" },
+        { "space": "canopen_object_decimal", "id": 9265 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2431", "catalogues/tec.json#write_parameters.2031"]
+    },
+    {
+      "mecom_id": 2032,
+      "name": "Output Stage Current Error Threshold",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2432", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2432" },
+        { "space": "canopen_object_decimal", "id": 9266 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2432", "catalogues/tec.json#write_parameters.2032"]
+    },
+    {
+      "mecom_id": 2033,
+      "name": "Output Stage Voltage Error Threshold",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2433", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2433" },
+        { "space": "canopen_object_decimal", "id": 9267 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2433", "catalogues/tec.json#write_parameters.2033"]
+    },
+    {
+      "mecom_id": 2040,
+      "name": "Operating Mode",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2440", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2440" },
+        { "space": "canopen_object_decimal", "id": 9280 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2440", "catalogues/tec.json#write_parameters.2040"]
+    },
+    {
+      "mecom_id": 3000,
+      "name": "Target Object Temperature",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x2600", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2600" },
+        { "space": "canopen_object_decimal", "id": 9728 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2600", "catalogues/tec.json#write_parameters.3000"]
+    },
+    {
+      "mecom_id": 52002,
+      "name": "Lookup Table: Status Monitor",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 4 },
+      "canopen": { "index": "0x2F02", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2F02" },
+        { "space": "canopen_object_decimal", "id": 12034 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2F02", "CoSo log: Get INT32 Value ID 52002"]
+    },
+    {
+      "mecom_id": 52003,
+      "name": "Lookup Table: Current Executing Line Monitor",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": { "mode": "subindex", "min": 1, "max": 4 },
+      "canopen": { "index": "0x2F03", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x2F03" },
+        { "space": "canopen_object_decimal", "id": 12035 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.2F03", "CoSo lookup-table monitor flow"]
+    },
+    {
+      "mecom_id": 53120,
+      "name": "Cascade Temperature Controller Enable",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x4420", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x4420" },
+        { "space": "canopen_object_decimal", "id": 17440 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.4420", "catalogues/tec.json#write_parameters.53120"]
+    },
+    {
+      "mecom_id": 53121,
+      "name": "Cascade Current Temperature Selection",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x4421", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x4421" },
+        { "space": "canopen_object_decimal", "id": 17441 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.4421", "catalogues/tec.json#write_parameters.53121"]
+    },
+    {
+      "mecom_id": 53122,
+      "name": "Cascade Sync Run With Channel",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x4422", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0004" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x4422" },
+        { "space": "canopen_object_decimal", "id": 17442 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.4422", "catalogues/tec.json#write_parameters.53122"]
+    },
+    {
+      "mecom_id": 53123,
+      "name": "Cascade Target Temperature",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": { "mode": "subindex", "min": 1, "max": 255 },
+      "canopen": { "index": "0x4423", "subindex": "instance", "subindex_mode": "instance", "data_type": "0x0008" },
+      "aliases": [
+        { "space": "canopen_index", "id": "0x4423" },
+        { "space": "canopen_object_decimal", "id": 17443 }
+      ],
+      "source_evidence": ["catalogues/sources/canopen_eds.v631.json#objects.4423", "catalogues/tec.json#write_parameters.53123"]
+    }
+  ],
+  "unsupported": [
+    {
+      "id": 120,
+      "reason": "User Notes is latin1 metadata/big-data, not a 32-bit CANopen SDO numeric parameter.",
+      "source_evidence": ["catalogues/tec.json#write_parameters.120", "catalogues/sources/tec_tooltips.v631.json#parameters.120"]
+    },
+    {
+      "id": "?RS0000",
+      "reason": "CRTVStream ring-current-position is a MeCom stream command; the CANopen client marks ring readout unsupported.",
+      "source_evidence": ["mecom/canopen_client.go#SupportsRingReadout"]
+    }
+  ]
+}

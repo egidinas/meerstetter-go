@@ -65,6 +65,7 @@ type RouterConfig struct {
 
 	// stats and routeStats are filled in by prepareRoutes so callers can
 	// retrieve compatibility per-address snapshots and full per-route snapshots.
+	statsMu    sync.RWMutex
 	stats      map[byte]*brokerStatsRecorder
 	routeStats []*brokerStatsRecorder
 }
@@ -74,7 +75,12 @@ type RouterConfig struct {
 // MeCom address. Use RouteStats when duplicate serial/CAN routes matter.
 // Returns nil before ServeRouter/ListenAndServeRouter has been called.
 func (cfg *RouterConfig) Stats() map[byte]BrokerStats {
-	if cfg == nil || cfg.stats == nil {
+	if cfg == nil {
+		return nil
+	}
+	cfg.statsMu.RLock()
+	defer cfg.statsMu.RUnlock()
+	if cfg.stats == nil {
 		return nil
 	}
 	out := make(map[byte]BrokerStats, len(cfg.stats))
@@ -88,7 +94,12 @@ func (cfg *RouterConfig) Stats() map[byte]BrokerStats {
 // including duplicate serial/CAN routes serving the same MeCom address.
 // Returns nil before ServeRouter/ListenAndServeRouter has been called.
 func (cfg *RouterConfig) RouteStats() []BrokerStats {
-	if cfg == nil || cfg.routeStats == nil {
+	if cfg == nil {
+		return nil
+	}
+	cfg.statsMu.RLock()
+	defer cfg.statsMu.RUnlock()
+	if cfg.routeStats == nil {
 		return nil
 	}
 	out := make([]BrokerStats, 0, len(cfg.routeStats))
@@ -147,6 +158,13 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 		return err
 	}
 	commandCache := newCommandIdempotencyCache(cfg.CommandIdempotencyTTL)
+	clientCfg := routedClientConfig{
+		RequestTimeout:    cfg.RequestTimeout,
+		ClientIdleTimeout: cfg.ClientIdleTimeout,
+		RouteSelection:    cfg.RouteSelection,
+		TraceFrames:       cfg.TraceFrames,
+		Logger:            cfg.Logger,
+	}
 	go func() {
 		<-ctx.Done()
 		_ = ln.Close()
@@ -166,7 +184,7 @@ func ServeRouter(ctx context.Context, ln net.Listener, cfg *RouterConfig) error 
 		clientAddressZero, releaseAddressZero := addressZero.Lease(conn.RemoteAddr())
 		go func() {
 			defer releaseAddressZero()
-			handleRoutedClient(ctx, conn, routes, *cfg, clientAddressZero, commandCache)
+			handleRoutedClient(ctx, conn, routes, clientCfg, clientAddressZero, commandCache)
 		}()
 	}
 }
@@ -202,8 +220,13 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 	}
 	cfg.RouteSelection = policy
 	routes := make(preparedRoutes, len(cfg.Routes))
-	cfg.stats = make(map[byte]*brokerStatsRecorder, len(cfg.Routes))
-	cfg.routeStats = make([]*brokerStatsRecorder, 0, len(cfg.Routes))
+	stats := make(map[byte]*brokerStatsRecorder, len(cfg.Routes))
+	routeStats := make([]*brokerStatsRecorder, 0, len(cfg.Routes))
+	type brokerStart struct {
+		config   Config
+		requests chan request
+	}
+	brokers := make([]brokerStart, 0, len(cfg.Routes))
 	for _, route := range cfg.Routes {
 		if route.Address == 0 {
 			return nil, fmt.Errorf("mecomserver: route address 0 is reserved")
@@ -219,10 +242,10 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 		priority := len(routes[route.Address])
 		routeID := fmt.Sprintf("0x%02X:%d:%s", route.Address, priority, route.Target)
 		recorder := newBrokerStatsRecorder(route.Address, route.Target, routeID, priority)
-		if _, ok := cfg.stats[route.Address]; !ok {
-			cfg.stats[route.Address] = recorder
+		if _, ok := stats[route.Address]; !ok {
+			stats[route.Address] = recorder
 		}
-		cfg.routeStats = append(cfg.routeStats, recorder)
+		routeStats = append(routeStats, recorder)
 		broker := &routeBroker{
 			address:  route.Address,
 			target:   route.Target,
@@ -240,7 +263,7 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 			Logger:            cfg.Logger,
 			statsRecorder:     recorder,
 		}
-		go runBroker(ctx, routeCfg, requests)
+		brokers = append(brokers, brokerStart{config: routeCfg, requests: requests})
 	}
 	if cfg.DefaultAddress != 0 {
 		if len(routes[cfg.DefaultAddress]) == 0 {
@@ -255,10 +278,25 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 			return nil, fmt.Errorf("mecomserver: address-zero route 0x%02X has no configured route", addr)
 		}
 	}
+	cfg.statsMu.Lock()
+	cfg.stats = stats
+	cfg.routeStats = routeStats
+	cfg.statsMu.Unlock()
+	for _, broker := range brokers {
+		go runBroker(ctx, broker.config, broker.requests)
+	}
 	return routes, nil
 }
 
-func handleRoutedClient(ctx context.Context, conn net.Conn, routes preparedRoutes, cfg RouterConfig, addressZero byte, commandCache *commandIdempotencyCache) {
+type routedClientConfig struct {
+	RequestTimeout    time.Duration
+	ClientIdleTimeout time.Duration
+	RouteSelection    RouteSelectionPolicy
+	TraceFrames       bool
+	Logger            *log.Logger
+}
+
+func handleRoutedClient(ctx context.Context, conn net.Conn, routes preparedRoutes, cfg routedClientConfig, addressZero byte, commandCache *commandIdempotencyCache) {
 	if cfg.ClientIdleTimeout <= 0 {
 		cfg.ClientIdleTimeout = defaultClientIdleTimeout
 	}

@@ -185,6 +185,51 @@ func TestCommanderRejectsFractionalIntArg(t *testing.T) {
 	}
 }
 
+func TestCommanderRejectsOutOfRangeParameterAddress(t *testing.T) {
+	tests := []struct {
+		name string
+		args map[string]any
+	}{
+		{
+			name: "negative param",
+			args: map[string]any{"param": -1, "instance": 1, "value": 25.0},
+		},
+		{
+			name: "too large param",
+			args: map[string]any{"param": 0x10000, "instance": 1, "value": 25.0},
+		},
+		{
+			name: "zero instance",
+			args: map[string]any{"param": 3000, "instance": 0, "value": 25.0},
+		},
+		{
+			name: "negative instance",
+			args: map[string]any{"param": 3000, "instance": -1, "value": 25.0},
+		},
+		{
+			name: "too large instance",
+			args: map[string]any{"param": 3000, "instance": 0x100, "value": 25.0},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fw := &fakeWriteClient{}
+			cmdr := NewCommander(fw, time.Second)
+			ev, err := cmdr.Send(tmtc.Telecommand{Name: "set_float32", Arguments: tt.args})
+			if !errors.Is(err, ErrInvalidArgument) {
+				t.Fatalf("err=%v, want ErrInvalidArgument", err)
+			}
+			if ev.Status != tmtc.CommandFailed {
+				t.Fatalf("status=%v, want failed", ev.Status)
+			}
+			if got := len(fw.float32Calls); got != 0 {
+				t.Fatalf("float32 calls=%d, want 0", got)
+			}
+		})
+	}
+}
+
 func TestCommanderControlActionsRoute(t *testing.T) {
 	fw := &fakeWriteClient{}
 	cmdr := NewCommander(fw, time.Second)

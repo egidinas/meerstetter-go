@@ -51,6 +51,9 @@ func (c *CANClient) ReadInt32(ctx context.Context, paramID, instance int) (int32
 // ReadBulk uses binary single-value reads as a conservative compatibility
 // fallback until the exact binary multi-parameter CAN framing is proven live.
 func (c *CANClient) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
+	if err := validateParameterList(params); err != nil {
+		return nil, err
+	}
 	values := make([]float64, 0, len(params))
 	for _, param := range params {
 		value, err := c.readNumeric(ctx, param.ID, param.Instance, param.Type)
@@ -79,6 +82,9 @@ func (c *CANClient) ReadRingChunk(context.Context, uint32, uint16) (RingReadResp
 }
 
 func (c *CANClient) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return 0, err
+	}
 	if dataType == "" {
 		dataType = DataTypeFloat32
 	}

@@ -217,6 +217,9 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 			}
 			instance = v
 		}
+		if err := validateParameterAddress(120, instance); err != nil {
+			return err
+		}
 		value, err := stringArg(tc.Arguments, "value")
 		if err != nil {
 			return err
@@ -287,6 +290,9 @@ func paramAndInstance(args map[string]any) (int, int, error) {
 			return 0, 0, err
 		}
 		instance = v
+	}
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return 0, 0, err
 	}
 	return paramID, instance, nil
 }

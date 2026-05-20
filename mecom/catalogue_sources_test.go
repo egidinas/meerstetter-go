@@ -40,6 +40,38 @@ type tecCANopenEDSSource struct {
 	} `json:"objects"`
 }
 
+type tecCANopenSDOMapSource struct {
+	SchemaVersion string `json:"schema_version"`
+	Mappings      []struct {
+		MeComID   int    `json:"mecom_id"`
+		Name      string `json:"name"`
+		ValueType string `json:"value_type"`
+		Access    string `json:"access"`
+		Instances struct {
+			Mode  string `json:"mode"`
+			Min   int    `json:"min"`
+			Max   int    `json:"max"`
+			Fixed int    `json:"fixed"`
+		} `json:"instances"`
+		CANopen struct {
+			Index        string `json:"index"`
+			Subindex     string `json:"subindex"`
+			SubindexMode string `json:"subindex_mode"`
+			DataType     string `json:"data_type"`
+		} `json:"canopen"`
+		Aliases []struct {
+			Space string `json:"space"`
+			ID    any    `json:"id"`
+		} `json:"aliases"`
+		SourceEvidence []string `json:"source_evidence"`
+	} `json:"mappings"`
+	Unsupported []struct {
+		ID             any      `json:"id"`
+		Reason         string   `json:"reason"`
+		SourceEvidence []string `json:"source_evidence"`
+	} `json:"unsupported"`
+}
+
 type tecHelpSource struct {
 	SchemaVersion string `json:"schema_version"`
 	Parameters    map[string]struct {
@@ -100,6 +132,16 @@ func TestTECCatalogueSourceJSONFiles(t *testing.T) {
 	if !strings.Contains(strings.ToLower(cascadeTarget.Name), "cascade") {
 		t.Fatalf("EDS 0x4423 name = %q, want cascade-related", cascadeTarget.Name)
 	}
+
+	var sdoMap tecCANopenSDOMapSource
+	readCatalogueSourceJSON(t, "catalogues/sources/tec_canopen_sdo_map.v631.json", &sdoMap)
+	if sdoMap.SchemaVersion != "mecom_tec_canopen_sdo_map.v1" {
+		t.Fatalf("SDO map schema = %q", sdoMap.SchemaVersion)
+	}
+	requireSDOMapAlias(t, sdoMap, 52002, "0x2F02", 12034, "int32")
+	requireSDOMapAlias(t, sdoMap, 52003, "0x2F03", 12035, "int32")
+	requireUnsupportedSDOPath(t, sdoMap, 120, "metadata")
+	requireUnsupportedSDOPath(t, sdoMap, "?RS0000", "ring")
 
 	var help tecHelpSource
 	readCatalogueSourceJSON(t, "catalogues/sources/tec_tooltips.v631.json", &help)
@@ -197,4 +239,84 @@ func requireHiddenCandidate(t *testing.T, index tecMetadataIndexSource, id int, 
 		}
 	}
 	t.Fatalf("missing hidden candidate %d with visibility %q", id, visibility)
+}
+
+func requireSDOMapAlias(t *testing.T, sdoMap tecCANopenSDOMapSource, mecomID int, canopenIndex string, canopenObjectDecimal int, valueType string) {
+	t.Helper()
+	for _, mapping := range sdoMap.Mappings {
+		if mapping.MeComID != mecomID {
+			continue
+		}
+		if mapping.CANopen.Index != canopenIndex {
+			t.Fatalf("MeCom %d CANopen index = %q, want %q", mecomID, mapping.CANopen.Index, canopenIndex)
+		}
+		if mapping.ValueType != valueType {
+			t.Fatalf("MeCom %d value_type = %q, want %q", mecomID, mapping.ValueType, valueType)
+		}
+		if mapping.Instances.Mode != "subindex" || mapping.Instances.Min != 1 || mapping.Instances.Max < 4 {
+			t.Fatalf("MeCom %d instances = %+v, want subindex instances 1..4", mecomID, mapping.Instances)
+		}
+		if !hasAlias(mapping.Aliases, "canopen_object_decimal", canopenObjectDecimal) {
+			t.Fatalf("MeCom %d missing CANopen decimal alias %d", mecomID, canopenObjectDecimal)
+		}
+		if len(mapping.SourceEvidence) == 0 {
+			t.Fatalf("MeCom %d missing source evidence", mecomID)
+		}
+		return
+	}
+	t.Fatalf("missing SDO mapping for MeCom %d", mecomID)
+}
+
+func requireUnsupportedSDOPath(t *testing.T, sdoMap tecCANopenSDOMapSource, id any, reasonFragment string) {
+	t.Helper()
+	for _, unsupported := range sdoMap.Unsupported {
+		if !sameCatalogueSourceID(unsupported.ID, id) {
+			continue
+		}
+		if !strings.Contains(strings.ToLower(unsupported.Reason), strings.ToLower(reasonFragment)) {
+			t.Fatalf("unsupported %v reason = %q, want fragment %q", id, unsupported.Reason, reasonFragment)
+		}
+		if len(unsupported.SourceEvidence) == 0 {
+			t.Fatalf("unsupported %v missing source evidence", id)
+		}
+		return
+	}
+	t.Fatalf("missing unsupported SDO path %v", id)
+}
+
+func sameCatalogueSourceID(got, want any) bool {
+	switch want := want.(type) {
+	case int:
+		switch got := got.(type) {
+		case float64:
+			return got == float64(want)
+		case int:
+			return got == want
+		default:
+			return false
+		}
+	case string:
+		got, ok := got.(string)
+		return ok && got == want
+	default:
+		return got == want
+	}
+}
+
+func hasAlias(aliases []struct {
+	Space string `json:"space"`
+	ID    any    `json:"id"`
+}, space string, id int) bool {
+	for _, alias := range aliases {
+		if alias.Space != space {
+			continue
+		}
+		switch value := alias.ID.(type) {
+		case float64:
+			return int(value) == id
+		case int:
+			return value == id
+		}
+	}
+	return false
 }

@@ -203,10 +203,17 @@ func TestCANopenClientReadsSystemInt32Objects(t *testing.T) {
 		wantIndex uint16
 		wantValue int32
 	}{
+		{name: "device type", paramID: 100, wantIndex: 0x2000, wantValue: 8065},
+		{name: "hardware version", paramID: 101, wantIndex: 0x2001, wantValue: 8503},
 		{name: "serial number", paramID: 102, wantIndex: 0x2002, wantValue: 75},
 		{name: "firmware int", paramID: 103, wantIndex: 0x2003, wantValue: 631},
 		{name: "device status", paramID: 104, wantIndex: 0x2004, wantValue: 1},
 		{name: "error number", paramID: 105, wantIndex: 0x2005, wantValue: 0},
+		{name: "error instance", paramID: 106, wantIndex: 0x2006, wantValue: 0},
+		{name: "error parameter", paramID: 107, wantIndex: 0x2007, wantValue: 0},
+		{name: "flash status", paramID: 109, wantIndex: 0x2009, wantValue: 0},
+		{name: "device reset command", paramID: 111, wantIndex: 0x200B, wantValue: 0},
+		{name: "random startup value", paramID: 115, wantIndex: 0x200F, wantValue: 123456},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -224,6 +231,36 @@ func TestCANopenClientReadsSystemInt32Objects(t *testing.T) {
 			assertSDOUploadRequest(t, fake.sent, 0x4b, tt.wantIndex, 0x01)
 		})
 	}
+}
+
+func TestCANopenClientReadsSystemFloat32Objects(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{sdoFloatUploadReply(0x4b, 0x200C, 0x01, 6.31)},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	got, err := client.ReadFloat32(context.Background(), 112, 1)
+	if err != nil {
+		t.Fatalf("ReadFloat32 returned error: %v", err)
+	}
+	if math.Abs(got-6.31) > 0.001 {
+		t.Fatalf("ReadFloat32=%f, want 6.31", got)
+	}
+	assertSDOUploadRequest(t, fake.sent, 0x4b, 0x200C, 0x01)
+}
+
+func TestCANopenClientReadsLookupTableStatusFromMeComAlias(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{sdoInt32UploadReply(0x4b, 0x2F02, 0x03, 7)},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	got, err := client.ReadInt32(context.Background(), 52002, 3)
+	if err != nil {
+		t.Fatalf("ReadInt32 returned error: %v", err)
+	}
+	if got != 7 {
+		t.Fatalf("ReadInt32=%d, want 7", got)
+	}
+	assertSDOUploadRequest(t, fake.sent, 0x4b, 0x2F02, 0x03)
 }
 
 func TestCANopenClientReadsChannelSpecificObjects(t *testing.T) {

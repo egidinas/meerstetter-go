@@ -47,6 +47,9 @@ const (
 	RingStatusOverlap     byte = 2
 
 	maxRingCaptureParameters = 16
+	maxMeComParameterID      = 0xFFFF
+	minMeComInstance         = 1
+	maxMeComInstance         = 0xFF
 )
 
 // RingCaptureParameter configures one CRTVStream capture slot.
@@ -178,6 +181,9 @@ func BuildWriteStringFrame(addr int, seq uint16, paramID, instance int, value st
 
 // BuildSetBigDataStringFrame constructs a VB frame for writing one LATIN1 big-data package.
 func BuildSetBigDataStringFrame(addr int, seq uint16, paramID, instance int, writeStart uint32, value string, isLast bool) ([]byte, error) {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return nil, err
+	}
 	data, err := encodeLatin1String(value, true)
 	if err != nil {
 		return nil, err
@@ -214,6 +220,25 @@ func BuildResetFrame(addr int, seq uint16) []byte {
 func buildWriteFrame(addr int, seq uint16, paramID, instance int, valueHex string) []byte {
 	body := fmt.Sprintf("VS%04X%02X%s", paramID, instance, valueHex)
 	return appendCRC(addr, seq, body)
+}
+
+func validateParameterAddress(paramID, instance int) error {
+	if paramID < 0 || paramID > maxMeComParameterID {
+		return fmt.Errorf("%w: parameter id %d outside 0..%d", ErrInvalidArgument, paramID, maxMeComParameterID)
+	}
+	if instance < minMeComInstance || instance > maxMeComInstance {
+		return fmt.Errorf("%w: parameter instance %d outside %d..%d", ErrInvalidArgument, instance, minMeComInstance, maxMeComInstance)
+	}
+	return nil
+}
+
+func validateParameterList(params []Parameter) error {
+	for i, p := range params {
+		if err := validateParameterAddress(p.ID, p.Instance); err != nil {
+			return fmt.Errorf("parameter[%d]: %w", i, err)
+		}
+	}
+	return nil
 }
 
 func appendCRC(addr int, seq uint16, body string) []byte {
@@ -683,6 +708,9 @@ func (c *Client) ReadInt32(ctx context.Context, paramID, instance int) (int32, e
 // ReadBulk reads a chunk of parameters via ?VX. It is the preferred primitive
 // for background round-robin polling.
 func (c *Client) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
+	if err := validateParameterList(params); err != nil {
+		return nil, err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildBulkGetFrame(int(c.address), seq, params), nil
 	})
@@ -733,6 +761,9 @@ func (c *Client) TriggerRingSync(ctx context.Context) error {
 }
 
 func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteFloat32Frame(int(c.address), seq, paramID, instance, value), nil
 	})
@@ -743,6 +774,9 @@ func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value 
 }
 
 func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteInt32Frame(int(c.address), seq, paramID, instance, value), nil
 	})
@@ -753,6 +787,9 @@ func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value in
 }
 
 func (c *Client) WriteString(ctx context.Context, paramID, instance int, value string) error {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteStringFrame(int(c.address), seq, paramID, instance, value), nil
 	})
@@ -763,6 +800,9 @@ func (c *Client) WriteString(ctx context.Context, paramID, instance int, value s
 }
 
 func (c *Client) WriteBigDataString(ctx context.Context, paramID, instance int, value string) error {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildSetBigDataStringFrame(int(c.address), seq, paramID, instance, 0, value, true)
 	})
@@ -793,6 +833,9 @@ func (c *Client) Reset(ctx context.Context) error {
 }
 
 func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
+	if err := validateParameterAddress(paramID, instance); err != nil {
+		return 0, err
+	}
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildSingleGetFrame(int(c.address), seq, paramID, instance), nil
 	})

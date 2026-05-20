@@ -40,6 +40,24 @@ for (const [readId, writeId] of readWritePairs) {
   }
 }
 
+const protocolAliasExpectations = [
+  { catalogueId: 12034, mecomId: 52002, canopenIndex: "0x2F02", type: "int32" },
+  { catalogueId: 12035, mecomId: 52003, canopenIndex: "0x2F03", type: "int32" },
+];
+
+for (const expected of protocolAliasExpectations) {
+  const entry = catalogue.find((item) => item.id === expected.catalogueId);
+  assert.ok(entry, `expected CANopen catalogue entry ${expected.catalogueId}`);
+  assert.equal(entry.type, expected.type, `catalogue entry ${expected.catalogueId} type should match CANopen SDO source map`);
+  assert.equal(entry.protocol_aliases?.mecom_parameter_id, expected.mecomId, `catalogue entry ${expected.catalogueId} must document CoSo/MeCom parameter alias`);
+  assert.equal(entry.protocol_aliases?.canopen_index, expected.canopenIndex, `catalogue entry ${expected.catalogueId} must document CANopen index`);
+  assert.equal(entry.protocol_aliases?.canopen_object_decimal, expected.catalogueId, `catalogue entry ${expected.catalogueId} must document decimal CANopen object alias`);
+  assert.ok(
+    entry.protocol_aliases?.source_map?.includes("tec_canopen_sdo_map"),
+    `catalogue entry ${expected.catalogueId} must point at the source SDO map`,
+  );
+}
+
 // Global counterparts validation to ensure all targets exist and mutual back-references exist for primary telemetry/control pairs
 for (const entry of catalogue) {
   if (entry.counterparts) {

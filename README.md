@@ -115,6 +115,20 @@ The raw source files from which the catalogue is compiled live in
 `mecom/catalogues/sources/`. Use `scripts/harvest_coso_catalogue_sources.py` to
 regenerate them from a Meerstetter CoSo installation.
 
+The CAN-backed CoSo compatibility bridge has one explicit crosswalk for
+MeCom-to-CANopen SDO routing:
+
+| Source | Role |
+|--------|------|
+| `mecom/catalogues/sources/tec_canopen_sdo_map.v631.json` | Canonical runtime SDO map. MeCom parameter IDs are primary; CANopen indexes and decimal object IDs are aliases with source evidence. |
+| `mecom/canopen_sdo_map.go` | Embeds and validates the JSON map, then exposes runtime lookup and bridge parameter types. |
+| `web/src/data/mecom-catalogue.json` | Compiled UI dictionary. CANopen catalogue rows carry `protocol_aliases.source_map` back to the JSON map and `protocol_aliases.mecom_parameter_id` back to the CoSo-facing ID. |
+
+Known non-SDO paths from CoSo logs are recorded in the JSON map's `unsupported`
+section. For example, MeCom ID `120` is latin1 metadata/big-data rather than a
+32-bit SDO value, and CRTVStream `?RS0000` is a ring-buffer command; CANopen
+direct transports only claim ring readout after an implementation is proven.
+
 ---
 
 ## Quick start

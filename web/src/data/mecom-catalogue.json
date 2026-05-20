@@ -9252,14 +9252,20 @@
     "source_status": "public_safe_eds",
     "hover_help": "Public-safe metadata sourced from Lookup Table: Status Monitor.",
     "help_text": "CANopen object dictionary entry for Lookup Table: Status Monitor.",
-    "source_parameter_name": "Lookup Table: Status Monitor"
+    "source_parameter_name": "Lookup Table: Status Monitor",
+    "protocol_aliases": {
+      "mecom_parameter_id": 52002,
+      "canopen_index": "0x2F02",
+      "canopen_object_decimal": 12034,
+      "source_map": "mecom/catalogues/sources/tec_canopen_sdo_map.v631.json"
+    }
   },
   {
     "id": 12035,
     "name": "Lookup Table: Current Executing Line Monitor",
     "sid": "lookup_table_current_executing_line_monitor",
     "unit": "",
-    "type": "float32",
+    "type": "int32",
     "kind": "continuous",
     "role": "monitor",
     "group": "Lookup Table",
@@ -9267,7 +9273,13 @@
     "source_status": "public_safe_eds",
     "hover_help": "Public-safe metadata sourced from Lookup Table: Current Executing Line Monitor.",
     "help_text": "CANopen object dictionary entry for Lookup Table: Current Executing Line Monitor.",
-    "source_parameter_name": "Lookup Table: Current Executing Line Monitor"
+    "source_parameter_name": "Lookup Table: Current Executing Line Monitor",
+    "protocol_aliases": {
+      "mecom_parameter_id": 52003,
+      "canopen_index": "0x2F03",
+      "canopen_object_decimal": 12035,
+      "source_map": "mecom/catalogues/sources/tec_canopen_sdo_map.v631.json"
+    }
   },
   {
     "id": 12048,

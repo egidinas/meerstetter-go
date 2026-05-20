@@ -441,11 +441,11 @@ func buildDefaultDeviceBridgeParameterTypes() map[int]mecom.DataType {
 			out[param.ID] = param.Type
 		}
 	}
-	out[102] = mecom.DataTypeInt32
+	for id, typ := range mecom.CANopenMappedParameterTypes() {
+		out[id] = typ
+	}
 	out[deviceBridgeFirmwareVersionIntParam] = mecom.DataTypeInt32
 	out[deviceBridgeFirmwareVersionFloatParam] = mecom.DataTypeFloat32
-	out[104] = mecom.DataTypeInt32
-	out[105] = mecom.DataTypeInt32
 	return out
 }
 

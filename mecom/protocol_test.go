@@ -3,6 +3,7 @@ package mecom
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -226,6 +227,71 @@ func TestClientReadBulk(t *testing.T) {
 	}
 }
 
+func TestClientRejectsOutOfRangeParameterAddressBeforeWrite(t *testing.T) {
+	tests := []struct {
+		name string
+		op   func(*Client) error
+	}{
+		{
+			name: "negative param",
+			op: func(c *Client) error {
+				_, err := c.ReadFloat32(context.Background(), -1, 1)
+				return err
+			},
+		},
+		{
+			name: "too large param",
+			op: func(c *Client) error {
+				_, err := c.ReadFloat32(context.Background(), 0x10000, 1)
+				return err
+			},
+		},
+		{
+			name: "zero instance",
+			op: func(c *Client) error {
+				_, err := c.ReadFloat32(context.Background(), 1000, 0)
+				return err
+			},
+		},
+		{
+			name: "too large instance",
+			op: func(c *Client) error {
+				return c.WriteFloat32(context.Background(), 1000, 0x100, 1)
+			},
+		},
+		{
+			name: "invalid bulk member",
+			op: func(c *Client) error {
+				_, err := c.ReadBulk(context.Background(), []Parameter{
+					{ID: 1000, Instance: 1, Type: DataTypeFloat32},
+					{ID: -1, Instance: 1, Type: DataTypeFloat32},
+				})
+				return err
+			},
+		},
+		{
+			name: "invalid big-data instance",
+			op: func(c *Client) error {
+				return c.WriteBigDataString(context.Background(), 120, 0, "SN76")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rw := &rejectingReadWriter{}
+			client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})
+			err := tt.op(client)
+			if !errors.Is(err, ErrInvalidArgument) {
+				t.Fatalf("err=%v, want ErrInvalidArgument", err)
+			}
+			if rw.writes != 0 {
+				t.Fatalf("writes=%d, want 0", rw.writes)
+			}
+		})
+	}
+}
+
 func TestClientRecoversAfterTimedOutRead(t *testing.T) {
 	clientConn, serverConn := net.Pipe()
 	defer clientConn.Close()
@@ -347,4 +413,17 @@ func (s *scriptedReadWriter) Read(p []byte) (int, error) {
 
 func (s *scriptedReadWriter) Write(p []byte) (int, error) {
 	return s.written.Write(p)
+}
+
+type rejectingReadWriter struct {
+	writes int
+}
+
+func (r *rejectingReadWriter) Read([]byte) (int, error) {
+	return 0, errors.New("read should not happen")
+}
+
+func (r *rejectingReadWriter) Write([]byte) (int, error) {
+	r.writes++
+	return 0, errors.New("write should not happen")
 }
