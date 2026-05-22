@@ -88,6 +88,22 @@ func TestCANopenClientReadBulkKeepsUnsupportedSlots(t *testing.T) {
 	}
 }
 
+func TestCANopenClientReadBulkReturnsTransportError(t *testing.T) {
+	sendErr := errors.New("send failed")
+	fake := &fakeCANTransceiver{sendErr: sendErr}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+
+	got, err := client.ReadBulk(context.Background(), []Parameter{
+		{ID: 1000, Instance: 1, Type: DataTypeFloat32},
+	})
+	if !errors.Is(err, sendErr) {
+		t.Fatalf("ReadBulk error = %v, want send error", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("ReadBulk returned partial values on initial transport failure: %#v", got)
+	}
+}
+
 func TestCANopenClientWriteFloat32SetsNominalTarget(t *testing.T) {
 	fake := &fakeCANTransceiver{
 		replies: []canopen.Frame{
@@ -510,4 +526,28 @@ func assertSDOFloatDownload(t *testing.T, sent []canopen.Frame, node byte, wantI
 	if math.Abs(float64(gotValue-wantValue)) > 0.001 {
 		t.Fatalf("payload=%f, want %f", gotValue, wantValue)
 	}
+}
+
+func TestCANopenClientContextSDOMap(t *testing.T) {
+	lddMap, ok := ResolveCANopenSDOMap("ldd", "ldd_130x")
+	if !ok {
+		t.Fatalf("failed to resolve LDD CANopen SDO Map")
+	}
+
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{sdoInt32UploadReply(0x4b, 0x1000, 0x00, 42)},
+	}
+
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+
+	ctx := WithSDOMap(context.Background(), lddMap)
+	got, err := client.ReadInt32(ctx, 100, 1)
+	if err != nil {
+		t.Fatalf("ReadInt32 returned error: %v", err)
+	}
+	if got != 42 {
+		t.Fatalf("ReadInt32=%d, want 42", got)
+	}
+
+	assertSDOUploadRequest(t, fake.sent, 0x4b, 0x1000, 0x00)
 }

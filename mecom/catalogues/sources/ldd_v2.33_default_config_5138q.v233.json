@@ -1,0 +1,1548 @@
+{
+  "schema_version": "mecom_ldd_v2.33_defaults.v1",
+  "source": "5138Q LDD Default Config.ini",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_v2.33.v233",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_v2.33",
+    "version": "v233"
+  },
+  "parameters": {
+    "label_Temp": {
+      "key": "label_Temp",
+      "label_key": "label_Temp",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 26.9,
+      "default_value_text": "26.9",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Temp"
+      ]
+    },
+    "label_FPGA_VER": {
+      "key": "label_FPGA_VER",
+      "label_key": "label_FPGA_VER",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.7,
+      "default_value_text": "1.7",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_FPGA_VER"
+      ]
+    },
+    "label_MPWR": {
+      "key": "label_MPWR",
+      "label_key": "label_MPWR",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 22.48,
+      "default_value_text": "22.48",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_MPWR"
+      ]
+    },
+    "label_MEDV": {
+      "key": "label_MEDV",
+      "label_key": "label_MEDV",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10.09,
+      "default_value_text": "10.09",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_MEDV"
+      ]
+    },
+    "label_M33V": {
+      "key": "label_M33V",
+      "label_key": "label_M33V",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 3.32,
+      "default_value_text": "3.32",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_M33V"
+      ]
+    },
+    "label_M1V": {
+      "key": "label_M1V",
+      "label_key": "label_M1V",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.21,
+      "default_value_text": "1.21",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_M1V"
+      ]
+    },
+    "label_SYM1": {
+      "key": "label_SYM1",
+      "label_key": "label_SYM1",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_SYM1"
+      ]
+    },
+    "label_SYM2": {
+      "key": "label_SYM2",
+      "label_key": "label_SYM2",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_SYM2"
+      ]
+    },
+    "label_SYM3": {
+      "key": "label_SYM3",
+      "label_key": "label_SYM3",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.01,
+      "default_value_text": "0.01",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_SYM3"
+      ]
+    },
+    "label_VLD_Act": {
+      "key": "label_VLD_Act",
+      "label_key": "label_VLD_Act",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_VLD_Act"
+      ]
+    },
+    "label_VLD_Pulse": {
+      "key": "label_VLD_Pulse",
+      "label_key": "label_VLD_Pulse",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_VLD_Pulse"
+      ]
+    },
+    "label_CUR_Act": {
+      "key": "label_CUR_Act",
+      "label_key": "label_CUR_Act",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CUR_Act"
+      ]
+    },
+    "label_CUR_CW": {
+      "key": "label_CUR_CW",
+      "label_key": "label_CUR_CW",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CUR_CW"
+      ]
+    },
+    "label_CUR_Pulse": {
+      "key": "label_CUR_Pulse",
+      "label_key": "label_CUR_Pulse",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CUR_Pulse"
+      ]
+    },
+    "label_CUR_Int": {
+      "key": "label_CUR_Int",
+      "label_key": "label_CUR_Int",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CUR_Int"
+      ]
+    },
+    "label_TLD": {
+      "key": "label_TLD",
+      "label_key": "label_TLD",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 23.7,
+      "default_value_text": "23.7",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_TLD"
+      ]
+    },
+    "label_CUR_Smart": {
+      "key": "label_CUR_Smart",
+      "label_key": "label_CUR_Smart",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CUR_Smart"
+      ]
+    },
+    "label_VLD_Smart": {
+      "key": "label_VLD_Smart",
+      "label_key": "label_VLD_Smart",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_VLD_Smart"
+      ]
+    },
+    "label_Error": {
+      "key": "label_Error",
+      "label_key": "label_Error",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Error"
+      ]
+    },
+    "label_RES3_AD": {
+      "key": "label_RES3_AD",
+      "label_key": "label_RES3_AD",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 122,
+      "default_value_text": "122",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_RES3_AD"
+      ]
+    },
+    "label_uc_Version": {
+      "key": "label_uc_Version",
+      "label_key": "label_uc_Version",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 2.21,
+      "default_value_text": "2.21",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_uc_Version"
+      ]
+    },
+    "label_uc_BuildNumber": {
+      "key": "label_uc_BuildNumber",
+      "label_key": "label_uc_BuildNumber",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 281,
+      "default_value_text": "281",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_uc_BuildNumber"
+      ]
+    },
+    "ERROR_INSTANCE": {
+      "key": "ERROR_INSTANCE",
+      "label_key": "label_PAR_ERROR_INSTANCE",
+      "group": "error",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_ERROR_INSTANCE"
+      ]
+    },
+    "ERROR_PARAMETER": {
+      "key": "ERROR_PARAMETER",
+      "label_key": "label_PAR_ERROR_PARAMETER",
+      "group": "error",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_ERROR_PARAMETER"
+      ]
+    },
+    "SYSTICK_MAX_CYCLE": {
+      "key": "SYSTICK_MAX_CYCLE",
+      "label_key": "label_PAR_SYSTICK_MAX_CYCLE",
+      "group": "systick",
+      "visibility": "advanced",
+      "default_value": 5107,
+      "default_value_text": "5107",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SYSTICK_MAX_CYCLE"
+      ]
+    },
+    "SYSTICK_AVG_CYCLE": {
+      "key": "SYSTICK_AVG_CYCLE",
+      "label_key": "label_PAR_SYSTICK_AVG_CYCLE",
+      "group": "systick",
+      "visibility": "advanced",
+      "default_value": 18,
+      "default_value_text": "18",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SYSTICK_AVG_CYCLE"
+      ]
+    },
+    "labelM_PAR_VER_HW_VERSION": {
+      "key": "labelM_PAR_VER_HW_VERSION",
+      "label_key": "labelM_PAR_VER_HW_VERSION",
+      "group": "labelm",
+      "visibility": "advanced",
+      "default_value": 1.1,
+      "default_value_text": "1.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_PAR_VER_HW_VERSION"
+      ]
+    },
+    "labelM_PAR_VER_HW_SERNR": {
+      "key": "labelM_PAR_VER_HW_SERNR",
+      "label_key": "labelM_PAR_VER_HW_SERNR",
+      "group": "labelm",
+      "visibility": "advanced",
+      "default_value": 109,
+      "default_value_text": "109",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_PAR_VER_HW_SERNR"
+      ]
+    },
+    "labelM_Device_Type": {
+      "key": "labelM_Device_Type",
+      "label_key": "labelM_Device_Type",
+      "group": "labelm",
+      "visibility": "advanced",
+      "default_value": 1124,
+      "default_value_text": "1124",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_Device_Type"
+      ]
+    },
+    "LD_ACT_U_INT": {
+      "key": "LD_ACT_U_INT",
+      "label_key": "label_PAR_LD_ACT_U_INT",
+      "group": "ld",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LD_ACT_U_INT"
+      ]
+    },
+    "VOLTAGE_VDM": {
+      "key": "VOLTAGE_VDM",
+      "label_key": "label_PAR_VOLTAGE_VDM",
+      "group": "voltage",
+      "visibility": "advanced",
+      "default_value": 0.01,
+      "default_value_text": "0.01",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VOLTAGE_VDM"
+      ]
+    },
+    "label_ANALOG_INT_FACTOR": {
+      "key": "label_ANALOG_INT_FACTOR",
+      "label_key": "label_ANALOG_INT_FACTOR",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_ANALOG_INT_FACTOR"
+      ]
+    },
+    "label_CURRENT_LIMIT": {
+      "key": "label_CURRENT_LIMIT",
+      "label_key": "label_CURRENT_LIMIT",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.5,
+      "default_value_text": "1.5",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CURRENT_LIMIT"
+      ]
+    },
+    "label_CURRENT_MIN": {
+      "key": "label_CURRENT_MIN",
+      "label_key": "label_CURRENT_MIN",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CURRENT_MIN"
+      ]
+    },
+    "label_SlopeLimit": {
+      "key": "label_SlopeLimit",
+      "label_key": "label_SlopeLimit",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.01,
+      "default_value_text": "0.01",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_SlopeLimit"
+      ]
+    },
+    "label_PID_Kp": {
+      "key": "label_PID_Kp",
+      "label_key": "label_PID_Kp",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 3,
+      "default_value_text": "3",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Kp"
+      ]
+    },
+    "label_PID_Ti": {
+      "key": "label_PID_Ti",
+      "label_key": "label_PID_Ti",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.001,
+      "default_value_text": "0.001",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Ti"
+      ]
+    },
+    "label_PID_Td": {
+      "key": "label_PID_Td",
+      "label_key": "label_PID_Td",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1e-09,
+      "default_value_text": "1E-09",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Td"
+      ]
+    },
+    "label_RS485_CH1_BaudRate": {
+      "key": "label_RS485_CH1_BaudRate",
+      "label_key": "label_RS485_CH1_BaudRate",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 57600,
+      "default_value_text": "57600",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_RS485_CH1_BaudRate"
+      ]
+    },
+    "TLD_NTC_T1": {
+      "key": "TLD_NTC_T1",
+      "label_key": "label_PAR_TLD_NTC_T1",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T1"
+      ]
+    },
+    "TLD_NTC_R1": {
+      "key": "TLD_NTC_R1",
+      "label_key": "label_PAR_TLD_NTC_R1",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 32650,
+      "default_value_text": "32650",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R1"
+      ]
+    },
+    "TLD_NTC_T2": {
+      "key": "TLD_NTC_T2",
+      "label_key": "label_PAR_TLD_NTC_T2",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T2"
+      ]
+    },
+    "TLD_NTC_R2": {
+      "key": "TLD_NTC_R2",
+      "label_key": "label_PAR_TLD_NTC_R2",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R2"
+      ]
+    },
+    "TLD_NTC_T3": {
+      "key": "TLD_NTC_T3",
+      "label_key": "label_PAR_TLD_NTC_T3",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 60,
+      "default_value_text": "60",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T3"
+      ]
+    },
+    "TLD_NTC_R3": {
+      "key": "TLD_NTC_R3",
+      "label_key": "label_PAR_TLD_NTC_R3",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 2488,
+      "default_value_text": "2488",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R3"
+      ]
+    },
+    "TLD_TEMP_UNDER": {
+      "key": "TLD_TEMP_UNDER",
+      "label_key": "label_PAR_TLD_TEMP_UNDER",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": -20,
+      "default_value_text": "-20",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TEMP_UNDER"
+      ]
+    },
+    "TLD_TEMP_OVER": {
+      "key": "TLD_TEMP_OVER",
+      "label_key": "label_PAR_TLD_TEMP_OVER",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 60,
+      "default_value_text": "60",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TEMP_OVER"
+      ]
+    },
+    "MAX_CURRENT_ERROR": {
+      "key": "MAX_CURRENT_ERROR",
+      "label_key": "label_PAR_MAX_CURRENT_ERROR",
+      "group": "max",
+      "visibility": "advanced",
+      "default_value": 1.85,
+      "default_value_text": "1.85",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_MAX_CURRENT_ERROR"
+      ]
+    },
+    "RS485_1_RPL_DELAY": {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "group": "rs485",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RS485_1_RPL_DELAY"
+      ]
+    },
+    "label_PID_Kp_L": {
+      "key": "label_PID_Kp_L",
+      "label_key": "label_PID_Kp_L",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Kp_L"
+      ]
+    },
+    "label_PID_Ti_L": {
+      "key": "label_PID_Ti_L",
+      "label_key": "label_PID_Ti_L",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.001,
+      "default_value_text": "0.001",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Ti_L"
+      ]
+    },
+    "label_PID_Td_L": {
+      "key": "label_PID_Td_L",
+      "label_key": "label_PID_Td_L",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PID_Td_L"
+      ]
+    },
+    "label_SlopeLimit_L": {
+      "key": "label_SlopeLimit_L",
+      "label_key": "label_SlopeLimit_L",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_SlopeLimit_L"
+      ]
+    },
+    "label_PulseHigh": {
+      "key": "label_PulseHigh",
+      "label_key": "label_PulseHigh",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PulseHigh"
+      ]
+    },
+    "label_PulseLow": {
+      "key": "label_PulseLow",
+      "label_key": "label_PulseLow",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PulseLow"
+      ]
+    },
+    "label_ModHigh": {
+      "key": "label_ModHigh",
+      "label_key": "label_ModHigh",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_ModHigh"
+      ]
+    },
+    "label_ModLow": {
+      "key": "label_ModLow",
+      "label_key": "label_ModLow",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_ModLow"
+      ]
+    },
+    "label_CurrentHigh": {
+      "key": "label_CurrentHigh",
+      "label_key": "label_CurrentHigh",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.5,
+      "default_value_text": "1.5",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CurrentHigh"
+      ]
+    },
+    "label_CurrentLow": {
+      "key": "label_CurrentLow",
+      "label_key": "label_CurrentLow",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CurrentLow"
+      ]
+    },
+    "label_ModRise": {
+      "key": "label_ModRise",
+      "label_key": "label_ModRise",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_ModRise"
+      ]
+    },
+    "label_ModFall": {
+      "key": "label_ModFall",
+      "label_key": "label_ModFall",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_ModFall"
+      ]
+    },
+    "label_CurrentCW": {
+      "key": "label_CurrentCW",
+      "label_key": "label_CurrentCW",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.5,
+      "default_value_text": "1.5",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_CurrentCW"
+      ]
+    },
+    "label_GenSync": {
+      "key": "label_GenSync",
+      "label_key": "label_GenSync",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_GenSync"
+      ]
+    },
+    "SIGGEN_SINGLESEQ": {
+      "key": "SIGGEN_SINGLESEQ",
+      "label_key": "label_PAR_SIGGEN_SINGLESEQ",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_SINGLESEQ"
+      ]
+    },
+    "label_Enable_Source": {
+      "key": "label_Enable_Source",
+      "label_key": "label_Enable_Source",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Enable_Source"
+      ]
+    },
+    "label_Pulse_Source": {
+      "key": "label_Pulse_Source",
+      "label_key": "label_Pulse_Source",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Pulse_Source"
+      ]
+    },
+    "label_Current_Source": {
+      "key": "label_Current_Source",
+      "label_key": "label_Current_Source",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "CW",
+      "default_value_text": "CW",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Current_Source"
+      ]
+    },
+    "label_Com_WatchDog": {
+      "key": "label_Com_WatchDog",
+      "label_key": "label_Com_WatchDog",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Com_WatchDog"
+      ]
+    },
+    "label_LightSource": {
+      "key": "label_LightSource",
+      "label_key": "label_LightSource",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "CW",
+      "default_value_text": "CW",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LightSource"
+      ]
+    },
+    "label_LightCW": {
+      "key": "label_LightCW",
+      "label_key": "label_LightCW",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 2,
+      "default_value_text": "2",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LightCW"
+      ]
+    },
+    "label_LightHigh": {
+      "key": "label_LightHigh",
+      "label_key": "label_LightHigh",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 2,
+      "default_value_text": "2",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LightHigh"
+      ]
+    },
+    "label_LightLow": {
+      "key": "label_LightLow",
+      "label_key": "label_LightLow",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LightLow"
+      ]
+    },
+    "label_LModHigh": {
+      "key": "label_LModHigh",
+      "label_key": "label_LModHigh",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LModHigh"
+      ]
+    },
+    "label_LModLow": {
+      "key": "label_LModLow",
+      "label_key": "label_LModLow",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LModLow"
+      ]
+    },
+    "label_LModRise": {
+      "key": "label_LModRise",
+      "label_key": "label_LModRise",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LModRise"
+      ]
+    },
+    "label_LModFall": {
+      "key": "label_LModFall",
+      "label_key": "label_LModFall",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LModFall"
+      ]
+    },
+    "label_LimitStartCurrent": {
+      "key": "label_LimitStartCurrent",
+      "label_key": "label_LimitStartCurrent",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1.5,
+      "default_value_text": "1.5",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LimitStartCurrent"
+      ]
+    },
+    "label_LimitCurrentRamp": {
+      "key": "label_LimitCurrentRamp",
+      "label_key": "label_LimitCurrentRamp",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1e-05,
+      "default_value_text": "1E-05",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_LimitCurrentRamp"
+      ]
+    },
+    "label_Light_ApV": {
+      "key": "label_Light_ApV",
+      "label_key": "label_Light_ApV",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0.0001,
+      "default_value_text": "0.0001",
+      "value_kind": "number",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Light_ApV"
+      ]
+    },
+    "PBC_RES_FUNC1": {
+      "key": "PBC_RES_FUNC1",
+      "label_key": "label_PAR_PBC_RES_FUNC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC1"
+      ]
+    },
+    "PBC_RES_FUNC2": {
+      "key": "PBC_RES_FUNC2",
+      "label_key": "label_PAR_PBC_RES_FUNC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC2"
+      ]
+    },
+    "PBC_RES_FUNC3": {
+      "key": "PBC_RES_FUNC3",
+      "label_key": "label_PAR_PBC_RES_FUNC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC3"
+      ]
+    },
+    "PBC_RES_FUNC4": {
+      "key": "PBC_RES_FUNC4",
+      "label_key": "label_PAR_PBC_RES_FUNC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC4"
+      ]
+    },
+    "PBC_RES_FUNC5": {
+      "key": "PBC_RES_FUNC5",
+      "label_key": "label_PAR_PBC_RES_FUNC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC5"
+      ]
+    },
+    "PBC_RES_FUNC6": {
+      "key": "PBC_RES_FUNC6",
+      "label_key": "label_PAR_PBC_RES_FUNC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC6"
+      ]
+    },
+    "PBC_RES_FUNC7": {
+      "key": "PBC_RES_FUNC7",
+      "label_key": "label_PAR_PBC_RES_FUNC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC7"
+      ]
+    },
+    "PBC_RES_FUNC8": {
+      "key": "PBC_RES_FUNC8",
+      "label_key": "label_PAR_PBC_RES_FUNC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC8"
+      ]
+    },
+    "label_Trigger": {
+      "key": "label_Trigger",
+      "label_key": "label_Trigger",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "Enable",
+      "default_value_text": "Enable",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Trigger"
+      ]
+    },
+    "label_TimeBase": {
+      "key": "label_TimeBase",
+      "label_key": "label_TimeBase",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 100,
+      "default_value_text": "100",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_TimeBase"
+      ]
+    },
+    "FLASH_SAVE_OFF": {
+      "key": "FLASH_SAVE_OFF",
+      "label_key": "label_PAR_FLASH_SAVE_OFF",
+      "group": "flash",
+      "visibility": "advanced",
+      "default_value": "Enabled",
+      "default_value_text": "Enabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FLASH_SAVE_OFF"
+      ]
+    },
+    "FSS_LDD_TYPE": {
+      "key": "FSS_LDD_TYPE",
+      "label_key": "label_PAR_FSS_LDD_TYPE",
+      "group": "fss",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_LDD_TYPE"
+      ]
+    },
+    "FSS_RS485CH": {
+      "key": "FSS_RS485CH",
+      "label_key": "label_PAR_FSS_RS485CH",
+      "group": "fss",
+      "visibility": "advanced",
+      "default_value": "RS485 CH2",
+      "default_value_text": "RS485 CH2",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_RS485CH"
+      ]
+    },
+    "FSS_NROF_SLAVES": {
+      "key": "FSS_NROF_SLAVES",
+      "label_key": "label_PAR_FSS_NROF_SLAVES",
+      "group": "fss",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_NROF_SLAVES"
+      ]
+    },
+    "FSS_SLAVE_ID": {
+      "key": "FSS_SLAVE_ID",
+      "label_key": "label_PAR_FSS_SLAVE_ID",
+      "group": "fss",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_SLAVE_ID"
+      ]
+    },
+    "LUT_WAVE_INT1": {
+      "key": "LUT_WAVE_INT1",
+      "label_key": "label_PAR_LUT_WAVE_INT1",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT1"
+      ]
+    },
+    "LUT_WAVE_INT2": {
+      "key": "LUT_WAVE_INT2",
+      "label_key": "label_PAR_LUT_WAVE_INT2",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT2"
+      ]
+    },
+    "LUT_WAVE_INT3": {
+      "key": "LUT_WAVE_INT3",
+      "label_key": "label_PAR_LUT_WAVE_INT3",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT3"
+      ]
+    },
+    "LUT_WAVE_INT4": {
+      "key": "LUT_WAVE_INT4",
+      "label_key": "label_PAR_LUT_WAVE_INT4",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT4"
+      ]
+    },
+    "LUT_WAVE_SELECT": {
+      "key": "LUT_WAVE_SELECT",
+      "label_key": "label_PAR_LUT_WAVE_SELECT",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_SELECT"
+      ]
+    },
+    "label_TLD_TEMP_Offset": {
+      "key": "label_TLD_TEMP_Offset",
+      "label_key": "label_TLD_TEMP_Offset",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_TLD_TEMP_Offset"
+      ]
+    },
+    "label_TLD_TEMP_Gain": {
+      "key": "label_TLD_TEMP_Gain",
+      "label_key": "label_TLD_TEMP_Gain",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_TLD_TEMP_Gain"
+      ]
+    },
+    "TLD_ADCADJ_A0": {
+      "key": "TLD_ADCADJ_A0",
+      "label_key": "label_PAR_TLD_ADCADJ_A0",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_ADCADJ_A0"
+      ]
+    },
+    "TLD_ADCADJ_A1": {
+      "key": "TLD_ADCADJ_A1",
+      "label_key": "label_PAR_TLD_ADCADJ_A1",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_ADCADJ_A1"
+      ]
+    },
+    "TLD_TOTEMP_RV": {
+      "key": "TLD_TOTEMP_RV",
+      "label_key": "label_PAR_TLD_TOTEMP_RV",
+      "group": "tld",
+      "visibility": "advanced",
+      "default_value": 5600,
+      "default_value_text": "5600",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TOTEMP_RV"
+      ]
+    },
+    "label_Light_Rs": {
+      "key": "label_Light_Rs",
+      "label_key": "label_Light_Rs",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 90,
+      "default_value_text": "90",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Light_Rs"
+      ]
+    },
+    "label_Light_ADJ_A0": {
+      "key": "label_Light_ADJ_A0",
+      "label_key": "label_Light_ADJ_A0",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Light_ADJ_A0"
+      ]
+    },
+    "label_Light_ADJ_A1": {
+      "key": "label_Light_ADJ_A1",
+      "label_key": "label_Light_ADJ_A1",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Light_ADJ_A1"
+      ]
+    },
+    "label_Current_ADJ_A0": {
+      "key": "label_Current_ADJ_A0",
+      "label_key": "label_Current_ADJ_A0",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Current_ADJ_A0"
+      ]
+    },
+    "label_Current_ADJ_A1": {
+      "key": "label_Current_ADJ_A1",
+      "label_key": "label_Current_ADJ_A1",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_Current_ADJ_A1"
+      ]
+    },
+    "VER_HW_SERNR": {
+      "key": "VER_HW_SERNR",
+      "label_key": "label_PAR_VER_HW_SERNR",
+      "group": "ver",
+      "visibility": "advanced",
+      "default_value": 109,
+      "default_value_text": "109",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VER_HW_SERNR"
+      ]
+    },
+    "VER_HW_VERSION": {
+      "key": "VER_HW_VERSION",
+      "label_key": "label_PAR_VER_HW_VERSION",
+      "group": "ver",
+      "visibility": "advanced",
+      "default_value": 1.1,
+      "default_value_text": "1.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VER_HW_VERSION"
+      ]
+    },
+    "label_DeviceType": {
+      "key": "label_DeviceType",
+      "label_key": "label_DeviceType",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 1124,
+      "default_value_text": "1124",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_DeviceType"
+      ]
+    },
+    "label_HVType": {
+      "key": "label_HVType",
+      "label_key": "label_HVType",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "No",
+      "default_value_text": "No",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_HVType"
+      ]
+    },
+    "label_MeasSystem": {
+      "key": "label_MeasSystem",
+      "label_key": "label_MeasSystem",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": "Light",
+      "default_value_text": "Light",
+      "value_kind": "text",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_MeasSystem"
+      ]
+    },
+    "HW_TEST_MODE": {
+      "key": "HW_TEST_MODE",
+      "label_key": "label_PAR_HW_TEST_MODE",
+      "group": "hw",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_HW_TEST_MODE"
+      ]
+    },
+    "RACK_OUTPUT": {
+      "key": "RACK_OUTPUT",
+      "label_key": "label_PAR_RACK_OUTPUT",
+      "group": "rack",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RACK_OUTPUT"
+      ]
+    },
+    "label_OutputDerating": {
+      "key": "label_OutputDerating",
+      "label_key": "label_OutputDerating",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_OutputDerating"
+      ]
+    },
+    "RS485_1_ADDR": {
+      "key": "RS485_1_ADDR",
+      "label_key": "label_PAR_RS485_1_ADDR",
+      "group": "rs485",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RS485_1_ADDR"
+      ]
+    }
+  }
+}

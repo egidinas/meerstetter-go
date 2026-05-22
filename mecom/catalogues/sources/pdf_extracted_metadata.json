@@ -1,0 +1,3481 @@
+{
+  "ldd": {
+    "100": {
+      "Name": "Device Type",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "E.g. 1321 \u2192 LDD-1321"
+    },
+    "101": {
+      "Name": "Hardware Version",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "E.g. 123 \u2192 1.23"
+    },
+    "102": {
+      "Name": "Serial Number",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "103": {
+      "Name": "Firmware Version",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "E.g. 123 \u2192 1.23"
+    },
+    "104": {
+      "Name": "Device Status",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Init 1: Ready 2: Run 3: Error 4: Bootloader 5: Device will reset within next 200 ms"
+    },
+    "105": {
+      "Name": "Error Number",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "106": {
+      "Name": "Error Instance",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "107": {
+      "Name": "Error Parameter",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "109": {
+      "Name": "Parameter System: Flash Status",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: all parameters are saved to Flash 1: save to flash pending or in progress (please do not power off the device during this process)."
+    },
+    "110": {
+      "Name": "Error Text",
+      "Format": "LATIN1",
+      "ValueRange": "",
+      "Description": "Use the ?VB command to query the error text."
+    },
+    "111": {
+      "Name": "Device Reset",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "Write 1 to this parameter, to trigger a reset."
+    },
+    "112": {
+      "Name": "Firmware Version",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": "Same as parameter 103, but as float. Round it to two decimal places."
+    },
+    "120": {
+      "Name": "Device Type",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "E.g. 1191 \u2192 PWR-1191"
+    },
+    "121": {
+      "Name": "Hardware Version",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "E.g. 123 \u2192 1.23"
+    },
+    "122": {
+      "Name": "Serial Number",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "123": {
+      "Name": "Maximum Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": "Maximum Output Current of TEC Controller"
+    },
+    "1100": {
+      "Name": "Actual Output Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1101": {
+      "Name": "Actual Output Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1102": {
+      "Name": "Actual Output Current Raw ADC Value",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1106": {
+      "Name": "Nominal Anode Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1104": {
+      "Name": "Actual Anode Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1105": {
+      "Name": "Actual Cathode Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1402": {
+      "Name": "Nominal Output Current (Ramp)",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1404": {
+      "Name": "Gate Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1103": {
+      "Name": "Raw DAC Value",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1010": {
+      "Name": "Target Object Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1011": {
+      "Name": "(Ramp) Nominal Object Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1012": {
+      "Name": "Thermal Power Model Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1020": {
+      "Name": "Actual Output Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1021": {
+      "Name": "Actual Output Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1000": {
+      "Name": "Object Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1001": {
+      "Name": "Sink Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1030": {
+      "Name": "PID Lower Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1031": {
+      "Name": "PID Upper Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1032": {
+      "Name": "PID Control Variable",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1050": {
+      "Name": "Temperature is Stable",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "Temperature control is 0: not active 1: not stable 2: stable"
+    },
+    "1200": {
+      "Name": "Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1201": {
+      "Name": "Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u03a9",
+      "Description": ""
+    },
+    "1202": {
+      "Name": "Raw ADC Value",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1502": {
+      "Name": "Analog Voltage Input Raw ADC Value",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1500": {
+      "Name": "Analog Voltage Input",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1501": {
+      "Name": "Photodiode Input",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1600": {
+      "Name": "Laser Power",
+      "Format": "FLOAT32",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "1601": {
+      "Name": "Output Level",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1210": {
+      "Name": "Relative Cooling Power",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1212": {
+      "Name": "Actual Fan Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "rpm",
+      "Description": ""
+    },
+    "1211": {
+      "Name": "Fan Nominal Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1213": {
+      "Name": "Actual Fan PWM Level",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1051": {
+      "Name": "Firmware Build Number",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "1054": {
+      "Name": "Min Version for Firmware Downgrade",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "123 \u2192 1.23"
+    },
+    "1060": {
+      "Name": "Driver Input Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1061": {
+      "Name": "8V Internal Supply",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1062": {
+      "Name": "5V Internal Supply",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1063": {
+      "Name": "3.3V Internal Supply",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1064": {
+      "Name": "\u22123.3V Internal Supply",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1065": {
+      "Name": "Device Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1066": {
+      "Name": "Powerstage Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": "Instance 1: LD Driver Temperature Instance 2: TEC Controller Temperature"
+    },
+    "2100": {
+      "Name": "Output Enable",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: OFF 1: ON"
+    },
+    "2101": {
+      "Name": "Nominal Output Current",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Set Current 1: Analog Input 2: LPC 3: LUT 4: Signal Generator"
+    },
+    "2102": {
+      "Name": "Set Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "2113": {
+      "Name": "Slope Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "A/s",
+      "Description": ""
+    },
+    "2130": {
+      "Name": "Supply Enable",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: OFF 1: ON"
+    },
+    "2131": {
+      "Name": "Laser Forward Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "2132": {
+      "Name": "Laser Diff. Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "2122": {
+      "Name": "Max Nominal Current",
+      "Format": "FLOAT32",
+      "ValueRange": "1303: 0 \u2026 20A",
+      "Description": ""
+    },
+    "2123": {
+      "Name": "Min Nominal Current",
+      "Format": "FLOAT32",
+      "ValueRange": "1303: 0 \u2026 20A",
+      "Description": ""
+    },
+    "2120": {
+      "Name": "Current Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "2121": {
+      "Name": "Voltage Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "2010": {
+      "Name": "Input Selection",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Fixed Current/Voltage (uses parameter 2020) 1: Temperature Controller"
+    },
+    "2000": {
+      "Name": "Output Enable",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "0: OFF 1: ON"
+    },
+    "2020": {
+      "Name": "Set Current",
+      "Format": "FLOAT32",
+      "ValueRange": "\u22124 \u2026 4 A",
+      "Description": ""
+    },
+    "2021": {
+      "Name": "Set Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 21 V",
+      "Description": ""
+    },
+    "2030": {
+      "Name": "Current Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "See parameter ID 2020",
+      "Description": ""
+    },
+    "2031": {
+      "Name": "Voltage Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "See parameter ID 2021",
+      "Description": ""
+    },
+    "2032": {
+      "Name": "Current Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 5.6 A",
+      "Description": ""
+    },
+    "2033": {
+      "Name": "Voltage Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 24 V",
+      "Description": ""
+    },
+    "2051": {
+      "Name": "Device Address",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 254",
+      "Description": ""
+    },
+    "2050": {
+      "Name": "Base Baud Rate",
+      "Format": "INT32",
+      "ValueRange": "4800 \u2026 1M",
+      "Description": "Instance 1 = Interface 1 etc."
+    },
+    "2052": {
+      "Name": "Response Delay",
+      "Format": "INT32",
+      "ValueRange": "0 \u03bcs \u2026 1E6 \u03bcs",
+      "Description": "Instance 1 = Interface 1 etc."
+    },
+    "2060": {
+      "Name": "Timeout",
+      "Format": "FLOAT32",
+      "ValueRange": "0; 0.1 \u2026 60s",
+      "Description": "0: Disable the watchdog"
+    },
+    "2070": {
+      "Name": "Node ID",
+      "Format": "INT32",
+      "ValueRange": "1 ... 127",
+      "Description": ""
+    },
+    "2071": {
+      "Name": "Bit Rate",
+      "Format": "INT32",
+      "ValueRange": "10 \u2026 1000 kbit/s",
+      "Description": ""
+    },
+    "2072": {
+      "Name": "CAN1",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: CAN1 Disabled 1: CAN1 Enabled"
+    },
+    "3101": {
+      "Name": "Set Power",
+      "Format": "FLOAT32",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "3110": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "A/W",
+      "Description": ""
+    },
+    "3111": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "3112": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "3113": {
+      "Name": "Slope Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "W/s",
+      "Description": ""
+    },
+    "3121": {
+      "Name": "Max Nominal Power",
+      "Format": "FLOAT32",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "3122": {
+      "Name": "Min Nominal Power",
+      "Format": "FLOAT32",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "3201": {
+      "Name": "Loop Enable",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: loop disabled 1: loop enabled"
+    },
+    "3202": {
+      "Name": "Interval",
+      "Format": "INT32",
+      "ValueRange": "\u2265 1 cycle*",
+      "Description": ""
+    },
+    "3200": {
+      "Name": "Lookup Table",
+      "Format": "Big Data FLOAT32",
+      "ValueRange": "",
+      "Description": "Limited to 1000 samples"
+    },
+    "3300": {
+      "Name": "Wave Function",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 3",
+      "Description": "0: Custom 1: Sine 2: Square 3: Triangle"
+    },
+    "3301": {
+      "Name": "Current High",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "3302": {
+      "Name": "Current Low",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "3303": {
+      "Name": "Rise Time",
+      "Format": "INT32",
+      "ValueRange": "\u2265 0 cycles*",
+      "Description": ""
+    },
+    "3304": {
+      "Name": "Fall Time",
+      "Format": "INT32",
+      "ValueRange": "\u2265 0 cycles*",
+      "Description": ""
+    },
+    "3305": {
+      "Name": "High Time",
+      "Format": "INT32",
+      "ValueRange": "\u2265 0 cycles*",
+      "Description": ""
+    },
+    "3306": {
+      "Name": "Low Time",
+      "Format": "INT32",
+      "ValueRange": "\u2265 0 cycles*",
+      "Description": ""
+    },
+    "3307": {
+      "Name": "Signal Period Time",
+      "Format": "INT32",
+      "ValueRange": "\u2265 1 cycle*",
+      "Description": ""
+    },
+    "4000": {
+      "Name": "Target Object Temp",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "4003": {
+      "Name": "Coarse Temp Ramp",
+      "Format": "FLOAT32",
+      "ValueRange": "1E\u22126 \u00b0C/s \u2026 50 \u00b0C/s",
+      "Description": ""
+    },
+    "4002": {
+      "Name": "Proximity Width",
+      "Format": "FLOAT32",
+      "ValueRange": "0\u00b0C \u2026 200\u00b0C",
+      "Description": ""
+    },
+    "4010": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0 %/\u00b0C \u2026 10000 %/\u00b0C",
+      "Description": ""
+    },
+    "4011": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 10000 s",
+      "Description": "0s disables the integral term"
+    },
+    "4012": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 10000 s",
+      "Description": ""
+    },
+    "4013": {
+      "Name": "D Part Damping PT1",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": ""
+    },
+    "4020": {
+      "Name": "Mode",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "0: Peltier, Full Control 1: Peltier, Heat Only - Cool Only 2: Resistor, Heat Only"
+    },
+    "4030": {
+      "Name": "Maximum Current Imax",
+      "Format": "FLOAT32",
+      "ValueRange": "0 %/\u00b0C \u2026 10000 %/\u00b0C",
+      "Description": ""
+    },
+    "4031": {
+      "Name": "Delta Temperature dTmax",
+      "Format": "FLOAT32",
+      "ValueRange": "0 s \u2026 10000 s",
+      "Description": "0s disables the integral term"
+    },
+    "4032": {
+      "Name": "Positive Current is",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Cooling 1: Heating"
+    },
+    "4040": {
+      "Name": "Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "0.001 \u03a9 \u2026 10 k\u03a9",
+      "Description": ""
+    },
+    "4041": {
+      "Name": "Maximum Current",
+      "Format": "FLOAT32",
+      "ValueRange": "0.01 A \u2026 1000 A",
+      "Description": ""
+    },
+    "4051": {
+      "Name": "Upper Boundary",
+      "Format": "FLOAT32",
+      "ValueRange": "-273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "4050": {
+      "Name": "Lower Boundary",
+      "Format": "FLOAT32",
+      "ValueRange": "-273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "4060": {
+      "Name": "Temperature Deviation",
+      "Format": "INT32",
+      "ValueRange": "0\u00b0C \u2026 50\u00b0C",
+      "Description": ""
+    },
+    "4061": {
+      "Name": "Min Time in Window",
+      "Format": "INT32",
+      "ValueRange": "0 s \u2026 86400 s",
+      "Description": ""
+    },
+    "4062": {
+      "Name": "Max Stabilization Time",
+      "Format": "INT32",
+      "ValueRange": "0 s \u2026 86400 s",
+      "Description": ""
+    },
+    "51000": {
+      "Name": "Auto Tuning Start",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter initiates the Auto Tuning process."
+    },
+    "51001": {
+      "Name": "Auto Tuning Cancel",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter cancels the Auto Tuning process."
+    },
+    "51010": {
+      "Name": "Tuning Parameter 2A (Temperature peak- peak value)",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "\u00b0C",
+      "Description": "Returns the Temperature peak-peak value recorded while the Tuning Process was running."
+    },
+    "51011": {
+      "Name": "Tuning Parameter 2D (Control Variable peak- peak value)",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "%",
+      "Description": "Returns the Control Variable peak-peak value recorded while the Tuning Process was running."
+    },
+    "51012": {
+      "Name": "Tuning Parameter Ku (Ultimate gain)",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the Ultimate Gain calculated based upon the 2A and 2D values."
+    },
+    "51013": {
+      "Name": "Tuning Parameter Tu (Ultimate period)",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "s",
+      "Description": "Returns the recorded Ultimate Period."
+    },
+    "51014": {
+      "Name": "PID Parameter Kp",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the optimized Proportional Gain for the PID Controller."
+    },
+    "51015": {
+      "Name": "PID Parameter Ti",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Integral Time for the PID Controller."
+    },
+    "51016": {
+      "Name": "PID Parameter Td",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Derivative Time for the PID Controller."
+    },
+    "51017": {
+      "Name": "Coarse Temp Ramp",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "\u00b0C/s",
+      "Description": "Returns a recommendation value for the Target Temperature Ramp function."
+    },
+    "51018": {
+      "Name": "Proximity Width",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "\u00b0C",
+      "Description": "Returns a recommendation value for the Target Temperature Ramp function."
+    },
+    "51020": {
+      "Name": "Tuning Status",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "..",
+      "Description": "0: Idle 1: Ramping to Target Temperature... 2: Preparing for Acquisition... 3: Acquiring Data... 4: Success. Tuning Complete! 10: Error. Check Error Number!"
+    },
+    "51021": {
+      "Name": "Tuning Progress",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "0 \u2026 100%",
+      "Description": ""
+    },
+    "51022": {
+      "Name": "Slow PI Parameter Kp",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the optimized Proportional Gain for the PID Controller."
+    },
+    "51023": {
+      "Name": "Slow PI Parameter Ti",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Integral Time for the PID Controller."
+    },
+    "51024": {
+      "Name": "PID D Part Damping PT1 Recommendation",
+      "Format": "FLOAT32 Read Only",
+      "ValueRange": "..",
+      "Description": "Returns a recommendation value for the PID D Part Damping."
+    },
+    "5011": {
+      "Name": "Upper Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5010": {
+      "Name": "Lower Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5030": {
+      "Name": "ADC Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: None 1: Upper Only 2: Lower Only 3: Both"
+    },
+    "5031": {
+      "Name": "Temperature Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: None 1: Upper Only 2: Lower Only 3: Both"
+    },
+    "5040": {
+      "Name": "Lowest Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u03a9",
+      "Description": ""
+    },
+    "5041": {
+      "Name": "Highest Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u03a9",
+      "Description": ""
+    },
+    "5042": {
+      "Name": "Temperature at Lower Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5043": {
+      "Name": "Temperature at Highest Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5001": {
+      "Name": "Temperature Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5002": {
+      "Name": "Temperature Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C/\u00b0C",
+      "Description": ""
+    },
+    "5020": {
+      "Name": "Lower Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5021": {
+      "Name": "Lower Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5022": {
+      "Name": "Middle Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5023": {
+      "Name": "Middle Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5024": {
+      "Name": "Upper Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5025": {
+      "Name": "Upper Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5100": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "5101": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "8000": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "8001": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "A/A",
+      "Description": ""
+    },
+    "8002": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "8003": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "A/A",
+      "Description": ""
+    },
+    "8004": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "8005": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "8006": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "8007": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "8008": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "8009": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "V/V",
+      "Description": ""
+    },
+    "6300": {
+      "Name": "Input Source",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "0: Ext Temp 1 1: Ext Temp 2 2: Device"
+    },
+    "6320": {
+      "Name": "Input Source",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 3",
+      "Description": "0: Ext Temp 1 1: Ext Temp 2 2: Device 3: Fixed Value"
+    },
+    "6321": {
+      "Name": "Fixed Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "-273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6330": {
+      "Name": "Error Delay",
+      "Format": "INT32",
+      "ValueRange": "-1 \u2026 20000000 ms",
+      "Description": "-1: fully disable the Error 108 (not recommended) 0: set the delay to 1ms automatically"
+    },
+    "6340": {
+      "Name": "Disable on LDD Error",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Off 1: On"
+    },
+    "7011": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "7012": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "A/V",
+      "Description": ""
+    },
+    "7010": {
+      "Name": "LP System Scale",
+      "Format": "FLOAT32",
+      "ValueRange": "A/W",
+      "Description": ""
+    },
+    "7013": {
+      "Name": "Current Factor",
+      "Format": "FLOAT32",
+      "ValueRange": "W/V",
+      "Description": "This factor sets the scale when the analog input is used as source for the laser current setpoint."
+    },
+    "9001": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "9002": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "6100": {
+      "Name": "GPIO Function",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: No Function 1: Signal Control (see 3.2.17.2) 2: LDD OK (1 when Ready or Running) 3: LDD HW Enable 4: TEC HW Enable 5: LDD Toggle HW Enable 6: TEC Toggle HW Enable 7: Pulse Input 8: LDD Run 9: TEC Stable 10: TEC Ramp / Stable 11: TEC Ramp 12: Fan PWM 13: Fan Tacho 14: Fan Stop 15: Pump 16: Dev Addr +1 (Device Address) 17: Dev Addr +2 (Device Address) 18: Dev Addr +4 (Device Address) 19: TEC Alt Target T1 20: TEC Alt Target T12 21: TEC Power Stage 0 A 22: Fix 0 23: LDD HW Enable (edge) 24: TEC HW Enable (edge)"
+    },
+    "6101": {
+      "Name": "GPIO Level Assignment",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Positive 1: Negative"
+    },
+    "6102": {
+      "Name": "GPIO Hardware Configuration",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: IN WeakNo 1: IN WeakUp 2: IN WeakDown 3: OUT PushPull 4: OUT OD NoPull 5: OUT OD WeakUp"
+    },
+    "6103": {
+      "Name": "GPIO Channel",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "1: Channel 1 2: Channel 2"
+    },
+    "6120": {
+      "Name": "Actual Temperature Source",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: External 1 1: External 2 2: Device LD 3: Device TEC"
+    },
+    "6121": {
+      "Name": "ON Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6122": {
+      "Name": "OFF Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6130": {
+      "Name": "Temperature 1",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6131": {
+      "Name": "Temperature 2",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6132": {
+      "Name": "Temperature 3",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6200": {
+      "Name": "Fan Control Enable",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Disabled 1: Enabled"
+    },
+    "6210": {
+      "Name": "Actual Temperature Source",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: External 1 1: External 2 2: Device LD 3: Device TEC"
+    },
+    "6211": {
+      "Name": "Target Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2212273 \u00b0C \u2026 1000 \u00b0C",
+      "Description": ""
+    },
+    "6212": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0 %/\u00b0C \u2026 10000 %/\u00b0C",
+      "Description": "Temperature Controller"
+    },
+    "6213": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "100 us \u2026 10000 s",
+      "Description": "Temperature Controller, 0 s disables the integral term"
+    },
+    "6214": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0 s \u2026 10000 s",
+      "Description": "Temperature Controller"
+    },
+    "6220": {
+      "Name": "0% Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Fan speed when no cooling is required"
+    },
+    "6221": {
+      "Name": "100% Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Fan speed when maximum cooling is required"
+    },
+    "6227": {
+      "Name": "Fan Min Speed Start",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Speed above which the fan starts"
+    },
+    "6228": {
+      "Name": "Fan Min Speed Stop",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Speed below which the fan stops"
+    },
+    "6222": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0 %/\u00b0C \u2026 10000 %/\u00b0C",
+      "Description": "Speed Controller"
+    },
+    "6223": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "100 us \u2026 10000 s",
+      "Description": "Speed Controller 0 s disables the integral term"
+    },
+    "6224": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0 s \u2026 10000 s",
+      "Description": "Speed Controller"
+    },
+    "6225": {
+      "Name": "Bypassing Speed Controller",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: No 1: Yes"
+    },
+    "6226": {
+      "Name": "Fan Surveillance",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Enabled 1: Disabled"
+    },
+    "6230": {
+      "Name": "Fan PWM Frequency",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: 25kHz 1: 1kHz"
+    },
+    "6310": {
+      "Name": "Delay until Reset",
+      "Format": "FLOAT32",
+      "ValueRange": "0 s \u2026 86400 s",
+      "Description": "0: No Auto Reset Does not trigger for 20 seconds after a reset to avoid boot loops In case of an interlock error the delay time only starts to elapse once the interlock has been released again"
+    },
+    "2140": {
+      "Name": "Always off after Reset",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Disabled, LDD Output Enable remains unchanged 1: Enabled, LDD Output Enable is turned off after every reset"
+    },
+    "50010": {
+      "Name": "Sine Ramp Start Point",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: On a new Target Value, the actually measured Temperature is taken as Start Temperature. (Reset State) 1: On a new Target Value, the current Target Temperature is taken as Start Temperature"
+    },
+    "52100": {
+      "Name": "Enable Function",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "Enable the output signal control function."
+    },
+    "52101": {
+      "Name": "Set Output to Push-Pull",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "If a bit is set to 0, the output signal is at high impedance s(set as input). If a bit is set to 1, the output signal is driven."
+    },
+    "52102": {
+      "Name": "Set Output States",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "Set the output states of driven signals."
+    },
+    "52103": {
+      "Name": "Read Input States",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "Read back the (input) states of all signals."
+    },
+    "1300": {
+      "Name": "Phase Current x",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": "Only used in LDD-1303, always NA or 0 in LDD-1301"
+    },
+    "1301": {
+      "Name": "Phase Symmetrization Factor x",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": "Only used in LDD-1303, always NA or 0 in LDD-1301"
+    },
+    "1403": {
+      "Name": "Output Level",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1405": {
+      "Name": "Calculated Output Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1302": {
+      "Name": "Temperature Phase x Buck/Boost",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": "Only one value used in LDD-1301, other values are NA. All values used in LDD-1303"
+    },
+    "2110": {
+      "Name": "PID Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "%/A",
+      "Description": ""
+    },
+    "2111": {
+      "Name": "PID Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "2112": {
+      "Name": "PID Td",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "10002": {
+      "Name": "Feedforward Enable",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Off 1: On"
+    },
+    "10003": {
+      "Name": "Feedforward Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "10103": {
+      "Name": "Feedforward Slope Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "V/s",
+      "Description": ""
+    },
+    "10011": {
+      "Name": "Feedforward PID Option",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: PID 1: I"
+    },
+    "10201": {
+      "Name": "Feedforward PID Freeze",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "0: Off 1: On 2: Reset"
+    },
+    "10100": {
+      "Name": "PID Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "1/A",
+      "Description": ""
+    },
+    "10101": {
+      "Name": "PID Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "10102": {
+      "Name": "PID Td",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "3000": {
+      "Name": "Nominal Output Power",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Set Power 1: Analog"
+    },
+    "3001": {
+      "Name": "Set Power",
+      "Format": "FLOAT32",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "3010": {
+      "Name": "PID Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "A/W",
+      "Description": ""
+    },
+    "3011": {
+      "Name": "PID Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "3012": {
+      "Name": "PID Td",
+      "Format": "FLOAT32",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "3013": {
+      "Name": "Slope Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "W/s",
+      "Description": ""
+    },
+    "3021": {
+      "Name": "Max Nominal Power",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1 W",
+      "Description": ""
+    },
+    "3022": {
+      "Name": "Min Nominal Power",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1 W",
+      "Description": ""
+    },
+    "7000": {
+      "Name": "Signal Source",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Set Value 1: Sync"
+    },
+    "7001": {
+      "Name": "Set Value",
+      "Format": "FLOAT32",
+      "ValueRange": "-0.5V \u2026 10.5V",
+      "Description": ""
+    },
+    "7002": {
+      "Name": "Sync Scaling",
+      "Format": "FLOAT32",
+      "ValueRange": "V/A",
+      "Description": ""
+    },
+    "2124": {
+      "Name": "Max Nominal Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "0 V \u2026 1000 V",
+      "Description": ""
+    },
+    "2125": {
+      "Name": "Min Nominal Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "0 V \u2026 1000 V",
+      "Description": ""
+    },
+    "2126": {
+      "Name": "Fast Current Error Threshold",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: OFF 1: ON"
+    },
+    "9000": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "6110": {
+      "Name": "Source",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: OFF 1: Ext Temp 1 2: Ext Temp 2"
+    },
+    "6112": {
+      "Name": "Offset [\u00b0C]",
+      "Format": "FLOAT32",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "6111": {
+      "Name": "Gain [A/\u00b0C]",
+      "Format": "FLOAT32",
+      "ValueRange": "A/\u00b0C",
+      "Description": ""
+    },
+    "53000": {
+      "Name": "Load Characterization Start Command",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Disable 1: Enable"
+    },
+    "53001": {
+      "Name": "Load Characterization Status",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 3",
+      "Description": "0: Ready 1: Success 2: Error 3: Running"
+    },
+    "53002": {
+      "Name": "Load Characterization Progress",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": ""
+    },
+    "10301": {
+      "Name": "Upper End of the Modeling Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "10300": {
+      "Name": "Lower End of the Modeling Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "53004": {
+      "Name": "Load Characterization Driver Input Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "53006": {
+      "Name": "Current Samples",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "53005": {
+      "Name": "Voltage Samples",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "10006": {
+      "Name": "Load Model",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "0: Linear 1: Non-Linear"
+    },
+    "10204": {
+      "Name": "Calculated Voltage Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "10205": {
+      "Name": "Calculated Output Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2126",
+      "Description": ""
+    },
+    "10004": {
+      "Name": "Voltage Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "10005": {
+      "Name": "Output Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2126",
+      "Description": ""
+    },
+    "10207": {
+      "Name": "Calculated Saturation Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "10208": {
+      "Name": "Calculated Thermal Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "10212": {
+      "Name": "Calculated Series Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2126",
+      "Description": ""
+    },
+    "10007": {
+      "Name": "Saturation Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "10008": {
+      "Name": "Thermal Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "10012": {
+      "Name": "Series Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "\u2126",
+      "Description": ""
+    },
+    "1080": {
+      "Name": "Operating time",
+      "Format": "",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "1081": {
+      "Name": "Operating time running",
+      "Format": "",
+      "ValueRange": "s",
+      "Description": ""
+    },
+    "1082": {
+      "Name": "Total Output Energy",
+      "Format": "",
+      "ValueRange": "Wh",
+      "Description": ""
+    },
+    "54000": {
+      "Name": "Feature Key Store",
+      "Format": "LATIN1",
+      "ValueRange": "0 \u2026 256 Elements",
+      "Description": ""
+    },
+    "54001": {
+      "Name": "Feature Key Status",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Empty 1: Valid 2: Wrong structure 3: HMAC fail 4: Header fail 5: Device type wrong 6: Unique ID wrong"
+    },
+    "54010": {
+      "Name": "LPC Feature Status",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Locked 1: Trial 2: Extended Trial 3: Fully Enabled"
+    },
+    "54011": {
+      "Name": "LPC Feature Trial From Time",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "54012": {
+      "Name": "LPC Feature Trial To Time",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "54015": {
+      "Name": "Feedforward Feature Status",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: Locked 1: Trial 2: Extended Trial 3: Fully Enabled"
+    },
+    "54016": {
+      "Name": "Feedforward Feature Trial From Time",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "54017": {
+      "Name": "Feedforward Feature Trial To Time",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": ""
+    }
+  },
+  "tec": {
+    "100": {
+      "Name": "Device Type",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "1122 \u2192 TEC-1122"
+    },
+    "101": {
+      "Name": "Hardware Version",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "123 \u2192 1.23"
+    },
+    "102": {
+      "Name": "Serial Number",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "103": {
+      "Name": "Firmware Version",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "123 \u2192 1.23"
+    },
+    "104": {
+      "Name": "Device Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Init 1: Ready 2: Run 3: Error 4: Bootloader 5: Device will Reset within next 200ms"
+    },
+    "105": {
+      "Name": "Error Number",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "106": {
+      "Name": "Error Instance",
+      "Format": "INT32 R",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "107": {
+      "Name": "Error Parameter",
+      "Format": "INT32 R",
+      "ValueRange": "",
+      "Description": ""
+    },
+    "109": {
+      "Name": "Parameter System: Flash Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: All Parameters are saved to Flash 1: Save to flash pending or in progress. (Please do not power off the device now)"
+    },
+    "110": {
+      "Name": "Error Text",
+      "Format": "LATIN1 R",
+      "ValueRange": "",
+      "Description": "Use the ?VB command to query the error text."
+    },
+    "111": {
+      "Name": "Device Reset",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "Write 1 to this parameter, to trigger a reset."
+    },
+    "112": {
+      "Name": "Firmware Version",
+      "Format": "FLOAT32 R",
+      "ValueRange": "",
+      "Description": "Same as parameter 103, but as float. Round it to two decimal places."
+    },
+    "115": {
+      "Name": "Random Startup Value",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "Random value, which gets updated at each system start. Might be used to detect an unexpected reboot."
+    },
+    "120": {
+      "Name": "User Notes",
+      "Format": "LATIN1",
+      "ValueRange": "",
+      "Description": "Can be used by the user for notes. Has no influence to the firmware functionality."
+    },
+    "2040": {
+      "Name": "General Operating Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Bipolar 1: Parallel Bipolar Individual 2: Parallel Bipolar Common 3: Unipolar 4: Mixed 5: Do not use: Just for tests"
+    },
+    "6305": {
+      "Name": "Target Source Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Default (taken from ID 3000) 1: HR 1 2: HR 2 3: LR 1 4: LR 2 5: LR 3 6: LR 4 7: Device 8: Cascade 1 9: Cascade 2"
+    },
+    "6300": {
+      "Name": "Object Source Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device 7: External (From ID 52200) 8: Estimator 1 9: Estimator 2"
+    },
+    "6304": {
+      "Name": "Sink Source Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device 7: Fixed (From ID 52201)"
+    },
+    "52200": {
+      "Name": "Object External Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": "Initial Value will be NAN. NAN causes the temperature controller to Stop. This Value should be set every 100ms or faster. To enable this feature use Parameter 6300. If this Parameter doesn't get refreshed for longer than 5s, the value will automatically be set to NAN. This stops the temperature controller."
+    },
+    "52201": {
+      "Name": "Sink Fixed Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6210": {
+      "Name": "Fan Temperature Source",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device"
+    },
+    "6240": {
+      "Name": "Fan Ambient Source Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device 7: Fixed (Taken from 6241)"
+    },
+    "6241": {
+      "Name": "Fan Ambient Fixed Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "1051": {
+      "Name": "Firmware Build Number",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "1054": {
+      "Name": "Min Version for Firmware Downgrade",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "123 \u2192 1.23"
+    },
+    "1065": {
+      "Name": "Unique ID",
+      "Format": "LATIN1 R",
+      "ValueRange": "",
+      "Description": "This is the UniqueID of the processor on the device."
+    },
+    "1060": {
+      "Name": "Driver Input Voltage",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1061": {
+      "Name": "Medium Internal Supply",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1062": {
+      "Name": "3.3V Internal Supply",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1064": {
+      "Name": "Calculated Input Current",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": "The 'Calculated Input Current' is calculated by dividing the total output power by the 'Driver Input Voltage'."
+    },
+    "1066": {
+      "Name": "Total Output Power",
+      "Format": "FLOAT32 R",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "1071": {
+      "Name": "Input Protection: Actual Output Limit",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": "The maximum output current limitation that serves as input protection for the output stage."
+    },
+    "1072": {
+      "Name": "Input Protection: Device Limitation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": "The maximum input current limitation defined by the power stage."
+    },
+    "1063": {
+      "Name": "Device Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": "Temperature of the TEC Controller itself"
+    },
+    "1110": {
+      "Name": "Maximum Device Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1111": {
+      "Name": "Maximum Output Current",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1080": {
+      "Name": "Operating Time",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "1081": {
+      "Name": "Operating Time in Run Mode",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "1082": {
+      "Name": "Operating Time Supply CHx",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "1083": {
+      "Name": "Total Output Energy",
+      "Format": "INT32 R",
+      "ValueRange": "Wh",
+      "Description": ""
+    },
+    "1034": {
+      "Name": "P Part Output for CHx",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1035": {
+      "Name": "I Part Output for CHx",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1036": {
+      "Name": "D Part Output for CHx",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "3000": {
+      "Name": "Target Object Temp",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "1000": {
+      "Name": "Object Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "1001": {
+      "Name": "Sink Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "3003": {
+      "Name": "Coarse Temp Ramp",
+      "Format": "FLOAT32",
+      "ValueRange": "1E-6\u00b0C/s \u2026 50\u00b0C/s",
+      "Description": ""
+    },
+    "3002": {
+      "Name": "Proximity Width",
+      "Format": "FLOAT32",
+      "ValueRange": "0\u00b0C \u2026 200\u00b0C",
+      "Description": ""
+    },
+    "3004": {
+      "Name": "Ramp Start Point",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Object: When a new target value is set, the temperature actually measured is taken as the start temperature. This is the default behaviour. 1: Target: When a new target value is set, the previous target temperature is used as the start temperature. This setting is typically used when the target temperature is periodically updated from an external control instance. The first ramp after enabling the system is always from the object temperature to the target temperature. 2: Ramp: When a new target value is set, the last calculated ramp temperature is used as the start temperature. This setting is typically used when the target temperature is periodically updated from an external control instance. The first ramp after enabling the system is always from the object temperature to the target temperature."
+    },
+    "1011": {
+      "Name": "(Ramp) Nominal Object Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "3051": {
+      "Name": "Upper Boundary",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "3050": {
+      "Name": "Lower Boundary",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "3010": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0%/\u00b0C \u2026 10000%/\u00b0C",
+      "Description": ""
+    },
+    "3011": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": "0s disables the integral term"
+    },
+    "3012": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": ""
+    },
+    "3013": {
+      "Name": "D Part Damping PT1",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": ""
+    },
+    "1032": {
+      "Name": "PID Control Variable",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "3014": {
+      "Name": "Feedforward disturbance compensation",
+      "Format": "FLOAT32",
+      "ValueRange": "%",
+      "Description": "The written value to this parameter is once added to the Integral sum of the PID controller."
+    },
+    "3020": {
+      "Name": "Mode",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 2",
+      "Description": "0: Peltier, Full Control 1: Peltier, Heat Only - Cool Only 2: Resistor, Heat Only 3: Fan, Cool Only"
+    },
+    "3034": {
+      "Name": "Polarity",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Cooling (Positive current is cooling) 1: Heating (Positive current is heating)"
+    },
+    "3030": {
+      "Name": "Imax",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1A \u2026 1000A",
+      "Description": "From the Peltier Datasheet"
+    },
+    "3033": {
+      "Name": "dTmax",
+      "Format": "FLOAT32",
+      "ValueRange": "1\u00b0C \u2026 200\u00b0C",
+      "Description": "From the Peltier Datasheet"
+    },
+    "3040": {
+      "Name": "Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "0.001Ohm \u2026 10k Ohm",
+      "Description": ""
+    },
+    "3041": {
+      "Name": "Maximum Current",
+      "Format": "FLOAT32",
+      "ValueRange": "0.01A \u2026 1000A",
+      "Description": ""
+    },
+    "3045": {
+      "Name": "ON Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1000 V",
+      "Description": ""
+    },
+    "3046": {
+      "Name": "OFF Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1000 V",
+      "Description": ""
+    },
+    "1012": {
+      "Name": "Thermal Power Model Current",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1030": {
+      "Name": "PID Lower Limitation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1031": {
+      "Name": "PID Upper Limitation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1033": {
+      "Name": "PID 0A Limitation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": "Only active in Mode Peltier Heat/Cool Only"
+    },
+    "4040": {
+      "Name": "Temperature Deviation",
+      "Format": "FLOAT32",
+      "ValueRange": "0\u00b0C \u2026 50\u00b0C",
+      "Description": ""
+    },
+    "4041": {
+      "Name": "Min Time in Window",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 86400s",
+      "Description": ""
+    },
+    "4042": {
+      "Name": "Max Stabilization Time",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 86400s",
+      "Description": ""
+    },
+    "1200": {
+      "Name": "Temperature is Stable",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Temperature regulation is not active 1: Is not stable 2: Is stable"
+    },
+    "2010": {
+      "Name": "Status",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: ON"
+    },
+    "1020": {
+      "Name": "Actual Output Current",
+      "Format": "FLOAT32 R",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "1021": {
+      "Name": "Actual Output Voltage",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1022": {
+      "Name": "Actual Output Power",
+      "Format": "FLOAT32 R",
+      "ValueRange": "W",
+      "Description": ""
+    },
+    "2000": {
+      "Name": "Input Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Fixed Current/Voltage (Uses ID 2020\u2026) 1: Temperature Controller"
+    },
+    "2020": {
+      "Name": "Set Current",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: -1.2A \u2026 1.2A 1091 / 1161-4A: -4A \u2026 4A 1089 / 1122 / 1161-10A: -10A \u2026 10A 1090 / 1123: -16A \u2026 16A 1162 / 1166: -5A \u2026 5A 1163 / 1167: -25A \u2026 25A",
+      "Description": ""
+    },
+    "2021": {
+      "Name": "Set Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: 0V \u2026 9.6V -SV Version and 1091 / 1161: 0V \u2026 21V -HV Version: 0V \u2026 30V 1162 / 1163 / 1166 / 1167: 0V \u2026 57V",
+      "Description": ""
+    },
+    "2030": {
+      "Name": "Current Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "See parameter ID: 2020",
+      "Description": ""
+    },
+    "2031": {
+      "Name": "Voltage Limitation",
+      "Format": "FLOAT32",
+      "ValueRange": "See parameter ID: 2021",
+      "Description": ""
+    },
+    "2032": {
+      "Name": "Current Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: 0A \u2026 1.4A 1091 / 1161-4A: 0A \u2026 5.6A 1089 / 1122 / 1161-10A: 0A \u2026 14A 1090 / 1123: 0A \u2026 20A 1162 / 1166: -7A \u2026 7A 1163 / 1167: -35A \u2026 35A",
+      "Description": ""
+    },
+    "2033": {
+      "Name": "Voltage Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: 0A \u2026 13V -SV Version and 1091 / 1161: 0V \u2026 25V -HV Version: 0V \u2026 34V 1162 / 1163 / 1166 / 1167: 0V \u2026 60V",
+      "Description": ""
+    },
+    "1073": {
+      "Name": "Final Output Limitation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "...",
+      "Description": "Shows the final output current limitation, as min value of the parameters 1111, 1071, 2030"
+    },
+    "6000": {
+      "Name": "PGA Gain",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Gain = 1 1: Gain = 2 2: Gain = 4 3: Gain = 8 4: Gain = 16 5: Gain = 32 6: Gain = 64 7: Gain = 128 8: Auto Gain 1 or 8 9: Auto Gain 1 or 8 or 32"
+    },
+    "6007": {
+      "Name": "PGA Bypass",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Disabled 1: Enabled"
+    },
+    "6001": {
+      "Name": "Current Source",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "TEC-1091, 1092, 116x: 0: OFF 1: 10uA 2: 50uA 3: 100uA 4: 250uA 5: 500uA 6: 1000uA 7: 1500uA"
+    },
+    "6008": {
+      "Name": "Current Source 2 Out",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "TEC-1091, 1092, 116x: 0: OFF 1: AIN0 (UB) 2: AIN1 (UA) 3: AIN2 4: AIN3 (IA) 5: REFP0 (IB) 6: REFN0"
+    },
+    "6009": {
+      "Name": "Measurement Type",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Resistance 1: Voltage"
+    },
+    "6301": {
+      "Name": "Sampling Frequency",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: 10Hz 1: 80Hz/90Hz 2: 1Hz"
+    },
+    "6002": {
+      "Name": "ADC Rs",
+      "Format": "FLOAT32",
+      "ValueRange": "10Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "6006": {
+      "Name": "ADC Rp",
+      "Format": "FLOAT32",
+      "ValueRange": "0Ohm \u2026 1MOhm",
+      "Description": "0 Ohm means not assembled."
+    },
+    "6003": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "-100000 ... 100000",
+      "Description": ""
+    },
+    "6004": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1 ... 2",
+      "Description": ""
+    },
+    "1042": {
+      "Name": "Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "1046": {
+      "Name": "Differential Voltage",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "1040": {
+      "Name": "HR Measurement: Raw ADC Value",
+      "Format": "FLOAT32 R",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "6005": {
+      "Name": "Conversion Type",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: NTC 1: PT100 2: PT1000 3: Voltage"
+    },
+    "4001": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "-1E4\u00b0C \u2026 1E4\u00b0C",
+      "Description": ""
+    },
+    "4002": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1\u00b0C/\u00b0C \u2026 2.0\u00b0C/\u00b0C",
+      "Description": ""
+    },
+    "4024": {
+      "Name": "T High",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "4025": {
+      "Name": "R High",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "4022": {
+      "Name": "T Middle",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "4023": {
+      "Name": "R Middle",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "4020": {
+      "Name": "T Low",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "4021": {
+      "Name": "R Low",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "6400": {
+      "Name": "Reference Temp",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": "Reference Temperature in \u00b0C"
+    },
+    "6401": {
+      "Name": "Reference Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "-5V \u2026 5V",
+      "Description": "Voltage output at the Reference Temperature"
+    },
+    "6402": {
+      "Name": "Temperature Slope",
+      "Format": "FLOAT32",
+      "ValueRange": "-100V/\u00b0C \u2026 100V/\u00b0C",
+      "Description": "Voltage change per temperature change"
+    },
+    "1045": {
+      "Name": "Measured Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "4035": {
+      "Name": "Highest Voltage",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "4036": {
+      "Name": "Lowest Voltage",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "4030": {
+      "Name": "Lowest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "4031": {
+      "Name": "Highest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "4032": {
+      "Name": "Temperature at Lowest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "4033": {
+      "Name": "Temperature at Highest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "6302": {
+      "Name": "ADC Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: None 1: Upper Only 2: Lower Only 3: Both"
+    },
+    "6303": {
+      "Name": "Temp Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "Same as ID 6302"
+    },
+    "4011": {
+      "Name": "Upper Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "4010": {
+      "Name": "Lower Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "4012": {
+      "Name": "Max Temp Change",
+      "Format": "FLOAT32",
+      "ValueRange": "1\u00b0C/s \u2026 200\u00b0C/s",
+      "Description": ""
+    },
+    "4034": {
+      "Name": "Sensor Type",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Unknown Type 1: PT100 2: PT1000 3: NTC18K 4: NTC39K 5: NTC56K 6: NTC1M/NTC 7: VIN1 8: VIN2"
+    },
+    "6050": {
+      "Name": "Self-Check Period",
+      "Format": "INT32",
+      "ValueRange": "0s \u2026 2147483647s",
+      "Description": "Self-check Period in s. 0 disables the periodic self-check."
+    },
+    "6051": {
+      "Name": "Self-Check Trigger",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "Writing a 1 to this parameter triggers the automatic self- check. The parameter is automatically set to 0 after the check is finished."
+    },
+    "6052": {
+      "Name": "IRs Error Enable",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "If this parameter is set to 1 an error is thrown when the measured IRs is out of boundaries."
+    },
+    "6053": {
+      "Name": "AVDD",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": "Analog Supply Voltage measured by the ADC TEC 1091, 1092, 116x: 5V Other TEC-Controllers: 3.3V"
+    },
+    "6054": {
+      "Name": "IRs",
+      "Format": "FLOAT32 R",
+      "ValueRange": "I",
+      "Description": "Current through the reference Resistor See parameter 6001 for nominal value."
+    },
+    "6055": {
+      "Name": "VRef",
+      "Format": "FLOAT32 R",
+      "ValueRange": "V",
+      "Description": "Voltage at the reference voltage input of the AD-Converter"
+    },
+    "6010": {
+      "Name": "Rv",
+      "Format": "FLOAT32",
+      "ValueRange": "10Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "6015": {
+      "Name": "Rp",
+      "Format": "FLOAT32",
+      "ValueRange": "0Ohm \u2026 1MOhm",
+      "Description": "0 Ohm means not assembled."
+    },
+    "6013": {
+      "Name": "Vps",
+      "Format": "FLOAT32",
+      "ValueRange": "0V \u2026 100V",
+      "Description": ""
+    },
+    "6011": {
+      "Name": "ADC Calibration Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "-100000 ... 100000",
+      "Description": ""
+    },
+    "6012": {
+      "Name": "ADC Calibration Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1 ... 2",
+      "Description": ""
+    },
+    "1041": {
+      "Name": "LR Measurement: Sensor Raw ADC Value",
+      "Format": "FLOAT32 R",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "1043": {
+      "Name": "LR Measurement: Sensor Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "5024": {
+      "Name": "Upper Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "5025": {
+      "Name": "Upper Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "5022": {
+      "Name": "Middle Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "5023": {
+      "Name": "Middle Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "5020": {
+      "Name": "Lower Point: Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "5021": {
+      "Name": "Lower Point: Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "1Ohm \u2026 1MOhm",
+      "Description": ""
+    },
+    "5001": {
+      "Name": "Temperature Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "-1E4\u00b0C \u2026 1E4\u00b0C",
+      "Description": ""
+    },
+    "5002": {
+      "Name": "Temperature Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1\u00b0C/\u00b0C \u2026 2.0\u00b0C/\u00b0C",
+      "Description": ""
+    },
+    "5005": {
+      "Name": "PT1 Factor",
+      "Format": "FLOAT32",
+      "ValueRange": "1e-12 \u2026 1",
+      "Description": ""
+    },
+    "1044": {
+      "Name": "LR Measurement: Measured Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5040": {
+      "Name": "Lowest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "5041": {
+      "Name": "Highest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "5042": {
+      "Name": "Temperature at Lowest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "5043": {
+      "Name": "Temperature at Highest Resistance",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "6014": {
+      "Name": "ADC Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 3",
+      "Description": "0: None 1: Upper Only 2: Lower Only 3: Both"
+    },
+    "5013": {
+      "Name": "Temp. Limit Errors",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 3",
+      "Description": "Same as ID 6014"
+    },
+    "5011": {
+      "Name": "Upper Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "5010": {
+      "Name": "Lower Error Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "5012": {
+      "Name": "Max Temp Change",
+      "Format": "FLOAT32",
+      "ValueRange": "1\u00b0C/s \u2026 200\u00b0C/s",
+      "Description": ""
+    },
+    "6200": {
+      "Name": "Fan Control Enable",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Disabled 1: Enabled"
+    },
+    "6201": {
+      "Name": "Fan Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Cool 1: Conditioner"
+    },
+    "6230": {
+      "Name": "Fan PWM Frequency",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: 25kHz 1: 1kHz"
+    },
+    "6211": {
+      "Name": "Target Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6212": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0%/\u00b0C \u2026 10000%/\u00b0C",
+      "Description": "Temperature Controller"
+    },
+    "6213": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": "Temperature Controller, 0s disables the integral term"
+    },
+    "6214": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": "Temperature Controller"
+    },
+    "6243": {
+      "Name": "Linked Peltier Controller",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Temp CH1 1: Temp CH2 2: Temp CH3 3: Temp CH4"
+    },
+    "6242": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0%/\u00b0C \u2026 10000%/\u00b0C",
+      "Description": ""
+    },
+    "6220": {
+      "Name": "0% Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Fan Speed when no cooling is required"
+    },
+    "6221": {
+      "Name": "100% Speed",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Fan Speed when maximum cooling is required"
+    },
+    "6227": {
+      "Name": "Fan Min Speed Start",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Speed above which the Fan starts"
+    },
+    "6228": {
+      "Name": "Fan Min Speed Stop",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100000",
+      "Description": "Speed below which the Fan stops"
+    },
+    "6222": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0%/\u00b0C \u2026 10000%/\u00b0C",
+      "Description": "Speed Controller"
+    },
+    "6223": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": "Speed Controller 0s disables the integral term"
+    },
+    "6224": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 10000s",
+      "Description": "Speed Controller"
+    },
+    "6225": {
+      "Name": "Bypassing Speed Controller",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: No 1: Yes 2: Fixed PWM"
+    },
+    "6229": {
+      "Name": "Fixed PWM Level",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 100 %",
+      "Description": ""
+    },
+    "6226": {
+      "Name": "Fan Surveillance",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Enabled 1: Disabled"
+    },
+    "1100": {
+      "Name": "Relative Cooling Power",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "1101": {
+      "Name": "Nominal Fan Speed",
+      "Format": "FLOAT32 R",
+      "ValueRange": "rpm",
+      "Description": ""
+    },
+    "1102": {
+      "Name": "Actual Fan Speed",
+      "Format": "FLOAT32 R",
+      "ValueRange": "rpm",
+      "Description": ""
+    },
+    "1103": {
+      "Name": "Fan PWM Level",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": ""
+    },
+    "2051": {
+      "Name": "Device Address",
+      "Format": "INT32",
+      "ValueRange": "1 \u2026 254",
+      "Description": ""
+    },
+    "2050": {
+      "Name": "Base Baud Rate",
+      "Format": "INT32",
+      "ValueRange": "4800 \u2026 1M",
+      "Description": "Instance 1 = Interface 1\u2026"
+    },
+    "2052": {
+      "Name": "Response Delay",
+      "Format": "INT32",
+      "ValueRange": "0us \u2026 1E6us",
+      "Description": "Instance 1 = Interface 1\u2026"
+    },
+    "2060": {
+      "Name": "Timeout",
+      "Format": "FLOAT32",
+      "ValueRange": "0; 0.1 \u2026 60s",
+      "Description": "0 disables the Watchdog"
+    },
+    "2070": {
+      "Name": "Node ID",
+      "Format": "INT32",
+      "ValueRange": "1 \u2026 127",
+      "Description": ""
+    },
+    "2071": {
+      "Name": "Bit Rate",
+      "Format": "INT32",
+      "ValueRange": "10 kbit/s \u2026 1000kbit/s",
+      "Description": ""
+    },
+    "2072": {
+      "Name": "CAN1",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: CAN 1 Disabled 1: CAN 1 Enabled"
+    },
+    "2080": {
+      "Name": "CAN1 Auto Operational",
+      "Format": "INT32",
+      "ValueRange": "",
+      "Description": "0: No Auto operational 1: Device goes automatically to the operational state after bootup."
+    },
+    "2100": {
+      "Name": "COB ID SYNC",
+      "Format": "INT32",
+      "ValueRange": "0x00000000 .. 0xFFFFFFFF",
+      "Description": ""
+    },
+    "2101": {
+      "Name": "Inhibit Time Emergency",
+      "Format": "INT32",
+      "ValueRange": "0 .. 65535",
+      "Description": "This object defines the inhibit time used for the emergency message. The time must be a multiple of 100 milliseconds."
+    },
+    "2102": {
+      "Name": "Producer Heartbeat Time",
+      "Format": "INT32",
+      "ValueRange": "0 .. 655335",
+      "Description": "This object defines the cycle time of the heartbeat. If its value is 0 it is not used. The time must be a multiple of 1 millisecond."
+    },
+    "2150": {
+      "Name": "RPDO Com Config",
+      "Format": "BYTE",
+      "ValueRange": "",
+      "Description": "Parameter to save and restore CANopen PDO configuration. Do not edit manually."
+    },
+    "2151": {
+      "Name": "RPDO Mapping Config",
+      "Format": "BYTE",
+      "ValueRange": "",
+      "Description": "None"
+    },
+    "2152": {
+      "Name": "TPDO Com Config",
+      "Format": "BYTE",
+      "ValueRange": "",
+      "Description": "None"
+    },
+    "2153": {
+      "Name": "TPDO Mapping Config",
+      "Format": "BYTE",
+      "ValueRange": "",
+      "Description": "None"
+    },
+    "51002": {
+      "Name": "Thermal Model Speed",
+      "Format": "INT32",
+      "ValueRange": "0-1",
+      "Description": "0: Fast Model 1: Slow Model"
+    },
+    "51000": {
+      "Name": "Auto Tuning Start",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter initiates the Auto Tuning process."
+    },
+    "51001": {
+      "Name": "Auto Tuning Cancel",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter cancels the Auto Tuning process."
+    },
+    "51020": {
+      "Name": "Tuning Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Idle 1: Ramping to Target Temperature... 2: Preparing for Acquisition... 3: Acquiring Data... 4: Success. Tuning Complete! 10: Error. Check Error Number!"
+    },
+    "51021": {
+      "Name": "Tuning Progress",
+      "Format": "FLOAT32 R",
+      "ValueRange": "0 \u2026 100%",
+      "Description": ""
+    },
+    "51014": {
+      "Name": "PID Parameter Kp",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the optimized Proportional Gain for the PID Controller."
+    },
+    "51015": {
+      "Name": "PID Parameter Ti",
+      "Format": "FLOAT32 R",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Integral Time for the PID Controller."
+    },
+    "51016": {
+      "Name": "PID Parameter Td",
+      "Format": "FLOAT32 R",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Derivative Time for the PID Controller."
+    },
+    "51022": {
+      "Name": "Slow PI Parameter Kp",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the optimized Proportional Gain for the PID Controller."
+    },
+    "51023": {
+      "Name": "Slow PI Parameter Ti",
+      "Format": "FLOAT32 R",
+      "ValueRange": "s",
+      "Description": "Returns the optimized Integral Time for the PID Controller."
+    },
+    "51017": {
+      "Name": "Coarse Temp Ramp",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C/s",
+      "Description": "Returns a recommendation value for the Target Temperature Ramp function."
+    },
+    "51018": {
+      "Name": "Proximity Width",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": "Returns a recommendation value for the Target Temperature Ramp function."
+    },
+    "51024": {
+      "Name": "PID D Part Damping PT1 Recommendation",
+      "Format": "FLOAT32 R",
+      "ValueRange": "..",
+      "Description": "Returns a recommendation value for the PID D Part Damping."
+    },
+    "51010": {
+      "Name": "Tuning Parameter 2A (Temperature peak-peak value)",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": "Returns the Temperature peak- peak value recorded while the Tuning Process was running."
+    },
+    "51011": {
+      "Name": "Tuning Parameter 2D (Control Variable peak- peak value)",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%",
+      "Description": "Returns the Control Variable peak-peak value recorded while the Tuning Process was running."
+    },
+    "51012": {
+      "Name": "Tuning Parameter Ku (Ultimate gain)",
+      "Format": "FLOAT32 R",
+      "ValueRange": "%/\u00b0C",
+      "Description": "Returns the Ultimate Gain calculated based upon the 2A and 2D values."
+    },
+    "51013": {
+      "Name": "Tuning Parameter Tu (Ultimate period)",
+      "Format": "FLOAT32 R",
+      "ValueRange": "s",
+      "Description": "Returns the recorded Ultimate Period."
+    },
+    "52000": {
+      "Name": "Lookup Table Start",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter initiates the Lookup process."
+    },
+    "52001": {
+      "Name": "Lookup Table Stop",
+      "Format": "INT32",
+      "ValueRange": "1",
+      "Description": "Writing 1 to this parameter cancels the Lookup progress process."
+    },
+    "52002": {
+      "Name": "Lookup Table Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Not initialized 1: Table Data not valid 2: Analyzing Data Table 3: Ready (Data Table OK) 4: Executing\u2026 5: Max nr of Tables exceeded 6: Sub Table not found"
+    },
+    "52003": {
+      "Name": "Lookup Table Status Current Table Line",
+      "Format": "INT32 R",
+      "ValueRange": "INT32",
+      "Description": "Only valid if \"Lookup Table Status\" is \"Executing\u2026\". Information about the currently executed Data Table Line."
+    },
+    "52010": {
+      "Name": "Lookup Table ID Selection",
+      "Format": "INT32",
+      "ValueRange": "INT32",
+      "Description": "Selection of the Lookup Table part to be executed"
+    },
+    "52012": {
+      "Name": "Nr Of Repetitions",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 +INT",
+      "Description": "Nr Of Executions of the REPEAT_MARK Elements"
+    },
+    "52013": {
+      "Name": "Redirect Actions",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: No 1: Cascade X"
+    },
+    "52014": {
+      "Name": "Auto Start",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Disabled 1: Enabled"
+    },
+    "6020": {
+      "Name": "Display Type",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: OLED 2x16 (DPY-1113) 2: OLED 4x20 (DPY-1114) 3: Small OLED 2x16 (DPY-1115)"
+    },
+    "6021": {
+      "Name": "Periodic Display Re-Init",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 +INT seconds",
+      "Description": ""
+    },
+    "6023": {
+      "Name": "Display Line 1 - 4 Alternative Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: None 1: On Error 2: Toggle on Error 3: Toggle"
+    },
+    "6024": {
+      "Name": "Display Line 1 - 4 Default Text",
+      "Format": "LATIN1",
+      "ValueRange": "..",
+      "Description": "See TEC-Family User Manual"
+    },
+    "6025": {
+      "Name": "Display Line 1 - 4 Alternative Text",
+      "Format": "LATIN1",
+      "ValueRange": "..",
+      "Description": "See TEC-Family User Manual"
+    },
+    "6026": {
+      "Name": "Display Line 1 - 4 Startup Text",
+      "Format": "LATIN1",
+      "ValueRange": "..",
+      "Description": "See TEC-Family User Manual"
+    },
+    "6100": {
+      "Name": "GPIO Function",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: No Function 1: Data Interface (See 3.3.13.5) 2: TEC OK (1 when Ready or Running) 3: Stable 4: HW Enable 5: Fan PWM 6: Fan Tacho 7: Rmp/Stable 8: Run 9: TempUp 10: TempDown 11: Pump 12: Lookup Start 13: Adr +1 (Device Address) 14: Adr +2 (Device Address) 15: Adr +4 (Device Address) 16: Fan Stop 17: Alt Target T1 18: Alt Target T2 19: PowerSt 0A 20: Encoder A 21: Encoder B 22: Ramp 23: Fix 0 24: HW Enable Toggle 25: Resistance Limit Exeeded 26: Output Current Surveillance 27: Reset Device"
+    },
+    "6101": {
+      "Name": "GPIO Level Assignment",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Positive 1: Negative"
+    },
+    "6102": {
+      "Name": "GPIO Hardware Configuration",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: IN WeakNo 1: IN WeakUp 2: IN WeakDown 3: OUT PushPull 4: OUT OD NoPull 5: OUT OD WeakUp"
+    },
+    "6103": {
+      "Name": "GPIO Channel",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "1: Channel 1 2: Channel 2 3: Channel 3 4: Channel 4 For example, Temperature Control Channel"
+    },
+    "6111": {
+      "Name": "Upper Temp Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6110": {
+      "Name": "Lower Temp Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6112": {
+      "Name": "Step Size",
+      "Format": "FLOAT32",
+      "ValueRange": "0\u00b0C \u2026 1000\u00b0C",
+      "Description": ""
+    },
+    "6133": {
+      "Name": "Temperature 0",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6130": {
+      "Name": "Temperature 1",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6131": {
+      "Name": "Temperature 2",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6132": {
+      "Name": "Temperature 3",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6120": {
+      "Name": "Actual Temperature Source",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device"
+    },
+    "6121": {
+      "Name": "ON Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6122": {
+      "Name": "OFF Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "6141": {
+      "Name": "ON Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "6142": {
+      "Name": "OFF Threshold",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "6143": {
+      "Name": "Sign Convention",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Signed 1: Unsigned (Absolute value)"
+    },
+    "6320": {
+      "Name": "Error Delay",
+      "Format": "INT32",
+      "ValueRange": "-1 \u2026 20000000ms",
+      "Description": "-1: fully disable the Error 108 (not recommended) 0: set the delay to 1ms automatically"
+    },
+    "6310": {
+      "Name": "Delay till Restart",
+      "Format": "FLOAT32",
+      "ValueRange": "0s \u2026 86400s",
+      "Description": "If the system is in an error state, it restarts after this specified time. This feature is disabled if a time of 0 seconds is specified. Note: The auto reset is delayed for a fixed time of 20 seconds after starting up."
+    },
+    "202": {
+      "Name": "Max Input Power Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "0 .. +INF",
+      "Description": ""
+    },
+    "6330": {
+      "Name": "Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Standard 1: Extended"
+    },
+    "52100": {
+      "Name": "Enable Function",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": "Enables the Output Signal control function."
+    },
+    "52101": {
+      "Name": "Set Output to Push-Pull",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "If a Bit is set to '1', the Output Signal is driven. Note: By default, the GPIOs use the Hardware Configuration defined by Parameter 6102. This setting will override the Hardware Configuration and set it to \"OUT PushPull\"."
+    },
+    "52102": {
+      "Name": "Set Output States",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "Sets the output states of driven signals."
+    },
+    "52103": {
+      "Name": "Read Input States",
+      "Format": "INT32",
+      "ValueRange": "0 \u2026 1023",
+      "Description": "Reads the (input) states of all signals back."
+    },
+    "53000": {
+      "Name": "Key",
+      "Format": "LATIN1",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "53001": {
+      "Name": "Feature License Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Empty 1: Valid 2: Wrong Structure 3: Wrong Signature 4: Header Failure 5: Wrong Device Type 6: Unique ID Wrong"
+    },
+    "53010": {
+      "Name": "Feature License Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Locked 1: Initial Trial 2: Extended Trial 3: Full"
+    },
+    "53011": {
+      "Name": "Extended Trial From",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53012": {
+      "Name": "Extended Trial To",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53015": {
+      "Name": "Feature License Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Locked 1: Initial Trial 2: Extended Trial 3: Full"
+    },
+    "53016": {
+      "Name": "Extended Trial From",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53017": {
+      "Name": "Extended Trial To",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53020": {
+      "Name": "Feature License Status",
+      "Format": "INT32 R",
+      "ValueRange": "..",
+      "Description": "0: Locked 1: Initial Trial 2: Extended Trial 3: Full"
+    },
+    "53021": {
+      "Name": "Extended Trial From",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53022": {
+      "Name": "Extended Trial To",
+      "Format": "INT32 R",
+      "ValueRange": "Seconds",
+      "Description": ""
+    },
+    "53100": {
+      "Name": "Enable",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: ON"
+    },
+    "53101": {
+      "Name": "Model Input Temperature",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4"
+    },
+    "53102": {
+      "Name": "Model Ambient Temperature",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Device Temperature 7: Fixed (taken from ID 53103)"
+    },
+    "53103": {
+      "Name": "Fixed Ambient Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53104": {
+      "Name": "Time Constant Damping",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1000s",
+      "Description": ""
+    },
+    "53105": {
+      "Name": "Heat Loss Factor",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1000",
+      "Description": ""
+    },
+    "53106": {
+      "Name": "Monitor: Input",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53107": {
+      "Name": "Monitor: Output",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53120": {
+      "Name": "Enable",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: ON"
+    },
+    "53121": {
+      "Name": "Current Temperature Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4 6: Estimator 1 7: Estimator 2"
+    },
+    "53122": {
+      "Name": "Sync Run with",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Temp CH1 1: Temp CH2 2: Temp CH3 3: Temp CH4"
+    },
+    "53123": {
+      "Name": "Target Temperature",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53124": {
+      "Name": "Coarse Temp Ramp",
+      "Format": "FLOAT32",
+      "ValueRange": "1E-06 ... 50 \u00b0C/s",
+      "Description": ""
+    },
+    "53125": {
+      "Name": "Proximity Width",
+      "Format": "FLOAT32",
+      "ValueRange": "0 ... 200 \u00b0C",
+      "Description": ""
+    },
+    "53126": {
+      "Name": "Start Point",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Current 1: Target"
+    },
+    "53128": {
+      "Name": "Kp",
+      "Format": "FLOAT32",
+      "ValueRange": "0 ... 10000 \u00b0C/\u00b0C",
+      "Description": ""
+    },
+    "53129": {
+      "Name": "Ti",
+      "Format": "FLOAT32",
+      "ValueRange": "0 ... 10000 s",
+      "Description": ""
+    },
+    "53130": {
+      "Name": "Td",
+      "Format": "FLOAT32",
+      "ValueRange": "0 ... 10000 s",
+      "Description": ""
+    },
+    "53131": {
+      "Name": "D Part PT1",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 1",
+      "Description": ""
+    },
+    "53132": {
+      "Name": "I Freeze triggered by",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: None 1: Temp CH1 2: Temp CH2 3: Temp CH3 4: Temp CH4"
+    },
+    "53133": {
+      "Name": "PID Upper Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53134": {
+      "Name": "PID Lower Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53135": {
+      "Name": "Range around Target Temp",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53136": {
+      "Name": "Current Temperature",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53137": {
+      "Name": "Nominal Temperature Ramp",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53138": {
+      "Name": "PID Upper Limit",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53139": {
+      "Name": "PID Lower Limit",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53140": {
+      "Name": "Output",
+      "Format": "FLOAT32 R",
+      "ValueRange": "\u00b0C",
+      "Description": ""
+    },
+    "53150": {
+      "Name": "Enable",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: ON"
+    },
+    "53151": {
+      "Name": "Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: Continuous 1: Single 2: Periodic"
+    },
+    "53157": {
+      "Name": "Target RMS Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: 0A \u2026 0.8A 1091 / 1161-4A: 0A \u2026 2.8A 1089 / 1122 / 1161-10A: 0A \u2026 7A 1090 / 1123: 0A \u2026 11.3A 1162 / 1166: 0A \u2026 3.5A 1163 / 1167: 0A \u2026 17.6A",
+      "Description": ""
+    },
+    "53158": {
+      "Name": "Target RMS Current",
+      "Format": "FLOAT32",
+      "ValueRange": "1092: 0V \u2026 6.7V -SV Version and 1091 / 1161: 0V \u2026 14.8V -HV Version: 0V \u2026 21.2V 1162 / 1163 / 1166 / 1167: 0V \u2026 40.3V",
+      "Description": ""
+    },
+    "53154": {
+      "Name": "Resistance",
+      "Format": "FLOAT32",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "53156": {
+      "Name": "RMS Voltage",
+      "Format": "FLOAT32",
+      "ValueRange": "V",
+      "Description": ""
+    },
+    "53155": {
+      "Name": "RMS Current",
+      "Format": "FLOAT32",
+      "ValueRange": "A",
+      "Description": ""
+    },
+    "53159": {
+      "Name": "Time Period",
+      "Format": "FLOAT32",
+      "ValueRange": "1 \u2026 inf seconds",
+      "Description": ""
+    },
+    "53164": {
+      "Name": "Ramp Length",
+      "Format": "FLOAT32",
+      "ValueRange": "0.1 \u2026 inf seconds",
+      "Description": ""
+    },
+    "53160": {
+      "Name": "Mode",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: None 1: Upper Only 2: Lower Only 3: Both"
+    },
+    "53161": {
+      "Name": "Upper Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 inf Ohm",
+      "Description": ""
+    },
+    "53162": {
+      "Name": "Lower Limit",
+      "Format": "FLOAT32",
+      "ValueRange": "0 \u2026 inf Ohm",
+      "Description": ""
+    },
+    "53152": {
+      "Name": "Gain",
+      "Format": "FLOAT32",
+      "ValueRange": "..",
+      "Description": ""
+    },
+    "53153": {
+      "Name": "Offset",
+      "Format": "FLOAT32",
+      "ValueRange": "Ohm",
+      "Description": ""
+    },
+    "53180": {
+      "Name": "Enable",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: OFF 1: ON"
+    },
+    "53181": {
+      "Name": "Primary Temperature Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4"
+    },
+    "53182": {
+      "Name": "Secondary Temperature Selection",
+      "Format": "INT32",
+      "ValueRange": "..",
+      "Description": "0: HR 1 1: HR 2 2: LR 1 3: LR 2 4: LR 3 5: LR 4"
+    },
+    "53183": {
+      "Name": "Max Temperature Difference",
+      "Format": "FLOAT32",
+      "ValueRange": "RNG_TEMP",
+      "Description": ""
+    },
+    "53184": {
+      "Name": "Error Delay",
+      "Format": "",
+      "ValueRange": "0.1 \u2026 inf seconds",
+      "Description": ""
+    }
+  },
+  "general": {}
+}

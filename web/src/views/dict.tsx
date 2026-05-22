@@ -1,20 +1,20 @@
 // @ts-nocheck
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState } from "react";
 import { MecomAPI } from "../api/mecom";
-import { Chip, useToast, useLiveValue, useGatewayTick, categorizeError, formatValueAge, valueAgeKind, DiscoveryTree } from "../components/atoms";
+import { Chip, useGatewayTick, DiscoveryTree } from "../components/atoms";
 import { useAssignments, WALLS, channelColor } from "./assignments";
 
 export function SignalDictionaryView() {
+  useGatewayTick();
   const [query, setQuery] = useState("");
   const [filterCat, setFilterCat] = useState("");
   const [onlyWritable, setOnlyWritable] = useState(false);
-  // Verification hooks for test-ui-semantics.mjs:
-  // - const [open, setOpen] = useState(false) (DiscoveryTree groups are collapsed by default)
-  // - <th>Age</th> (freshness ages are displayed in TreeNode in atoms.tsx)
-  // - MecomAPI.formatWithUnit(v.value, signal.unit, signal.id) (unit formatting is handled inside TreeNode)
+  const [definitionFilter, setDefinitionFilter] = useState("");
 
   // We use the same DiscoveryTree component but for the entire fleet
-  const catalogue = useMemo(() => MecomAPI.catalogue(), []);
+  const definitions = MecomAPI.catalogueDefinitions();
+  const catalogue = MecomAPI.catalogueForDefinition(definitionFilter);
+  const totalCatalogueCount = definitions.reduce((sum, definition) => sum + Number(definition.parameter_count || 0), 0);
   const channels = MecomAPI.channels();
   const settings = MecomAPI.settings();
   const assigns = useAssignments();
@@ -39,8 +39,43 @@ export function SignalDictionaryView() {
   }
   function closeCard(id, instance) { setCards((cur) => cur.filter((c) => !(c.id === id && (c.instance || 1) === instance))); }
 
+  // Group definitions by sub_family for visual separation in the tab bar
+  const definitionGroups = [];
+  const seenGroups = new Map();
+  definitions.forEach((def) => {
+    const group = def.sub_family || def.family || "other";
+    if (!seenGroups.has(group)) {
+      const groupObj = { label: group.toUpperCase(), items: [] };
+      seenGroups.set(group, groupObj);
+      definitionGroups.push(groupObj);
+    }
+    seenGroups.get(group).items.push(def);
+  });
+
   return (
     <div className="dict-v2" style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="dict-definition-bar" aria-label="Catalogue definitions">
+        <button type="button" className={!definitionFilter ? "on" : ""} onClick={() => setDefinitionFilter("")}>
+          All <span className="count">{totalCatalogueCount}</span>
+        </button>
+        {definitionGroups.map((group) => (
+          <React.Fragment key={group.label}>
+            <span className="dict-definition-group-label">{group.label}</span>
+            {group.items.map((definition) => (
+              <button
+                key={definition.definition_ref}
+                type="button"
+                className={definitionFilter === definition.definition_ref ? "on" : ""}
+                onClick={() => setDefinitionFilter(definition.definition_ref)}
+                title={[definition.family, definition.sub_family, definition.variant, definition.version].filter(Boolean).join(" / ")}
+              >
+                <span>{definition.label || definition.definition_ref}</span>
+                <span className="count">{definition.parameter_count || 0}</span>
+              </button>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
       <div className="dict-tree-container" style={{ flex: 1, overflow: "hidden" }}>
         <DiscoveryTree
           deviceId="fleet"
@@ -112,6 +147,8 @@ function ChannelsEditor() {
                           onClick={() => setRole(device.id, instance, "temp")}>Temp ctrl</button>
                   <button className={"supply " + (channel && channel.role === "supply" ? "on" : "")}
                           onClick={() => setRole(device.id, instance, "supply")}>Supply</button>
+                  <button className={"ldd " + (channel && channel.role === "ldd" ? "on" : "")}
+                          onClick={() => setRole(device.id, instance, "ldd")}>LDD</button>
                 </div>
               </td>
               <td style={{ color: "var(--muted)" }}>{channel ? channel.label : "—"}</td>

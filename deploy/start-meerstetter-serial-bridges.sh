@@ -18,6 +18,9 @@ SOCAT="${SOCAT:-socat}"
 VSERVER="${VSERVER:-mecomvseriald}"
 STATE_DIR="${STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/meerstetter-serial}"
 LOG_DIR="${LOG_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/meerstetter-serial}"
+if [[ -z "${DEVICE_CACHE_DIR+x}" ]]; then
+  DEVICE_CACHE_DIR="${LOG_DIR}/device-cache"
+fi
 BAUD="${BAUD:-57600}"
 MODE="${MODE:-vserial}"
 LISTEN_PORT="${LISTEN_PORT:-50000}"
@@ -33,6 +36,7 @@ ENABLE_REMOTE_CAN_ROUTES="${ENABLE_REMOTE_CAN_ROUTES:-${ENABLE_PI_CAN_ROUTES:-au
 REMOTE_CAN_HOST="${REMOTE_CAN_HOST:-${PI_CAN_HOST:-}}"
 REMOTE_CAN_PORT="${REMOTE_CAN_PORT:-${PI_CAN_PORT:-50010}}"
 REMOTE_CAN_PROBE="${REMOTE_CAN_PROBE:-${PI_CAN_PROBE:-tcp}}"
+TRACE_FRAMES="${TRACE_FRAMES:-0}"
 CAN_TRACE_FRAMES="${CAN_TRACE_FRAMES:-0}"
 
 FIELD_SEP=$'\037'
@@ -539,7 +543,7 @@ print_plan() {
   echo "CONFIG ${CONFIG_FILE}"
   append_routed_args routed_args "$can_enabled" "$remote_enabled"
   listener_address_zero="$(format_address_zero_mode "$MECOM_ADDRESS_ZERO" routed_args)"
-  echo "LISTENER tcp://${BIND_ADDR}:${LISTEN_PORT} address-zero=${listener_address_zero} route-policy=${MECOM_ROUTE_POLICY}"
+  echo "LISTENER tcp://${BIND_ADDR}:${LISTEN_PORT} address-zero=${listener_address_zero} route-policy=${MECOM_ROUTE_POLICY} device-cache=${DEVICE_CACHE_DIR:-disabled}"
   for item in "${routes[@]}"; do
     row_args=()
     IFS="$FIELD_SEP" read -r addr serial node remote <<<"$item"
@@ -564,7 +568,7 @@ print_plan() {
   fi
   if can_tcp_allowed && [[ "${#can_args[@]}" -gt 0 ]]; then
     can_address_zero="$(format_address_zero_mode "$CAN_MECOM_ADDRESS_ZERO" can_args)"
-    echo "CAN_LISTENER tcp://${BIND_ADDR}:${CAN_LISTEN_PORT} address-zero=${can_address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled} remote-can=${remote_active}"
+    echo "CAN_LISTENER tcp://${BIND_ADDR}:${CAN_LISTEN_PORT} address-zero=${can_address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled} remote-can=${remote_active} device-cache=${DEVICE_CACHE_DIR:-disabled}"
     for ((i = 0; i < ${#can_args[@]}; i += 2)); do
       echo "CAN_ROUTE ${can_args[i + 1]}"
     done
@@ -585,10 +589,18 @@ stop_existing() {
   done
 }
 
+ensure_runtime_dirs() {
+  mkdir -p "$STATE_DIR" "$LOG_DIR"
+  if [[ -n "$DEVICE_CACHE_DIR" ]]; then
+    mkdir -p "$DEVICE_CACHE_DIR"
+  fi
+}
+
 start_can_tcp() {
   local can_enabled="$1"
   local remote_enabled="$2"
   local args=()
+  local cache_args=()
   local trace_args=()
   local remote_active=0
   local address_zero
@@ -605,15 +617,19 @@ start_can_tcp() {
   if truthy "$CAN_TRACE_FRAMES"; then
     trace_args+=("-trace-frames")
   fi
+  if [[ -n "$DEVICE_CACHE_DIR" ]]; then
+    cache_args+=("-device-cache-dir" "$DEVICE_CACHE_DIR")
+  fi
   address_zero="$(resolve_address_zero_mode "$CAN_MECOM_ADDRESS_ZERO" args)"
 
-  echo "START mecomvseriald CAN-only tcp://${BIND_ADDR}:${CAN_LISTEN_PORT} address-zero=${address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled}:${CAN_IFACE} remote-can=${remote_active}:${REMOTE_CAN_HOST:-}:${REMOTE_CAN_PORT}" | tee -a "$log"
+  echo "START mecomvseriald CAN-only tcp://${BIND_ADDR}:${CAN_LISTEN_PORT} address-zero=${address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled}:${CAN_IFACE} remote-can=${remote_active}:${REMOTE_CAN_HOST:-}:${REMOTE_CAN_PORT} device-cache=${DEVICE_CACHE_DIR:-disabled}" | tee -a "$log"
   "$VSERVER" \
     -listen "${BIND_ADDR}:${CAN_LISTEN_PORT}" \
     -address-zero "$address_zero" \
     -route-policy "$MECOM_ROUTE_POLICY" \
     -timeout 2s \
     -reconnect-delay 500ms \
+    "${cache_args[@]}" \
     "${trace_args[@]}" \
     "${args[@]}" \
     >>"$log" 2>&1 &
@@ -622,6 +638,8 @@ start_can_tcp() {
 
 start_vserial() {
   local args=()
+  local cache_args=()
+  local trace_args=()
   local can_enabled=0
   local remote_enabled=0
   local address_zero
@@ -643,15 +661,23 @@ start_vserial() {
   if can_tcp_allowed; then
     start_can_tcp "$can_enabled" "$remote_enabled"
   fi
+  if truthy "$TRACE_FRAMES"; then
+    trace_args+=("-trace-frames")
+  fi
+  if [[ -n "$DEVICE_CACHE_DIR" ]]; then
+    cache_args+=("-device-cache-dir" "$DEVICE_CACHE_DIR")
+  fi
 
   address_zero="$(resolve_address_zero_mode "$MECOM_ADDRESS_ZERO" args)"
-  echo "START mecomvseriald tcp://${BIND_ADDR}:${LISTEN_PORT} address-zero=${address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled}:${CAN_IFACE} remote-can=${remote_enabled}:${REMOTE_CAN_HOST:-}:${REMOTE_CAN_PORT}" | tee -a "$log"
+  echo "START mecomvseriald tcp://${BIND_ADDR}:${LISTEN_PORT} address-zero=${address_zero} route-policy=${MECOM_ROUTE_POLICY} local-can=${can_enabled}:${CAN_IFACE} remote-can=${remote_enabled}:${REMOTE_CAN_HOST:-}:${REMOTE_CAN_PORT} device-cache=${DEVICE_CACHE_DIR:-disabled}" | tee -a "$log"
   exec "$VSERVER" \
     -listen "${BIND_ADDR}:${LISTEN_PORT}" \
     -address-zero "$address_zero" \
     -route-policy "$MECOM_ROUTE_POLICY" \
     -timeout 2s \
     -reconnect-delay 500ms \
+    "${cache_args[@]}" \
+    "${trace_args[@]}" \
     "${args[@]}" \
     >>"$log" 2>&1
 }
@@ -697,7 +723,7 @@ main() {
   local command="${1:-start}"
   case "$command" in
     start)
-      mkdir -p "$STATE_DIR" "$LOG_DIR"
+      ensure_runtime_dirs
       load_routes
       stop_existing
       if [[ "$MODE" == "legacy" ]]; then
@@ -711,7 +737,7 @@ main() {
       print_plan
       ;;
     start-legacy)
-      mkdir -p "$STATE_DIR" "$LOG_DIR"
+      ensure_runtime_dirs
       load_routes
       stop_existing
       start_legacy

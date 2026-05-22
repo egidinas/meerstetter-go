@@ -5,6 +5,11 @@
    ============================================================ */
 
 import catalogueJson from "../data/mecom-catalogue.json?raw";
+import lddCatalogueJson from "../data/mecom-ldd-130x-catalogue.json?raw";
+import ldd1321CatalogueJson from "../data/mecom-ldd-1321-catalogue.json?raw";
+import lddV233CatalogueJson from "../data/mecom-ldd-v2.33-catalogue.json?raw";
+import ldd1137CatalogueJson from "../data/mecom-ldd-1137-catalogue.json?raw";
+import catalogueDefinitionsJson from "../data/mecom-catalogue-definitions.json?raw";
 import protocolFamiliesJson from "../data/mecom-protocol-families.json?raw";
 import operatorProjectionJson from "../data/mecom-operator-projection.json?raw";
 import {
@@ -50,6 +55,24 @@ const OPERATOR_PROJECTION = (() => {
 })();
 const OPERATOR_PRIMARY_PROJECTION_BY_ID = new Map();
 const OPERATOR_SECONDARY_PROJECTION_BY_ID = new Map();
+const DEFAULT_CATALOGUE_DEFINITION_REF = "meerstetter.tec.v631";
+const CATALOGUE_DEFINITIONS = JSON.parse(catalogueDefinitionsJson).map((definition) => ({
+  ...definition,
+  definition_ref: String(definition.definition_ref || definition.definitionRef || "").trim(),
+  system: String(definition.system || "").trim(),
+  family: String(definition.family || "").trim(),
+  sub_family: String(definition.sub_family || definition.subFamily || "").trim(),
+  variant: String(definition.variant || "").trim(),
+  version: String(definition.version || "").trim(),
+  label: String(definition.label || definition.display_name || definition.definition_ref || "").trim(),
+})).filter((definition) => definition.definition_ref);
+const STATIC_CATALOGUE_ROWS = [
+  ...JSON.parse(catalogueJson),
+  ...JSON.parse(lddCatalogueJson),
+  ...JSON.parse(ldd1321CatalogueJson),
+  ...JSON.parse(lddV233CatalogueJson),
+  ...JSON.parse(ldd1137CatalogueJson),
+];
 
 function registerOperatorProjectionMapping(mapping, secondary = false) {
   const ids = Array.isArray(mapping && mapping.ids) ? mapping.ids : [];
@@ -96,18 +119,37 @@ function saveSettings(patch) {
   return next;
 }
 
-const CATALOGUE = JSON.parse(catalogueJson).map((entry) => {
+const CATALOGUE = STATIC_CATALOGUE_ROWS.map((entry) => {
   const trees = treeSelectionFrom(entry, entry.id, entry.name || entry.sid);
-  return { ...entry, tree_path: trees.tree_path, tree_paths: trees.tree_paths };
+  const metadata = parseTreeMeta(entry.metadata) || entry.metadata || null;
+  return { ...entry, definition_ref: entryDefinitionRef({ ...entry, metadata }), metadata, tree_path: trees.tree_path, tree_paths: trees.tree_paths };
 });
 
-function paramById(id, instance?) {
+function normalizeDefinitionRef(value) {
+  return String(value || "").trim();
+}
+
+function entryDefinitionRef(entry) {
+  const metadata = parseTreeMeta(entry && entry.metadata) || {};
+  return normalizeDefinitionRef(
+    entry && (entry.definition_ref || entry.definitionRef) ||
+    metadata.definition_ref ||
+    DEFAULT_CATALOGUE_DEFINITION_REF,
+  ) || DEFAULT_CATALOGUE_DEFINITION_REF;
+}
+
+function catalogueEntryMatchesDefinition(entry, definitionRef) {
+  const wanted = normalizeDefinitionRef(definitionRef);
+  return !wanted || wanted === "all" || entryDefinitionRef(entry) === wanted;
+}
+
+function paramById(id, instance?, definitionRef?) {
   if (instance !== undefined && instance !== null) {
     const key = `${id}:${instance}`;
-    const keyed = CATALOGUE.find((p) => `${p.id}:${p.instance || 1}` === key);
+    const keyed = CATALOGUE.find((p) => `${p.id}:${p.instance || 1}` === key && catalogueEntryMatchesDefinition(p, definitionRef));
     if (keyed) return keyed;
   }
-  return CATALOGUE.find((p) => p.id === id);
+  return CATALOGUE.find((p) => p.id === id && catalogueEntryMatchesDefinition(p, definitionRef));
 }
 
 function parseTreeMeta(raw) {
@@ -280,6 +322,7 @@ function semanticName(entry, base, id) {
 function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
   entry = entry || {};
   base = base || {};
+  const definitionRef = entryDefinitionRef({ ...base, ...entry, metadata });
   const displayName = firstDefined(entry.displayName, entry.display_name, entry.display, base.displayName, base.display_name, base.display);
   const rawName = firstDefined(entry.rawName, entry.raw_name, base.rawName, base.raw_name, entry.sid, base.sid);
   const applicableModes = firstDefined(entry.applicableModes, entry.applicable_modes, base.applicableModes, base.applicable_modes, ["temp", "supply"]);
@@ -297,6 +340,7 @@ function normalizeCatalogueEntry(entry, base, id, instance, metadata, trees) {
     ...entry,
     id,
     instance,
+    definition_ref: definitionRef,
     name: semanticName(entry, base, id),
     displayName,
     display_name: displayName,
@@ -569,6 +613,18 @@ const DEVICES_BASE = [
     routes: [
       { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
       { kind: "warm", label: "USB FTDI RS485", detail: "serial bridge" },
+      { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
+    ],
+  },
+  {
+    id: "ldd-130x",
+    label: "Bus B · LDD SN130",
+    endpoint: "serial+can:can1/0x32",
+    address: 50,
+    channelCount: 2,
+    transport: "serial MeCom over CANopen",
+    routes: [
+      { kind: "hot", label: "Kvaser USB CAN", detail: "primary" },
       { kind: "warm", label: "PiXtend CAN", detail: "fallback bus" },
     ],
   },
@@ -869,7 +925,23 @@ const CHANNEL_ROLE_OVERRIDES = {
     label: "Bottom-back-left power supply",
     user_note: "SN84 - inferred bottom-left quadrant - power supply for the back-left-bottom test spot.",
   },
+  "ldd-130x/1": {
+    role: "ldd",
+    label: "Laser current controller",
+    user_note: "SN130 - laser diode driver channel 1. Target output current limit: 120A.",
+  },
+  "ldd-130x/2": {
+    role: "temp",
+    label: "Laser diode temperature controller",
+    user_note: "SN130 - laser diode temperature channel 2. Target temperature: 25 C.",
+  },
 };
+
+function channelCountForDevice(device) {
+  const raw = Number(device && (device.channel_count ?? device.channelCount));
+  if (!Number.isFinite(raw) || raw <= 0) return CHANNELS_PER_DEVICE;
+  return Math.max(1, Math.min(255, Math.floor(raw)));
+}
 
 function defaultChannelFor(deviceId, instance) {
   const key = `${deviceId}/${instance}`;
@@ -881,21 +953,15 @@ function defaultChannelFor(deviceId, instance) {
     instance,
     role,
     role_source: override.role_source || (hasOverride ? "config" : "local-assumption"),
-    label: override.label || (role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
+    label: override.label || (role === "ldd" ? `LDD ch${instance}` : role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
     user_note: override.user_note || "",
     hasCascade: override.hasCascade ?? false,
   };
 }
 
 const DEFAULT_CHANNELS = DEVICES_BASE.flatMap((d) =>
- Array.from({ length: CHANNELS_PER_DEVICE }, (_, idx) => defaultChannelFor(d.id, idx + 1))
+ Array.from({ length: channelCountForDevice(d) }, (_, idx) => defaultChannelFor(d.id, idx + 1))
 );
-
-function channelCountForDevice(device) {
-  const raw = Number(device && (device.channel_count ?? device.channelCount));
-  if (!Number.isFinite(raw) || raw <= 0) return CHANNELS_PER_DEVICE;
-  return Math.max(1, Math.min(255, Math.floor(raw)));
-}
 
 function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
   const byKey = new Map();
@@ -1061,6 +1127,20 @@ function resetScenario(name) {
         deviceStatus: 2,
         lastError: s.lastError || "",
       };
+    } else if (ch.role === "ldd") {
+      mock.channelState[k] = {
+        role: "ldd",
+        lddCurrentNoise: 0.002 + Math.random() * 0.001,
+        m3v3: 3.28 + (Math.random() - 0.5) * 0.02,
+        m5v: -4.95 + (Math.random() - 0.5) * 0.03,
+        fanSpeed2: 1200 + Math.floor(Math.random() * 50),
+        sinkT: 23.5 + (Math.random() - 0.5) * 0.5,
+        bound: s.bound !== false,
+        rejectWrites: !!s.rejectWrites,
+        savePending: 0,
+        deviceStatus: 2,
+        lastError: s.lastError || "",
+      };
     } else {
       mock.channelState[k] = {
         role: "supply",
@@ -1199,6 +1279,12 @@ function recordCommand({ deviceId, instance, paramId, value, prev, status, lease
 
 const mockAPIImpl = {
   catalogue: () => CATALOGUE.slice(),
+  catalogueDefinitions: () => catalogueDefinitionSummaries(CATALOGUE),
+  catalogueForDefinition(definitionRef) {
+    const ref = normalizeDefinitionRef(definitionRef);
+    if (!ref || ref === "all") return CATALOGUE.slice();
+    return CATALOGUE.filter((entry) => entryDefinitionRef(entry) === ref);
+  },
   paramById,
   commandNameFor,
   catalogueFor(role) {
@@ -1270,6 +1356,18 @@ const mockAPIImpl = {
         104:  ch.deviceStatus, 105: 0, 109: ch.savePending,
         4000: 0, 4010: 60 * 60 * 24 * 12 + Math.random() * 1000,
         100:  150, 101: 2, 102: parseInt(deviceId.split("-")[1]) + 100, 103: 3.21,
+      };
+      v = map[paramId];
+    } else if (ch.role === "ldd") {
+      const map = {
+        106:  ch.lddCurrentNoise,
+        1063: ch.m3v3,
+        1062: ch.m5v,
+        1061: ch.fanSpeed2,
+        1001: ch.sinkT,
+        104:  ch.deviceStatus, 105: 0, 109: ch.savePending,
+        4000: 0, 4010: 60 * 60 * 24 * 12 + Math.random() * 1000,
+        100:  130, 101: 2, 102: 130, 103: 2.21,
       };
       v = map[paramId];
     } else {
@@ -1565,11 +1663,23 @@ function storeLiveValue(deviceId, entry) {
     age_ms: Math.max(0, now - at),
   };
 }
+
+const SUPPLY_POLL_PARAM_IDS = [1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 2010, 2040, 1001];
+const TEMP_POLL_PARAM_IDS = [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 53120, 53121, 53122, 53123];
+
+function pollParamIDsForRole(role) {
+  return role === "supply" ? SUPPLY_POLL_PARAM_IDS : TEMP_POLL_PARAM_IDS;
+}
+
+function isPolledSignalForRole(role, paramId) {
+  const id = Number(paramId);
+  if (!Number.isFinite(id)) return false;
+  if (!role) return SUPPLY_POLL_PARAM_IDS.includes(id) || TEMP_POLL_PARAM_IDS.includes(id);
+  return pollParamIDsForRole(role).includes(id);
+}
+
 function paramsForChannel(role, instance) {
-  const ids = role === "supply"
-    ? [1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 2010, 2040, 1001]
-    : [1000, 1001, 3000, 52200, 1200, 1020, 1021, 1022, 40000, 2020, 2021, 2030, 2031, 2032, 2033, 53120, 53121, 53122, 53123];
-  return ids.map((id) => `${id}:${instance || 1}`).join(",");
+  return pollParamIDsForRole(role).map((id) => `${id}:${instance || 1}`).join(",");
 }
 
 function queueLiveValueRead(deviceId, paramId, instance?) {
@@ -1604,10 +1714,11 @@ function liveCatalogueEntries() {
     if (!entry || !Number.isFinite(Number(entry.id))) return;
     const id = Number(entry.id);
     const instance = Number.isFinite(Number(entry.instance)) ? Number(entry.instance) : 1;
-    const key = `${id}:${instance}`;
-    if (byID.has(key)) return;
-    const base = paramById(id) || {};
     const metadata = parseTreeMeta(entry.metadata);
+    const definitionRef = entryDefinitionRef({ ...entry, metadata });
+    const key = `${definitionRef}:${id}:${instance}`;
+    if (byID.has(key)) return;
+    const base = paramById(id, undefined, definitionRef) || paramById(id) || {};
     const treeSource = {
       ...base,
       ...entry,
@@ -1622,7 +1733,7 @@ function liveCatalogueEntries() {
 }
 
 function catalogueSignalKey(entry) {
-  return String(Number(entry && entry.id));
+  return `${entryDefinitionRef(entry)}:${Number(entry && entry.id)}`;
 }
 
 const LIVE_CATALOGUE_OBSERVED_FIELDS = [
@@ -1692,6 +1803,39 @@ function mergeLiveCatalogueEntries(full, liveEntries) {
 
 function activeCatalogue() {
   return mergeLiveCatalogueEntries(CATALOGUE, liveCatalogueEntries());
+}
+
+function catalogueDefinitionSummaries(catalogue = activeCatalogue()) {
+  const counts = new Map();
+  (Array.isArray(catalogue) ? catalogue : []).forEach((entry) => {
+    const ref = entryDefinitionRef(entry);
+    counts.set(ref, (counts.get(ref) || 0) + 1);
+  });
+  const listedRefs = new Set(CATALOGUE_DEFINITIONS.map((definition) => definition.definition_ref));
+  const listed = CATALOGUE_DEFINITIONS.map((definition) => ({
+    ...definition,
+    parameter_count: counts.get(definition.definition_ref) || 0,
+  }));
+  Array.from(counts.keys()).filter((ref) => !listedRefs.has(ref)).sort().forEach((ref) => {
+    listed.push({
+      definition_ref: ref,
+      label: ref,
+      system: "",
+      family: "",
+      sub_family: "",
+      variant: "",
+      version: "",
+      parameter_count: counts.get(ref) || 0,
+    });
+  });
+  return listed;
+}
+
+function catalogueEntriesForDefinition(definitionRef) {
+  const catalogue = activeCatalogue();
+  const ref = normalizeDefinitionRef(definitionRef);
+  if (!ref || ref === "all") return catalogue;
+  return catalogue.filter((entry) => entryDefinitionRef(entry) === ref);
 }
 
 async function refreshLiveReads(devices) {
@@ -1822,17 +1966,26 @@ function liveDeviceById(deviceId) {
 
 export const MecomAPI = {
   ...mockAPIImpl,
-  catalogue() {
+  catalogue(opts?) {
     ensureLivePolling();
+    if (opts && opts.definitionRef) return catalogueEntriesForDefinition(opts.definitionRef);
     return activeCatalogue();
   },
-  paramById(id, instance?) {
+  catalogueDefinitions() {
+    ensureLivePolling();
+    return catalogueDefinitionSummaries();
+  },
+  catalogueForDefinition(definitionRef) {
+    ensureLivePolling();
+    return catalogueEntriesForDefinition(definitionRef);
+  },
+  paramById(id, instance?, definitionRef?) {
     const catalogue = activeCatalogue();
     if (instance !== undefined && instance !== null) {
-      const keyed = catalogue.find((p) => `${p.id}:${p.instance || 1}` === `${id}:${instance}`);
+      const keyed = catalogue.find((p) => `${p.id}:${p.instance || 1}` === `${id}:${instance}` && catalogueEntryMatchesDefinition(p, definitionRef));
       if (keyed) return keyed;
     }
-    return catalogue.find((p) => p.id === id);
+    return catalogue.find((p) => p.id === id && catalogueEntryMatchesDefinition(p, definitionRef));
   },
   catalogueFor(role) {
     return activeCatalogue().filter((p) => !p.applicableModes || p.applicableModes.includes(role) || p.applicableModes.includes("any"));
@@ -1847,6 +2000,14 @@ export const MecomAPI = {
   },
   liveBase() {
     return live.base || configuredBase();
+  },
+  isPolledSignal(role, paramId) {
+    return isPolledSignalForRole(role, paramId);
+  },
+  hasLiveValue(deviceId, paramId, instance?) {
+    ensureLivePolling();
+    const inst = instance ?? 1;
+    return Boolean(live.values[liveKey(deviceId, paramId, inst)]);
   },
   liveError() {
     ensureLivePolling();

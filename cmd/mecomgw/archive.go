@@ -137,7 +137,7 @@ func (s *server) exportObjectDictionarySnapshots(enc *json.Encoder) {
 				"instance":     fmt.Sprintf("%d", p.Instance),
 				"read_path":    fmt.Sprintf("%d:%d", p.ID, p.Instance),
 				"write_path":   fmt.Sprintf("%d:%d", p.ID, p.Instance),
-				"writable":     gatewayCatalogueWritable(p.ID),
+				"writable":     gatewayCatalogueWritable(mecom.DefaultTECCatalogueDefinition(), p.ID),
 			}
 			_ = enc.Encode(snapshot)
 		}

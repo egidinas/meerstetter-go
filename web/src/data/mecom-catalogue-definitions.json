@@ -1,0 +1,52 @@
+[
+  {
+    "definition_ref": "meerstetter.tec.v631",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "tec",
+    "variant": "tec",
+    "version": "v631",
+    "label": "TEC v6.31",
+    "source_file": "mecom-catalogue.json"
+  },
+  {
+    "definition_ref": "meerstetter.ldd_1137.v150",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1137",
+    "version": "v150",
+    "label": "LDD-1137 v1.50",
+    "source_file": "mecom-ldd-1137-catalogue.json"
+  },
+  {
+    "definition_ref": "meerstetter.ldd_130x.v221",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_130x",
+    "version": "v221",
+    "label": "LDD-130x v2.21",
+    "source_file": "mecom-ldd-130x-catalogue.json"
+  },
+  {
+    "definition_ref": "meerstetter.ldd_1321.v130",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1321",
+    "version": "v130",
+    "label": "LDD-1321 v1.30",
+    "source_file": "mecom-ldd-1321-catalogue.json"
+  },
+  {
+    "definition_ref": "meerstetter.ldd_v2.33.v233",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_v2.33",
+    "version": "v233",
+    "label": "LDD v2.33",
+    "source_file": "mecom-ldd-v2.33-catalogue.json"
+  }
+]

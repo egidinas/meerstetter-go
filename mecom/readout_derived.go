@@ -1,7 +1,6 @@
 package mecom
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -150,7 +149,7 @@ func (d *derivedReadout) appendValue(observedAt time.Time, batch *ReadoutBatch, 
 			Unit:     derivedElectricalInputDisplayUnit,
 			Type:     DataTypeFloat32,
 		},
-		Sensor:     fmt.Sprintf("mecom.tec_%02d.%s", channel, name),
+		Sensor:     DefaultTECTraceID(channel, name),
 		Value:      value,
 		ObservedAt: observedAt,
 		Readout:    ReadoutDerivedChannelModel,

@@ -3,6 +3,7 @@ package mecom
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
@@ -50,6 +51,8 @@ func (c *CANClient) ReadInt32(ctx context.Context, paramID, instance int) (int32
 
 // ReadBulk uses binary single-value reads as a conservative compatibility
 // fallback until the exact binary multi-parameter CAN framing is proven live.
+// If an individual parameter fails to be retrieved, its slot is filled with
+// math.NaN() and processing continues.
 func (c *CANClient) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
 	if err := validateParameterList(params); err != nil {
 		return nil, err
@@ -58,7 +61,11 @@ func (c *CANClient) ReadBulk(ctx context.Context, params []Parameter) ([]float64
 	for _, param := range params {
 		value, err := c.readNumeric(ctx, param.ID, param.Instance, param.Type)
 		if err != nil {
-			return values, err
+			if readBulkShouldReturnError(ctx, err) {
+				return values, err
+			}
+			values = append(values, math.NaN())
+			continue
 		}
 		values = append(values, value)
 	}

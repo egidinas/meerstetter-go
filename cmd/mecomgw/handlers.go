@@ -328,15 +328,16 @@ func activeState(active bool) string {
 	return ""
 }
 
-func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
+func (s *server) handleCatalogue(w http.ResponseWriter, r *http.Request) {
 	channels := s.catalogueChannelCount()
-	params := mecom.DefaultTECCatalogueEntries(channels)
+	definition := gatewayCatalogueDefinitionFromRequest(r)
+	params := mecom.DefaultMeComCatalogueEntries(definition, channels)
 	seen := make(map[string]struct{}, len(params)+channels*2)
 	out := make([]gatewayCatalogueEntry, 0, len(params)+channels*2)
 	for _, p := range params {
 		e := gatewayCatalogueEntry{
 			TECCatalogueEntry:       p,
-			Writable:                gatewayCatalogueWritable(p.ID),
+			Writable:                gatewayCatalogueWritable(definition, p.ID),
 			RouteSupport:            gatewayCatalogueRouteSupport(p.TransportSupport),
 			TelemetryCounterparts:   p.Counterparts,
 			TelecommandCounterparts: p.Counterparts,
@@ -345,19 +346,55 @@ func (s *server) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 		if p.ReadoutPriority == "high" {
 			e.HighPri = true
 		}
-		e.Sensor = fmt.Sprintf("mecom.tec_%02d.%s", p.Instance, p.RawName)
+		e.Sensor = definition.TraceID(p.Instance, p.RawName)
 		seen[gatewayCatalogueKey(e.ID, e.Instance)] = struct{}{}
 		out = append(out, e)
 	}
-	for _, e := range gatewayWriteOnlyCatalogueEntries(channels) {
-		key := gatewayCatalogueKey(e.ID, e.Instance)
-		if _, ok := seen[key]; ok {
-			continue
+	if definition.SubFamily == mecom.MeerstetterSubFamilyTEC {
+		for _, e := range gatewayWriteOnlyCatalogueEntries(channels) {
+			key := gatewayCatalogueKey(e.ID, e.Instance)
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			out = append(out, e)
 		}
-		seen[key] = struct{}{}
-		out = append(out, e)
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"parameters": out})
+	writeJSON(w, http.StatusOK, map[string]any{"definition": definition.Metadata(), "parameters": out})
+}
+
+func gatewayCatalogueDefinitionFromRequest(r *http.Request) mecom.MeComCatalogueDefinition {
+	if r == nil {
+		return mecom.DefaultTECCatalogueDefinition()
+	}
+	q := r.URL.Query()
+	definitionRef := normalizeGatewayDefinitionToken(firstNonEmpty(q.Get("definition"), q.Get("definition_ref"), q.Get("definitionRef")))
+	if definitionRef != "" {
+		switch {
+		case strings.Contains(definitionRef, "ldd_130x"):
+			return mecom.DefaultLDD130xCatalogueDefinition()
+		case strings.Contains(definitionRef, "ldd_1321"):
+			if definition, ok := mecom.ResolveMeComCatalogueDefinition("", "", "ldd_1321"); ok {
+				return definition
+			}
+		case strings.Contains(definitionRef, "ldd"):
+			return mecom.DefaultLDDCatalogueDefinition()
+		case strings.Contains(definitionRef, "daq"):
+			return mecom.DefaultDAQCatalogueDefinition()
+		case strings.Contains(definitionRef, "tec"):
+			return mecom.DefaultTECCatalogueDefinition()
+		}
+	}
+	if definition, ok := mecom.ResolveMeComCatalogueDefinition(q.Get("system"), q.Get("family"), firstNonEmpty(q.Get("sub_family"), q.Get("subFamily"), q.Get("variant"))); ok {
+		return definition
+	}
+	return mecom.DefaultTECCatalogueDefinition()
+}
+
+func normalizeGatewayDefinitionToken(value string) string {
+	value = strings.TrimSpace(strings.ToLower(value))
+	value = strings.ReplaceAll(value, "-", "_")
+	return value
 }
 
 func (s *server) catalogueChannelCount() int {
@@ -407,8 +444,19 @@ func gatewayCatalogueKey(id, instance int) string {
 	return fmt.Sprintf("%d:%d", id, instance)
 }
 
-func gatewayCatalogueWritable(id int) bool {
-	return mecom.TECParameterWritable(id)
+func gatewayCatalogueWritable(definition mecom.MeComCatalogueDefinition, id int) bool {
+	if definition.SubFamily == mecom.MeerstetterSubFamilyTEC {
+		return mecom.TECParameterWritable(id)
+	}
+	if sdoMap, ok := mecom.ResolveCANopenSDOMap(definition.SubFamily, definition.Variant); ok {
+		if writable, exists := sdoMap.ParameterWritability()[id]; exists {
+			return writable
+		}
+	}
+	if writable, ok := mecom.CANopenMappedParameterWritability()[id]; ok {
+		return writable
+	}
+	return false
 }
 
 func gatewayWriteOnlyCatalogueEntries(channels int) []gatewayCatalogueEntry {
@@ -428,7 +476,7 @@ func gatewayWriteOnlyCatalogueEntries(channels int) []gatewayCatalogueEntry {
 				ReadoutPriority:  "background",
 				PreferredReadout: "mecom_vx_round_robin_queue",
 			},
-			Sensor:         fmt.Sprintf("mecom.tec_%02d.%s", p.Instance, p.Name),
+			Sensor:         mecom.DefaultTECTraceID(p.Instance, p.Name),
 			Writable:       p.Writable,
 			RouteSupport:   []string{"serial", "can", "serial+can", "canopen", "tcp"},
 			WriteSemantics: "write",
@@ -463,6 +511,9 @@ func gatewayCatalogueRouteSupport(transportSupport []string) []string {
 }
 
 func gatewayCatalogueWriteSemantics(access, command string) string {
+	if access == "metadata" {
+		return "metadata"
+	}
 	if access == "write" {
 		if command != "" {
 			return command
@@ -633,6 +684,12 @@ type writeRequest struct {
 }
 
 func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID string) {
+	ctx := r.Context()
+	definition := gatewayCatalogueDefinitionFromRequest(r)
+	if sdoMap, ok := mecom.ResolveCANopenSDOMap(definition.SubFamily, definition.Variant); ok {
+		ctx = mecom.WithSDOMap(ctx, sdoMap)
+	}
+
 	activity := gatewayCommandActivity{
 		Time:     time.Now(),
 		DeviceID: deviceID,
@@ -723,7 +780,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 			http.Error(w, activity.Error, activity.HTTPStatus)
 			return
 		}
-		if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(r.Context(), deviceID, bound.client, req, activity); blocked {
+		if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(ctx, deviceID, bound.client, req, activity); blocked {
 			s.recordCommandActivity(blockedActivity)
 			writeJSON(w, blockedActivity.HTTPStatus, map[string]any{"error": blockedActivity.Error})
 			return
@@ -770,7 +827,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 		writeJSON(w, activity.HTTPStatus, map[string]any{"error": activity.Error})
 		return
 	}
-	if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(r.Context(), deviceID, bound.client, req, activity); blocked {
+	if blockedActivity, blocked := s.gatewayWriteDeviceErrorBackoff(ctx, deviceID, bound.client, req, activity); blocked {
 		s.recordCommandActivity(blockedActivity)
 		writeJSON(w, blockedActivity.HTTPStatus, map[string]any{"error": blockedActivity.Error})
 		return
@@ -778,14 +835,14 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 
 	// Pre-check: Read current value before write for definitely validated status
 	if bound.client != nil && activity.ParamID != 0 {
-		ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
-		if vals, err := bound.client.ReadBulk(ctx, []mecom.Parameter{{ID: activity.ParamID, Instance: activity.Instance}}); err == nil && len(vals) == 1 {
+		readCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+		if vals, err := bound.client.ReadBulk(readCtx, []mecom.Parameter{{ID: activity.ParamID, Instance: activity.Instance}}); err == nil && len(vals) == 1 {
 			activity.PrevValue = gatewayConfirmedWriteValue(mecom.Parameter{ID: activity.ParamID}, vals[0])
 		}
 		cancel()
 	}
 
-	ev, err := bound.commander.Send(tc)
+	ev, err := bound.commander.SendContext(ctx, tc)
 	activity.HTTPStatus = http.StatusOK
 	activity.Status = string(ev.Status)
 	if errors.Is(err, mecom.ErrReadbackMismatch) {
@@ -795,7 +852,7 @@ func (s *server) handleWrite(w http.ResponseWriter, r *http.Request, deviceID st
 		activity.Error = ev.Error
 	}
 	if ev.Status == tmtc.CommandCompleted {
-		confirmed, matched, verifyErr := s.verifyGatewayWrite(r.Context(), deviceID, bound.client, req)
+		confirmed, matched, verifyErr := s.verifyGatewayWrite(ctx, deviceID, bound.client, req)
 		activity.ConfirmedValue = confirmed
 		activity.ReadbackMatched = matched
 		if verifyErr != nil {
@@ -1148,6 +1205,10 @@ func (s *server) handleRead(w http.ResponseWriter, r *http.Request, deviceID str
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
+	definition := gatewayCatalogueDefinitionFromRequest(r)
+	if sdoMap, ok := mecom.ResolveCANopenSDOMap(definition.SubFamily, definition.Variant); ok {
+		ctx = mecom.WithSDOMap(ctx, sdoMap)
+	}
 	out, err := s.readGatewayValues(deviceID, ctx, bound.client, params)
 	if err != nil {
 		if shouldResetDeviceBinding(err) {
@@ -1292,6 +1353,10 @@ func (s *server) handlePollSSE(w http.ResponseWriter, r *http.Request, deviceID 
 	})
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
+	definition := gatewayCatalogueDefinitionFromRequest(r)
+	if sdoMap, ok := mecom.ResolveCANopenSDOMap(definition.SubFamily, definition.Variant); ok {
+		ctx = mecom.WithSDOMap(ctx, sdoMap)
+	}
 	go sub.Run(ctx)
 
 	enc := json.NewEncoder(w)
@@ -1471,7 +1536,22 @@ func gatewayParameterByID(id int) (mecom.Parameter, bool) {
 				Name:     p.RawName,
 				Unit:     p.Unit,
 				Type:     mecom.DataType(p.Type),
-				Writable: gatewayCatalogueWritable(p.ID),
+				Writable: gatewayCatalogueWritable(mecom.DefaultTECCatalogueDefinition(), p.ID),
+				Role:     p.Role,
+				Kind:     p.Kind,
+			}, true
+		}
+	}
+	lddParams := mecom.DefaultLDD130xCatalogueEntries(1)
+	for _, p := range lddParams {
+		if p.ID == id {
+			return mecom.Parameter{
+				ID:       p.ID,
+				Instance: p.Instance,
+				Name:     p.RawName,
+				Unit:     p.Unit,
+				Type:     mecom.DataType(p.Type),
+				Writable: gatewayCatalogueWritable(mecom.DefaultLDD130xCatalogueDefinition(), p.ID),
 				Role:     p.Role,
 				Kind:     p.Kind,
 			}, true

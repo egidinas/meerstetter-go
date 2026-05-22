@@ -166,7 +166,7 @@ func (c *Commander) dispatch(ctx context.Context, tc tmtc.Telecommand) error {
 		if c.Reader != nil {
 			got, err := c.Reader.ReadInt32(ctx, paramID, instance)
 			if err == nil && got != int32(value) {
-				return fmt.Errorf("readback_mismatch: wrote %v, confirmed %v", int32(value), got)
+				return fmt.Errorf("%w: wrote %v, confirmed %v", ErrReadbackMismatch, int32(value), got)
 			}
 		}
 		return nil

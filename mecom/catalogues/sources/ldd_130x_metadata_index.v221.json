@@ -1,0 +1,2245 @@
+{
+  "schema_version": "mecom_ldd_130x_metadata_index.v1",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_130x.v221",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_130x",
+    "version": "v221"
+  },
+  "sources": [
+    {
+      "id": "ldd_130x_default_config",
+      "path": "5261H LDD-130x Default Config.ini",
+      "method": "parsed [SRV_PAR] key/value defaults",
+      "status": "harvested",
+      "sha256": "0532be1332fb49c31f9496fb462dce7ec6269f105f8d1dcd173e21033e89886b",
+      "bytes": 6295,
+      "text_encoding": "ascii",
+      "parameter_count": 190
+    },
+    {
+      "id": "ldd_130x_canopen_eds",
+      "path": "LDD-130x STM32 v2.21 CanOpen.eds",
+      "method": "parsed CANopen EDS object dictionary",
+      "status": "harvested",
+      "sha256": "ccc8bab5c22924dd097ac536dd73e3a98c99e55db8762baa7819871c8ff03869",
+      "bytes": 129633,
+      "text_encoding": "utf-8-sig",
+      "object_count": 250
+    },
+    {
+      "id": "ldd_130x_service_software",
+      "path": "ServiceSoftware.exe",
+      "method": "resource string scan for UI label keys, parameter context, paths, and tooltip-like notes",
+      "status": "harvested",
+      "sha256": "ef8bdf82ce5d803b088601a8add65c089131a41f764c7e0116e4f66e5d46199a",
+      "bytes": 583552,
+      "text_encoding": "utf-16le",
+      "strings_output_encoding": "ascii",
+      "label_count": 275,
+      "software_only_label_count": 86,
+      "parameter_context_count": 275,
+      "parameter_path_count": 68,
+      "ui_note_count": 42,
+      "ui_string_count": 791
+    },
+    {
+      "id": "ldd_130x_ui_metadata",
+      "path": "ldd_130x_ui_metadata.v221.json",
+      "method": "generated source JSON from ServiceSoftware resource strings",
+      "status": "generated",
+      "text_encoding": "utf-8",
+      "parameter_context_count": 275,
+      "parameter_path_count": 68,
+      "ui_note_count": 42,
+      "ui_string_count": 791
+    },
+    {
+      "id": "ldd_130x_release_notes",
+      "path": "LDD-130x Software Release Notes 5265M.pdf",
+      "method": "pdftotext release-note parse",
+      "status": "harvested",
+      "sha256": "fdad7c2c1c5d4cee671ec93c8e9900ad94c68f354b593df81a54238e003d1234",
+      "bytes": 344901,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_130x_communication_protocol",
+      "path": "LDD-130x Communication Protocol 5260H.pdf",
+      "method": "pdftotext protocol cross-check against generated LDD catalogue sources",
+      "status": "cross_checked",
+      "sha256": "33e45fb1ad3566551586f9c595a703c7f9da83e408e44a4ab053a64f4ac9eff7",
+      "bytes": 1749050,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_130x_user_manual",
+      "path": "LDD-130x User Manual 5261H.pdf",
+      "method": "pdftotext manual cross-check for tooltip-like UI metadata",
+      "status": "cross_checked",
+      "sha256": "22d1fa802e62762122533d1524a65b4609ac5ef76229dcb2af043afc6b6aeb16",
+      "bytes": 2393248,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_130x_firmware_hex",
+      "path": "LDD-130x STM32 v2.21.hex",
+      "method": "packaged firmware image; retained as provenance only",
+      "status": "available",
+      "sha256": "3cc89e3b0b6c3b6e7e1514d858f42af08b84e3610e7ab9327a44eed3821e9cf3",
+      "bytes": 460120
+    },
+    {
+      "id": "ldd_130x_lookup_table_example",
+      "path": "LookupTable Example.csv",
+      "method": "packaged CSV example; retained as lookup table provenance",
+      "status": "available",
+      "sha256": "04e72a79d2f3dd0862290a8b4ba3867e47ae13eab0a6d28f89ec46ed63251032",
+      "bytes": 5944,
+      "text_encoding": "ascii"
+    },
+    {
+      "id": "ldd_130x_lookup_table_example_xlsx",
+      "path": "LookupTable Example.xlsx",
+      "method": "packaged XLSX example; retained as lookup table provenance only",
+      "status": "available",
+      "sha256": "f9e9d30115a15f43313543722d3e61e0d8480afcca73e8e03530bbb996890627",
+      "bytes": 28164
+    }
+  ],
+  "software_labels": [
+    "label_PAR_ANALOG_CURRENT_FACTOR",
+    "label_PAR_ANALOG_IN_VOLTAGE",
+    "label_PAR_ANALOG_POWER_FACTOR",
+    "label_PAR_AUTORESET_TIME",
+    "label_PAR_CANOPEN_BITRATE",
+    "label_PAR_CANOPEN_CAN1EN",
+    "label_PAR_CANOPEN_NODEID",
+    "label_PAR_CONNECT_WATCH_DOG",
+    "label_PAR_CTR_EOUT_WATT_HOURS",
+    "label_PAR_CTR_OPERATING_T",
+    "label_PAR_CTR_OPERATING_T_RUN",
+    "label_PAR_CTR_QOUT_AMPERE_HOURS",
+    "label_PAR_DAC_ADJ_A0",
+    "label_PAR_DAC_ADJ_A1",
+    "label_PAR_DAC_OUTPUT_GAIN",
+    "label_PAR_DAC_OUTPUT_VALUE",
+    "label_PAR_DAC_OUT_SOURCE",
+    "label_PAR_DEBUG_CALC_INPUTCURRENT",
+    "label_PAR_DEBUG_CALC_OUTPUTCURRENT",
+    "label_PAR_DEBUG_SYMFACT_A",
+    "label_PAR_DEBUG_SYMFACT_B",
+    "label_PAR_DEBUG_SYMFACT_C",
+    "label_PAR_DEVICE_TYPE",
+    "label_PAR_ERROR_INSTANCE",
+    "label_PAR_ERROR_PARAMETER",
+    "label_PAR_EXTT_ADCADJ_A01",
+    "label_PAR_EXTT_ADCADJ_A02",
+    "label_PAR_EXTT_ADCADJ_A11",
+    "label_PAR_EXTT_ADCADJ_A12",
+    "label_PAR_EXTT_ADC_OBSERVE1",
+    "label_PAR_EXTT_ADC_OBSERVE2",
+    "label_PAR_EXTT_MAX_R1",
+    "label_PAR_EXTT_MAX_R2",
+    "label_PAR_EXTT_MAX_T1",
+    "label_PAR_EXTT_MAX_T2",
+    "label_PAR_EXTT_MIN_R1",
+    "label_PAR_EXTT_MIN_R2",
+    "label_PAR_EXTT_MIN_T1",
+    "label_PAR_EXTT_MIN_T2",
+    "label_PAR_EXTT_NTC_R11",
+    "label_PAR_EXTT_NTC_R12",
+    "label_PAR_EXTT_NTC_R21",
+    "label_PAR_EXTT_NTC_R22",
+    "label_PAR_EXTT_NTC_R31",
+    "label_PAR_EXTT_NTC_R32",
+    "label_PAR_EXTT_NTC_T11",
+    "label_PAR_EXTT_NTC_T12",
+    "label_PAR_EXTT_NTC_T21",
+    "label_PAR_EXTT_NTC_T22",
+    "label_PAR_EXTT_NTC_T31",
+    "label_PAR_EXTT_NTC_T32",
+    "label_PAR_EXTT_R1",
+    "label_PAR_EXTT_R2",
+    "label_PAR_EXTT_RAW_ADC1",
+    "label_PAR_EXTT_RAW_ADC2",
+    "label_PAR_EXTT_TADJ_A01",
+    "label_PAR_EXTT_TADJ_A02",
+    "label_PAR_EXTT_TADJ_A11",
+    "label_PAR_EXTT_TADJ_A12",
+    "label_PAR_EXTT_TEMPERATURE1",
+    "label_PAR_EXTT_TEMPERATURE2",
+    "label_PAR_EXTT_TEMP_OBSERVE1",
+    "label_PAR_EXTT_TEMP_OBSERVE2",
+    "label_PAR_EXTT_TEMP_OVER1",
+    "label_PAR_EXTT_TEMP_OVER2",
+    "label_PAR_EXTT_TEMP_UNDER1",
+    "label_PAR_EXTT_TEMP_UNDER2",
+    "label_PAR_FAN_ACT_SPEED1",
+    "label_PAR_FAN_ACT_SPEED2",
+    "label_PAR_FAN_ENABLE1",
+    "label_PAR_FAN_ENABLE2",
+    "label_PAR_FAN_ERROR_DISABLE1",
+    "label_PAR_FAN_ERROR_DISABLE2",
+    "label_PAR_FAN_REL_COOL_POWER1",
+    "label_PAR_FAN_REL_COOL_POWER2",
+    "label_PAR_FAN_SPEED_BYPASS1",
+    "label_PAR_FAN_SPEED_BYPASS2",
+    "label_PAR_FAN_SPEED_FPWM",
+    "label_PAR_FAN_SPEED_KP1",
+    "label_PAR_FAN_SPEED_KP2",
+    "label_PAR_FAN_SPEED_MAX1",
+    "label_PAR_FAN_SPEED_MAX2",
+    "label_PAR_FAN_SPEED_MIN1",
+    "label_PAR_FAN_SPEED_MIN2",
+    "label_PAR_FAN_SPEED_START1",
+    "label_PAR_FAN_SPEED_START2",
+    "label_PAR_FAN_SPEED_STOP1",
+    "label_PAR_FAN_SPEED_STOP2",
+    "label_PAR_FAN_SPEED_TD1",
+    "label_PAR_FAN_SPEED_TD2",
+    "label_PAR_FAN_SPEED_TI1",
+    "label_PAR_FAN_SPEED_TI2",
+    "label_PAR_FAN_TEMPR_KP1",
+    "label_PAR_FAN_TEMPR_KP2",
+    "label_PAR_FAN_TEMPR_TD1",
+    "label_PAR_FAN_TEMPR_TD2",
+    "label_PAR_FAN_TEMPR_TI1",
+    "label_PAR_FAN_TEMPR_TI2",
+    "label_PAR_FAN_TEMP_ACT_SRC1",
+    "label_PAR_FAN_TEMP_ACT_SRC2",
+    "label_PAR_FAN_TEMP_TARGET1",
+    "label_PAR_FAN_TEMP_TARGET2",
+    "label_PAR_FKU_FeedForward_Status",
+    "label_PAR_FKU_LPC_Status",
+    "label_PAR_FKU_STATUS",
+    "label_PAR_GPIO_CHANNEL1",
+    "label_PAR_GPIO_CHANNEL10",
+    "label_PAR_GPIO_CHANNEL2",
+    "label_PAR_GPIO_CHANNEL3",
+    "label_PAR_GPIO_CHANNEL4",
+    "label_PAR_GPIO_CHANNEL5",
+    "label_PAR_GPIO_CHANNEL6",
+    "label_PAR_GPIO_CHANNEL7",
+    "label_PAR_GPIO_CHANNEL8",
+    "label_PAR_GPIO_CHANNEL9",
+    "label_PAR_HWTEST_COMM_ERR_EN",
+    "label_PAR_HWTEST_GPIO_ERR_EN",
+    "label_PAR_HWTEST_STATE",
+    "label_PAR_HW_TEST_MODE",
+    "label_PAR_IGNORE_BRANCH_ID",
+    "label_PAR_IGNORE_FEATURE_FIRMW_LIM",
+    "label_PAR_IVCURVE_CALC_OUTPUT_RESISTANCE",
+    "label_PAR_IVCURVE_CALC_SATURATION_CURRENT",
+    "label_PAR_IVCURVE_CALC_SERIES_RESISTANCE",
+    "label_PAR_IVCURVE_CALC_THERMAL_VOLTAGE",
+    "label_PAR_IVCURVE_CALC_VOLTAGE_OFFSET",
+    "label_PAR_IVCURVE_ENABLE",
+    "label_PAR_IVCURVE_FEEDFORWARD_GAIN",
+    "label_PAR_IVCURVE_MODEL",
+    "label_PAR_IVCURVE_MPWR",
+    "label_PAR_IVCURVE_OUTPUT_RESISTANCE",
+    "label_PAR_IVCURVE_PID_FREEZE",
+    "label_PAR_IVCURVE_PID_KP",
+    "label_PAR_IVCURVE_PID_OPTION",
+    "label_PAR_IVCURVE_PID_TD",
+    "label_PAR_IVCURVE_PID_TI",
+    "label_PAR_IVCURVE_RANGE_LOWER",
+    "label_PAR_IVCURVE_RANGE_UPPER",
+    "label_PAR_IVCURVE_SATURATION_CURRENT",
+    "label_PAR_IVCURVE_SERIES_RESISTANCE",
+    "label_PAR_IVCURVE_SLOPE_LIMIT",
+    "label_PAR_IVCURVE_THERMAL_VOLTAGE",
+    "label_PAR_IVCURVE_VOLTAGE_OFFSET",
+    "label_PAR_LDD_CURRENT_ACT_AVG",
+    "label_PAR_LDD_CURRENT_CAL_A0",
+    "label_PAR_LDD_CURRENT_CAL_A1",
+    "label_PAR_LDD_CURRENT_ERROR_FAST",
+    "label_PAR_LDD_CURRENT_ERROR_THRESH",
+    "label_PAR_LDD_CURRENT_LIMIT_MAX",
+    "label_PAR_LDD_CURRENT_LIMIT_MIN",
+    "label_PAR_LDD_CURRENT_NOISE",
+    "label_PAR_LDD_ERROR_CURRENT_LIMIT",
+    "label_PAR_LDD_ERROR_VOLTAGE_LIMIT",
+    "label_PAR_LDD_INA_GAIN",
+    "label_PAR_LDD_IN_CURRENT_LIMIT",
+    "label_PAR_LDD_NOM_CURRENT",
+    "label_PAR_LDD_NOM_CURRENT_LIMIT",
+    "label_PAR_LDD_NOM_CURRENT_RAMP",
+    "label_PAR_LDD_NOM_CURRENT_SOURCE",
+    "label_PAR_LDD_NOM_SLOPE_LIMIT",
+    "label_PAR_LDD_OUTPUT_EN",
+    "label_PAR_LDD_OUTPUT_LEVEL_MONITOR",
+    "label_PAR_LDD_OUTPUT_RESET_OFF",
+    "label_PAR_LDD_PID_KP",
+    "label_PAR_LDD_PID_TD",
+    "label_PAR_LDD_PID_TI",
+    "label_PAR_LDD_SHUNT_RESISTANCE",
+    "label_PAR_LDD_TEMP_LIMIT",
+    "label_PAR_LDD_T_CORR_GAIN",
+    "label_PAR_LDD_T_CORR_OFFSET",
+    "label_PAR_LDD_T_CORR_SOURCE",
+    "label_PAR_LDD_VOLTAGE_ACT_AVG",
+    "label_PAR_LDD_VOLTAGE_CAL_A0",
+    "label_PAR_LDD_VOLTAGE_CAL_A1",
+    "label_PAR_LDD_VOLTAGE_ERROR_THRESH",
+    "label_PAR_LDD_VOLTAGE_LIMIT_MAX",
+    "label_PAR_LDD_VOLTAGE_LIMIT_MIN",
+    "label_PAR_LPC_NOM_POWER",
+    "label_PAR_LPC_NOM_POWER_SOURCE",
+    "label_PAR_LPC_NOM_SLOPE_LIMIT",
+    "label_PAR_LPC_OUTPUT_LEVEL_MONITOR",
+    "label_PAR_LPC_PID_KP",
+    "label_PAR_LPC_PID_TD",
+    "label_PAR_LPC_PID_TI",
+    "label_PAR_LPC_POWER_ACT_AVG",
+    "label_PAR_LPC_POWER_LIMIT_MAX",
+    "label_PAR_LPC_POWER_LIMIT_MIN",
+    "label_PAR_LUT_INTERVAL_CYCLES",
+    "label_PAR_LUT_INTERVAL_MS",
+    "label_PAR_LUT_LOOP",
+    "label_PAR_M12V",
+    "label_PAR_M3V3",
+    "label_PAR_M5V",
+    "label_PAR_MEPARFLASHV2_WRITECYCLES",
+    "label_PAR_MIN_FW_VERSION",
+    "label_PAR_MIN_FW_VERSION_Moni",
+    "label_PAR_MN5V",
+    "label_PAR_MPWR",
+    "label_PAR_PBC_GPIO10_InputState",
+    "label_PAR_PBC_GPIO1_InputState",
+    "label_PAR_PBC_GPIO2_InputState",
+    "label_PAR_PBC_GPIO3_InputState",
+    "label_PAR_PBC_GPIO4_InputState",
+    "label_PAR_PBC_GPIO5_InputState",
+    "label_PAR_PBC_GPIO6_InputState",
+    "label_PAR_PBC_GPIO7_InputState",
+    "label_PAR_PBC_GPIO8_InputState",
+    "label_PAR_PBC_GPIO9_InputState",
+    "label_PAR_PBC_GPIO_FUNC1",
+    "label_PAR_PBC_GPIO_FUNC10",
+    "label_PAR_PBC_GPIO_FUNC2",
+    "label_PAR_PBC_GPIO_FUNC3",
+    "label_PAR_PBC_GPIO_FUNC4",
+    "label_PAR_PBC_GPIO_FUNC5",
+    "label_PAR_PBC_GPIO_FUNC6",
+    "label_PAR_PBC_GPIO_FUNC7",
+    "label_PAR_PBC_GPIO_FUNC8",
+    "label_PAR_PBC_GPIO_FUNC9",
+    "label_PAR_PBC_GPIO_HWCONF1",
+    "label_PAR_PBC_GPIO_HWCONF10",
+    "label_PAR_PBC_GPIO_HWCONF2",
+    "label_PAR_PBC_GPIO_HWCONF3",
+    "label_PAR_PBC_GPIO_HWCONF4",
+    "label_PAR_PBC_GPIO_HWCONF5",
+    "label_PAR_PBC_GPIO_HWCONF6",
+    "label_PAR_PBC_GPIO_HWCONF7",
+    "label_PAR_PBC_GPIO_HWCONF8",
+    "label_PAR_PBC_GPIO_HWCONF9",
+    "label_PAR_PBC_GPIO_LOGIC1",
+    "label_PAR_PBC_GPIO_LOGIC10",
+    "label_PAR_PBC_GPIO_LOGIC2",
+    "label_PAR_PBC_GPIO_LOGIC3",
+    "label_PAR_PBC_GPIO_LOGIC4",
+    "label_PAR_PBC_GPIO_LOGIC5",
+    "label_PAR_PBC_GPIO_LOGIC6",
+    "label_PAR_PBC_GPIO_LOGIC7",
+    "label_PAR_PBC_GPIO_LOGIC8",
+    "label_PAR_PBC_GPIO_LOGIC9",
+    "label_PAR_PBC_RES_InputState",
+    "label_PAR_PHOTODIODE_CURRENT",
+    "label_PAR_PHOTODIODE_LP_SYSTEMSCALE",
+    "label_PAR_PHOTODIODE_RS",
+    "label_PAR_PUMP_OFF_THRESHOLD1",
+    "label_PAR_PUMP_OFF_THRESHOLD2",
+    "label_PAR_PUMP_ON_THRESHOLD1",
+    "label_PAR_PUMP_ON_THRESHOLD2",
+    "label_PAR_PUMP_TEMP_SRC1",
+    "label_PAR_PUMP_TEMP_SRC2",
+    "label_PAR_RS485_1_ADDRESS",
+    "label_PAR_RS485_1_RPL_DELAY",
+    "label_PAR_SIGGEN_CURRENT_HIGH",
+    "label_PAR_SIGGEN_CURRENT_HIGH_GRAPH",
+    "label_PAR_SIGGEN_CURRENT_LOW",
+    "label_PAR_SIGGEN_CURRENT_LOW_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_FALL_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_FALL_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_FALL_MS",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_MS",
+    "label_PAR_SIGGEN_CUSTOM_LOW_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_LOW_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_LOW_MS",
+    "label_PAR_SIGGEN_CUSTOM_RISE_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_RISE_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_RISE_MS",
+    "label_PAR_SIGGEN_FUNCTION",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_GRAPH",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_MS",
+    "label_PAR_UART_BAUDRATE1",
+    "label_PAR_UART_BAUDRATE3",
+    "label_PAR_UART_DELAY3",
+    "label_PAR_VER_HW_SERNR",
+    "label_PAR_VER_HW_VERSION"
+  ],
+  "release_notes": {
+    "document": "5265M",
+    "release_date": "2025-03-25",
+    "current_version": "2.21",
+    "current_release_date": "2025-03-25",
+    "current_service_software_version": "2.21",
+    "current_firmware_version": "2.21",
+    "supported_devices": [
+      {
+        "device": "LDD-1301",
+        "hardware_version": "1.10 - 1.21"
+      },
+      {
+        "device": "LDD-1303",
+        "hardware_version": "1.10 - 1.30"
+      }
+    ],
+    "versions": [
+      {
+        "version": "2.21",
+        "release_date": "2025-03-25",
+        "service_software_version": "2.21",
+        "firmware_version": "2.21",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "If you have bought your device with the -LPC? option and you wish to use a firmware version >= v2.20 please consult the \"LPC Feature Unlock Migration\" section in the user manual. If you have already paid for LPC, you will not be charged twice."
+        ],
+        "resolved_issues": [
+          "The \"Input Source Selection / Output Enable\" parameter with ID 2100 is no longer set to ON when updating from a firmware < v2.10 while set to Volatile (< v2.00) or GPIO. Setups which use at least one of either the \"HW Enable\" or \"HW Enable (edge)\" GPIO function, not however the \"Toggle HW Enable\" function, were unaffected.",
+          "The \"External Temperature Measurement Limits\" parameters with ID 5040-5043 for channel 2 were previously copied from channel 1. They are now calculated separately."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 4"
+        ]
+      },
+      {
+        "version": "2.20",
+        "release_date": "2024-11-18",
+        "service_software_version": "2.20",
+        "firmware_version": "2.20",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "If you have bought your device with the -LPC? option and you wish to use a firmware version >= v2.20 please consult the \"LPC Feature Unlock Migration\" section in the user manual. If you have already paid for LPC, you will not be charged twice.",
+          "A software feature unlock system has been added for the following features:",
+          "Feedforward",
+          "LPC",
+          "Feedforward and auto-characterization feature have been added.",
+          "System counters have been added.",
+          "New output voltage limit parameters have been added.",
+          "New parameter \"Always off after Reset\" ID 2140 to disable the output after every reset or power cycle.",
+          "New parameter \"User Thresholds / Fast Current Error Threshold\" ID 2126 to enable the fast current switch off mechanism for the user configurable current error threshold.",
+          "Added a \"reset required\" error. If a parameter which requires a reset to apply is changed the LDD goes into error state now. This avoids confusion regarding the state of parameters.",
+          "Increased the accuracy of the NTC temperature calculations.",
+          "The signal generator has been internally revamped. No user visible change in behavior is expected.",
+          "Reduced the time after a reset in which the power stage is in an undefined state."
+        ],
+        "resolved_issues": [
+          "The fan GPIO pins are now initialized early to avoid unintended fan spin up.",
+          "The crowbar FETs are now also activated at boot up, previously this was only the case after at least one on / off cycle of the LDD output.",
+          "The auto reset when triggered by an interlock error is no longer affected by the initial blocking time.",
+          "Under certain conditions a MCU system malfunction (error number 10) could be triggered."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 5"
+        ]
+      },
+      {
+        "version": "2.11",
+        "release_date": "2025-03-25",
+        "service_software_version": "2.11",
+        "firmware_version": "2.11",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "None."
+        ],
+        "resolved_issues": [
+          "The \"Input Source Selection / Output Enable\" parameter with ID 2100 is no longer set to ON when updating from a firmware < v2.10 while set to Volatile (< v2.00) or GPIO. Setups which use at least one of either the \"HW Enable\" or \"HW Enable (edge)\" GPIO function, not however the \"Toggle HW Enable\" function, were unaffected."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 6"
+        ]
+      },
+      {
+        "version": "2.10",
+        "release_date": "2024-10-16",
+        "service_software_version": "2.10",
+        "firmware_version": "2.10",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "It is not possible to update from a firmware < v1.40 to a firmware >= v2.00",
+          "it is not possible to downgrade from firmware >= v2.00 to a firmware < 2.00, without sending the device back to Meerstetter Engineering GmbH",
+          "Number of GPIO channels reduced from 10 to 2, since the rest was unused. This does not change the number of usable GPIOs, only the GPIO channel parameter (ID 6103) is affected.",
+          "HW Enable removed from the Output Enable parameter (ID 2100). The GPIO function now directly changes this parameter.",
+          "The device address is now applied on reset instead of immediately."
+        ],
+        "resolved_issues": [
+          "The D parameter of the PID did not get applied and was always disabled. Only firmware >= v2.00.",
+          "The service software now properly reads and applies the communication watchdog. Only firmware >= v2.00.",
+          "The parameter Set Output States (ID 52102) now also works for GPIO9 and GPIO10.",
+          "The Fan Tacho GPIO function is now properly deactivated if the GPIO function is changed."
+        ],
+        "known_issues": [
+          "The following parameter cannot be imported from a Default.ini created in an earlier firmware version:",
+          "Input Source Selection / Output Enable (ID 2100) LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 7"
+        ]
+      },
+      {
+        "version": "2.01",
+        "release_date": "2024-08-29",
+        "service_software_version": "2.01",
+        "firmware_version": "2.01",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "It is not possible to update from a firmware < v1.40 to a firmware >= v2.00",
+          "it is not possible to downgrade from firmware >= v2.00 to a firmware < 2.00, without sending the device back to Meerstetter Engineering GmbH"
+        ],
+        "resolved_issues": [
+          "The CANopen interface was misconfigured, affecting the phase driver of the LDD- 1303. If the CANopen interface and the LDD output were enabled at the same time, damage to the device was possible. This issue is only present in firmware v2.00. This does not affect the LDD-1301.",
+          "The CANopen interface returned incorrect information. This issue is only present in firmware v2.00."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 8"
+        ]
+      },
+      {
+        "version": "2.00",
+        "release_date": "2024-06-25",
+        "service_software_version": "2.00",
+        "firmware_version": "2.00",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "It is not possible to update from a firmware < v1.40 to a firmware >= v2.00",
+          "it is not possible to downgrade from firmware >= v2.00 to a firmware < 2.00, without sending the device back to Meerstetter Engineering GmbH",
+          "LPC reworked.",
+          "The set current can now be set by using a lookup table (LUT).",
+          "Signal generator feature added.",
+          "Fan control feature added.",
+          "Pump control feature added.",
+          "New GPIO functions: fix 0, edge triggered and toggled hardware enable.",
+          "Increased update frequency of the analog input and the photo diode input.",
+          "Increased upper limit of the slope limit parameter (ID 2113).",
+          "Removed deprecated volatile parameters:",
+          "Removed: parameter 50000, 50001 and 50002",
+          "Changed: parameter 2100, 2101 and 3000",
+          "For more information, please check the change log of the following documents:",
+          "5260-LDD-130x Communication Protocol",
+          "5261-LDD-130x User Manual"
+        ],
+        "resolved_issues": [
+          "In case of an interlock error the auto reset now waits until the interlock has been released again before triggering.",
+          "A concurrent parameter save and reset could lead to memory loss.",
+          "Fixed an out of bounds write when setting the stop fan channel of a GPIO to an invalid channel. Any channel higher than channel 2 is invalid for the stop fan GPIO function.",
+          "Fixed a bug where the GPIO HW Enable goes active even if the GPIO input is logic low. Happened when setting the HW Enable channel to an invalid channel. Only channel 1 is valid for the HW Enable GPIO function."
+        ],
+        "known_issues": [
+          "The Communication Watchdog Timeout setting will get reset upon updating to this version. Please set the value again, if you use this feature. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 9"
+        ]
+      },
+      {
+        "version": "1.41",
+        "release_date": "2023-07-11",
+        "service_software_version": "1.41",
+        "firmware_version": "1.41",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "None."
+        ],
+        "resolved_issues": [
+          "It was not possible to select the analog input as nominal current source."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 10"
+        ]
+      },
+      {
+        "version": "1.40",
+        "release_date": "2022-10-18",
+        "service_software_version": "1.40",
+        "firmware_version": "1.40",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10 - 1.21"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "Add: CANopen. See Communication Protocol Document for details.",
+          "Del: Parameters 1050, 1052, 1053, 1070, 1071, 1072, 1080, 1081 deleted, because the new parameter system only supports one ID per parameter for MeCom.",
+          "Add: Parameter 1601 added for the LPC output level."
+        ],
+        "resolved_issues": [
+          "Newer devices can be operated with up to 60V (input voltage). The error for too high input voltage now occurs at 63 V for those devices.",
+          "Unit of the PID Kp value of the \"Laser Power Control\" tab in the Service Software corrected."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 11"
+        ]
+      },
+      {
+        "version": "1.30",
+        "release_date": "2022-09-06",
+        "service_software_version": "1.30",
+        "firmware_version": "1.30",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "Laser power control now also features a \"Volatile\" nominal output parameter.",
+          "LDD output current can be controlled by the analog input feature."
+        ],
+        "resolved_issues": [
+          "LDD activates with enable source \"GPIO\" despite of \"No Function\" being selected."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 12"
+        ]
+      },
+      {
+        "version": "1.20",
+        "release_date": "2022-06-15",
+        "service_software_version": "1.20",
+        "firmware_version": "1.20",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.10 - 1.30"
+          }
+        ],
+        "new_features": [
+          "Fast shut-off feature for the LDD output (LDD-1301 only).",
+          "Feature: laser power control of the LDD output. Can be used to control the light power of laser diodes through the photodiode input."
+        ],
+        "resolved_issues": [
+          "LDD does not run in the operating state \"Volatile\"."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 13"
+        ]
+      },
+      {
+        "version": "1.10",
+        "release_date": "2022-04-07",
+        "service_software_version": "1.00",
+        "firmware_version": "1.10",
+        "supported_devices": [
+          {
+            "device": "LDD-1301",
+            "hardware_version": "1.10"
+          },
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.00 - 1.10"
+          }
+        ],
+        "new_features": [
+          "Support for LDD-1301 added.",
+          "Feature: temperature correction of the output current. Can be used to correct temperature dependent variations of the laser diode output.",
+          "Improved current control through increased control loop frequency."
+        ],
+        "resolved_issues": [
+          "LDD does not go into error state when enabled and set current = 0 A anymore."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 14"
+        ]
+      },
+      {
+        "version": "1.00",
+        "release_date": "2021-12-20",
+        "service_software_version": "1.00",
+        "firmware_version": "1.00",
+        "supported_devices": [
+          {
+            "device": "LDD-1303",
+            "hardware_version": "1.00 - 1.10"
+          }
+        ],
+        "new_features": [
+          "Initial firmware release. LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 15 A Change History Date of change Doc/Version Changed/ Change / Reason Approved 2022-04-07 5265A HS/RS * Initial release 2022-06-15 5265B CU/RS * Release v1.20 2022-09-06 5265C CU/RS * Release v1.30 2023-03-15 5265D ML, CU/RS * Release v1.40 2023-07-11 5265E RS/CU * Release v1.41 2023-12-15 5265F RS/HS * Update hardware ver.",
+          "Update template 2024-01-22 5265G RS/HS * Add mention of LDD-1303 HWv1.30 2024-06-25 5265H SC/RS * Release v2.00 2024-08-27 5265I SC/ML * Release v2.01 2024-10-16 5265J SC/RS * Release v2.10 2025-03-04 5265K SC/RS * Release v2.20 2025-03-25 5265L SC/RS * Release v2.11 (without v2.20) 2025-03-25 5265M SC/RS * Release v2.21 LDD-130x Software Release Notes 5265M Meerstetter Engineering GmbH 16"
+        ]
+      }
+    ],
+    "risk_notes": [
+      {
+        "id": "output_enable_import_behavior_fixed",
+        "version": "2.21",
+        "summary": "Output Enable parameter ID 2100 is no longer set to ON during specified older-firmware imports.",
+        "source_evidence": [
+          "ldd_130x_release_notes:LDD-130x Software Release Notes 5265M.pdf:Version 2.21 Resolved Issues"
+        ]
+      },
+      {
+        "id": "feedforward_lpc_feature_unlock_added",
+        "version": "2.20",
+        "summary": "Firmware and service software v2.20 introduced feature unlocks for Feedforward and LPC.",
+        "source_evidence": [
+          "ldd_130x_release_notes:LDD-130x Software Release Notes 5265M.pdf:Version 2.20 New and Improved Features"
+        ]
+      },
+      {
+        "id": "firmware_v200_canopen_damage_risk",
+        "version": "2.01",
+        "summary": "Firmware v2.00 could damage LDD-1303 devices when CANopen and LDD output were enabled together; fixed in v2.01.",
+        "source_evidence": [
+          "ldd_130x_release_notes:LDD-130x Software Release Notes 5265M.pdf:Version 2.01 Resolved Issues"
+        ]
+      }
+    ]
+  },
+  "documentation_cross_checks": {
+    "protocol_document": {
+      "source": "LDD-130x Communication Protocol 5260H.pdf",
+      "document": "5260H",
+      "release_date": "2025-03-03",
+      "text_encoding": "utf-8"
+    },
+    "manual_document": {
+      "source": "LDD-130x User Manual 5261H.pdf",
+      "document": "5261H",
+      "release_date": "2025-02-27",
+      "text_encoding": "utf-8"
+    },
+    "checks": [
+      {
+        "id": "output_enable_protocol_mapping",
+        "status": "matched",
+        "summary": "Output Enable is MeCom ID 2100 in the LDD protocol and CANopen object 0x2230 in the EDS; keep the UI/default key LDD_OUTPUT_EN mapped to those documented protocol identities.",
+        "source_evidence": [
+          "ldd_130x_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 458",
+          "ldd_130x_canopen_eds:LDD-130x STM32 v2.21 CanOpen.eds:[2230]",
+          "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_OUTPUT_EN",
+          "ldd_130x_service_software:ServiceSoftware.exe managed resource strings:strings[1870]"
+        ],
+        "default_key": "LDD_OUTPUT_EN",
+        "mecom_id": "2100",
+        "canopen_index": "2230",
+        "ui_path": "Operation.Input Source Selection.Output Enable"
+      },
+      {
+        "id": "min_nominal_voltage_protocol_mapping",
+        "status": "matched",
+        "summary": "Min Nominal Voltage is MeCom ID 2125 in the LDD protocol and CANopen object 0x2255 in the EDS; the manual warning text explains the overcurrent risk of setting the lower voltage limit too high.",
+        "source_evidence": [
+          "ldd_130x_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 782",
+          "ldd_130x_canopen_eds:LDD-130x STM32 v2.21 CanOpen.eds:[2255]",
+          "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_VOLTAGE_LIMIT_MIN",
+          "ldd_130x_service_software:ServiceSoftware.exe managed resource strings:strings[928-931]"
+        ],
+        "default_key": "LDD_VOLTAGE_LIMIT_MIN",
+        "mecom_id": "2125",
+        "canopen_index": "2255",
+        "ui_path": "Operation.Output Stage Limits.Min Nominal Voltage"
+      },
+      {
+        "id": "feature_unlock_license_metadata",
+        "status": "matched",
+        "summary": "Feature unlock metadata is documented by the protocol Feature Licenses table; ServiceSoftware adds license guidance text that is useful as tooltip-style metadata.",
+        "source_evidence": [
+          "ldd_130x_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 1050",
+          "ldd_130x_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 1045",
+          "ldd_130x_user_manual:LDD-130x User Manual 5261H.pdf:line 66",
+          "ldd_130x_service_software:ServiceSoftware.exe managed resource strings:strings[1511-1511]"
+        ],
+        "mecom_id": "54000",
+        "protocol_name": "Feature Key Store"
+      },
+      {
+        "id": "bootloader_ignore_feature_fw_limit_service_only",
+        "status": "service_software_only",
+        "summary": "Ignore Feature FW Limit is present in the ServiceSoftware bootloader UI strings, but it is not documented as an LDD protocol parameter in 5260H; treat it as service-software UI metadata only.",
+        "source_evidence": [
+          "ldd_130x_service_software:ServiceSoftware.exe managed resource strings:strings[1897]",
+          "ldd_130x_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 35"
+        ],
+        "ui_key": "IGNORE_FEATURE_FIRMW_LIM",
+        "ui_path": "ME.Bootloader.Ignore Feature FW Limit"
+      }
+    ]
+  },
+  "hidden_candidates": [
+    {
+      "key": "CANOPEN_BITRATE",
+      "label_key": "label_PAR_CANOPEN_BITRATE",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_CANOPEN_BITRATE"
+      ]
+    },
+    {
+      "key": "CANOPEN_CAN1EN",
+      "label_key": "label_PAR_CANOPEN_CAN1EN",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_CANOPEN_CAN1EN"
+      ]
+    },
+    {
+      "key": "CANOPEN_NODEID",
+      "label_key": "label_PAR_CANOPEN_NODEID",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_CANOPEN_NODEID"
+      ]
+    },
+    {
+      "key": "DAC_ADJ_A0",
+      "label_key": "label_PAR_DAC_ADJ_A0",
+      "group": "dac",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_DAC_ADJ_A0"
+      ]
+    },
+    {
+      "key": "DAC_ADJ_A1",
+      "label_key": "label_PAR_DAC_ADJ_A1",
+      "group": "dac",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_DAC_ADJ_A1"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A01",
+      "label_key": "label_PAR_EXTT_ADCADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A01"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A02",
+      "label_key": "label_PAR_EXTT_ADCADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A02"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A11",
+      "label_key": "label_PAR_EXTT_ADCADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A11"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A12",
+      "label_key": "label_PAR_EXTT_ADCADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A12"
+      ]
+    },
+    {
+      "key": "EXTT_ADC_OBSERVE1",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE1"
+      ]
+    },
+    {
+      "key": "EXTT_ADC_OBSERVE2",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE2"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_R1",
+      "label_key": "label_PAR_EXTT_MAX_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MAX_R1"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_R2",
+      "label_key": "label_PAR_EXTT_MAX_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MAX_R2"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_T1",
+      "label_key": "label_PAR_EXTT_MAX_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MAX_T1"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_T2",
+      "label_key": "label_PAR_EXTT_MAX_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MAX_T2"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_R1",
+      "label_key": "label_PAR_EXTT_MIN_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MIN_R1"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_R2",
+      "label_key": "label_PAR_EXTT_MIN_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MIN_R2"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_T1",
+      "label_key": "label_PAR_EXTT_MIN_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MIN_T1"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_T2",
+      "label_key": "label_PAR_EXTT_MIN_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_MIN_T2"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R11",
+      "label_key": "label_PAR_EXTT_NTC_R11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R11"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R12",
+      "label_key": "label_PAR_EXTT_NTC_R12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R12"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R21",
+      "label_key": "label_PAR_EXTT_NTC_R21",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R21"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R22",
+      "label_key": "label_PAR_EXTT_NTC_R22",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R22"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R31",
+      "label_key": "label_PAR_EXTT_NTC_R31",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R31"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R32",
+      "label_key": "label_PAR_EXTT_NTC_R32",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_R32"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T11",
+      "label_key": "label_PAR_EXTT_NTC_T11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T11"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T12",
+      "label_key": "label_PAR_EXTT_NTC_T12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T12"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T21",
+      "label_key": "label_PAR_EXTT_NTC_T21",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T21"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T22",
+      "label_key": "label_PAR_EXTT_NTC_T22",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T22"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T31",
+      "label_key": "label_PAR_EXTT_NTC_T31",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T31"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T32",
+      "label_key": "label_PAR_EXTT_NTC_T32",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_NTC_T32"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A01",
+      "label_key": "label_PAR_EXTT_TADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A01"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A02",
+      "label_key": "label_PAR_EXTT_TADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A02"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A11",
+      "label_key": "label_PAR_EXTT_TADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A11"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A12",
+      "label_key": "label_PAR_EXTT_TADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A12"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OBSERVE1",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OBSERVE2",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE2"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OVER1",
+      "label_key": "label_PAR_EXTT_TEMP_OVER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OVER2",
+      "label_key": "label_PAR_EXTT_TEMP_OVER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER2"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_UNDER1",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_UNDER2",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER2"
+      ]
+    },
+    {
+      "key": "FAN_ENABLE1",
+      "label_key": "label_PAR_FAN_ENABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_ENABLE1"
+      ]
+    },
+    {
+      "key": "FAN_ENABLE2",
+      "label_key": "label_PAR_FAN_ENABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_ENABLE2"
+      ]
+    },
+    {
+      "key": "FAN_ERROR_DISABLE1",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE1"
+      ]
+    },
+    {
+      "key": "FAN_ERROR_DISABLE2",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_BYPASS1",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_BYPASS2",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_FPWM",
+      "label_key": "label_PAR_FAN_SPEED_FPWM",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_FPWM"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_KP1",
+      "label_key": "label_PAR_FAN_SPEED_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_KP2",
+      "label_key": "label_PAR_FAN_SPEED_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MAX1",
+      "label_key": "label_PAR_FAN_SPEED_MAX1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MAX2",
+      "label_key": "label_PAR_FAN_SPEED_MAX2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MIN1",
+      "label_key": "label_PAR_FAN_SPEED_MIN1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MIN2",
+      "label_key": "label_PAR_FAN_SPEED_MIN2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_START1",
+      "label_key": "label_PAR_FAN_SPEED_START1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_START1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_START2",
+      "label_key": "label_PAR_FAN_SPEED_START2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_START2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_STOP1",
+      "label_key": "label_PAR_FAN_SPEED_STOP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_STOP2",
+      "label_key": "label_PAR_FAN_SPEED_STOP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TD1",
+      "label_key": "label_PAR_FAN_SPEED_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TD2",
+      "label_key": "label_PAR_FAN_SPEED_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TI1",
+      "label_key": "label_PAR_FAN_SPEED_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TI2",
+      "label_key": "label_PAR_FAN_SPEED_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_KP1",
+      "label_key": "label_PAR_FAN_TEMPR_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_KP2",
+      "label_key": "label_PAR_FAN_TEMPR_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TD1",
+      "label_key": "label_PAR_FAN_TEMPR_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TD2",
+      "label_key": "label_PAR_FAN_TEMPR_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TI1",
+      "label_key": "label_PAR_FAN_TEMPR_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TI2",
+      "label_key": "label_PAR_FAN_TEMPR_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI2"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_ACT_SRC1",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC1"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_ACT_SRC2",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC2"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_TARGET1",
+      "label_key": "label_PAR_FAN_TEMP_TARGET1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET1"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_TARGET2",
+      "label_key": "label_PAR_FAN_TEMP_TARGET2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET2"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL1",
+      "label_key": "label_PAR_GPIO_CHANNEL1",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL1"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL10",
+      "label_key": "label_PAR_GPIO_CHANNEL10",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL10"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL2",
+      "label_key": "label_PAR_GPIO_CHANNEL2",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL2"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL3",
+      "label_key": "label_PAR_GPIO_CHANNEL3",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL3"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL4",
+      "label_key": "label_PAR_GPIO_CHANNEL4",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL4"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL5",
+      "label_key": "label_PAR_GPIO_CHANNEL5",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL5"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL6",
+      "label_key": "label_PAR_GPIO_CHANNEL6",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL6"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL7",
+      "label_key": "label_PAR_GPIO_CHANNEL7",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL7"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL8",
+      "label_key": "label_PAR_GPIO_CHANNEL8",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL8"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL9",
+      "label_key": "label_PAR_GPIO_CHANNEL9",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL9"
+      ]
+    },
+    {
+      "key": "IVCURVE_ENABLE",
+      "label_key": "label_PAR_IVCURVE_ENABLE",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_ENABLE"
+      ]
+    },
+    {
+      "key": "IVCURVE_FEEDFORWARD_GAIN",
+      "label_key": "label_PAR_IVCURVE_FEEDFORWARD_GAIN",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_FEEDFORWARD_GAIN"
+      ]
+    },
+    {
+      "key": "IVCURVE_MODEL",
+      "label_key": "label_PAR_IVCURVE_MODEL",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_MODEL"
+      ]
+    },
+    {
+      "key": "IVCURVE_OUTPUT_RESISTANCE",
+      "label_key": "label_PAR_IVCURVE_OUTPUT_RESISTANCE",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_OUTPUT_RESISTANCE"
+      ]
+    },
+    {
+      "key": "IVCURVE_PID_FREEZE",
+      "label_key": "label_PAR_IVCURVE_PID_FREEZE",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_PID_FREEZE"
+      ]
+    },
+    {
+      "key": "IVCURVE_PID_KP",
+      "label_key": "label_PAR_IVCURVE_PID_KP",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_PID_KP"
+      ]
+    },
+    {
+      "key": "IVCURVE_PID_OPTION",
+      "label_key": "label_PAR_IVCURVE_PID_OPTION",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_PID_OPTION"
+      ]
+    },
+    {
+      "key": "IVCURVE_PID_TD",
+      "label_key": "label_PAR_IVCURVE_PID_TD",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_PID_TD"
+      ]
+    },
+    {
+      "key": "IVCURVE_PID_TI",
+      "label_key": "label_PAR_IVCURVE_PID_TI",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_PID_TI"
+      ]
+    },
+    {
+      "key": "IVCURVE_RANGE_LOWER",
+      "label_key": "label_PAR_IVCURVE_RANGE_LOWER",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_RANGE_LOWER"
+      ]
+    },
+    {
+      "key": "IVCURVE_RANGE_UPPER",
+      "label_key": "label_PAR_IVCURVE_RANGE_UPPER",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_RANGE_UPPER"
+      ]
+    },
+    {
+      "key": "IVCURVE_SATURATION_CURRENT",
+      "label_key": "label_PAR_IVCURVE_SATURATION_CURRENT",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_SATURATION_CURRENT"
+      ]
+    },
+    {
+      "key": "IVCURVE_SERIES_RESISTANCE",
+      "label_key": "label_PAR_IVCURVE_SERIES_RESISTANCE",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_SERIES_RESISTANCE"
+      ]
+    },
+    {
+      "key": "IVCURVE_SLOPE_LIMIT",
+      "label_key": "label_PAR_IVCURVE_SLOPE_LIMIT",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_SLOPE_LIMIT"
+      ]
+    },
+    {
+      "key": "IVCURVE_THERMAL_VOLTAGE",
+      "label_key": "label_PAR_IVCURVE_THERMAL_VOLTAGE",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_THERMAL_VOLTAGE"
+      ]
+    },
+    {
+      "key": "IVCURVE_VOLTAGE_OFFSET",
+      "label_key": "label_PAR_IVCURVE_VOLTAGE_OFFSET",
+      "group": "ivcurve",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_IVCURVE_VOLTAGE_OFFSET"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_CAL_A0",
+      "label_key": "label_PAR_LDD_CURRENT_CAL_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_CURRENT_CAL_A0"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_CAL_A1",
+      "label_key": "label_PAR_LDD_CURRENT_CAL_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_CURRENT_CAL_A1"
+      ]
+    },
+    {
+      "key": "LDD_VOLTAGE_CAL_A0",
+      "label_key": "label_PAR_LDD_VOLTAGE_CAL_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_VOLTAGE_CAL_A0"
+      ]
+    },
+    {
+      "key": "LDD_VOLTAGE_CAL_A1",
+      "label_key": "label_PAR_LDD_VOLTAGE_CAL_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LDD_VOLTAGE_CAL_A1"
+      ]
+    },
+    {
+      "key": "LUT_INTERVAL_CYCLES",
+      "label_key": "label_PAR_LUT_INTERVAL_CYCLES",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LUT_INTERVAL_CYCLES"
+      ]
+    },
+    {
+      "key": "LUT_LOOP",
+      "label_key": "label_PAR_LUT_LOOP",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_LUT_LOOP"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC1",
+      "label_key": "label_PAR_PBC_GPIO_FUNC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC10",
+      "label_key": "label_PAR_PBC_GPIO_FUNC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC2",
+      "label_key": "label_PAR_PBC_GPIO_FUNC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC3",
+      "label_key": "label_PAR_PBC_GPIO_FUNC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC4",
+      "label_key": "label_PAR_PBC_GPIO_FUNC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC5",
+      "label_key": "label_PAR_PBC_GPIO_FUNC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC6",
+      "label_key": "label_PAR_PBC_GPIO_FUNC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC7",
+      "label_key": "label_PAR_PBC_GPIO_FUNC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC8",
+      "label_key": "label_PAR_PBC_GPIO_FUNC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC9",
+      "label_key": "label_PAR_PBC_GPIO_FUNC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC9"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF1",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF10",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF2",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF3",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF4",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF5",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF6",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF7",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF8",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF9",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF9"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC1",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC10",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC2",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC3",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC4",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC5",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC6",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC7",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC8",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC9",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC9"
+      ]
+    },
+    {
+      "key": "PBC_RES_InputState",
+      "label_key": "label_PAR_PBC_RES_InputState",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_InputState"
+      ]
+    },
+    {
+      "key": "PHOTODIODE_LP_SYSTEMSCALE",
+      "label_key": "label_PAR_PHOTODIODE_LP_SYSTEMSCALE",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PHOTODIODE_LP_SYSTEMSCALE"
+      ]
+    },
+    {
+      "key": "PUMP_OFF_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD1"
+      ]
+    },
+    {
+      "key": "PUMP_OFF_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD2"
+      ]
+    },
+    {
+      "key": "PUMP_ON_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD1"
+      ]
+    },
+    {
+      "key": "PUMP_ON_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD2"
+      ]
+    },
+    {
+      "key": "PUMP_TEMP_SRC1",
+      "label_key": "label_PAR_PUMP_TEMP_SRC1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC1"
+      ]
+    },
+    {
+      "key": "PUMP_TEMP_SRC2",
+      "label_key": "label_PAR_PUMP_TEMP_SRC2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC2"
+      ]
+    },
+    {
+      "key": "RS485_1_ADDRESS",
+      "label_key": "label_PAR_RS485_1_ADDRESS",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_RS485_1_ADDRESS"
+      ]
+    },
+    {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_RS485_1_RPL_DELAY"
+      ]
+    },
+    {
+      "key": "SIGGEN_CURRENT_HIGH",
+      "label_key": "label_PAR_SIGGEN_CURRENT_HIGH",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_HIGH"
+      ]
+    },
+    {
+      "key": "SIGGEN_CURRENT_LOW",
+      "label_key": "label_PAR_SIGGEN_CURRENT_LOW",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_LOW"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_FALL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_FALL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_FALL_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_HIGH_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_LOW_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_LOW_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_LOW_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_RISE_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_RISE_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_RISE_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_FUNCTION",
+      "label_key": "label_PAR_SIGGEN_FUNCTION",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_FUNCTION"
+      ]
+    },
+    {
+      "key": "SIGGEN_PRESET_SIGNAL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES"
+      ]
+    },
+    {
+      "key": "UART_BAUDRATE1",
+      "label_key": "label_PAR_UART_BAUDRATE1",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_UART_BAUDRATE1"
+      ]
+    },
+    {
+      "key": "UART_BAUDRATE3",
+      "label_key": "label_PAR_UART_BAUDRATE3",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_UART_BAUDRATE3"
+      ]
+    },
+    {
+      "key": "UART_DELAY3",
+      "label_key": "label_PAR_UART_DELAY3",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-130X Software v221 MSI payload:5261H LDD-130x Default Config.ini:[SRV_PAR].label_PAR_UART_DELAY3"
+      ]
+    }
+  ],
+  "safety_policy": "Advanced LDD source entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review."
+}

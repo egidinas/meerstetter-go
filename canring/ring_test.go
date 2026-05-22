@@ -297,6 +297,107 @@ func TestMergeRecordsKeepsNewestLimitAfterCombiningSources(t *testing.T) {
 	}
 }
 
+func TestMergeRecordsKeepsTailWithoutFullHistory(t *testing.T) {
+	t0 := time.Unix(1700000000, 0).UTC()
+	primary := []Record{
+		{Seq: 20, Time: t0.Add(20 * time.Millisecond), ID: 0x702, DLC: 1, Data: [8]byte{2}, Interface: "can0"},
+		{Seq: 30, Time: t0.Add(30 * time.Millisecond), ID: 0x703, DLC: 1, Data: [8]byte{3}, Interface: "can0"},
+	}
+	fallback := []Record{
+		{Seq: 10, Time: t0.Add(10 * time.Millisecond), ID: 0x701, DLC: 1, Data: [8]byte{1}, Interface: "can0"},
+		{Seq: 22, Time: t0.Add(22 * time.Millisecond), ID: 0x702, DLC: 1, Data: [8]byte{0xEE}, Interface: "can0"},
+		{Seq: 40, Time: t0.Add(40 * time.Millisecond), ID: 0x704, DLC: 1, Data: [8]byte{4}, Interface: "can0"},
+	}
+
+	merged := MergeRecords(primary, fallback, 2)
+	if len(merged) != 2 {
+		t.Fatalf("merged records = %d: %#v", len(merged), merged)
+	}
+	if merged[0].ID != 0x703 || merged[1].ID != 0x704 {
+		t.Fatalf("unexpected tail merge order: %#v", merged)
+	}
+}
+
+func TestMergeRecordsPreservesEqualOrderingAndPrimaryPreference(t *testing.T) {
+	t0 := time.Unix(1700000000, 0).UTC()
+	primary := []Record{
+		{Seq: 1, Time: t0, ID: 0x701, DLC: 1, Data: [8]byte{0x01}, Interface: "can0"},
+	}
+	fallback := []Record{
+		{Seq: 1, Time: t0, ID: 0x701, DLC: 1, Data: [8]byte{0x02}, Interface: "can0"},
+	}
+
+	merged := MergeRecords(primary, fallback, 0)
+	if len(merged) != 2 {
+		t.Fatalf("merged records = %d: %#v", len(merged), merged)
+	}
+	if merged[0].Data[0] != 0x01 || merged[1].Data[0] != 0x02 {
+		t.Fatalf("equal-order records not preserved stably: %#v", merged)
+	}
+
+	merged = MergeRecords(primary, fallback, 1)
+	if len(merged) != 1 {
+		t.Fatalf("merged records = %d: %#v", len(merged), merged)
+	}
+	if merged[0].Data[0] != 0x02 {
+		t.Fatalf("tail selection kept wrong equal-order record: %#v", merged)
+	}
+}
+
+func TestMergeRecordsHandlesEmptySides(t *testing.T) {
+	t0 := time.Unix(1700000000, 0).UTC()
+	primary := []Record{
+		{Seq: 1, Time: t0, ID: 0x701, DLC: 1, Data: [8]byte{0x01}, Interface: "can0"},
+		{Seq: 2, Time: t0.Add(time.Millisecond), ID: 0x702, DLC: 1, Data: [8]byte{0x02}, Interface: "can0"},
+	}
+
+	merged := MergeRecords(primary, nil, 1)
+	if len(merged) != 1 || merged[0].ID != 0x702 {
+		t.Fatalf("primary-only tail merge wrong: %#v", merged)
+	}
+
+	merged = MergeRecords(nil, primary, 0)
+	if len(merged) != 2 || merged[0].ID != 0x701 || merged[1].ID != 0x702 {
+		t.Fatalf("fallback-only merge wrong: %#v", merged)
+	}
+}
+
+func TestMergeRecordsLimitNonPositiveMatchesCurrentBehavior(t *testing.T) {
+	t0 := time.Unix(1700000000, 0).UTC()
+	primary := []Record{
+		{Seq: 2, Time: t0.Add(2 * time.Millisecond), ID: 0x702, DLC: 1, Data: [8]byte{0x02}, Interface: "can0"},
+	}
+	fallback := []Record{
+		{Seq: 1, Time: t0.Add(time.Millisecond), ID: 0x701, DLC: 1, Data: [8]byte{0x01}, Interface: "can0"},
+	}
+
+	merged := MergeRecords(primary, fallback, 0)
+	if len(merged) != 2 || merged[0].ID != 0x701 || merged[1].ID != 0x702 {
+		t.Fatalf("limit=0 merge wrong: %#v", merged)
+	}
+
+	merged = MergeRecords(primary, fallback, -1)
+	if len(merged) != 2 || merged[0].ID != 0x701 || merged[1].ID != 0x702 {
+		t.Fatalf("limit<0 merge wrong: %#v", merged)
+	}
+}
+
+func TestMergeRecordsLimitPreservesSortForUnorderedInputs(t *testing.T) {
+	t0 := time.Unix(1700000000, 0).UTC()
+	primary := []Record{
+		{Seq: 30, Time: t0.Add(30 * time.Millisecond), ID: 0x703, DLC: 1, Data: [8]byte{0x03}, Interface: "can0"},
+		{Seq: 10, Time: t0.Add(10 * time.Millisecond), ID: 0x701, DLC: 1, Data: [8]byte{0x01}, Interface: "can0"},
+	}
+	fallback := []Record{
+		{Seq: 20, Time: t0.Add(20 * time.Millisecond), ID: 0x702, DLC: 1, Data: [8]byte{0x02}, Interface: "can0"},
+	}
+
+	merged := MergeRecords(primary, fallback, 2)
+	if len(merged) != 2 || merged[0].ID != 0x702 || merged[1].ID != 0x703 {
+		t.Fatalf("limit merge sorted tail = %#v, want IDs 0x702, 0x703", merged)
+	}
+}
+
 func TestMergeRecordsDoesNotCollapseDistinctRepeatedFrames(t *testing.T) {
 	t0 := time.Unix(1700000000, 0).UTC()
 	frame := Record{Seq: 1, Time: t0, ElapsedNanos: 1, ID: 0x701, DLC: 1, Data: [8]byte{0x05}, Interface: "can0"}

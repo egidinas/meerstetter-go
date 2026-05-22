@@ -70,6 +70,14 @@ type Snapshot struct {
 // Mirrored frames are de-duplicated by CAN identity and timestamp, preferring
 // the primary record when both rings contain the same frame.
 func MergeRecords(primary, fallback []Record, limit int) []Record {
+	if limit > 0 && recordsSorted(primary) && recordsSorted(fallback) {
+		return mergeRecordsTail(primary, fallback, limit)
+	}
+
+	return mergeRecordsFull(primary, fallback, limit)
+}
+
+func mergeRecordsFull(primary, fallback []Record, limit int) []Record {
 	merged := make([]Record, 0, len(primary)+len(fallback))
 	seen := make(map[recordKey]struct{}, len(primary)+len(fallback))
 	for _, record := range primary {
@@ -104,6 +112,92 @@ func MergeRecords(primary, fallback []Record, limit int) []Record {
 		merged = merged[len(merged)-limit:]
 	}
 	return merged
+}
+
+func recordsSorted(records []Record) bool {
+	for i := 1; i < len(records); i++ {
+		if recordBefore(records[i], records[i-1]) {
+			return false
+		}
+	}
+	return true
+}
+
+func mergeRecordsTail(primary, fallback []Record, limit int) []Record {
+	tail := make([]Record, limit)
+	start := 0
+	count := 0
+	primaryKeys := make(map[recordKey]struct{}, len(primary))
+	for _, record := range primary {
+		primaryKeys[newRecordKey(record)] = struct{}{}
+	}
+	seenPrimary := make(map[recordKey]struct{}, len(primary))
+	seenFallback := make(map[recordKey]struct{}, len(fallback))
+
+	push := func(record Record, sourcePrimary bool) {
+		key := newRecordKey(record)
+		if sourcePrimary {
+			if _, ok := seenPrimary[key]; ok {
+				return
+			}
+			seenPrimary[key] = struct{}{}
+		} else {
+			if _, ok := primaryKeys[key]; ok {
+				return
+			}
+			if _, ok := seenFallback[key]; ok {
+				return
+			}
+			seenFallback[key] = struct{}{}
+		}
+		if count < limit {
+			tail[(start+count)%limit] = record
+			count++
+			return
+		}
+		tail[start] = record
+		start = (start + 1) % limit
+	}
+
+	i, j := 0, 0
+	for i < len(primary) || j < len(fallback) {
+		switch {
+		case j >= len(fallback):
+			push(primary[i], true)
+			i++
+		case i >= len(primary):
+			push(fallback[j], false)
+			j++
+		case recordBefore(primary[i], fallback[j]):
+			push(primary[i], true)
+			i++
+		case recordBefore(fallback[j], primary[i]):
+			push(fallback[j], false)
+			j++
+		default:
+			push(primary[i], true)
+			i++
+		}
+	}
+
+	merged := make([]Record, 0, count)
+	for i := 0; i < count; i++ {
+		merged = append(merged, tail[(start+i)%limit])
+	}
+	return merged
+}
+
+func recordBefore(a, b Record) bool {
+	if !a.Time.Equal(b.Time) {
+		return a.Time.Before(b.Time)
+	}
+	if a.Seq != b.Seq {
+		return a.Seq < b.Seq
+	}
+	if a.ID != b.ID {
+		return a.ID < b.ID
+	}
+	return a.Interface < b.Interface
 }
 
 type recordKey struct {

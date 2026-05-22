@@ -49,11 +49,18 @@ export function valueAgeKind(ageMs, quality) {
 }
 
 /* ---------- Hook: latest value for a (device, param, instance) ---------- */
-export function useLiveValue(deviceId, paramId, instance?) {
+export function useLiveValue(deviceId, paramId, instance?, opts?) {
   const inst = instance ?? 1;
+  const enabled = opts?.enabled !== false && Boolean(deviceId) && paramId !== undefined && paramId !== null;
+  const disabledQuality = opts?.disabledQuality || "catalogue";
   const [, force] = useState(0);
   const [latest, setLatest] = useState(null);
   useEffect(() => {
+    if (!enabled) {
+      setLatest(null);
+      force((n) => (n + 1) % 1e9);
+      return undefined;
+    }
     const tick = () => {
       const r = MecomAPI.readValue(deviceId, paramId, inst);
       recordTelemetry(deviceId, paramId, r.value, r.quality, inst);
@@ -63,37 +70,34 @@ export function useLiveValue(deviceId, paramId, instance?) {
     tick();
     const unsub = MecomAPI.subscribe(tick);
     return unsub;
-  }, [deviceId, paramId, inst]);
+  }, [deviceId, paramId, inst, enabled]);
+  if (!enabled) {
+    return { value: null, quality: disabledQuality, ageMs: null, at: null, history: { t: [], v: [], q: [] } };
+  }
   const buf = getTelemetry(deviceId, paramId, inst);
   const v = buf.v.length ? buf.v[buf.v.length - 1] : null;
   const q = buf.q.length ? buf.q[buf.q.length - 1] : "missing";
   return { value: v, quality: q, ageMs: valueAgeMs(latest), at: latest?.at ?? null, history: buf };
 }
 
-export function useSparkline(deviceId, paramId, instance?) {
+export function useSparkline(deviceId, paramId, instance?, opts?) {
   const inst = instance ?? 1;
-  const [data, setData] = useState([]);
+  const enabled = opts?.enabled !== false && Boolean(deviceId) && paramId !== undefined && paramId !== null;
+  const [, force] = useState(0);
   useEffect(() => {
-    let active = true;
-    const fetch = async () => {
-      try {
-        const resp = await window.fetch(`/api/graph/sparklines?device=${deviceId}&param=${paramId}&instance=${inst}`);
-        const body = await resp.json();
-        if (active && body.values) {
-          setData(body.values);
-        }
-      } catch (err) {
-        console.warn("sparkline fetch failed", err);
-      }
-    };
-    fetch();
-    const timer = setInterval(fetch, 5000);
+    if (!enabled) return undefined;
+    const tick = () => force((n) => (n + 1) % 1e9);
+    tick();
+    const unsub = MecomAPI.subscribe(tick);
+    const timer = setInterval(tick, 5000);
     return () => {
-      active = false;
+      unsub();
       clearInterval(timer);
     };
-  }, [deviceId, paramId, inst]);
-  return data;
+  }, [deviceId, paramId, inst, enabled]);
+  if (!enabled) return [];
+  const buf = getTelemetry(deviceId, paramId, inst);
+  return buf.v.filter((v) => typeof v === "number" && Number.isFinite(v)).slice(-30);
 }
 
 /* ---------- Hook: re-render on any state change ---------- */
@@ -753,7 +757,11 @@ const TreeNode = React.memo(({ deviceId, channels, param, ctx: suppliedCtx, pins
 
 const TreeInstance = React.memo(({ deviceId, channel, instance, role, param, pinned, onTogglePin, onPinCard, onWrite }) => {
   const resolvedDeviceId = channel?.device_id || deviceId;
-  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, param.id, instance);
+  const liveEnabled = Boolean(
+    MecomAPI.isPolledSignal?.(role, param.id) ||
+    MecomAPI.hasLiveValue?.(resolvedDeviceId, param.id, instance)
+  );
+  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, param.id, instance, { enabled: liveEnabled });
   const [editingAlias, setEditingAlias] = useState(false);
   const [aliasDraft, setAliasDraft] = useState(channel?.alias || channel?.nickname || "");
   const [noteDraft, setNoteDraft] = useState(channel?.user_overlay_note || channel?.fixture_note || "");
@@ -769,6 +777,10 @@ const TreeInstance = React.memo(({ deviceId, channel, instance, role, param, pin
   const rawLabel = MecomAPI.channelDisplayLabel ? MecomAPI.channelDisplayLabel(channel || { device_id: resolvedDeviceId, instance }, { includeAlias: false }) : `${resolvedDeviceId} ch${instance}`;
   const pair = MecomAPI.semanticPairFor ? MecomAPI.semanticPairFor(param) : null;
   const peer = pair && pair.telemetry && pair.telemetry.id !== param.id ? pair.telemetry : pair && pair.control && pair.control.id !== param.id ? pair.control : null;
+  const peerLiveEnabled = Boolean(peer && (
+    MecomAPI.isPolledSignal?.(role, peer.id) ||
+    MecomAPI.hasLiveValue?.(resolvedDeviceId, peer.id, instance)
+  ));
   const helpText = [
     rawLabel,
     alias ? `alias ${alias}` : "no alias",
@@ -803,10 +815,10 @@ const TreeInstance = React.memo(({ deviceId, channel, instance, role, param, pin
       <span className="vl">{displayValue}</span>
       <span className={"qtag " + quality}>{quality || "missing"}</span>
       <span className={"age " + valueAgeKind(ageMs, quality)}>{formatValueAge(ageMs, quality)}</span>
-      <SparklineWrapper deviceId={resolvedDeviceId} paramId={param.id} instance={instance} />
+      <SparklineWrapper deviceId={resolvedDeviceId} paramId={param.id} instance={instance} enabled={liveEnabled} />
       <span className={"pairline " + (pair ? "" : "empty")}>
         {pair ? (
-          <PeerValue resolvedDeviceId={resolvedDeviceId} instance={instance} peer={peer} />
+          <PeerValue resolvedDeviceId={resolvedDeviceId} instance={instance} peer={peer} enabled={peerLiveEnabled} />
         ) : (
           <span>unpaired</span>
         )}
@@ -902,8 +914,8 @@ function semanticValueRows(param, value, quality, ageMs) {
   return rows;
 }
 
-const PeerValue = React.memo(({ resolvedDeviceId, instance, peer }) => {
-  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, peer?.id, instance);
+const PeerValue = React.memo(({ resolvedDeviceId, instance, peer, enabled = true }) => {
+  const { value, quality, ageMs } = useLiveValue(resolvedDeviceId, peer?.id, instance, { enabled: enabled && Boolean(peer) });
   if (!peer) return null;
   const displayValue = formatWithUnit(value, peer.unit, peer.id);
   const kind = peer.role === "monitor" ? "telemetry" : "telecommand";
@@ -1150,8 +1162,8 @@ export function MetricTile({ label, value, unit, kind = "", title }) {
     </SemanticValuePopup>
   );
 }
-function SparklineWrapper({ deviceId, paramId, instance }) {
-  const data = useSparkline(deviceId, paramId, instance);
+function SparklineWrapper({ deviceId, paramId, instance, enabled = true }) {
+  const data = useSparkline(deviceId, paramId, instance, { enabled });
   return (
     <div className="tree-sparkline">
       <Sparkline data={data} width={80} height={16} />

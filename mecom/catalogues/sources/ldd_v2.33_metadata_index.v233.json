@@ -1,0 +1,722 @@
+{
+  "schema_version": "mecom_ldd_v2.33_metadata_index.v1",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_v2.33.v233",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_v2.33",
+    "version": "v233"
+  },
+  "sources": [
+    {
+      "id": "ldd_v2.33_default_config",
+      "path": "5138Q LDD Default Config.ini",
+      "method": "parsed [SRV_PAR] key/value defaults",
+      "status": "harvested",
+      "sha256": "fd5456c084f145cfd0084ec6657938c4b6878e21dc4e0596c60baec28b03b92f",
+      "bytes": 2908,
+      "text_encoding": "ascii",
+      "parameter_count": 118
+    },
+    {
+      "id": "ldd_v2.33_service_software",
+      "path": "Service_LDD.exe",
+      "method": "resource string scan for UI label keys, parameter context, paths, and tooltip-like notes",
+      "status": "harvested",
+      "sha256": "377ce711253486b2597a8b35175104c7c5eaa9a8217fc4ab6aff122ebf8b498b",
+      "bytes": 1519000,
+      "text_encoding": "utf-16le",
+      "strings_output_encoding": "ascii",
+      "label_count": 44,
+      "software_only_label_count": 1,
+      "parameter_context_count": 44,
+      "parameter_path_count": 29,
+      "ui_note_count": 24,
+      "ui_string_count": 562
+    },
+    {
+      "id": "ldd_v2.33_ui_metadata",
+      "path": "ldd_v2.33_ui_metadata.v233.json",
+      "method": "generated source JSON from ServiceSoftware resource strings",
+      "status": "generated",
+      "text_encoding": "utf-8",
+      "parameter_context_count": 44,
+      "parameter_path_count": 29,
+      "ui_note_count": 24,
+      "ui_string_count": 562
+    },
+    {
+      "id": "ldd_v2.33_release_notes",
+      "path": "LDD Software Release Notes 5148V.pdf",
+      "method": "pdftotext release-note parse",
+      "status": "harvested",
+      "sha256": "84475eddcc4571f460664b23d38cff86bda74ac5a697e98937d5c5e214c7e0dd",
+      "bytes": 305555,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_v2.33_user_manual",
+      "path": "LDD-130x User Manual 5261H.pdf",
+      "method": "pdftotext manual cross-check for tooltip-like UI metadata",
+      "status": "cross_checked",
+      "sha256": "a228f861177c7608890d6edd60e54c9b79b7a5041c7e11b94788be2009c59c7d",
+      "bytes": 1154475,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_v2.33_firmware_hex",
+      "path": "LDD STM32 v2.32.hex",
+      "method": "packaged firmware image; retained as provenance only",
+      "status": "available",
+      "sha256": "e85f9a03a20c4f69c6e42feb95b8001c2ce31e353f9936dc16cf00ce897a1e95",
+      "bytes": 292073
+    },
+    {
+      "id": "ldd_v2.33_lookup_table_example",
+      "path": "LookupTable Example.csv",
+      "method": "packaged CSV example; retained as lookup table provenance",
+      "status": "available",
+      "sha256": "c447f24ca1f2d82a995727c344dd84fc25de3e15327751f76d7b9e81b2e7382b",
+      "bytes": 25946,
+      "text_encoding": "ascii"
+    },
+    {
+      "id": "ldd_v2.33_lookup_table_example_xlsx",
+      "path": "LookupTable Example.xlsx",
+      "method": "packaged XLSX example; retained as lookup table provenance only",
+      "status": "available",
+      "sha256": "1b4e7c0ed9b99089ff7115f361e73634e528b4f343dc650764eaa538b92df86d",
+      "bytes": 72118
+    }
+  ],
+  "software_labels": [
+    "label_PAR_DEBUG_WRITE1",
+    "label_PAR_ERROR_INSTANCE",
+    "label_PAR_ERROR_PARAMETER",
+    "label_PAR_FLASH_SAVE_OFF",
+    "label_PAR_FSS_LDD_TYPE",
+    "label_PAR_FSS_NROF_SLAVES",
+    "label_PAR_FSS_RS485CH",
+    "label_PAR_FSS_SLAVE_ID",
+    "label_PAR_HW_TEST_MODE",
+    "label_PAR_LD_ACT_U_INT",
+    "label_PAR_LUT_WAVE_INT1",
+    "label_PAR_LUT_WAVE_INT2",
+    "label_PAR_LUT_WAVE_INT3",
+    "label_PAR_LUT_WAVE_INT4",
+    "label_PAR_LUT_WAVE_SELECT",
+    "label_PAR_MAX_CURRENT_ERROR",
+    "label_PAR_PBC_RES_FUNC1",
+    "label_PAR_PBC_RES_FUNC2",
+    "label_PAR_PBC_RES_FUNC3",
+    "label_PAR_PBC_RES_FUNC4",
+    "label_PAR_PBC_RES_FUNC5",
+    "label_PAR_PBC_RES_FUNC6",
+    "label_PAR_PBC_RES_FUNC7",
+    "label_PAR_PBC_RES_FUNC8",
+    "label_PAR_RACK_OUTPUT",
+    "label_PAR_RS485_1_ADDR",
+    "label_PAR_RS485_1_RPL_DELAY",
+    "label_PAR_SIGGEN_SINGLESEQ",
+    "label_PAR_SYSTICK_AVG_CYCLE",
+    "label_PAR_SYSTICK_MAX_CYCLE",
+    "label_PAR_TLD_ADCADJ_A0",
+    "label_PAR_TLD_ADCADJ_A1",
+    "label_PAR_TLD_NTC_R1",
+    "label_PAR_TLD_NTC_R2",
+    "label_PAR_TLD_NTC_R3",
+    "label_PAR_TLD_NTC_T1",
+    "label_PAR_TLD_NTC_T2",
+    "label_PAR_TLD_NTC_T3",
+    "label_PAR_TLD_TEMP_OVER",
+    "label_PAR_TLD_TEMP_UNDER",
+    "label_PAR_TLD_TOTEMP_RV",
+    "label_PAR_VER_HW_SERNR",
+    "label_PAR_VER_HW_VERSION",
+    "label_PAR_VOLTAGE_VDM"
+  ],
+  "release_notes": {
+    "document": "",
+    "release_date": "",
+    "current_version": "2.33",
+    "current_release_date": "2018-08-17",
+    "current_service_software_version": "2.33",
+    "current_firmware_version": "2.32",
+    "supported_devices": [],
+    "versions": [
+      {
+        "version": "2.33",
+        "release_date": "2018-08-17",
+        "service_software_version": "2.33",
+        "firmware_version": "2.32"
+      },
+      {
+        "version": "2.32",
+        "release_date": "2017-06-20",
+        "service_software_version": "2.30",
+        "firmware_version": "2.32"
+      },
+      {
+        "version": "2.31",
+        "release_date": "2016-05-31",
+        "service_software_version": "2.30",
+        "firmware_version": "2.31"
+      },
+      {
+        "version": "2.30",
+        "release_date": "2016-04-07",
+        "service_software_version": "2.30",
+        "firmware_version": "2.30"
+      },
+      {
+        "version": "2.21",
+        "release_date": "2015-03-03",
+        "service_software_version": "2.20",
+        "firmware_version": "2.21"
+      },
+      {
+        "version": "2.20",
+        "release_date": "2015-09-18",
+        "service_software_version": "2.20",
+        "firmware_version": "2.20"
+      },
+      {
+        "version": "2.10",
+        "release_date": "2015-05-20",
+        "service_software_version": "2.10",
+        "firmware_version": "2.10"
+      },
+      {
+        "version": "2.02",
+        "release_date": "2014-10-09",
+        "service_software_version": "2.00",
+        "firmware_version": "2.02"
+      },
+      {
+        "version": "2.01",
+        "release_date": "2014-04-14",
+        "service_software_version": "2.00",
+        "firmware_version": "2.01"
+      },
+      {
+        "version": "2.00",
+        "release_date": "2014-04-14",
+        "service_software_version": "2.00",
+        "firmware_version": "2.00"
+      },
+      {
+        "version": "1.91",
+        "release_date": "2014-02-13",
+        "service_software_version": "1.91",
+        "firmware_version": "1.90"
+      },
+      {
+        "version": "1.90",
+        "release_date": "24 Dezember 2013",
+        "service_software_version": "1.90",
+        "firmware_version": "1.90"
+      },
+      {
+        "version": "1.80",
+        "release_date": "2013-09-25",
+        "service_software_version": "1.80",
+        "firmware_version": "1.80"
+      },
+      {
+        "version": "1.70",
+        "release_date": "9 Septemper 2013",
+        "service_software_version": "1.70",
+        "firmware_version": "1.70"
+      },
+      {
+        "version": "1.60",
+        "release_date": "2013-08-16",
+        "service_software_version": "1.60",
+        "firmware_version": "1.60"
+      },
+      {
+        "version": "1.50",
+        "release_date": "2013-06-18",
+        "service_software_version": "1.50",
+        "firmware_version": "1.50"
+      },
+      {
+        "version": "1.40",
+        "release_date": "2013-04-10",
+        "service_software_version": "1.40",
+        "firmware_version": "1.40"
+      }
+    ],
+    "risk_notes": []
+  },
+  "documentation_cross_checks": {
+    "protocol_document": {
+      "source": "",
+      "document": "",
+      "release_date": "",
+      "text_encoding": ""
+    },
+    "manual_document": {
+      "source": "LDD-130x User Manual 5261H.pdf",
+      "document": "",
+      "release_date": "",
+      "text_encoding": "utf-8"
+    },
+    "checks": [
+      {
+        "id": "output_enable_protocol_mapping",
+        "status": "missing",
+        "summary": "Output Enable is MeCom ID 2100 in the LDD protocol and CANopen object 0x2230 in the EDS; keep the UI/default key LDD_OUTPUT_EN mapped to those documented protocol identities.",
+        "source_evidence": [],
+        "default_key": "LDD_OUTPUT_EN",
+        "mecom_id": "2100",
+        "canopen_index": "2230",
+        "ui_path": "Operation.Input Source Selection.Output Enable"
+      },
+      {
+        "id": "min_nominal_voltage_protocol_mapping",
+        "status": "missing",
+        "summary": "Min Nominal Voltage is MeCom ID 2125 in the LDD protocol and CANopen object 0x2255 in the EDS; the manual warning text explains the overcurrent risk of setting the lower voltage limit too high.",
+        "source_evidence": [],
+        "default_key": "LDD_VOLTAGE_LIMIT_MIN",
+        "mecom_id": "2125",
+        "canopen_index": "2255",
+        "ui_path": "Operation.Output Stage Limits.Min Nominal Voltage"
+      },
+      {
+        "id": "feature_unlock_license_metadata",
+        "status": "missing",
+        "summary": "Feature unlock metadata is documented by the protocol Feature Licenses table; ServiceSoftware adds license guidance text that is useful as tooltip-style metadata.",
+        "source_evidence": [],
+        "mecom_id": "54000",
+        "protocol_name": "Feature Key Store"
+      },
+      {
+        "id": "bootloader_ignore_feature_fw_limit_service_only",
+        "status": "",
+        "summary": "Ignore Feature FW Limit is present in the ServiceSoftware bootloader UI strings, but it is not documented as an LDD protocol parameter in 5260H; treat it as service-software UI metadata only.",
+        "source_evidence": [],
+        "ui_key": "IGNORE_FEATURE_FIRMW_LIM",
+        "ui_path": "ME.Bootloader.Ignore Feature FW Limit"
+      }
+    ]
+  },
+  "hidden_candidates": [
+    {
+      "key": "ERROR_INSTANCE",
+      "label_key": "label_PAR_ERROR_INSTANCE",
+      "group": "error",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_ERROR_INSTANCE"
+      ]
+    },
+    {
+      "key": "ERROR_PARAMETER",
+      "label_key": "label_PAR_ERROR_PARAMETER",
+      "group": "error",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_ERROR_PARAMETER"
+      ]
+    },
+    {
+      "key": "FLASH_SAVE_OFF",
+      "label_key": "label_PAR_FLASH_SAVE_OFF",
+      "group": "flash",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FLASH_SAVE_OFF"
+      ]
+    },
+    {
+      "key": "FSS_LDD_TYPE",
+      "label_key": "label_PAR_FSS_LDD_TYPE",
+      "group": "fss",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_LDD_TYPE"
+      ]
+    },
+    {
+      "key": "FSS_NROF_SLAVES",
+      "label_key": "label_PAR_FSS_NROF_SLAVES",
+      "group": "fss",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_NROF_SLAVES"
+      ]
+    },
+    {
+      "key": "FSS_RS485CH",
+      "label_key": "label_PAR_FSS_RS485CH",
+      "group": "fss",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_RS485CH"
+      ]
+    },
+    {
+      "key": "FSS_SLAVE_ID",
+      "label_key": "label_PAR_FSS_SLAVE_ID",
+      "group": "fss",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_FSS_SLAVE_ID"
+      ]
+    },
+    {
+      "key": "HW_TEST_MODE",
+      "label_key": "label_PAR_HW_TEST_MODE",
+      "group": "hw",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_HW_TEST_MODE"
+      ]
+    },
+    {
+      "key": "LD_ACT_U_INT",
+      "label_key": "label_PAR_LD_ACT_U_INT",
+      "group": "ld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LD_ACT_U_INT"
+      ]
+    },
+    {
+      "key": "LUT_WAVE_INT1",
+      "label_key": "label_PAR_LUT_WAVE_INT1",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT1"
+      ]
+    },
+    {
+      "key": "LUT_WAVE_INT2",
+      "label_key": "label_PAR_LUT_WAVE_INT2",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT2"
+      ]
+    },
+    {
+      "key": "LUT_WAVE_INT3",
+      "label_key": "label_PAR_LUT_WAVE_INT3",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT3"
+      ]
+    },
+    {
+      "key": "LUT_WAVE_INT4",
+      "label_key": "label_PAR_LUT_WAVE_INT4",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_INT4"
+      ]
+    },
+    {
+      "key": "LUT_WAVE_SELECT",
+      "label_key": "label_PAR_LUT_WAVE_SELECT",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_LUT_WAVE_SELECT"
+      ]
+    },
+    {
+      "key": "MAX_CURRENT_ERROR",
+      "label_key": "label_PAR_MAX_CURRENT_ERROR",
+      "group": "max",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_MAX_CURRENT_ERROR"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC1",
+      "label_key": "label_PAR_PBC_RES_FUNC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC1"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC2",
+      "label_key": "label_PAR_PBC_RES_FUNC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC2"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC3",
+      "label_key": "label_PAR_PBC_RES_FUNC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC3"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC4",
+      "label_key": "label_PAR_PBC_RES_FUNC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC4"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC5",
+      "label_key": "label_PAR_PBC_RES_FUNC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC5"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC6",
+      "label_key": "label_PAR_PBC_RES_FUNC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC6"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC7",
+      "label_key": "label_PAR_PBC_RES_FUNC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC7"
+      ]
+    },
+    {
+      "key": "PBC_RES_FUNC8",
+      "label_key": "label_PAR_PBC_RES_FUNC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_PBC_RES_FUNC8"
+      ]
+    },
+    {
+      "key": "RACK_OUTPUT",
+      "label_key": "label_PAR_RACK_OUTPUT",
+      "group": "rack",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RACK_OUTPUT"
+      ]
+    },
+    {
+      "key": "RS485_1_ADDR",
+      "label_key": "label_PAR_RS485_1_ADDR",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RS485_1_ADDR"
+      ]
+    },
+    {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_RS485_1_RPL_DELAY"
+      ]
+    },
+    {
+      "key": "SIGGEN_SINGLESEQ",
+      "label_key": "label_PAR_SIGGEN_SINGLESEQ",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SIGGEN_SINGLESEQ"
+      ]
+    },
+    {
+      "key": "SYSTICK_AVG_CYCLE",
+      "label_key": "label_PAR_SYSTICK_AVG_CYCLE",
+      "group": "systick",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SYSTICK_AVG_CYCLE"
+      ]
+    },
+    {
+      "key": "SYSTICK_MAX_CYCLE",
+      "label_key": "label_PAR_SYSTICK_MAX_CYCLE",
+      "group": "systick",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_SYSTICK_MAX_CYCLE"
+      ]
+    },
+    {
+      "key": "TLD_ADCADJ_A0",
+      "label_key": "label_PAR_TLD_ADCADJ_A0",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_ADCADJ_A0"
+      ]
+    },
+    {
+      "key": "TLD_ADCADJ_A1",
+      "label_key": "label_PAR_TLD_ADCADJ_A1",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_ADCADJ_A1"
+      ]
+    },
+    {
+      "key": "TLD_NTC_R1",
+      "label_key": "label_PAR_TLD_NTC_R1",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R1"
+      ]
+    },
+    {
+      "key": "TLD_NTC_R2",
+      "label_key": "label_PAR_TLD_NTC_R2",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R2"
+      ]
+    },
+    {
+      "key": "TLD_NTC_R3",
+      "label_key": "label_PAR_TLD_NTC_R3",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_R3"
+      ]
+    },
+    {
+      "key": "TLD_NTC_T1",
+      "label_key": "label_PAR_TLD_NTC_T1",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T1"
+      ]
+    },
+    {
+      "key": "TLD_NTC_T2",
+      "label_key": "label_PAR_TLD_NTC_T2",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T2"
+      ]
+    },
+    {
+      "key": "TLD_NTC_T3",
+      "label_key": "label_PAR_TLD_NTC_T3",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_NTC_T3"
+      ]
+    },
+    {
+      "key": "TLD_TEMP_OVER",
+      "label_key": "label_PAR_TLD_TEMP_OVER",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TEMP_OVER"
+      ]
+    },
+    {
+      "key": "TLD_TEMP_UNDER",
+      "label_key": "label_PAR_TLD_TEMP_UNDER",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TEMP_UNDER"
+      ]
+    },
+    {
+      "key": "TLD_TOTEMP_RV",
+      "label_key": "label_PAR_TLD_TOTEMP_RV",
+      "group": "tld",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_TLD_TOTEMP_RV"
+      ]
+    },
+    {
+      "key": "VER_HW_SERNR",
+      "label_key": "label_PAR_VER_HW_SERNR",
+      "group": "ver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VER_HW_SERNR"
+      ]
+    },
+    {
+      "key": "VER_HW_VERSION",
+      "label_key": "label_PAR_VER_HW_VERSION",
+      "group": "ver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VER_HW_VERSION"
+      ]
+    },
+    {
+      "key": "VOLTAGE_VDM",
+      "label_key": "label_PAR_VOLTAGE_VDM",
+      "group": "voltage",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].label_PAR_VOLTAGE_VDM"
+      ]
+    },
+    {
+      "key": "labelM_Device_Type",
+      "label_key": "labelM_Device_Type",
+      "group": "labelm",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_Device_Type"
+      ]
+    },
+    {
+      "key": "labelM_PAR_VER_HW_SERNR",
+      "label_key": "labelM_PAR_VER_HW_SERNR",
+      "group": "labelm",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_PAR_VER_HW_SERNR"
+      ]
+    },
+    {
+      "key": "labelM_PAR_VER_HW_VERSION",
+      "label_key": "labelM_PAR_VER_HW_VERSION",
+      "group": "labelm",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-V2.33 Software v233 MSI payload:5138Q LDD Default Config.ini:[SRV_PAR].labelM_PAR_VER_HW_VERSION"
+      ]
+    }
+  ],
+  "safety_policy": "Advanced LDD source entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review."
+}

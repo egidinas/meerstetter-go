@@ -1,0 +1,2958 @@
+{
+  "schema_version": "mecom_ldd_1137_defaults.v1",
+  "source": "LDD-1137 Default Configuration 5249F.xml",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_1137.v150",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1137",
+    "version": "v150"
+  },
+  "parameters": {
+    "SYSTEM_DEVICE_TYPE": {
+      "key": "SYSTEM_DEVICE_TYPE",
+      "label_key": "label_PAR_SYSTEM_DEVICE_TYPE",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": 1137,
+      "default_value_text": "1137",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "100",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Device Type",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=100, Name=ME Settings / System / Device Type]"
+      ]
+    },
+    "SYSTEM_HARDWARE_VERSION": {
+      "key": "SYSTEM_HARDWARE_VERSION",
+      "label_key": "label_PAR_SYSTEM_HARDWARE_VERSION",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": 1.3,
+      "default_value_text": "1.30",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "101",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Hardware Version",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=101, Name=ME Settings / System / Hardware Version]"
+      ]
+    },
+    "SYSTEM_SERIAL_NUMBER_BOARD": {
+      "key": "SYSTEM_SERIAL_NUMBER_BOARD",
+      "label_key": "label_PAR_SYSTEM_SERIAL_NUMBER_BOARD",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": 194,
+      "default_value_text": "194",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "102",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Serial Number Board",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=102, Name=ME Settings / System / Serial Number Board]"
+      ]
+    },
+    "SYSTEM_PULSE_TYPE": {
+      "key": "SYSTEM_PULSE_TYPE",
+      "label_key": "label_PAR_SYSTEM_PULSE_TYPE",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": "Pulse",
+      "default_value_text": "Pulse",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "103",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Pulse Type",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=103, Name=ME Settings / System / Pulse Type]"
+      ]
+    },
+    "SYSTEM_SERIAL_NUMBER_ZYNQ": {
+      "key": "SYSTEM_SERIAL_NUMBER_ZYNQ",
+      "label_key": "label_PAR_SYSTEM_SERIAL_NUMBER_ZYNQ",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": 200,
+      "default_value_text": "200",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "106",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Serial Number Zynq",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=106, Name=ME Settings / System / Serial Number Zynq]"
+      ]
+    },
+    "SYSTEM_PHOTO_DIODE_INPUT": {
+      "key": "SYSTEM_PHOTO_DIODE_INPUT",
+      "label_key": "label_PAR_SYSTEM_PHOTO_DIODE_INPUT",
+      "group": "system",
+      "visibility": "advanced",
+      "default_value": "Enabled",
+      "default_value_text": "Enabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "107",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / System / Photo Diode Input",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=107, Name=ME Settings / System / Photo Diode Input]"
+      ]
+    },
+    "LDD_TEMPERATURE_LIMIT": {
+      "key": "LDD_TEMPERATURE_LIMIT",
+      "label_key": "label_PAR_LDD_TEMPERATURE_LIMIT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 80,
+      "default_value_text": "80",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1003",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Temperature Limit",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1003, Name=ME Settings / LDD / Temperature Limit]"
+      ]
+    },
+    "HARDWARE_TEST_MODE_SELECTOR": {
+      "key": "HARDWARE_TEST_MODE_SELECTOR",
+      "label_key": "label_PAR_HARDWARE_TEST_MODE_SELECTOR",
+      "group": "hardware",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9900",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Hardware Test / Mode Selector",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9900, Name=ME Settings / Hardware Test / Mode Selector]"
+      ]
+    },
+    "LDD_VLD_OFFSET": {
+      "key": "LDD_VLD_OFFSET",
+      "label_key": "label_PAR_LDD_VLD_OFFSET",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0.1572698,
+      "default_value_text": "0.1572698",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20002",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / VLD Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20002, Name=ME Settings / LDD / VLD Offset]"
+      ]
+    },
+    "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_1V": {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_1V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_1V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": "150.0n",
+      "default_value_text": "150.0n",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22162",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Analog Voltage Input / Conversion Factor 1V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22162, Name=ME Settings / Analog Voltage Input / Conversion Factor 1V]"
+      ]
+    },
+    "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_5V": {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_5V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_5V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": "800.0n",
+      "default_value_text": "800.0n",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22163",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Analog Voltage Input / Conversion Factor 5V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22163, Name=ME Settings / Analog Voltage Input / Conversion Factor 5V]"
+      ]
+    },
+    "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_10V": {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_10V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_10V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": "1.500u",
+      "default_value_text": "1.500u",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22164",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Analog Voltage Input / Conversion Factor 10V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22164, Name=ME Settings / Analog Voltage Input / Conversion Factor 10V]"
+      ]
+    },
+    "SHORT_PID_KP": {
+      "key": "SHORT_PID_KP",
+      "label_key": "label_PAR_SHORT_PID_KP",
+      "group": "short",
+      "visibility": "advanced",
+      "default_value": 5.0,
+      "default_value_text": "5.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27003",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Short PID / Kp",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27003, Name=ME Settings / Short PID / Kp]"
+      ]
+    },
+    "SHORT_PID_TI": {
+      "key": "SHORT_PID_TI",
+      "label_key": "label_PAR_SHORT_PID_TI",
+      "group": "short",
+      "visibility": "advanced",
+      "default_value": "10.00m",
+      "default_value_text": "10.00m",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27004",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Short PID / Ti",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27004, Name=ME Settings / Short PID / Ti]"
+      ]
+    },
+    "SHORT_PID_TD": {
+      "key": "SHORT_PID_TD",
+      "label_key": "label_PAR_SHORT_PID_TD",
+      "group": "short",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27005",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Short PID / Td",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27005, Name=ME Settings / Short PID / Td]"
+      ]
+    },
+    "ANTI_WINDUP_I_FREEZE_ENABLE": {
+      "key": "ANTI_WINDUP_I_FREEZE_ENABLE",
+      "label_key": "label_PAR_ANTI_WINDUP_I_FREEZE_ENABLE",
+      "group": "anti",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27006",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / Anti Windup I Freeze enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27006, Name=ME Settings / Anti Windup I Freeze enable]"
+      ]
+    },
+    "LDD_CURRENT_MEASUREMENT_SHUNT": {
+      "key": "LDD_CURRENT_MEASUREMENT_SHUNT",
+      "label_key": "label_PAR_LDD_CURRENT_MEASUREMENT_SHUNT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0.0005,
+      "default_value_text": "0.0005",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28000",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Current Measurement Shunt",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28000, Name=ME Settings / LDD / Current Measurement Shunt]"
+      ]
+    },
+    "LDD_CURRENT_CALIBRATION_OFFSET": {
+      "key": "LDD_CURRENT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_LDD_CURRENT_CALIBRATION_OFFSET",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28020",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Current Calibration Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28020, Name=ME Settings / LDD / Current Calibration Offset]"
+      ]
+    },
+    "LDD_CURRENT_CALIBRATION_GAIN": {
+      "key": "LDD_CURRENT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_LDD_CURRENT_CALIBRATION_GAIN",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28021",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Current Calibration Gain",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28021, Name=ME Settings / LDD / Current Calibration Gain]"
+      ]
+    },
+    "LDD_DEAD_TIME_H2L": {
+      "key": "LDD_DEAD_TIME_H2L",
+      "label_key": "label_PAR_LDD_DEAD_TIME_H2L",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 32,
+      "default_value_text": "32",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28111",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Dead Time H2L",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28111, Name=ME Settings / LDD / Dead Time H2L]"
+      ]
+    },
+    "LDD_DEAD_TIME_L2H": {
+      "key": "LDD_DEAD_TIME_L2H",
+      "label_key": "label_PAR_LDD_DEAD_TIME_L2H",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 32,
+      "default_value_text": "32",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28112",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Dead Time L2H",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28112, Name=ME Settings / LDD / Dead Time L2H]"
+      ]
+    },
+    "LDD_PHASE_RESOLUTION": {
+      "key": "LDD_PHASE_RESOLUTION",
+      "label_key": "label_PAR_LDD_PHASE_RESOLUTION",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 2784,
+      "default_value_text": "2784",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28114",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase Resolution",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28114, Name=ME Settings / LDD / Phase Resolution]"
+      ]
+    },
+    "LDD_PHASE_1_ENABLE": {
+      "key": "LDD_PHASE_1_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_1_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28121",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase 1 Enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28121, Name=ME Settings / LDD / Phase 1 Enable]"
+      ]
+    },
+    "LDD_PHASE_2_ENABLE": {
+      "key": "LDD_PHASE_2_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_2_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28122",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase 2 Enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28122, Name=ME Settings / LDD / Phase 2 Enable]"
+      ]
+    },
+    "LDD_PHASE_3_ENABLE": {
+      "key": "LDD_PHASE_3_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_3_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28123",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase 3 Enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28123, Name=ME Settings / LDD / Phase 3 Enable]"
+      ]
+    },
+    "LDD_PHASE_ERROR_SLOW_COUNT": {
+      "key": "LDD_PHASE_ERROR_SLOW_COUNT",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_SLOW_COUNT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 5,
+      "default_value_text": "5",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28200",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase Error Slow Count",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28200, Name=ME Settings / LDD / Phase Error Slow Count]"
+      ]
+    },
+    "LDD_PHASE_ERROR_SLOW_THRESHOLD": {
+      "key": "LDD_PHASE_ERROR_SLOW_THRESHOLD",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_SLOW_THRESHOLD",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 2,
+      "default_value_text": "2",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28201",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase Error Slow Threshold",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28201, Name=ME Settings / LDD / Phase Error Slow Threshold]"
+      ]
+    },
+    "LDD_PHASE_ERROR_FAST_THRESHOLD": {
+      "key": "LDD_PHASE_ERROR_FAST_THRESHOLD",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_FAST_THRESHOLD",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28202",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / LDD / Phase Error Fast Threshold",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28202, Name=ME Settings / LDD / Phase Error Fast Threshold]"
+      ]
+    },
+    "PD_RF_RESISTOR": {
+      "key": "PD_RF_RESISTOR",
+      "label_key": "label_PAR_PD_RF_RESISTOR",
+      "group": "pd",
+      "visibility": "advanced",
+      "default_value": "1.000k",
+      "default_value_text": "1.000k",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29007",
+      "mepar_inst": "1",
+      "name_path": "ME Settings / PD / Rf Resistor",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29007, Name=ME Settings / PD / Rf Resistor]"
+      ]
+    },
+    "DEVICE_FIRMWARE_VERSION": {
+      "key": "DEVICE_FIRMWARE_VERSION",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_VERSION",
+      "group": "device",
+      "visibility": "advanced",
+      "default_value": 1.5,
+      "default_value_text": "1.50",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "112",
+      "mepar_inst": "1",
+      "name_path": "System / Device Firmware Version",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=112, Name=System / Device Firmware Version]"
+      ]
+    },
+    "DEVICE_FIRMWARE_REVISION": {
+      "key": "DEVICE_FIRMWARE_REVISION",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_REVISION",
+      "group": "device",
+      "visibility": "advanced",
+      "default_value": "0xD0F75EF3",
+      "default_value_text": "0xD0F75EF3",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "113",
+      "mepar_inst": "1",
+      "name_path": "System / Device Firmware Revision",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=113, Name=System / Device Firmware Revision]"
+      ]
+    },
+    "DEVICE_FIRMWARE_SOURCE_STATUS": {
+      "key": "DEVICE_FIRMWARE_SOURCE_STATUS",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_SOURCE_STATUS",
+      "group": "device",
+      "visibility": "advanced",
+      "default_value": "Released",
+      "default_value_text": "Released",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "114",
+      "mepar_inst": "1",
+      "name_path": "System / Device Firmware Source Status",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=114, Name=System / Device Firmware Source Status]"
+      ]
+    },
+    "FIRMWARE_BUILD_TIME": {
+      "key": "FIRMWARE_BUILD_TIME",
+      "label_key": "label_PAR_FIRMWARE_BUILD_TIME",
+      "group": "firmware",
+      "visibility": "advanced",
+      "default_value": "Oct  2 2025 14:21:07",
+      "default_value_text": "Oct  2 2025 14:21:07",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "120",
+      "mepar_inst": "1",
+      "name_path": "System / Firmware Build Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=120, Name=System / Firmware Build Time]"
+      ]
+    },
+    "LDD_UNIQUE_ID": {
+      "key": "LDD_UNIQUE_ID",
+      "label_key": "label_PAR_LDD_UNIQUE_ID",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": "E461-20F3-5F55-3721",
+      "default_value_text": "E461-20F3-5F55-3721",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "200",
+      "mepar_inst": "1",
+      "name_path": "System / LDD Unique ID",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=200, Name=System / LDD Unique ID]"
+      ]
+    },
+    "ZYNQ_TEMPERATURE": {
+      "key": "ZYNQ_TEMPERATURE",
+      "label_key": "label_PAR_ZYNQ_TEMPERATURE",
+      "group": "zynq",
+      "visibility": "advanced",
+      "default_value": 65.0,
+      "default_value_text": "65.0",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1001",
+      "mepar_inst": "1",
+      "name_path": "System / Zynq Temperature",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1001, Name=System / Zynq Temperature]"
+      ]
+    },
+    "DEVICE_TEMPERATURE": {
+      "key": "DEVICE_TEMPERATURE",
+      "label_key": "label_PAR_DEVICE_TEMPERATURE",
+      "group": "device",
+      "visibility": "advanced",
+      "default_value": 27.3,
+      "default_value_text": "27.3",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1002",
+      "mepar_inst": "1",
+      "name_path": "System / Device Temperature",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1002, Name=System / Device Temperature]"
+      ]
+    },
+    "BOOTED_ADDRESS": {
+      "key": "BOOTED_ADDRESS",
+      "label_key": "label_PAR_BOOTED_ADDRESS",
+      "group": "booted",
+      "visibility": "advanced",
+      "default_value": "0x00008000",
+      "default_value_text": "0x00008000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9004",
+      "mepar_inst": "1",
+      "name_path": "System / Booted Address",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9004, Name=System / Booted Address]"
+      ]
+    },
+    "SUPPLY_DRIVER_INPUT_VOLTAGE": {
+      "key": "SUPPLY_DRIVER_INPUT_VOLTAGE",
+      "label_key": "label_PAR_SUPPLY_DRIVER_INPUT_VOLTAGE",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 23.93,
+      "default_value_text": "23.93",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1010",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Driver Input Voltage",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1010, Name=Power / Supply / Driver Input Voltage]"
+      ]
+    },
+    "SUPPLY_INTERNAL_3_3V": {
+      "key": "SUPPLY_INTERNAL_3_3V",
+      "label_key": "label_PAR_SUPPLY_INTERNAL_3_3V",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 3.28,
+      "default_value_text": "3.28",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1015",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Internal 3.3V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1015, Name=Power / Supply / Internal 3.3V]"
+      ]
+    },
+    "SUPPLY_INTERNAL_5V": {
+      "key": "SUPPLY_INTERNAL_5V",
+      "label_key": "label_PAR_SUPPLY_INTERNAL_5V",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 5.03,
+      "default_value_text": "5.03",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1019",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Internal 5V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1019, Name=Power / Supply / Internal 5V]"
+      ]
+    },
+    "SUPPLY_PHASE_1_CURRENT": {
+      "key": "SUPPLY_PHASE_1_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_1_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 0.2,
+      "default_value_text": "0.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20008",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Phase 1 Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20008, Name=Power / Supply / Phase 1 Current]"
+      ]
+    },
+    "SUPPLY_PHASE_2_CURRENT": {
+      "key": "SUPPLY_PHASE_2_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_2_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 0.2,
+      "default_value_text": "0.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20009",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Phase 2 Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20009, Name=Power / Supply / Phase 2 Current]"
+      ]
+    },
+    "SUPPLY_PHASE_3_CURRENT": {
+      "key": "SUPPLY_PHASE_3_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_3_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "default_value": 0.2,
+      "default_value_text": "0.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20010",
+      "mepar_inst": "1",
+      "name_path": "Power / Supply / Phase 3 Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20010, Name=Power / Supply / Phase 3 Current]"
+      ]
+    },
+    "GPIO_1_FUNCTION": {
+      "key": "GPIO_1_FUNCTION",
+      "label_key": "label_PAR_GPIO_1_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "1",
+      "name_path": "Digital IO / GPIO 1 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 1 Function]"
+      ]
+    },
+    "GPIO_2_FUNCTION": {
+      "key": "GPIO_2_FUNCTION",
+      "label_key": "label_PAR_GPIO_2_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "2",
+      "name_path": "Digital IO / GPIO 2 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 2 Function]"
+      ]
+    },
+    "GPIO_3_FUNCTION": {
+      "key": "GPIO_3_FUNCTION",
+      "label_key": "label_PAR_GPIO_3_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "3",
+      "name_path": "Digital IO / GPIO 3 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 3 Function]"
+      ]
+    },
+    "GPIO_4_FUNCTION": {
+      "key": "GPIO_4_FUNCTION",
+      "label_key": "label_PAR_GPIO_4_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "4",
+      "name_path": "Digital IO / GPIO 4 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 4 Function]"
+      ]
+    },
+    "GPIO_5_FUNCTION": {
+      "key": "GPIO_5_FUNCTION",
+      "label_key": "label_PAR_GPIO_5_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "5",
+      "name_path": "Digital IO / GPIO 5 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 5 Function]"
+      ]
+    },
+    "GPIO_6_FUNCTION": {
+      "key": "GPIO_6_FUNCTION",
+      "label_key": "label_PAR_GPIO_6_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "6",
+      "name_path": "Digital IO / GPIO 6 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 6 Function]"
+      ]
+    },
+    "GPIO_7_FUNCTION": {
+      "key": "GPIO_7_FUNCTION",
+      "label_key": "label_PAR_GPIO_7_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "7",
+      "name_path": "Digital IO / GPIO 7 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 7 Function]"
+      ]
+    },
+    "GPIO_8_FUNCTION": {
+      "key": "GPIO_8_FUNCTION",
+      "label_key": "label_PAR_GPIO_8_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "8",
+      "name_path": "Digital IO / GPIO 8 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 8 Function]"
+      ]
+    },
+    "GPIO_9_FUNCTION": {
+      "key": "GPIO_9_FUNCTION",
+      "label_key": "label_PAR_GPIO_9_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "9",
+      "name_path": "Digital IO / GPIO 9 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 9 Function]"
+      ]
+    },
+    "GPIO_10_FUNCTION": {
+      "key": "GPIO_10_FUNCTION",
+      "label_key": "label_PAR_GPIO_10_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "10",
+      "name_path": "Digital IO / GPIO 10 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 10 Function]"
+      ]
+    },
+    "LED_0_FUNCTION": {
+      "key": "LED_0_FUNCTION",
+      "label_key": "label_PAR_LED_0_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "11",
+      "name_path": "Digital IO / LED 0 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 0 Function]"
+      ]
+    },
+    "LED_1_FUNCTION": {
+      "key": "LED_1_FUNCTION",
+      "label_key": "label_PAR_LED_1_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "12",
+      "name_path": "Digital IO / LED 1 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 1 Function]"
+      ]
+    },
+    "LED_2_FUNCTION": {
+      "key": "LED_2_FUNCTION",
+      "label_key": "label_PAR_LED_2_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "13",
+      "name_path": "Digital IO / LED 2 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 2 Function]"
+      ]
+    },
+    "LED_3_FUNCTION": {
+      "key": "LED_3_FUNCTION",
+      "label_key": "label_PAR_LED_3_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2000",
+      "mepar_inst": "14",
+      "name_path": "Digital IO / LED 3 Function",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 3 Function]"
+      ]
+    },
+    "GPIO_1_DEBOUNCE_TIME": {
+      "key": "GPIO_1_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_1_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "1",
+      "name_path": "Digital IO / GPIO 1 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 1 Debounce Time]"
+      ]
+    },
+    "GPIO_2_DEBOUNCE_TIME": {
+      "key": "GPIO_2_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_2_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "2",
+      "name_path": "Digital IO / GPIO 2 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 2 Debounce Time]"
+      ]
+    },
+    "GPIO_3_DEBOUNCE_TIME": {
+      "key": "GPIO_3_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_3_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "3",
+      "name_path": "Digital IO / GPIO 3 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 3 Debounce Time]"
+      ]
+    },
+    "GPIO_4_DEBOUNCE_TIME": {
+      "key": "GPIO_4_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_4_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "4",
+      "name_path": "Digital IO / GPIO 4 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 4 Debounce Time]"
+      ]
+    },
+    "GPIO_5_DEBOUNCE_TIME": {
+      "key": "GPIO_5_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_5_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "5",
+      "name_path": "Digital IO / GPIO 5 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 5 Debounce Time]"
+      ]
+    },
+    "GPIO_6_DEBOUNCE_TIME": {
+      "key": "GPIO_6_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_6_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "6",
+      "name_path": "Digital IO / GPIO 6 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 6 Debounce Time]"
+      ]
+    },
+    "GPIO_7_DEBOUNCE_TIME": {
+      "key": "GPIO_7_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_7_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "7",
+      "name_path": "Digital IO / GPIO 7 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 7 Debounce Time]"
+      ]
+    },
+    "GPIO_8_DEBOUNCE_TIME": {
+      "key": "GPIO_8_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_8_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "8",
+      "name_path": "Digital IO / GPIO 8 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 8 Debounce Time]"
+      ]
+    },
+    "GPIO_9_DEBOUNCE_TIME": {
+      "key": "GPIO_9_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_9_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "9",
+      "name_path": "Digital IO / GPIO 9 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 9 Debounce Time]"
+      ]
+    },
+    "GPIO_10_DEBOUNCE_TIME": {
+      "key": "GPIO_10_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_10_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2010",
+      "mepar_inst": "10",
+      "name_path": "Digital IO / GPIO 10 Debounce Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 10 Debounce Time]"
+      ]
+    },
+    "GPIO_1_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_1_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_1_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "1",
+      "name_path": "Digital IO / GPIO 1 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 1 Level Assignment]"
+      ]
+    },
+    "LED_0_LEVEL_ASSIGNMENT": {
+      "key": "LED_0_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_0_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "11",
+      "name_path": "Digital IO / LED 0 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 0 Level Assignment]"
+      ]
+    },
+    "GPIO_2_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_2_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_2_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "2",
+      "name_path": "Digital IO / GPIO 2 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 2 Level Assignment]"
+      ]
+    },
+    "GPIO_3_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_3_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_3_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "3",
+      "name_path": "Digital IO / GPIO 3 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 3 Level Assignment]"
+      ]
+    },
+    "GPIO_4_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_4_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_4_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "4",
+      "name_path": "Digital IO / GPIO 4 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 4 Level Assignment]"
+      ]
+    },
+    "GPIO_5_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_5_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_5_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "5",
+      "name_path": "Digital IO / GPIO 5 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 5 Level Assignment]"
+      ]
+    },
+    "GPIO_6_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_6_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_6_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "6",
+      "name_path": "Digital IO / GPIO 6 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 6 Level Assignment]"
+      ]
+    },
+    "GPIO_7_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_7_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_7_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "7",
+      "name_path": "Digital IO / GPIO 7 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 7 Level Assignment]"
+      ]
+    },
+    "GPIO_8_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_8_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_8_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "8",
+      "name_path": "Digital IO / GPIO 8 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 8 Level Assignment]"
+      ]
+    },
+    "GPIO_9_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_9_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_9_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "9",
+      "name_path": "Digital IO / GPIO 9 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 9 Level Assignment]"
+      ]
+    },
+    "GPIO_10_LEVEL_ASSIGNMENT": {
+      "key": "GPIO_10_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_10_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "10",
+      "name_path": "Digital IO / GPIO 10 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 10 Level Assignment]"
+      ]
+    },
+    "LED_1_LEVEL_ASSIGNMENT": {
+      "key": "LED_1_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_1_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "12",
+      "name_path": "Digital IO / LED 1 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 1 Level Assignment]"
+      ]
+    },
+    "LED_2_LEVEL_ASSIGNMENT": {
+      "key": "LED_2_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_2_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "13",
+      "name_path": "Digital IO / LED 2 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 2 Level Assignment]"
+      ]
+    },
+    "LED_3_LEVEL_ASSIGNMENT": {
+      "key": "LED_3_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_3_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "2020",
+      "mepar_inst": "14",
+      "name_path": "Digital IO / LED 3 Level Assignment",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 3 Level Assignment]"
+      ]
+    },
+    "HWTEST_GPIO_READ": {
+      "key": "HWTEST_GPIO_READ",
+      "label_key": "label_PAR_HWTEST_GPIO_READ",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9901",
+      "mepar_inst": "1",
+      "name_path": "Debug / HwTest / GPIO Read",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9901, Name=Debug / HwTest / GPIO Read]"
+      ]
+    },
+    "LDD_SYMMETRY_LEVELS_PHASE_1": {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_1",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.0",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28101",
+      "mepar_inst": "1",
+      "name_path": "Debug / LDD Symmetry Levels / Phase 1",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28101, Name=Debug / LDD Symmetry Levels / Phase 1]"
+      ]
+    },
+    "LDD_SYMMETRY_LEVELS_PHASE_2": {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_2",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_2",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.0",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28102",
+      "mepar_inst": "1",
+      "name_path": "Debug / LDD Symmetry Levels / Phase 2",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28102, Name=Debug / LDD Symmetry Levels / Phase 2]"
+      ]
+    },
+    "LDD_SYMMETRY_LEVELS_PHASE_3": {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_3",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_3",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.0",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "28103",
+      "mepar_inst": "1",
+      "name_path": "Debug / LDD Symmetry Levels / Phase 3",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28103, Name=Debug / LDD Symmetry Levels / Phase 3]"
+      ]
+    },
+    "FLASHTEST_ERASE_PAR_SECTOR": {
+      "key": "FLASHTEST_ERASE_PAR_SECTOR",
+      "label_key": "label_PAR_FLASHTEST_ERASE_PAR_SECTOR",
+      "group": "flashtest",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "50000",
+      "mepar_inst": "1",
+      "name_path": "Debug / FlashTest / Erase Par Sector",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=50000, Name=Debug / FlashTest / Erase Par Sector]"
+      ]
+    },
+    "PAR_55000": {
+      "key": "PAR_55000",
+      "label_key": "label_PAR_PAR_55000",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55000",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55000, Name=]"
+      ]
+    },
+    "PAR_55001": {
+      "key": "PAR_55001",
+      "label_key": "label_PAR_PAR_55001",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55001",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55001, Name=]"
+      ]
+    },
+    "PAR_55002": {
+      "key": "PAR_55002",
+      "label_key": "label_PAR_PAR_55002",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55002",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55002, Name=]"
+      ]
+    },
+    "PAR_55003": {
+      "key": "PAR_55003",
+      "label_key": "label_PAR_PAR_55003",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55003",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55003, Name=]"
+      ]
+    },
+    "PAR_55004": {
+      "key": "PAR_55004",
+      "label_key": "label_PAR_PAR_55004",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55004",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55004, Name=]"
+      ]
+    },
+    "PAR_55005": {
+      "key": "PAR_55005",
+      "label_key": "label_PAR_PAR_55005",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55005",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55005, Name=]"
+      ]
+    },
+    "PAR_55006": {
+      "key": "PAR_55006",
+      "label_key": "label_PAR_PAR_55006",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55006",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55006, Name=]"
+      ]
+    },
+    "PAR_55007": {
+      "key": "PAR_55007",
+      "label_key": "label_PAR_PAR_55007",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55007",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55007, Name=]"
+      ]
+    },
+    "PAR_55008": {
+      "key": "PAR_55008",
+      "label_key": "label_PAR_PAR_55008",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55008",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55008, Name=]"
+      ]
+    },
+    "PAR_55009": {
+      "key": "PAR_55009",
+      "label_key": "label_PAR_PAR_55009",
+      "group": "par",
+      "visibility": "advanced",
+      "default_value": "0x00000000",
+      "default_value_text": "0x00000000",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "55009",
+      "mepar_inst": "1",
+      "name_path": "",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55009, Name=]"
+      ]
+    },
+    "IP_SETTINGS_DHCP": {
+      "key": "IP_SETTINGS_DHCP",
+      "label_key": "label_PAR_IP_SETTINGS_DHCP",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "Enabled",
+      "default_value_text": "Enabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1200",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Settings / DHCP",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1200, Name=Communication / IP Settings / DHCP]"
+      ]
+    },
+    "IP_SETTINGS_IP_ADDRESS": {
+      "key": "IP_SETTINGS_IP_ADDRESS",
+      "label_key": "label_PAR_IP_SETTINGS_IP_ADDRESS",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1201",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Settings / IP Address",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1201, Name=Communication / IP Settings / IP Address]"
+      ]
+    },
+    "IP_SETTINGS_NETWORK_MASK": {
+      "key": "IP_SETTINGS_NETWORK_MASK",
+      "label_key": "label_PAR_IP_SETTINGS_NETWORK_MASK",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1202",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Settings / Network Mask",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1202, Name=Communication / IP Settings / Network Mask]"
+      ]
+    },
+    "IP_SETTINGS_GATEWAY": {
+      "key": "IP_SETTINGS_GATEWAY",
+      "label_key": "label_PAR_IP_SETTINGS_GATEWAY",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1203",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Settings / Gateway",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1203, Name=Communication / IP Settings / Gateway]"
+      ]
+    },
+    "IP_MONITOR_IP_ADDRESS": {
+      "key": "IP_MONITOR_IP_ADDRESS",
+      "label_key": "label_PAR_IP_MONITOR_IP_ADDRESS",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1210",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Monitor / IP Address",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1210, Name=Communication / IP Monitor / IP Address]"
+      ]
+    },
+    "IP_MONITOR_NETWORK_MASK": {
+      "key": "IP_MONITOR_NETWORK_MASK",
+      "label_key": "label_PAR_IP_MONITOR_NETWORK_MASK",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1211",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Monitor / Network Mask",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1211, Name=Communication / IP Monitor / Network Mask]"
+      ]
+    },
+    "IP_MONITOR_GATEWAY": {
+      "key": "IP_MONITOR_GATEWAY",
+      "label_key": "label_PAR_IP_MONITOR_GATEWAY",
+      "group": "ip",
+      "visibility": "advanced",
+      "default_value": "0.0.0.0",
+      "default_value_text": "0.0.0.0",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "1212",
+      "mepar_inst": "1",
+      "name_path": "Communication / IP Monitor / Gateway",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1212, Name=Communication / IP Monitor / Gateway]"
+      ]
+    },
+    "RS485_DEVICE_ADDRESS": {
+      "key": "RS485_DEVICE_ADDRESS",
+      "label_key": "label_PAR_RS485_DEVICE_ADDRESS",
+      "group": "rs485",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "3040",
+      "mepar_inst": "1",
+      "name_path": "Communication / RS485 Device Address",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3040, Name=Communication / RS485 Device Address]"
+      ]
+    },
+    "BASE_BAUDRATE": {
+      "key": "BASE_BAUDRATE",
+      "label_key": "label_PAR_BASE_BAUDRATE",
+      "group": "base",
+      "visibility": "advanced",
+      "default_value": 57600,
+      "default_value_text": "57600",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "3041",
+      "mepar_inst": "1",
+      "name_path": "Communication / Base Baudrate",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3041, Name=Communication / Base Baudrate]"
+      ]
+    },
+    "RESPONSE_DELAY_US": {
+      "key": "RESPONSE_DELAY_US",
+      "label_key": "label_PAR_RESPONSE_DELAY_US",
+      "group": "response",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "3042",
+      "mepar_inst": "1",
+      "name_path": "Communication / Response Delay [us]",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3042, Name=Communication / Response Delay [us]]"
+      ]
+    },
+    "COMMUNICATION_WATCHDOG_TIMEOUT": {
+      "key": "COMMUNICATION_WATCHDOG_TIMEOUT",
+      "label_key": "label_PAR_COMMUNICATION_WATCHDOG_TIMEOUT",
+      "group": "communication",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "3043",
+      "mepar_inst": "1",
+      "name_path": "Communication / Communication Watchdog / Timeout",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3043, Name=Communication / Communication Watchdog / Timeout]"
+      ]
+    },
+    "ANALOG_IO_VIN_1V": {
+      "key": "ANALOG_IO_VIN_1V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_1V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": 0.002,
+      "default_value_text": "0.002",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9910",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Analog IO / Vin 1V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9910, Name=Analog IO / Analog IO / Vin 1V]"
+      ]
+    },
+    "ANALOG_IO_VIN_5V": {
+      "key": "ANALOG_IO_VIN_5V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_5V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": 0.011,
+      "default_value_text": "0.011",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9911",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Analog IO / Vin 5V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9911, Name=Analog IO / Analog IO / Vin 5V]"
+      ]
+    },
+    "ANALOG_IO_VIN_10V": {
+      "key": "ANALOG_IO_VIN_10V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_10V",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": 0.02,
+      "default_value_text": "0.020",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "9912",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Analog IO / Vin 10V",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9912, Name=Analog IO / Analog IO / Vin 10V]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_INPUT_TEMPERATURE": {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_TEMPERATURE",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_TEMPERATURE",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": -114.7,
+      "default_value_text": "-114.7",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15000",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Input / Temperature",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15000, Name=Analog IO / External Temperature Input / Temperature]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_T1": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T1",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T1",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": -10,
+      "default_value_text": "-10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15002",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / T1",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15002, Name=Analog IO / NTC Sensor Characteristics / T1]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_T2": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T2",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T2",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": 20,
+      "default_value_text": "20",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15003",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / T2",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15003, Name=Analog IO / NTC Sensor Characteristics / T2]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_T3": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T3",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T3",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": 60,
+      "default_value_text": "60",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15004",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / T3",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15004, Name=Analog IO / NTC Sensor Characteristics / T3]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_R1": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R1",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R1",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": 45168,
+      "default_value_text": "45168",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15005",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / R1",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15005, Name=Analog IO / NTC Sensor Characteristics / R1]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_R2": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R2",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R2",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": 12133,
+      "default_value_text": "12133",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15006",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / R2",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15006, Name=Analog IO / NTC Sensor Characteristics / R2]"
+      ]
+    },
+    "NTC_SENSOR_CHARACTERISTICS_R3": {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R3",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R3",
+      "group": "ntc",
+      "visibility": "advanced",
+      "default_value": 3039,
+      "default_value_text": "3039",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15007",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / NTC Sensor Characteristics / R3",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15007, Name=Analog IO / NTC Sensor Characteristics / R3]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_OFFSET": {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_OFFSET",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15008",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Input / Calibration Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15008, Name=Analog IO / External Temperature Input / Calibration Offset]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_GAIN": {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_GAIN",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15009",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Input / Calibration Gain",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15009, Name=Analog IO / External Temperature Input / Calibration Gain]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_ERROR_LIMITS_ENABLE": {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_ENABLE",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_ENABLE",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15010",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Error Limits / Enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15010, Name=Analog IO / External Temperature Error Limits / Enable]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_ERROR_LIMITS_LOWER_ERROR_THRESHOLD": {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_LOWER_ERROR_THRESHOLD",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_LOWER_ERROR_THRESHOLD",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15011",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Error Limits / Lower Error Threshold",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15011, Name=Analog IO / External Temperature Error Limits / Lower Error Threshold]"
+      ]
+    },
+    "EXTERNAL_TEMPERATURE_ERROR_LIMITS_UPPER_ERROR_THRESHOLD": {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_UPPER_ERROR_THRESHOLD",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_UPPER_ERROR_THRESHOLD",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 80,
+      "default_value_text": "80",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "15012",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / External Temperature Error Limits / Upper Error Threshold",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15012, Name=Analog IO / External Temperature Error Limits / Upper Error Threshold]"
+      ]
+    },
+    "PHOTODIODE_INPUT_CALIBRATION_OFFSET": {
+      "key": "PHOTODIODE_INPUT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_CALIBRATION_OFFSET",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29004",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Photodiode Input / Calibration Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29004, Name=Analog IO / Photodiode Input / Calibration Offset]"
+      ]
+    },
+    "PHOTODIODE_INPUT_CALIBRATION_GAIN": {
+      "key": "PHOTODIODE_INPUT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_CALIBRATION_GAIN",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29005",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Photodiode Input / Calibration Gain",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29005, Name=Analog IO / Photodiode Input / Calibration Gain]"
+      ]
+    },
+    "PHOTODIODE_INPUT_PHOTOCURRENT": {
+      "key": "PHOTODIODE_INPUT_PHOTOCURRENT",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_PHOTOCURRENT",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29009",
+      "mepar_inst": "1",
+      "name_path": "Analog IO / Photodiode Input / Photocurrent",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29009, Name=Analog IO / Photodiode Input / Photocurrent]"
+      ]
+    },
+    "RESET_SETTINGS_RESET_ON_CHANGE": {
+      "key": "RESET_SETTINGS_RESET_ON_CHANGE",
+      "label_key": "label_PAR_RESET_SETTINGS_RESET_ON_CHANGE",
+      "group": "reset",
+      "visibility": "advanced",
+      "default_value": "ON",
+      "default_value_text": "ON",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22220",
+      "mepar_inst": "1",
+      "name_path": "Advanced Settings / Reset Settings / Reset on change",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22220, Name=Advanced Settings / Reset Settings / Reset on change]"
+      ]
+    },
+    "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_DELAY": {
+      "key": "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_DELAY",
+      "label_key": "label_PAR_PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_DELAY",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22407",
+      "mepar_inst": "1",
+      "name_path": "Advanced Settings / Pulse Settings / Pulse Trigger Monitor Delay",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22407, Name=Advanced Settings / Pulse Settings / Pulse Trigger Monitor Delay]"
+      ]
+    },
+    "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_LENGTH": {
+      "key": "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_LENGTH",
+      "label_key": "label_PAR_PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_LENGTH",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "1.000u",
+      "default_value_text": "1.000u",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22408",
+      "mepar_inst": "1",
+      "name_path": "Advanced Settings / Pulse Settings / Pulse Trigger Monitor Length",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22408, Name=Advanced Settings / Pulse Settings / Pulse Trigger Monitor Length]"
+      ]
+    },
+    "ENABLE_SETTINGS_EXTERNAL_ENABLE_EDGE_DETECT": {
+      "key": "ENABLE_SETTINGS_EXTERNAL_ENABLE_EDGE_DETECT",
+      "label_key": "label_PAR_ENABLE_SETTINGS_EXTERNAL_ENABLE_EDGE_DETECT",
+      "group": "enable",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "25101",
+      "mepar_inst": "1",
+      "name_path": "Advanced Settings / Enable Settings / External Enable Edge Detect",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25101, Name=Advanced Settings / Enable Settings / External Enable Edge Detect]"
+      ]
+    },
+    "ACTUAL_OUTPUT_CURRENT": {
+      "key": "ACTUAL_OUTPUT_CURRENT",
+      "label_key": "label_PAR_ACTUAL_OUTPUT_CURRENT",
+      "group": "actual",
+      "visibility": "advanced",
+      "default_value": 0.101,
+      "default_value_text": "0.101",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20000",
+      "mepar_inst": "1",
+      "name_path": "LDD / Actual Output Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20000, Name=LDD / Actual Output Current]"
+      ]
+    },
+    "ACTUAL_OUTPUT_VOLTAGE": {
+      "key": "ACTUAL_OUTPUT_VOLTAGE",
+      "label_key": "label_PAR_ACTUAL_OUTPUT_VOLTAGE",
+      "group": "actual",
+      "visibility": "advanced",
+      "default_value": 0.41,
+      "default_value_text": "0.410",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "20001",
+      "mepar_inst": "1",
+      "name_path": "LDD / Actual Output Voltage",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20001, Name=LDD / Actual Output Voltage]"
+      ]
+    },
+    "HARDWARE_INTERLOCK": {
+      "key": "HARDWARE_INTERLOCK",
+      "label_key": "label_PAR_HARDWARE_INTERLOCK",
+      "group": "hardware",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "21106",
+      "mepar_inst": "1",
+      "name_path": "LDD / Hardware Interlock",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=21106, Name=LDD / Hardware Interlock]"
+      ]
+    },
+    "CURRENT_SOURCE_SELECTOR": {
+      "key": "CURRENT_SOURCE_SELECTOR",
+      "label_key": "label_PAR_CURRENT_SOURCE_SELECTOR",
+      "group": "current",
+      "visibility": "advanced",
+      "default_value": "CW",
+      "default_value_text": "CW",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22000",
+      "mepar_inst": "1",
+      "name_path": "LDD / Current Source Selector",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22000, Name=LDD / Current Source Selector]"
+      ]
+    },
+    "SIGNAL_GENERATOR_WAVE": {
+      "key": "SIGNAL_GENERATOR_WAVE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_WAVE",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": "Rectangular",
+      "default_value_text": "Rectangular",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22100",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Wave",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22100, Name=LDD / Signal Generator / Wave]"
+      ]
+    },
+    "SIGNAL_GENERATOR_AMPLITUDE": {
+      "key": "SIGNAL_GENERATOR_AMPLITUDE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_AMPLITUDE",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22101",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Amplitude",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22101, Name=LDD / Signal Generator / Amplitude]"
+      ]
+    },
+    "SIGNAL_GENERATOR_OFFSET": {
+      "key": "SIGNAL_GENERATOR_OFFSET",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_OFFSET",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22102",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22102, Name=LDD / Signal Generator / Offset]"
+      ]
+    },
+    "SIGNAL_GENERATOR_FREQUENCY": {
+      "key": "SIGNAL_GENERATOR_FREQUENCY",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_FREQUENCY",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22103",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Frequency",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22103, Name=LDD / Signal Generator / Frequency]"
+      ]
+    },
+    "SIGNAL_GENERATOR_TRIGGER": {
+      "key": "SIGNAL_GENERATOR_TRIGGER",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_TRIGGER",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": "Auto",
+      "default_value_text": "Auto",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22104",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Trigger",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22104, Name=LDD / Signal Generator / Trigger]"
+      ]
+    },
+    "SIGNAL_GENERATOR_DUTY_CYCLE": {
+      "key": "SIGNAL_GENERATOR_DUTY_CYCLE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "group": "signal",
+      "visibility": "advanced",
+      "default_value": 0.5,
+      "default_value_text": "0.5",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22105",
+      "mepar_inst": "1",
+      "name_path": "LDD / Signal Generator / Duty Cycle",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22105, Name=LDD / Signal Generator / Duty Cycle]"
+      ]
+    },
+    "CONSTANT_CURRENT_CW_CURRENT": {
+      "key": "CONSTANT_CURRENT_CW_CURRENT",
+      "label_key": "label_PAR_CONSTANT_CURRENT_CW_CURRENT",
+      "group": "constant",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22150",
+      "mepar_inst": "1",
+      "name_path": "LDD / Constant Current / CW Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22150, Name=LDD / Constant Current / CW Current]"
+      ]
+    },
+    "EXTERNAL_INPUT_SCALING": {
+      "key": "EXTERNAL_INPUT_SCALING",
+      "label_key": "label_PAR_EXTERNAL_INPUT_SCALING",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22160",
+      "mepar_inst": "1",
+      "name_path": "LDD / External Input Scaling",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22160, Name=LDD / External Input Scaling]"
+      ]
+    },
+    "EXTERNAL_INPUT_OFFSET": {
+      "key": "EXTERNAL_INPUT_OFFSET",
+      "label_key": "label_PAR_EXTERNAL_INPUT_OFFSET",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22161",
+      "mepar_inst": "1",
+      "name_path": "LDD / External Input Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22161, Name=LDD / External Input Offset]"
+      ]
+    },
+    "EXTERNAL_INPUT_SELECT": {
+      "key": "EXTERNAL_INPUT_SELECT",
+      "label_key": "label_PAR_EXTERNAL_INPUT_SELECT",
+      "group": "external",
+      "visibility": "advanced",
+      "default_value": "Analog in 10V",
+      "default_value_text": "Analog in 10V",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22170",
+      "mepar_inst": "1",
+      "name_path": "LDD / External Input Select",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22170, Name=LDD / External Input Select]"
+      ]
+    },
+    "LOOKUP_TABLE_SAMPLE_RATE": {
+      "key": "LOOKUP_TABLE_SAMPLE_RATE",
+      "label_key": "label_PAR_LOOKUP_TABLE_SAMPLE_RATE",
+      "group": "lookup",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22210",
+      "mepar_inst": "1",
+      "name_path": "LDD / Lookup Table / Sample Rate",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22210, Name=LDD / Lookup Table / Sample Rate]"
+      ]
+    },
+    "MODE_SELECTOR": {
+      "key": "MODE_SELECTOR",
+      "label_key": "label_PAR_MODE_SELECTOR",
+      "group": "mode",
+      "visibility": "advanced",
+      "default_value": "CW",
+      "default_value_text": "CW",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22400",
+      "mepar_inst": "1",
+      "name_path": "LDD / Mode Selector",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22400, Name=LDD / Mode Selector]"
+      ]
+    },
+    "PULSE_PRE_TIME": {
+      "key": "PULSE_PRE_TIME",
+      "label_key": "label_PAR_PULSE_PRE_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "1.000m",
+      "default_value_text": "1.000m",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22401",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / Pre Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22401, Name=LDD / Pulse / Pre Time]"
+      ]
+    },
+    "PULSE_ON_TIME": {
+      "key": "PULSE_ON_TIME",
+      "label_key": "label_PAR_PULSE_ON_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "1.000m",
+      "default_value_text": "1.000m",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22402",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / On Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22402, Name=LDD / Pulse / On Time]"
+      ]
+    },
+    "PULSE_OFF_TIME": {
+      "key": "PULSE_OFF_TIME",
+      "label_key": "label_PAR_PULSE_OFF_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "1.000m",
+      "default_value_text": "1.000m",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22403",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / Off Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22403, Name=LDD / Pulse / Off Time]"
+      ]
+    },
+    "PULSE_POST_TIME": {
+      "key": "PULSE_POST_TIME",
+      "label_key": "label_PAR_PULSE_POST_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "1.000m",
+      "default_value_text": "1.000m",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22404",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / Post Time",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22404, Name=LDD / Pulse / Post Time]"
+      ]
+    },
+    "PULSE_NR_OF_PULSES": {
+      "key": "PULSE_NR_OF_PULSES",
+      "label_key": "label_PAR_PULSE_NR_OF_PULSES",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": 4,
+      "default_value_text": "4",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22405",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / Nr of Pulses",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22405, Name=LDD / Pulse / Nr of Pulses]"
+      ]
+    },
+    "PULSE_TRIGGER_SELECTION": {
+      "key": "PULSE_TRIGGER_SELECTION",
+      "label_key": "label_PAR_PULSE_TRIGGER_SELECTION",
+      "group": "pulse",
+      "visibility": "advanced",
+      "default_value": "Auto",
+      "default_value_text": "Auto",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "22406",
+      "mepar_inst": "1",
+      "name_path": "LDD / Pulse / Trigger selection",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22406, Name=LDD / Pulse / Trigger selection]"
+      ]
+    },
+    "DRIVER_LIMITS_MAXIMUM_CURRENT": {
+      "key": "DRIVER_LIMITS_MAXIMUM_CURRENT",
+      "label_key": "label_PAR_DRIVER_LIMITS_MAXIMUM_CURRENT",
+      "group": "driver",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23102",
+      "mepar_inst": "1",
+      "name_path": "LDD / Driver Limits / Maximum Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23102, Name=LDD / Driver Limits / Maximum Current]"
+      ]
+    },
+    "DRIVER_LIMITS_MINIMUM_CURRENT": {
+      "key": "DRIVER_LIMITS_MINIMUM_CURRENT",
+      "label_key": "label_PAR_DRIVER_LIMITS_MINIMUM_CURRENT",
+      "group": "driver",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23110",
+      "mepar_inst": "1",
+      "name_path": "LDD / Driver Limits / Minimum Current",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23110, Name=LDD / Driver Limits / Minimum Current]"
+      ]
+    },
+    "DRIVER_LIMITS_ERROR_THRESHOLD": {
+      "key": "DRIVER_LIMITS_ERROR_THRESHOLD",
+      "label_key": "label_PAR_DRIVER_LIMITS_ERROR_THRESHOLD",
+      "group": "driver",
+      "visibility": "advanced",
+      "default_value": 12,
+      "default_value_text": "12",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23120",
+      "mepar_inst": "1",
+      "name_path": "LDD / Driver Limits / Error Threshold",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23120, Name=LDD / Driver Limits / Error Threshold]"
+      ]
+    },
+    "ENABLE": {
+      "key": "ENABLE",
+      "label_key": "label_PAR_ENABLE",
+      "group": "enable",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "25100",
+      "mepar_inst": "1",
+      "name_path": "LDD / Enable",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25100, Name=LDD / Enable]"
+      ]
+    },
+    "ENABLE_STATUS": {
+      "key": "ENABLE_STATUS",
+      "label_key": "label_PAR_ENABLE_STATUS",
+      "group": "enable",
+      "visibility": "advanced",
+      "default_value": "Software Enable:False; Hardware interlock:True; Out:False",
+      "default_value_text": "Software Enable:False; Hardware interlock:True; Out:False",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "25109",
+      "mepar_inst": "1",
+      "name_path": "LDD / Enable Status",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25109, Name=LDD / Enable Status]"
+      ]
+    },
+    "CURRENT_PID_KP": {
+      "key": "CURRENT_PID_KP",
+      "label_key": "label_PAR_CURRENT_PID_KP",
+      "group": "current",
+      "visibility": "advanced",
+      "default_value": 80.0,
+      "default_value_text": "80.00",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27000",
+      "mepar_inst": "1",
+      "name_path": "LDD / Current PID / Kp",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27000, Name=LDD / Current PID / Kp]"
+      ]
+    },
+    "CURRENT_PID_TI": {
+      "key": "CURRENT_PID_TI",
+      "label_key": "label_PAR_CURRENT_PID_TI",
+      "group": "current",
+      "visibility": "advanced",
+      "default_value": "40.00u",
+      "default_value_text": "40.00u",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27001",
+      "mepar_inst": "1",
+      "name_path": "LDD / Current PID / Ti",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27001, Name=LDD / Current PID / Ti]"
+      ]
+    },
+    "CURRENT_PID_TD": {
+      "key": "CURRENT_PID_TD",
+      "label_key": "label_PAR_CURRENT_PID_TD",
+      "group": "current",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27002",
+      "mepar_inst": "1",
+      "name_path": "LDD / Current PID / Td",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27002, Name=LDD / Current PID / Td]"
+      ]
+    },
+    "CURRENT_SIGNAL_GENERATOR_SLEW_RATE": {
+      "key": "CURRENT_SIGNAL_GENERATOR_SLEW_RATE",
+      "label_key": "label_PAR_CURRENT_SIGNAL_GENERATOR_SLEW_RATE",
+      "group": "current",
+      "visibility": "advanced",
+      "default_value": 5,
+      "default_value_text": "5",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "27010",
+      "mepar_inst": "1",
+      "name_path": "LDD / Current Signal Generator / Slew Rate",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27010, Name=LDD / Current Signal Generator / Slew Rate]"
+      ]
+    },
+    "LDD_LPC_MODE": {
+      "key": "LDD_LPC_MODE",
+      "label_key": "label_PAR_LDD_LPC_MODE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": "Normal",
+      "default_value_text": "Normal",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29000",
+      "mepar_inst": "1",
+      "name_path": "LDD / LDD/LPC mode",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29000, Name=LDD / LDD/LPC mode]"
+      ]
+    },
+    "LPC_PID_KP": {
+      "key": "LPC_PID_KP",
+      "label_key": "label_PAR_LPC_PID_KP",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "mepar_id": "29001",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC PID / Kp",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29001, Name=LDD / LPC PID / Kp]"
+      ]
+    },
+    "LPC_PID_TI": {
+      "key": "LPC_PID_TI",
+      "label_key": "label_PAR_LPC_PID_TI",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": "10.00m",
+      "default_value_text": "10.00m",
+      "value_kind": "text",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "mepar_id": "29002",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC PID / Ti",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29002, Name=LDD / LPC PID / Ti]"
+      ]
+    },
+    "LPC_PID_TD": {
+      "key": "LPC_PID_TD",
+      "label_key": "label_PAR_LPC_PID_TD",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": "5.000u",
+      "default_value_text": "5.000u",
+      "value_kind": "text",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "mepar_id": "29003",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC PID / Td",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29003, Name=LDD / LPC PID / Td]"
+      ]
+    },
+    "LPC_SCALE": {
+      "key": "LPC_SCALE",
+      "label_key": "label_PAR_LPC_SCALE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 1.0,
+      "default_value_text": "1.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29006",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Scale",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29006, Name=LDD / LPC / Scale]"
+      ]
+    },
+    "LPC_ACTUAL_OUTPUT_POWER": {
+      "key": "LPC_ACTUAL_OUTPUT_POWER",
+      "label_key": "label_PAR_LPC_ACTUAL_OUTPUT_POWER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 0.0,
+      "default_value_text": "0.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "29010",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Actual Output Power",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29010, Name=LDD / LPC / Actual Output Power]"
+      ]
+    },
+    "LPC_CURRENT_SOURCE_SELECTOR": {
+      "key": "LPC_CURRENT_SOURCE_SELECTOR",
+      "label_key": "label_PAR_LPC_CURRENT_SOURCE_SELECTOR",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": "CW",
+      "default_value_text": "CW",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30000",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Current Source Selector",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30000, Name=LDD / LPC / Current Source Selector]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_WAVE": {
+      "key": "LPC_SIGNAL_GENERATOR_WAVE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_WAVE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": "Rectangular",
+      "default_value_text": "Rectangular",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30100",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Wave",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30100, Name=LDD / LPC / Signal Generator / Wave]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_AMPLITUDE": {
+      "key": "LPC_SIGNAL_GENERATOR_AMPLITUDE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_AMPLITUDE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30101",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Amplitude",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30101, Name=LDD / LPC / Signal Generator / Amplitude]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_OFFSET": {
+      "key": "LPC_SIGNAL_GENERATOR_OFFSET",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_OFFSET",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30102",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30102, Name=LDD / LPC / Signal Generator / Offset]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_FREQUENCY": {
+      "key": "LPC_SIGNAL_GENERATOR_FREQUENCY",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_FREQUENCY",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30103",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Frequency",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30103, Name=LDD / LPC / Signal Generator / Frequency]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_TRIGGER": {
+      "key": "LPC_SIGNAL_GENERATOR_TRIGGER",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_TRIGGER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": "Auto",
+      "default_value_text": "Auto",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30104",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Trigger",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30104, Name=LDD / LPC / Signal Generator / Trigger]"
+      ]
+    },
+    "LPC_SIGNAL_GENERATOR_DUTY_CYCLE": {
+      "key": "LPC_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 0.5,
+      "default_value_text": "0.5",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30105",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Signal Generator / Duty Cycle",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30105, Name=LDD / LPC / Signal Generator / Duty Cycle]"
+      ]
+    },
+    "LPC_CONSTANT_POWER_CW_POWER": {
+      "key": "LPC_CONSTANT_POWER_CW_POWER",
+      "label_key": "label_PAR_LPC_CONSTANT_POWER_CW_POWER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 1.0,
+      "default_value_text": "1.000",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30150",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Constant Power / CW Power",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30150, Name=LDD / LPC / Constant Power / CW Power]"
+      ]
+    },
+    "LPC_EXTERNAL_INPUT_SCALING": {
+      "key": "LPC_EXTERNAL_INPUT_SCALING",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_SCALING",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30160",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / External Input Scaling",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30160, Name=LDD / LPC / External Input Scaling]"
+      ]
+    },
+    "LPC_EXTERNAL_INPUT_OFFSET": {
+      "key": "LPC_EXTERNAL_INPUT_OFFSET",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_OFFSET",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30161",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / External Input Offset",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30161, Name=LDD / LPC / External Input Offset]"
+      ]
+    },
+    "LPC_EXTERNAL_INPUT_SELECT": {
+      "key": "LPC_EXTERNAL_INPUT_SELECT",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_SELECT",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": "Analog in 10V",
+      "default_value_text": "Analog in 10V",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30170",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / External Input Select",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30170, Name=LDD / LPC / External Input Select]"
+      ]
+    },
+    "LPC_LOOKUP_TABLE_SAMPLE_RATE": {
+      "key": "LPC_LOOKUP_TABLE_SAMPLE_RATE",
+      "label_key": "label_PAR_LPC_LOOKUP_TABLE_SAMPLE_RATE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "30210",
+      "mepar_inst": "1",
+      "name_path": "LDD / LPC / Lookup Table / Sample Rate",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30210, Name=LDD / LPC / Lookup Table / Sample Rate]"
+      ]
+    },
+    "GRAPH_LDD_GRAPH_STATUS": {
+      "key": "GRAPH_LDD_GRAPH_STATUS",
+      "label_key": "label_PAR_GRAPH_LDD_GRAPH_STATUS",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": "Finished",
+      "default_value_text": "Finished",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23500",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / LDD Graph Status",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23500, Name=LDD / Graph / LDD Graph Status]"
+      ]
+    },
+    "GRAPH_NUMBER_OF_POINTS_TO_RECORD": {
+      "key": "GRAPH_NUMBER_OF_POINTS_TO_RECORD",
+      "label_key": "label_PAR_GRAPH_NUMBER_OF_POINTS_TO_RECORD",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": 1000,
+      "default_value_text": "1000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23501",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / Number of Points to Record",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23501, Name=LDD / Graph / Number of Points to Record]"
+      ]
+    },
+    "GRAPH_VALUE_AVERAGING": {
+      "key": "GRAPH_VALUE_AVERAGING",
+      "label_key": "label_PAR_GRAPH_VALUE_AVERAGING",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23502",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / Value Averaging",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23502, Name=LDD / Graph / Value Averaging]"
+      ]
+    },
+    "GRAPH_TRIGGER_SOURCE": {
+      "key": "GRAPH_TRIGGER_SOURCE",
+      "label_key": "label_PAR_GRAPH_TRIGGER_SOURCE",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": "No Trigger",
+      "default_value_text": "No Trigger",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23503",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / Trigger Source",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23503, Name=LDD / Graph / Trigger Source]"
+      ]
+    },
+    "GRAPH_LD_CURRENT_TRIGGER_LEVEL": {
+      "key": "GRAPH_LD_CURRENT_TRIGGER_LEVEL",
+      "label_key": "label_PAR_GRAPH_LD_CURRENT_TRIGGER_LEVEL",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23504",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / LD Current Trigger Level",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23504, Name=LDD / Graph / LD Current Trigger Level]"
+      ]
+    },
+    "GRAPH_CHANNEL_2_TRIGGER_LEVEL": {
+      "key": "GRAPH_CHANNEL_2_TRIGGER_LEVEL",
+      "label_key": "label_PAR_GRAPH_CHANNEL_2_TRIGGER_LEVEL",
+      "group": "graph",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "mepar_id": "23505",
+      "mepar_inst": "1",
+      "name_path": "LDD / Graph / Channel 2 Trigger Level",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23505, Name=LDD / Graph / Channel 2 Trigger Level]"
+      ]
+    }
+  }
+}

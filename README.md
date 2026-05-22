@@ -1,11 +1,15 @@
 # meerstetter-go
 
-Go toolkit for Meerstetter TEC (Thermoelectric Controller) and LDD communication,
-plus an HTTP gateway, a multi-device serial/CAN router, and a browser UI.
+Go toolkit for Meerstetter MeCom/CANopen communication, definition-backed TEC
+and LDD catalogues, an HTTP gateway, a multi-device serial/CAN router, and a
+browser UI.
 
 ---
 
 ## What this does today
+
+For a capability matrix with the current device-family status, see
+[`walkthrough.md`](walkthrough.md).
 
 ### Protocol library — `mecom`
 Pure Go implementation of the Meerstetter MeCom wire protocol: framing, CRC, typed
@@ -97,37 +101,63 @@ a pre-built browser bundle; source checkouts can build it from `web/`.
   detects sensor-detach heuristically but does not escalate or latch alarms.
 - **No firmware upgrade** — the gateway reads and writes MeCom parameters; it
   does not implement the Meerstetter firmware download protocol.
+- **No blanket LDD/DAQ runtime claim** — LDD-130x metadata is present as a
+  reverse-engineered definition-backed catalogue, and DAQ has a definition slot,
+  but TEC remains the active runtime bridge baseline until each family is wired
+  through a reviewed polling/write surface.
 
 ---
 
-## Signal catalogue and UI projection
+## Definition catalogue and UI projection
 
-The verified JSON assets that define the operator parameter surface are in
-`web/src/data/`:
+Catalogue data is definition-backed. Definitions carry `system`, `family`,
+`sub_family`, `variant`, and `version` metadata so Meerstetter TEC, LDD, DAQ,
+and future families can share one dictionary shape without hardcoding a single
+device class. The verified JSON assets that define the browser-visible
+parameter surface are in `web/src/data/`:
 
 | File | Contents |
 |------|----------|
+| `mecom-catalogue-definitions.json` | Available definition bundles; currently TEC v6.31 and LDD-130x v2.21 |
 | `mecom-catalogue.json` | Full compiled TEC parameter catalogue: IDs, names, units, types, access levels, help text, semantic counterparts |
+| `mecom-ldd-130x-catalogue.json` | Reverse-engineered LDD-130x dictionary export with source evidence, UI paths, protocol aliases, default values, and safety notes |
 | `mecom-operator-projection.json` | Maps operator-visible parameter IDs onto UI tree paths and bundles; validated by `web/scripts/test-mecom-projection.mjs` |
 | `mecom-protocol-families.json` | Protocol family boundaries (MeCom vs CANopen) |
 
 The raw source files from which the catalogue is compiled live in
-`mecom/catalogues/sources/`. Use `scripts/harvest_coso_catalogue_sources.py` to
-regenerate them from a Meerstetter CoSo installation.
+`mecom/catalogues/sources/`. TEC sources are harvested from a Meerstetter CoSo
+installation with `scripts/harvest_coso_catalogue_sources.py`. LDD-130x sources
+are harvested/exported with `scripts/harvest_ldd_catalogue_sources.py` and
+`scripts/export_ldd_web_catalogue.py`.
+
+The currently represented Meerstetter definitions are:
+
+| Definition | Runtime status |
+|------------|----------------|
+| `meerstetter.tec.v631` | Active runtime/UI catalogue and CANopen bridge baseline |
+| `meerstetter.ldd_130x.v221` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
+| `meerstetter.ldd.v1`, `meerstetter.ldd_1321.v1`, `meerstetter.daq.v1` | Family/variant scaffolds for future catalogues |
 
 The CAN-backed CoSo compatibility bridge has one explicit crosswalk for
 MeCom-to-CANopen SDO routing:
 
 | Source | Role |
 |--------|------|
-| `mecom/catalogues/sources/tec_canopen_sdo_map.v631.json` | Canonical runtime SDO map. MeCom parameter IDs are primary; CANopen indexes and decimal object IDs are aliases with source evidence. |
+| `mecom/catalogues/sources/tec_canopen_sdo_map.v631.json` | Canonical runtime SDO map and protocol inventory. MeCom parameter IDs are primary; CANopen indexes and decimal object IDs are aliases with source evidence. |
 | `mecom/canopen_sdo_map.go` | Embeds and validates the JSON map, then exposes runtime lookup and bridge parameter types. |
 | `web/src/data/mecom-catalogue.json` | Compiled UI dictionary. CANopen catalogue rows carry `protocol_aliases.source_map` back to the JSON map and `protocol_aliases.mecom_parameter_id` back to the CoSo-facing ID. |
 
-Known non-SDO paths from CoSo logs are recorded in the JSON map's `unsupported`
-section. For example, MeCom ID `120` is latin1 metadata/big-data rather than a
-32-bit SDO value, and CRTVStream `?RS0000` is a ring-buffer command; CANopen
-direct transports only claim ring readout after an implementation is proven.
+The JSON map's `protocol_inventory` section records CoSo-facing MeCom commands
+that the CAN-backed bridge owns, including synthesized metadata (`?VM`),
+latin1 big-data (`?VB`/`VB`), and ring-stream fallback behavior. Its
+`bridge_transforms` section records intentional non-SDO compatibility behavior,
+such as firmware float ID `112`, random-startup ID `115`, and User Notes ID
+`120`. Compatibility-only constants, such as conservative Temperature Stable ID
+`1200`, are documented there with the live CoSo frame that required them. Known
+non-SDO paths from CoSo logs are recorded in the `unsupported` section. For
+example, MeCom ID `120` is latin1 metadata/big-data rather than a 32-bit SDO
+value, and CRTVStream `?RS0000` is a ring-buffer command; CANopen direct
+transports only claim ring readout after an implementation is proven.
 
 ---
 

@@ -232,8 +232,8 @@ export function DeviceMini({ device, onOpen }) {
       </div>
       <div className="chans">
         {channels.map((c) => (
-          <Chip key={c.instance} kind={c.role === "supply" ? "warn" : "accent"}>
-            channel {c.instance} · {c.role === "supply" ? "supply" : "temperature"}
+          <Chip key={c.instance} kind={c.role === "supply" ? "warn" : c.role === "ldd" ? "info" : "accent"}>
+            channel {c.instance} · {c.role === "ldd" ? "LDD" : c.role === "supply" ? "supply" : "temperature"}
           </Chip>
         ))}
         {channels.length === 0 && <Chip>no channels</Chip>}
@@ -330,6 +330,7 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   const catalogue = MecomAPI.catalogue();
   const device = MecomAPI.devices().find((d) => d.id === deviceId);
   const allChannels = MecomAPI.channels();
+  const [catalogueVariant, setCatalogueVariant] = useState("");
   const channels = useMemo(() => allChannels
     .filter((c) => c.device_id === deviceId)
     .slice()
@@ -423,7 +424,10 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
     if (!activeChannel) return;
     const cur = assigns.forWall(deviceWallId);
     if (cur.length > 0) return;
-    const defaults = activeChannel.role === "temp" ? [3000, 1000, 1001] : [1022];
+    // LDD channels don't have well-established universal defaults yet — don't seed
+    const defaults = activeChannel.role === "temp" ? [3000, 1000, 1001]
+      : activeChannel.role === "supply" ? [1022]
+      : []; // ldd — leave empty so tree is shown clean
     defaults.forEach((pid) => assigns.add(deviceWallId, pid, deviceId, activeChannel.instance));
   }, [deviceWallId, activeChannel?.instance, activeChannel?.role]);
 
@@ -448,7 +452,21 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   if (!activeChannel) return <div style={{ padding: 32, color: "var(--muted)" }}>No channels active for {deviceId}.</div>;
 
   const deviceRoles = new Set(channels.map((c) => c.role));
-  const applicableCatalogue = catalogue.filter((p) => !p.applicableModes || p.applicableModes.some((role) => deviceRoles.has(role)));
+  // Build list of catalogue definition refs that are relevant to this device
+  const deviceDefinitionRefs = Array.from(
+    new Set(
+      catalogue
+        .filter((p) => !p.applicableModes || p.applicableModes.some((role) => deviceRoles.has(role)))
+        .map((p) => p.definition_ref)
+        .filter(Boolean)
+    )
+  ).sort();
+  const effectiveVariant = catalogueVariant && deviceDefinitionRefs.includes(catalogueVariant)
+    ? catalogueVariant
+    : deviceDefinitionRefs[0] || "";
+  const applicableCatalogue = effectiveVariant
+    ? catalogue.filter((p) => p.definition_ref === effectiveVariant)
+    : catalogue.filter((p) => !p.applicableModes || p.applicableModes.some((role) => deviceRoles.has(role)));
 
   function togglePin(param, instance) {
     const inst = instance || activeChannel.instance;
@@ -517,16 +535,30 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
               <div className="role-toggle" style={{ height: 28 }}>
                 {channels.map((c) => (
                   <button key={c.instance}
-                          className={(c.role === "temp" ? "temp " : "supply ") + (c.instance === activeChannelInst ? "on" : "")}
+                          className={(c.role === "temp" ? "temp " : c.role === "ldd" ? "ldd " : "supply ") + (c.instance === activeChannelInst ? "on" : "")}
                           style={{ padding: "0 12px" }}
                           onClick={() => setActiveChannelInst(c.instance)}>
-                    channel {c.instance} · {c.role === "temp" ? "temperature" : c.role}
+                    channel {c.instance} · {c.role === "ldd" ? "LDD" : c.role === "temp" ? "temperature" : c.role}
                   </button>
                 ))}
               </div>
             )}
             {channels.length === 1 && (
-              <Chip kind={activeChannel.role === "supply" ? "warn" : "accent"}>channel {activeChannel.instance} · {activeChannel.role === "supply" ? "supply" : "temperature control"}</Chip>
+              <Chip kind={activeChannel.role === "ldd" ? "info" : activeChannel.role === "supply" ? "warn" : "accent"}>
+                channel {activeChannel.instance} · {activeChannel.role === "ldd" ? "LDD current control" : activeChannel.role === "supply" ? "supply" : "temperature control"}
+              </Chip>
+            )}
+            {deviceDefinitionRefs.length > 1 && (
+              <div className="role-toggle" style={{ height: 28 }} title="Catalogue variant — switch to browse a different parameter set for this device">
+                {deviceDefinitionRefs.map((ref) => (
+                  <button key={ref}
+                          className={ref === effectiveVariant ? "on" : ""}
+                          style={{ padding: "0 10px", fontFamily: "var(--font-mono)", fontSize: 10.5 }}
+                          onClick={() => setCatalogueVariant(ref)}>
+                    {ref.split(".").slice(-2).join(" ")}
+                  </button>
+                ))}
+              </div>
             )}
             <button className="btn sm" onClick={() => setOnlyWritable((v) => !v)}>{onlyWritable ? "All params" : "Writable only"}</button>
             <button className="btn sm" onClick={onOpenSequencer}>Run sequence ▸</button>

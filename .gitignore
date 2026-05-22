@@ -7,5 +7,8 @@
 /.ui-interact.*/
 *.test
 *.out
+*.msi
+*.cab
+__pycache__/
 /mecomgw
 *.exe

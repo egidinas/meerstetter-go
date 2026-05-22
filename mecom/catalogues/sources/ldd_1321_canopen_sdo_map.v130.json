@@ -1,0 +1,502 @@
+{
+  "schema_version": "mecom_ldd_1321_canopen_sdo_map.v1",
+  "source_policy": "Runtime CANopen SDO routing uses MeCom parameter IDs as the primary key. CANopen object indexes and decimal object IDs are aliases, not replacement MeCom IDs.",
+  "mappings": [
+    {
+      "mecom_id": 100,
+      "name": "Save Data*",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "fixed",
+        "fixed": 1
+      },
+      "canopen": {
+        "index": "0x1000",
+        "subindex": "0x00",
+        "subindex_mode": "fixed",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x1000"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 4096
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.TEC_CURRENT_MAX",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.1000"
+      ]
+    },
+    {
+      "mecom_id": 101,
+      "name": "PID Upper Limitation [%]",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2001",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2001"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8193
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.TEC_PID_LIM_N",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2001"
+      ]
+    },
+    {
+      "mecom_id": 102,
+      "name": "Actual",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2002",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2002"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8194
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.TEC_HW_SERNR",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2002"
+      ]
+    },
+    {
+      "mecom_id": 105,
+      "name": "External Temperature 1",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2005",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2005"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8197
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.EXTT_R1",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2005"
+      ]
+    },
+    {
+      "mecom_id": 106,
+      "name": "Error Instance",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2006",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2006"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8198
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.ERROR_PARAMETER",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2006"
+      ]
+    },
+    {
+      "mecom_id": 1061,
+      "name": "LDD Actual Output Voltage",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2011",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2011"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8209
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.LDD_LDVOLTAGE_ACT",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2011"
+      ]
+    },
+    {
+      "mecom_id": 1062,
+      "name": "LDD Actual Output Current Raw ADC Value",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2012",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2012"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8210
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.LDD_CURRENT_RAW_ADC",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2012"
+      ]
+    },
+    {
+      "mecom_id": 1065,
+      "name": "LDD Actual Cathode Voltage",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2015",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2015"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8213
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.LDD_VLDK",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2015"
+      ]
+    },
+    {
+      "mecom_id": 1403,
+      "name": "LDD Gate Voltage",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2053",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2053"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8275
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.LDD_GATE_VOLTAGE",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2053"
+      ]
+    },
+    {
+      "mecom_id": 2052,
+      "name": "Actual Fan Speed [rpm]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2202",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2202"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8706
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.FAN_REL_COOL_POWER2",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2202"
+      ]
+    },
+    {
+      "mecom_id": 5040,
+      "name": "Current Limitation [A]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2630",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2630"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9776
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.TEC_ERRORLIMIT_U",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2630"
+      ]
+    },
+    {
+      "mecom_id": 6121,
+      "name": "ON Threshold [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3121",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3121"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 12577
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.PUMP_ON_THRESHOLD1",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.3121"
+      ]
+    },
+    {
+      "mecom_id": 6122,
+      "name": "Temperature 2 [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3122",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3122"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 12578
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.TEC_ALT_TARGET_TEMP2",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.3122"
+      ]
+    },
+    {
+      "mecom_id": 7002,
+      "name": "Temperature Gain [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2802",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2802"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10242
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.EXTT_TADJ_A02",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2802"
+      ]
+    },
+    {
+      "mecom_id": 7012,
+      "name": "Gain [V/V]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2812",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2812"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10258
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.LDD_VLDA_VADJ_A0",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2812"
+      ]
+    },
+    {
+      "mecom_id": 7013,
+      "name": "Analog Voltage Input User Settings",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2813",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2813"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10259
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_1321_ui_metadata.v130.json#parameter_contexts.ANALOG_IN_IV_FACTOR",
+        "catalogues/sources/ldd_1321_canopen_eds.v130.json#objects.2813"
+      ]
+    }
+  ],
+  "bridge_transforms": []
+}

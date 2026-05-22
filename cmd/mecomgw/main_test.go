@@ -298,6 +298,84 @@ func TestGatewayRoutesExposeHealthDevicesCatalogueAndLeases(t *testing.T) {
 	}
 }
 
+func TestGatewayCatalogueCanSelectLDDDefinition(t *testing.T) {
+	s := newServer(Config{}, time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var catalogue struct {
+		Definition map[string]string       `json:"definition"`
+		Parameters []gatewayCatalogueEntry `json:"parameters"`
+	}
+	getJSON(t, ts.URL+"/api/catalogue?definition=meerstetter.ldd_130x.v221", http.StatusOK, &catalogue)
+	if catalogue.Definition["definition_ref"] != "meerstetter.ldd_130x.v221" ||
+		catalogue.Definition["definition_family"] != mecom.MeerstetterDefinitionFamily ||
+		catalogue.Definition["definition_sub_family"] != mecom.MeerstetterSubFamilyLDD ||
+		catalogue.Definition["definition_variant"] != mecom.MeerstetterVariantLDD130x {
+		t.Fatalf("gateway LDD definition metadata = %#v", catalogue.Definition)
+	}
+	if got, want := len(catalogue.Parameters), 275; got < want {
+		t.Fatalf("gateway LDD catalogue entries = %d, want at least %d", got, want)
+	}
+	var foundWritable, foundReadOnly bool
+	for _, p := range catalogue.Parameters {
+		if p.Instance != 1 {
+			t.Fatalf("gateway LDD entry %s instance = %d, want 1", p.RawName, p.Instance)
+		}
+		if p.Metadata["definition_sub_family"] == mecom.MeerstetterSubFamilyTEC {
+			t.Fatalf("gateway LDD catalogue leaked TEC metadata: %#v", p.Metadata)
+		}
+		if p.Writable {
+			foundWritable = true
+		} else {
+			foundReadOnly = true
+		}
+	}
+	if !foundWritable {
+		t.Fatalf("expected to find at least one writable LDD parameter")
+	}
+	if !foundReadOnly {
+		t.Fatalf("expected to find at least one read-only LDD parameter")
+	}
+
+	fanController := findGatewayCatalogueRawName(t, catalogue.Parameters, "FAN_TEMPR_TI2")
+	if !fanController.Writable {
+		t.Fatalf("gateway LDD entry FAN_TEMPR_TI2:6211 should be writable")
+	}
+
+	exttObserve := findGatewayCatalogueRawName(t, catalogue.Parameters, "EXTT_ADC_OBSERVE1")
+	if exttObserve.Writable {
+		t.Fatalf("gateway LDD entry EXTT_ADC_OBSERVE1:5040 should be read-only")
+	}
+
+	outputEnable := findGatewayCatalogueRawName(t, catalogue.Parameters, "LDD_OUTPUT_EN")
+	if outputEnable.ID != 2100 ||
+		outputEnable.Sensor != "mecom.ldd_130x_01.LDD_OUTPUT_EN" ||
+		outputEnable.RouteSupport[0] != "serial" ||
+		outputEnable.Metadata["protocol_ids"] != "2100" ||
+		outputEnable.Metadata["canopen_indices"] != "0x2230" {
+		t.Fatalf("gateway LDD output enable row = %#v metadata=%#v", outputEnable, outputEnable.Metadata)
+	}
+	if !outputEnable.Writable || outputEnable.WriteSemantics != "metadata" {
+		t.Fatalf("gateway LDD output enable write behavior = writable:%v semantics:%q", outputEnable.Writable, outputEnable.WriteSemantics)
+	}
+
+	minVoltage := findGatewayCatalogueRawName(t, catalogue.Parameters, "LDD_VOLTAGE_LIMIT_MIN")
+	if minVoltage.Unit != "V" ||
+		minVoltage.Metadata["protocol_ids"] != "2125" ||
+		minVoltage.Metadata["canopen_indices"] != "0x2255" ||
+		minVoltage.Metadata["documentation_cross_check"] != "min_nominal_voltage_protocol_mapping" {
+		t.Fatalf("gateway LDD minimum-voltage row = %#v metadata=%#v", minVoltage, minVoltage.Metadata)
+	}
+
+	featureLimitBypass := findGatewayCatalogueRawName(t, catalogue.Parameters, "IGNORE_FEATURE_FIRMW_LIM")
+	if featureLimitBypass.SourceStatus != "service_software_only" ||
+		featureLimitBypass.Metadata["definition_ref"] != "meerstetter.ldd_130x.v221" ||
+		!strings.Contains(featureLimitBypass.SafetyNote, "metadata candidates") {
+		t.Fatalf("gateway LDD service-only row = %#v metadata=%#v", featureLimitBypass, featureLimitBypass.Metadata)
+	}
+}
+
 func TestGatewayDevicesExposePowerControlOptIn(t *testing.T) {
 	s := newServer(Config{Devices: []DeviceConfig{{
 		ID:                  "tec-75",
@@ -1791,6 +1869,17 @@ func findGatewayCatalogueEntry(t *testing.T, params []gatewayCatalogueEntry, id,
 		}
 	}
 	t.Fatalf("catalogue missing parameter %d:%d", id, instance)
+	return gatewayCatalogueEntry{}
+}
+
+func findGatewayCatalogueRawName(t *testing.T, params []gatewayCatalogueEntry, rawName string) gatewayCatalogueEntry {
+	t.Helper()
+	for _, p := range params {
+		if p.RawName == rawName {
+			return p
+		}
+	}
+	t.Fatalf("catalogue missing raw name %q", rawName)
 	return gatewayCatalogueEntry{}
 }
 

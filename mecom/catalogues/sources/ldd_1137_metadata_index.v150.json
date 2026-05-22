@@ -1,0 +1,1892 @@
+{
+  "schema_version": "mecom_ldd_1137_metadata_index.v1",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_1137.v150",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1137",
+    "version": "v150"
+  },
+  "sources": [
+    {
+      "id": "ldd_1137_default_config",
+      "path": "LDD-1137 Default Configuration 5249F.xml",
+      "method": "parsed [SRV_PAR] key/value defaults",
+      "status": "harvested",
+      "sha256": "b8c0799aba569ad4c3c058242a9c5ecc9705ec7f1a9c77984d6ef186457c1165",
+      "bytes": 21374,
+      "text_encoding": "utf-8",
+      "parameter_count": 184
+    },
+    {
+      "id": "ldd_1137_service_software",
+      "path": "MeSoft.CoSoG2.LDD_113xZy.exe",
+      "method": "resource string scan for UI label keys, parameter context, paths, and tooltip-like notes",
+      "status": "harvested",
+      "sha256": "34c346af951c31d0e8eb9c4df9cd9e04e5a5f31d68f5ff721230bf0dbdb540d4",
+      "bytes": 6577512,
+      "text_encoding": "utf-8",
+      "strings_output_encoding": "utf-8",
+      "label_count": 0,
+      "software_only_label_count": 0,
+      "parameter_context_count": 184,
+      "parameter_path_count": 0,
+      "ui_note_count": 0,
+      "ui_string_count": 0
+    },
+    {
+      "id": "ldd_1137_ui_metadata",
+      "path": "ldd_1137_ui_metadata.v150.json",
+      "method": "generated source JSON from ServiceSoftware resource strings",
+      "status": "generated",
+      "text_encoding": "utf-8",
+      "parameter_context_count": 184,
+      "parameter_path_count": 0,
+      "ui_note_count": 0,
+      "ui_string_count": 0
+    },
+    {
+      "id": "ldd_1137_release_notes",
+      "path": "LDD-1137 Software Release Notes 5275F.pdf",
+      "method": "pdftotext release-note parse",
+      "status": "harvested",
+      "sha256": "5b4ea135fbde8331dc65b152b1d87e29cfa2349b03f1efbd8b66ab1f9eaf8326",
+      "bytes": 363287,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_1137_firmware_hex",
+      "path": "LDD-1137 Firmware v1.50.mefw",
+      "method": "packaged firmware image; retained as provenance only",
+      "status": "available",
+      "sha256": "979afa95508cc7389810f43d650c151c4a015e2f3d78f92b85dec1250a8f4572",
+      "bytes": 2603708
+    },
+    {
+      "id": "ldd_1137_lookup_table_example_xlsx",
+      "path": "LookupTable Example.xlsx",
+      "method": "packaged XLSX example; retained as lookup table provenance only",
+      "status": "available",
+      "sha256": "cca75ae1a4dd5da2f66181b6333115b24f17a71d465c48acf559038084eb0074",
+      "bytes": 17524
+    }
+  ],
+  "software_labels": [],
+  "release_notes": {
+    "document": "",
+    "release_date": "",
+    "current_version": "1.50",
+    "current_release_date": "2025-10-02",
+    "current_service_software_version": "",
+    "current_firmware_version": "",
+    "supported_devices": [],
+    "versions": [
+      {
+        "version": "1.50",
+        "release_date": "2025-10-02",
+        "supported_devices": [],
+        "new_features": [
+          "Added a configurable communication watchdog",
+          "Added a new GPIO function: Fix 0"
+        ],
+        "resolved_issues": [
+          "None."
+        ],
+        "known_issues": [
+          "Configuration software LDD graph timing is off, especially on hardware versions >=1.30.",
+          "Culture conversion of decimal separator does not always work during import and export of settings on systems using a comma.",
+          "The configuration software may timeout if connected via TCP/IP while acquiring DSO data.",
+          "ADC configuration is not properly resetted/initialized when doing a soft reset (no power cycle), which can make the device error out after a firmware update. A power cycle is then needed. LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 4"
+        ]
+      },
+      {
+        "version": "1.41",
+        "release_date": "2025-08-15",
+        "supported_devices": [],
+        "new_features": [
+          "None."
+        ],
+        "resolved_issues": [
+          "Fixed a bug where the device would not catch the cause of an error condition in case of an interlock error. The error still caused a power down of the output, however, the device stayed in ready or run state and did not present an error code. Detection of FPGA controlled error conditions might now take up to 10 ns longer. The issue was only present on firmware v1.40."
+        ],
+        "known_issues": [
+          "Configuration software LDD graph timing is off, especially on hardware versions >=1.30.",
+          "Culture conversion of decimal separator does not always work during import and export of settings on systems using a comma.",
+          "The configuration software may timeout if connected via TCP/IP while acquiring DSO data.",
+          "ADC configuration is not properly resetted/initialized when doing a soft reset (no power cycle), which can make the device error out after a firmware update. A power cycle is then needed. LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 5"
+        ]
+      },
+      {
+        "version": "1.40",
+        "release_date": "2025-03-06",
+        "supported_devices": [],
+        "new_features": [
+          "Laser power control feature (optional).",
+          "Photocurrent parameters and Graph added.",
+          "Pulse sync output delay and length can now be set by the user.",
+          "Added parameter to change external input edge detector."
+        ],
+        "resolved_issues": [
+          "Phase asymmetry detection acted too fast during fast current transient.",
+          "Ethernet connection works even if the endpoint has a Gbit interface.",
+          "The external input was not affected by the maximum current setting.",
+          "The \"Show Pulse Current\" option in the graph has been removed.",
+          "The driver no longer throws an error on the main system after the user resets a sub- system to clear a device internal error.",
+          "Negative signal generator values are no longer mapped as high values.",
+          "Graph button in LDD window now reliably brings the window to the front.",
+          "Reworked the DSO subsystem.",
+          "Improved phase synchronization of the PWM.",
+          "Depending on the Reset on change parameter (ID 22220), current output is not tem- porarily disabled anymore upon changing the following settings during operation:",
+          "LDD / LDD/LPC mode (ID 29000)",
+          "LDD / Current PID / * (ID 27000-27002)",
+          "LDD / Constant Current / CW Current (ID 22150)",
+          "LDD / Signal Generator / * (ID 22100-22105)",
+          "LDD / Lookup Table (ID 22200)",
+          "LDD / Lookup Table / Sample Rate (ID 22210)",
+          "LDD / External Input / * (ID 22160, 22161, 22170)",
+          "LDD / Pulse / * (ID 22400-22406)",
+          "LDD / Current Source Selector (ID 22000)",
+          "LDD / Driver Limits / Minimum Current (ID 23110)",
+          "LDD / Driver Limits / Maximum Current (ID 23102)",
+          "LDD / LPC PID / Kp (ID 29001)",
+          "LDD / LPC PID / Ti (ID 29002)",
+          "LDD / LPC PID / Td (ID 29003)",
+          "LDD / LPC / Constant Power / CW Power (ID 30150)",
+          "LDD / LPC / Signal Generator / * (ID 30100-30105)",
+          "LDD / LPC / Lookup Table (ID 30200)",
+          "LDD / LPC / Lookup Table / Sample Rate (ID 30210)",
+          "LDD / LPC / External Input / * (ID 30160, 30161, 30170)",
+          "LDD / LPC / Current Source Selector (ID 30000)",
+          "LDD / LPC / Scale (ID 29006)",
+          "Advanced Settings / Pulse Settings / * (ID 22407, 22408)",
+          "Analog IO / Photodiode Input / Calibration * (ID 29004, 29005) LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 6"
+        ],
+        "known_issues": [
+          "Configuration software LDD graph timing is off, especially on hardware versions >=1.30.",
+          "Culture conversion of decimal separator does not always work during import and ex- port of settings on systems using a comma.",
+          "The configuration software may timeout if connected via TCP/IP while acquiring DSO data.",
+          "ADC configuration is not properly resetted/initialized when doing a soft reset (no power cycle), which can make the device error out after a firmware update. A power cycle is then needed. LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 7"
+        ]
+      },
+      {
+        "version": "1.31",
+        "release_date": "2022-11-16",
+        "supported_devices": [],
+        "new_features": [
+          "PAR_LDD_Enable will be reset if the LDD status is not ready or running to reflect to current status of the LDD properly."
+        ],
+        "resolved_issues": [
+          "Communication Problems between the Current measurement sensor and FPGA on Hardware version 1.30."
+        ],
+        "known_issues": [
+          "CoSo LDD graph timing is slightly off with HW version 1.30 and Firmware version v1.31. LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 8"
+        ]
+      },
+      {
+        "version": "1.30",
+        "release_date": "2022-09-07",
+        "supported_devices": [],
+        "new_features": [
+          "LDD system can be reset separately without reboot.",
+          "Control system improved.",
+          "Device configuration migrated to Base-Board Flash chip",
+          "Feature: Pulse current low display option.",
+          "Feature: External Temperature Measurements with limits",
+          "Feature: RS485_1 Interface usable with options"
+        ],
+        "resolved_issues": [
+          "Overcurrent raises LDD Error and not System error anymore."
+        ],
+        "known_issues": [
+          "None known at time of publication. LDD-1137 Software Release Notes 5275F Meerstetter Engineering GmbH 9 A Change History Date of change Doc/Version Changed/ Change / Reason Approved 7 September 2022 5275A PV/RS * Initial release 16 November 2022 5275B PV/RS * Added firmware version 1.31 6 March 2025 5275C SC/RS * Added firmware version 1.40 15 August 2025 5275D SC/RS * Added firmware version 1.41 9 September 2025 52."
+        ]
+      }
+    ],
+    "risk_notes": []
+  },
+  "documentation_cross_checks": {
+    "protocol_document": {
+      "source": "",
+      "document": "",
+      "release_date": "",
+      "text_encoding": ""
+    },
+    "manual_document": {
+      "source": "",
+      "document": "",
+      "release_date": "",
+      "text_encoding": ""
+    },
+    "checks": [
+      {
+        "id": "output_enable_protocol_mapping",
+        "status": "missing",
+        "summary": "Output Enable is MeCom ID 2100 in the LDD protocol and CANopen object 0x2230 in the EDS; keep the UI/default key LDD_OUTPUT_EN mapped to those documented protocol identities.",
+        "source_evidence": [],
+        "default_key": "LDD_OUTPUT_EN",
+        "mecom_id": "2100",
+        "canopen_index": "2230",
+        "ui_path": "Operation.Input Source Selection.Output Enable"
+      },
+      {
+        "id": "min_nominal_voltage_protocol_mapping",
+        "status": "missing",
+        "summary": "Min Nominal Voltage is MeCom ID 2125 in the LDD protocol and CANopen object 0x2255 in the EDS; the manual warning text explains the overcurrent risk of setting the lower voltage limit too high.",
+        "source_evidence": [],
+        "default_key": "LDD_VOLTAGE_LIMIT_MIN",
+        "mecom_id": "2125",
+        "canopen_index": "2255",
+        "ui_path": "Operation.Output Stage Limits.Min Nominal Voltage"
+      },
+      {
+        "id": "feature_unlock_license_metadata",
+        "status": "missing",
+        "summary": "Feature unlock metadata is documented by the protocol Feature Licenses table; ServiceSoftware adds license guidance text that is useful as tooltip-style metadata.",
+        "source_evidence": [],
+        "mecom_id": "54000",
+        "protocol_name": "Feature Key Store"
+      },
+      {
+        "id": "bootloader_ignore_feature_fw_limit_service_only",
+        "status": "",
+        "summary": "Ignore Feature FW Limit is present in the ServiceSoftware bootloader UI strings, but it is not documented as an LDD protocol parameter in 5260H; treat it as service-software UI metadata only.",
+        "source_evidence": [],
+        "ui_key": "IGNORE_FEATURE_FIRMW_LIM",
+        "ui_path": "ME.Bootloader.Ignore Feature FW Limit"
+      }
+    ]
+  },
+  "hidden_candidates": [
+    {
+      "key": "ACTUAL_OUTPUT_CURRENT",
+      "label_key": "label_PAR_ACTUAL_OUTPUT_CURRENT",
+      "group": "actual",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20000, Name=LDD / Actual Output Current]"
+      ]
+    },
+    {
+      "key": "ACTUAL_OUTPUT_VOLTAGE",
+      "label_key": "label_PAR_ACTUAL_OUTPUT_VOLTAGE",
+      "group": "actual",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20001, Name=LDD / Actual Output Voltage]"
+      ]
+    },
+    {
+      "key": "ANALOG_IO_VIN_10V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_10V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9912, Name=Analog IO / Analog IO / Vin 10V]"
+      ]
+    },
+    {
+      "key": "ANALOG_IO_VIN_1V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_1V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9910, Name=Analog IO / Analog IO / Vin 1V]"
+      ]
+    },
+    {
+      "key": "ANALOG_IO_VIN_5V",
+      "label_key": "label_PAR_ANALOG_IO_VIN_5V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9911, Name=Analog IO / Analog IO / Vin 5V]"
+      ]
+    },
+    {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_10V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_10V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22164, Name=ME Settings / Analog Voltage Input / Conversion Factor 10V]"
+      ]
+    },
+    {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_1V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_1V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22162, Name=ME Settings / Analog Voltage Input / Conversion Factor 1V]"
+      ]
+    },
+    {
+      "key": "ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_5V",
+      "label_key": "label_PAR_ANALOG_VOLTAGE_INPUT_CONVERSION_FACTOR_5V",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22163, Name=ME Settings / Analog Voltage Input / Conversion Factor 5V]"
+      ]
+    },
+    {
+      "key": "ANTI_WINDUP_I_FREEZE_ENABLE",
+      "label_key": "label_PAR_ANTI_WINDUP_I_FREEZE_ENABLE",
+      "group": "anti",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27006, Name=ME Settings / Anti Windup I Freeze enable]"
+      ]
+    },
+    {
+      "key": "BASE_BAUDRATE",
+      "label_key": "label_PAR_BASE_BAUDRATE",
+      "group": "base",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3041, Name=Communication / Base Baudrate]"
+      ]
+    },
+    {
+      "key": "BOOTED_ADDRESS",
+      "label_key": "label_PAR_BOOTED_ADDRESS",
+      "group": "booted",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9004, Name=System / Booted Address]"
+      ]
+    },
+    {
+      "key": "COMMUNICATION_WATCHDOG_TIMEOUT",
+      "label_key": "label_PAR_COMMUNICATION_WATCHDOG_TIMEOUT",
+      "group": "communication",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3043, Name=Communication / Communication Watchdog / Timeout]"
+      ]
+    },
+    {
+      "key": "CONSTANT_CURRENT_CW_CURRENT",
+      "label_key": "label_PAR_CONSTANT_CURRENT_CW_CURRENT",
+      "group": "constant",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22150, Name=LDD / Constant Current / CW Current]"
+      ]
+    },
+    {
+      "key": "CURRENT_PID_KP",
+      "label_key": "label_PAR_CURRENT_PID_KP",
+      "group": "current",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27000, Name=LDD / Current PID / Kp]"
+      ]
+    },
+    {
+      "key": "CURRENT_PID_TD",
+      "label_key": "label_PAR_CURRENT_PID_TD",
+      "group": "current",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27002, Name=LDD / Current PID / Td]"
+      ]
+    },
+    {
+      "key": "CURRENT_PID_TI",
+      "label_key": "label_PAR_CURRENT_PID_TI",
+      "group": "current",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27001, Name=LDD / Current PID / Ti]"
+      ]
+    },
+    {
+      "key": "CURRENT_SIGNAL_GENERATOR_SLEW_RATE",
+      "label_key": "label_PAR_CURRENT_SIGNAL_GENERATOR_SLEW_RATE",
+      "group": "current",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27010, Name=LDD / Current Signal Generator / Slew Rate]"
+      ]
+    },
+    {
+      "key": "CURRENT_SOURCE_SELECTOR",
+      "label_key": "label_PAR_CURRENT_SOURCE_SELECTOR",
+      "group": "current",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22000, Name=LDD / Current Source Selector]"
+      ]
+    },
+    {
+      "key": "DEVICE_FIRMWARE_REVISION",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_REVISION",
+      "group": "device",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=113, Name=System / Device Firmware Revision]"
+      ]
+    },
+    {
+      "key": "DEVICE_FIRMWARE_SOURCE_STATUS",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_SOURCE_STATUS",
+      "group": "device",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=114, Name=System / Device Firmware Source Status]"
+      ]
+    },
+    {
+      "key": "DEVICE_FIRMWARE_VERSION",
+      "label_key": "label_PAR_DEVICE_FIRMWARE_VERSION",
+      "group": "device",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=112, Name=System / Device Firmware Version]"
+      ]
+    },
+    {
+      "key": "DEVICE_TEMPERATURE",
+      "label_key": "label_PAR_DEVICE_TEMPERATURE",
+      "group": "device",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1002, Name=System / Device Temperature]"
+      ]
+    },
+    {
+      "key": "DRIVER_LIMITS_ERROR_THRESHOLD",
+      "label_key": "label_PAR_DRIVER_LIMITS_ERROR_THRESHOLD",
+      "group": "driver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23120, Name=LDD / Driver Limits / Error Threshold]"
+      ]
+    },
+    {
+      "key": "DRIVER_LIMITS_MAXIMUM_CURRENT",
+      "label_key": "label_PAR_DRIVER_LIMITS_MAXIMUM_CURRENT",
+      "group": "driver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23102, Name=LDD / Driver Limits / Maximum Current]"
+      ]
+    },
+    {
+      "key": "DRIVER_LIMITS_MINIMUM_CURRENT",
+      "label_key": "label_PAR_DRIVER_LIMITS_MINIMUM_CURRENT",
+      "group": "driver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23110, Name=LDD / Driver Limits / Minimum Current]"
+      ]
+    },
+    {
+      "key": "ENABLE",
+      "label_key": "label_PAR_ENABLE",
+      "group": "enable",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25100, Name=LDD / Enable]"
+      ]
+    },
+    {
+      "key": "ENABLE_SETTINGS_EXTERNAL_ENABLE_EDGE_DETECT",
+      "label_key": "label_PAR_ENABLE_SETTINGS_EXTERNAL_ENABLE_EDGE_DETECT",
+      "group": "enable",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25101, Name=Advanced Settings / Enable Settings / External Enable Edge Detect]"
+      ]
+    },
+    {
+      "key": "ENABLE_STATUS",
+      "label_key": "label_PAR_ENABLE_STATUS",
+      "group": "enable",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=25109, Name=LDD / Enable Status]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_INPUT_OFFSET",
+      "label_key": "label_PAR_EXTERNAL_INPUT_OFFSET",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22161, Name=LDD / External Input Offset]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_INPUT_SCALING",
+      "label_key": "label_PAR_EXTERNAL_INPUT_SCALING",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22160, Name=LDD / External Input Scaling]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_INPUT_SELECT",
+      "label_key": "label_PAR_EXTERNAL_INPUT_SELECT",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22170, Name=LDD / External Input Select]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_ENABLE",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_ENABLE",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15010, Name=Analog IO / External Temperature Error Limits / Enable]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_LOWER_ERROR_THRESHOLD",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_LOWER_ERROR_THRESHOLD",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15011, Name=Analog IO / External Temperature Error Limits / Lower Error Threshold]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_ERROR_LIMITS_UPPER_ERROR_THRESHOLD",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_ERROR_LIMITS_UPPER_ERROR_THRESHOLD",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15012, Name=Analog IO / External Temperature Error Limits / Upper Error Threshold]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_GAIN",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15009, Name=Analog IO / External Temperature Input / Calibration Gain]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_CALIBRATION_OFFSET",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15008, Name=Analog IO / External Temperature Input / Calibration Offset]"
+      ]
+    },
+    {
+      "key": "EXTERNAL_TEMPERATURE_INPUT_TEMPERATURE",
+      "label_key": "label_PAR_EXTERNAL_TEMPERATURE_INPUT_TEMPERATURE",
+      "group": "external",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15000, Name=Analog IO / External Temperature Input / Temperature]"
+      ]
+    },
+    {
+      "key": "FIRMWARE_BUILD_TIME",
+      "label_key": "label_PAR_FIRMWARE_BUILD_TIME",
+      "group": "firmware",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=120, Name=System / Firmware Build Time]"
+      ]
+    },
+    {
+      "key": "FLASHTEST_ERASE_PAR_SECTOR",
+      "label_key": "label_PAR_FLASHTEST_ERASE_PAR_SECTOR",
+      "group": "flashtest",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=50000, Name=Debug / FlashTest / Erase Par Sector]"
+      ]
+    },
+    {
+      "key": "GPIO_10_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_10_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 10 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_10_FUNCTION",
+      "label_key": "label_PAR_GPIO_10_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 10 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_10_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_10_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 10 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_1_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_1_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 1 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_1_FUNCTION",
+      "label_key": "label_PAR_GPIO_1_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 1 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_1_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_1_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 1 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_2_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_2_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 2 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_2_FUNCTION",
+      "label_key": "label_PAR_GPIO_2_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 2 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_2_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_2_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 2 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_3_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_3_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 3 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_3_FUNCTION",
+      "label_key": "label_PAR_GPIO_3_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 3 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_3_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_3_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 3 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_4_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_4_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 4 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_4_FUNCTION",
+      "label_key": "label_PAR_GPIO_4_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 4 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_4_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_4_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 4 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_5_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_5_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 5 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_5_FUNCTION",
+      "label_key": "label_PAR_GPIO_5_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 5 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_5_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_5_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 5 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_6_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_6_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 6 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_6_FUNCTION",
+      "label_key": "label_PAR_GPIO_6_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 6 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_6_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_6_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 6 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_7_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_7_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 7 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_7_FUNCTION",
+      "label_key": "label_PAR_GPIO_7_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 7 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_7_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_7_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 7 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_8_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_8_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 8 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_8_FUNCTION",
+      "label_key": "label_PAR_GPIO_8_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 8 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_8_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_8_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 8 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GPIO_9_DEBOUNCE_TIME",
+      "label_key": "label_PAR_GPIO_9_DEBOUNCE_TIME",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2010, Name=Digital IO / GPIO 9 Debounce Time]"
+      ]
+    },
+    {
+      "key": "GPIO_9_FUNCTION",
+      "label_key": "label_PAR_GPIO_9_FUNCTION",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / GPIO 9 Function]"
+      ]
+    },
+    {
+      "key": "GPIO_9_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_GPIO_9_LEVEL_ASSIGNMENT",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / GPIO 9 Level Assignment]"
+      ]
+    },
+    {
+      "key": "GRAPH_CHANNEL_2_TRIGGER_LEVEL",
+      "label_key": "label_PAR_GRAPH_CHANNEL_2_TRIGGER_LEVEL",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23505, Name=LDD / Graph / Channel 2 Trigger Level]"
+      ]
+    },
+    {
+      "key": "GRAPH_LDD_GRAPH_STATUS",
+      "label_key": "label_PAR_GRAPH_LDD_GRAPH_STATUS",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23500, Name=LDD / Graph / LDD Graph Status]"
+      ]
+    },
+    {
+      "key": "GRAPH_LD_CURRENT_TRIGGER_LEVEL",
+      "label_key": "label_PAR_GRAPH_LD_CURRENT_TRIGGER_LEVEL",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23504, Name=LDD / Graph / LD Current Trigger Level]"
+      ]
+    },
+    {
+      "key": "GRAPH_NUMBER_OF_POINTS_TO_RECORD",
+      "label_key": "label_PAR_GRAPH_NUMBER_OF_POINTS_TO_RECORD",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23501, Name=LDD / Graph / Number of Points to Record]"
+      ]
+    },
+    {
+      "key": "GRAPH_TRIGGER_SOURCE",
+      "label_key": "label_PAR_GRAPH_TRIGGER_SOURCE",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23503, Name=LDD / Graph / Trigger Source]"
+      ]
+    },
+    {
+      "key": "GRAPH_VALUE_AVERAGING",
+      "label_key": "label_PAR_GRAPH_VALUE_AVERAGING",
+      "group": "graph",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=23502, Name=LDD / Graph / Value Averaging]"
+      ]
+    },
+    {
+      "key": "HARDWARE_INTERLOCK",
+      "label_key": "label_PAR_HARDWARE_INTERLOCK",
+      "group": "hardware",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=21106, Name=LDD / Hardware Interlock]"
+      ]
+    },
+    {
+      "key": "HARDWARE_TEST_MODE_SELECTOR",
+      "label_key": "label_PAR_HARDWARE_TEST_MODE_SELECTOR",
+      "group": "hardware",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9900, Name=ME Settings / Hardware Test / Mode Selector]"
+      ]
+    },
+    {
+      "key": "HWTEST_GPIO_READ",
+      "label_key": "label_PAR_HWTEST_GPIO_READ",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=9901, Name=Debug / HwTest / GPIO Read]"
+      ]
+    },
+    {
+      "key": "IP_MONITOR_GATEWAY",
+      "label_key": "label_PAR_IP_MONITOR_GATEWAY",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1212, Name=Communication / IP Monitor / Gateway]"
+      ]
+    },
+    {
+      "key": "IP_MONITOR_IP_ADDRESS",
+      "label_key": "label_PAR_IP_MONITOR_IP_ADDRESS",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1210, Name=Communication / IP Monitor / IP Address]"
+      ]
+    },
+    {
+      "key": "IP_MONITOR_NETWORK_MASK",
+      "label_key": "label_PAR_IP_MONITOR_NETWORK_MASK",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1211, Name=Communication / IP Monitor / Network Mask]"
+      ]
+    },
+    {
+      "key": "IP_SETTINGS_DHCP",
+      "label_key": "label_PAR_IP_SETTINGS_DHCP",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1200, Name=Communication / IP Settings / DHCP]"
+      ]
+    },
+    {
+      "key": "IP_SETTINGS_GATEWAY",
+      "label_key": "label_PAR_IP_SETTINGS_GATEWAY",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1203, Name=Communication / IP Settings / Gateway]"
+      ]
+    },
+    {
+      "key": "IP_SETTINGS_IP_ADDRESS",
+      "label_key": "label_PAR_IP_SETTINGS_IP_ADDRESS",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1201, Name=Communication / IP Settings / IP Address]"
+      ]
+    },
+    {
+      "key": "IP_SETTINGS_NETWORK_MASK",
+      "label_key": "label_PAR_IP_SETTINGS_NETWORK_MASK",
+      "group": "ip",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1202, Name=Communication / IP Settings / Network Mask]"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_LDD_CURRENT_CALIBRATION_GAIN",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28021, Name=ME Settings / LDD / Current Calibration Gain]"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_LDD_CURRENT_CALIBRATION_OFFSET",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28020, Name=ME Settings / LDD / Current Calibration Offset]"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_MEASUREMENT_SHUNT",
+      "label_key": "label_PAR_LDD_CURRENT_MEASUREMENT_SHUNT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28000, Name=ME Settings / LDD / Current Measurement Shunt]"
+      ]
+    },
+    {
+      "key": "LDD_DEAD_TIME_H2L",
+      "label_key": "label_PAR_LDD_DEAD_TIME_H2L",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28111, Name=ME Settings / LDD / Dead Time H2L]"
+      ]
+    },
+    {
+      "key": "LDD_DEAD_TIME_L2H",
+      "label_key": "label_PAR_LDD_DEAD_TIME_L2H",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28112, Name=ME Settings / LDD / Dead Time L2H]"
+      ]
+    },
+    {
+      "key": "LDD_LPC_MODE",
+      "label_key": "label_PAR_LDD_LPC_MODE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29000, Name=LDD / LDD/LPC mode]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_1_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_1_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28121, Name=ME Settings / LDD / Phase 1 Enable]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_2_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_2_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28122, Name=ME Settings / LDD / Phase 2 Enable]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_3_ENABLE",
+      "label_key": "label_PAR_LDD_PHASE_3_ENABLE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28123, Name=ME Settings / LDD / Phase 3 Enable]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_ERROR_FAST_THRESHOLD",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_FAST_THRESHOLD",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28202, Name=ME Settings / LDD / Phase Error Fast Threshold]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_ERROR_SLOW_COUNT",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_SLOW_COUNT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28200, Name=ME Settings / LDD / Phase Error Slow Count]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_ERROR_SLOW_THRESHOLD",
+      "label_key": "label_PAR_LDD_PHASE_ERROR_SLOW_THRESHOLD",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28201, Name=ME Settings / LDD / Phase Error Slow Threshold]"
+      ]
+    },
+    {
+      "key": "LDD_PHASE_RESOLUTION",
+      "label_key": "label_PAR_LDD_PHASE_RESOLUTION",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28114, Name=ME Settings / LDD / Phase Resolution]"
+      ]
+    },
+    {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_1",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28101, Name=Debug / LDD Symmetry Levels / Phase 1]"
+      ]
+    },
+    {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_2",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_2",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28102, Name=Debug / LDD Symmetry Levels / Phase 2]"
+      ]
+    },
+    {
+      "key": "LDD_SYMMETRY_LEVELS_PHASE_3",
+      "label_key": "label_PAR_LDD_SYMMETRY_LEVELS_PHASE_3",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=28103, Name=Debug / LDD Symmetry Levels / Phase 3]"
+      ]
+    },
+    {
+      "key": "LDD_TEMPERATURE_LIMIT",
+      "label_key": "label_PAR_LDD_TEMPERATURE_LIMIT",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1003, Name=ME Settings / LDD / Temperature Limit]"
+      ]
+    },
+    {
+      "key": "LDD_UNIQUE_ID",
+      "label_key": "label_PAR_LDD_UNIQUE_ID",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=200, Name=System / LDD Unique ID]"
+      ]
+    },
+    {
+      "key": "LDD_VLD_OFFSET",
+      "label_key": "label_PAR_LDD_VLD_OFFSET",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20002, Name=ME Settings / LDD / VLD Offset]"
+      ]
+    },
+    {
+      "key": "LED_0_FUNCTION",
+      "label_key": "label_PAR_LED_0_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 0 Function]"
+      ]
+    },
+    {
+      "key": "LED_0_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_0_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 0 Level Assignment]"
+      ]
+    },
+    {
+      "key": "LED_1_FUNCTION",
+      "label_key": "label_PAR_LED_1_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 1 Function]"
+      ]
+    },
+    {
+      "key": "LED_1_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_1_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 1 Level Assignment]"
+      ]
+    },
+    {
+      "key": "LED_2_FUNCTION",
+      "label_key": "label_PAR_LED_2_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 2 Function]"
+      ]
+    },
+    {
+      "key": "LED_2_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_2_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 2 Level Assignment]"
+      ]
+    },
+    {
+      "key": "LED_3_FUNCTION",
+      "label_key": "label_PAR_LED_3_FUNCTION",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2000, Name=Digital IO / LED 3 Function]"
+      ]
+    },
+    {
+      "key": "LED_3_LEVEL_ASSIGNMENT",
+      "label_key": "label_PAR_LED_3_LEVEL_ASSIGNMENT",
+      "group": "led",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=2020, Name=Digital IO / LED 3 Level Assignment]"
+      ]
+    },
+    {
+      "key": "LOOKUP_TABLE_SAMPLE_RATE",
+      "label_key": "label_PAR_LOOKUP_TABLE_SAMPLE_RATE",
+      "group": "lookup",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22210, Name=LDD / Lookup Table / Sample Rate]"
+      ]
+    },
+    {
+      "key": "LPC_ACTUAL_OUTPUT_POWER",
+      "label_key": "label_PAR_LPC_ACTUAL_OUTPUT_POWER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29010, Name=LDD / LPC / Actual Output Power]"
+      ]
+    },
+    {
+      "key": "LPC_CONSTANT_POWER_CW_POWER",
+      "label_key": "label_PAR_LPC_CONSTANT_POWER_CW_POWER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30150, Name=LDD / LPC / Constant Power / CW Power]"
+      ]
+    },
+    {
+      "key": "LPC_CURRENT_SOURCE_SELECTOR",
+      "label_key": "label_PAR_LPC_CURRENT_SOURCE_SELECTOR",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30000, Name=LDD / LPC / Current Source Selector]"
+      ]
+    },
+    {
+      "key": "LPC_EXTERNAL_INPUT_OFFSET",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_OFFSET",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30161, Name=LDD / LPC / External Input Offset]"
+      ]
+    },
+    {
+      "key": "LPC_EXTERNAL_INPUT_SCALING",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_SCALING",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30160, Name=LDD / LPC / External Input Scaling]"
+      ]
+    },
+    {
+      "key": "LPC_EXTERNAL_INPUT_SELECT",
+      "label_key": "label_PAR_LPC_EXTERNAL_INPUT_SELECT",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30170, Name=LDD / LPC / External Input Select]"
+      ]
+    },
+    {
+      "key": "LPC_LOOKUP_TABLE_SAMPLE_RATE",
+      "label_key": "label_PAR_LPC_LOOKUP_TABLE_SAMPLE_RATE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30210, Name=LDD / LPC / Lookup Table / Sample Rate]"
+      ]
+    },
+    {
+      "key": "LPC_SCALE",
+      "label_key": "label_PAR_LPC_SCALE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29006, Name=LDD / LPC / Scale]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_AMPLITUDE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_AMPLITUDE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30101, Name=LDD / LPC / Signal Generator / Amplitude]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30105, Name=LDD / LPC / Signal Generator / Duty Cycle]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_FREQUENCY",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_FREQUENCY",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30103, Name=LDD / LPC / Signal Generator / Frequency]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_OFFSET",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_OFFSET",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30102, Name=LDD / LPC / Signal Generator / Offset]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_TRIGGER",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_TRIGGER",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30104, Name=LDD / LPC / Signal Generator / Trigger]"
+      ]
+    },
+    {
+      "key": "LPC_SIGNAL_GENERATOR_WAVE",
+      "label_key": "label_PAR_LPC_SIGNAL_GENERATOR_WAVE",
+      "group": "lpc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=30100, Name=LDD / LPC / Signal Generator / Wave]"
+      ]
+    },
+    {
+      "key": "MODE_SELECTOR",
+      "label_key": "label_PAR_MODE_SELECTOR",
+      "group": "mode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22400, Name=LDD / Mode Selector]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R1",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R1",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15005, Name=Analog IO / NTC Sensor Characteristics / R1]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R2",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R2",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15006, Name=Analog IO / NTC Sensor Characteristics / R2]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_R3",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_R3",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15007, Name=Analog IO / NTC Sensor Characteristics / R3]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T1",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T1",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15002, Name=Analog IO / NTC Sensor Characteristics / T1]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T2",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T2",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15003, Name=Analog IO / NTC Sensor Characteristics / T2]"
+      ]
+    },
+    {
+      "key": "NTC_SENSOR_CHARACTERISTICS_T3",
+      "label_key": "label_PAR_NTC_SENSOR_CHARACTERISTICS_T3",
+      "group": "ntc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=15004, Name=Analog IO / NTC Sensor Characteristics / T3]"
+      ]
+    },
+    {
+      "key": "PAR_55000",
+      "label_key": "label_PAR_PAR_55000",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55000, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55001",
+      "label_key": "label_PAR_PAR_55001",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55001, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55002",
+      "label_key": "label_PAR_PAR_55002",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55002, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55003",
+      "label_key": "label_PAR_PAR_55003",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55003, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55004",
+      "label_key": "label_PAR_PAR_55004",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55004, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55005",
+      "label_key": "label_PAR_PAR_55005",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55005, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55006",
+      "label_key": "label_PAR_PAR_55006",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55006, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55007",
+      "label_key": "label_PAR_PAR_55007",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55007, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55008",
+      "label_key": "label_PAR_PAR_55008",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55008, Name=]"
+      ]
+    },
+    {
+      "key": "PAR_55009",
+      "label_key": "label_PAR_PAR_55009",
+      "group": "par",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=55009, Name=]"
+      ]
+    },
+    {
+      "key": "PD_RF_RESISTOR",
+      "label_key": "label_PAR_PD_RF_RESISTOR",
+      "group": "pd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29007, Name=ME Settings / PD / Rf Resistor]"
+      ]
+    },
+    {
+      "key": "PHOTODIODE_INPUT_CALIBRATION_GAIN",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_CALIBRATION_GAIN",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29005, Name=Analog IO / Photodiode Input / Calibration Gain]"
+      ]
+    },
+    {
+      "key": "PHOTODIODE_INPUT_CALIBRATION_OFFSET",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_CALIBRATION_OFFSET",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29004, Name=Analog IO / Photodiode Input / Calibration Offset]"
+      ]
+    },
+    {
+      "key": "PHOTODIODE_INPUT_PHOTOCURRENT",
+      "label_key": "label_PAR_PHOTODIODE_INPUT_PHOTOCURRENT",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=29009, Name=Analog IO / Photodiode Input / Photocurrent]"
+      ]
+    },
+    {
+      "key": "PULSE_NR_OF_PULSES",
+      "label_key": "label_PAR_PULSE_NR_OF_PULSES",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22405, Name=LDD / Pulse / Nr of Pulses]"
+      ]
+    },
+    {
+      "key": "PULSE_OFF_TIME",
+      "label_key": "label_PAR_PULSE_OFF_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22403, Name=LDD / Pulse / Off Time]"
+      ]
+    },
+    {
+      "key": "PULSE_ON_TIME",
+      "label_key": "label_PAR_PULSE_ON_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22402, Name=LDD / Pulse / On Time]"
+      ]
+    },
+    {
+      "key": "PULSE_POST_TIME",
+      "label_key": "label_PAR_PULSE_POST_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22404, Name=LDD / Pulse / Post Time]"
+      ]
+    },
+    {
+      "key": "PULSE_PRE_TIME",
+      "label_key": "label_PAR_PULSE_PRE_TIME",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22401, Name=LDD / Pulse / Pre Time]"
+      ]
+    },
+    {
+      "key": "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_DELAY",
+      "label_key": "label_PAR_PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_DELAY",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22407, Name=Advanced Settings / Pulse Settings / Pulse Trigger Monitor Delay]"
+      ]
+    },
+    {
+      "key": "PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_LENGTH",
+      "label_key": "label_PAR_PULSE_SETTINGS_PULSE_TRIGGER_MONITOR_LENGTH",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22408, Name=Advanced Settings / Pulse Settings / Pulse Trigger Monitor Length]"
+      ]
+    },
+    {
+      "key": "PULSE_TRIGGER_SELECTION",
+      "label_key": "label_PAR_PULSE_TRIGGER_SELECTION",
+      "group": "pulse",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22406, Name=LDD / Pulse / Trigger selection]"
+      ]
+    },
+    {
+      "key": "RESET_SETTINGS_RESET_ON_CHANGE",
+      "label_key": "label_PAR_RESET_SETTINGS_RESET_ON_CHANGE",
+      "group": "reset",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22220, Name=Advanced Settings / Reset Settings / Reset on change]"
+      ]
+    },
+    {
+      "key": "RESPONSE_DELAY_US",
+      "label_key": "label_PAR_RESPONSE_DELAY_US",
+      "group": "response",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3042, Name=Communication / Response Delay [us]]"
+      ]
+    },
+    {
+      "key": "RS485_DEVICE_ADDRESS",
+      "label_key": "label_PAR_RS485_DEVICE_ADDRESS",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=3040, Name=Communication / RS485 Device Address]"
+      ]
+    },
+    {
+      "key": "SHORT_PID_KP",
+      "label_key": "label_PAR_SHORT_PID_KP",
+      "group": "short",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27003, Name=ME Settings / Short PID / Kp]"
+      ]
+    },
+    {
+      "key": "SHORT_PID_TD",
+      "label_key": "label_PAR_SHORT_PID_TD",
+      "group": "short",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27005, Name=ME Settings / Short PID / Td]"
+      ]
+    },
+    {
+      "key": "SHORT_PID_TI",
+      "label_key": "label_PAR_SHORT_PID_TI",
+      "group": "short",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=27004, Name=ME Settings / Short PID / Ti]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_AMPLITUDE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_AMPLITUDE",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22101, Name=LDD / Signal Generator / Amplitude]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_DUTY_CYCLE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_DUTY_CYCLE",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22105, Name=LDD / Signal Generator / Duty Cycle]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_FREQUENCY",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_FREQUENCY",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22103, Name=LDD / Signal Generator / Frequency]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_OFFSET",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_OFFSET",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22102, Name=LDD / Signal Generator / Offset]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_TRIGGER",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_TRIGGER",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22104, Name=LDD / Signal Generator / Trigger]"
+      ]
+    },
+    {
+      "key": "SIGNAL_GENERATOR_WAVE",
+      "label_key": "label_PAR_SIGNAL_GENERATOR_WAVE",
+      "group": "signal",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=22100, Name=LDD / Signal Generator / Wave]"
+      ]
+    },
+    {
+      "key": "SUPPLY_DRIVER_INPUT_VOLTAGE",
+      "label_key": "label_PAR_SUPPLY_DRIVER_INPUT_VOLTAGE",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1010, Name=Power / Supply / Driver Input Voltage]"
+      ]
+    },
+    {
+      "key": "SUPPLY_INTERNAL_3_3V",
+      "label_key": "label_PAR_SUPPLY_INTERNAL_3_3V",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1015, Name=Power / Supply / Internal 3.3V]"
+      ]
+    },
+    {
+      "key": "SUPPLY_INTERNAL_5V",
+      "label_key": "label_PAR_SUPPLY_INTERNAL_5V",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1019, Name=Power / Supply / Internal 5V]"
+      ]
+    },
+    {
+      "key": "SUPPLY_PHASE_1_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_1_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20008, Name=Power / Supply / Phase 1 Current]"
+      ]
+    },
+    {
+      "key": "SUPPLY_PHASE_2_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_2_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20009, Name=Power / Supply / Phase 2 Current]"
+      ]
+    },
+    {
+      "key": "SUPPLY_PHASE_3_CURRENT",
+      "label_key": "label_PAR_SUPPLY_PHASE_3_CURRENT",
+      "group": "supply",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=20010, Name=Power / Supply / Phase 3 Current]"
+      ]
+    },
+    {
+      "key": "SYSTEM_DEVICE_TYPE",
+      "label_key": "label_PAR_SYSTEM_DEVICE_TYPE",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=100, Name=ME Settings / System / Device Type]"
+      ]
+    },
+    {
+      "key": "SYSTEM_HARDWARE_VERSION",
+      "label_key": "label_PAR_SYSTEM_HARDWARE_VERSION",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=101, Name=ME Settings / System / Hardware Version]"
+      ]
+    },
+    {
+      "key": "SYSTEM_PHOTO_DIODE_INPUT",
+      "label_key": "label_PAR_SYSTEM_PHOTO_DIODE_INPUT",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=107, Name=ME Settings / System / Photo Diode Input]"
+      ]
+    },
+    {
+      "key": "SYSTEM_PULSE_TYPE",
+      "label_key": "label_PAR_SYSTEM_PULSE_TYPE",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=103, Name=ME Settings / System / Pulse Type]"
+      ]
+    },
+    {
+      "key": "SYSTEM_SERIAL_NUMBER_BOARD",
+      "label_key": "label_PAR_SYSTEM_SERIAL_NUMBER_BOARD",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=102, Name=ME Settings / System / Serial Number Board]"
+      ]
+    },
+    {
+      "key": "SYSTEM_SERIAL_NUMBER_ZYNQ",
+      "label_key": "label_PAR_SYSTEM_SERIAL_NUMBER_ZYNQ",
+      "group": "system",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=106, Name=ME Settings / System / Serial Number Zynq]"
+      ]
+    },
+    {
+      "key": "ZYNQ_TEMPERATURE",
+      "label_key": "label_PAR_ZYNQ_TEMPERATURE",
+      "group": "zynq",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1137 Software v150 MSI payload:LDD-1137 Default Configuration 5249F.xml:Parameter[MeParID=1001, Name=System / Zynq Temperature]"
+      ]
+    }
+  ],
+  "safety_policy": "Advanced LDD source entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review."
+}

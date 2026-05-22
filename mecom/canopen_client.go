@@ -26,6 +26,8 @@ type CANopenClient struct {
 	sdoMap  *CANopenSDOMap
 }
 
+// NewCANopenClient creates a CANopen SDO client over the given CAN transceiver.
+// If cfg.SDOMap is nil, the embedded TEC SDO map is used as the default.
 func NewCANopenClient(rw CANTransceiver, cfg ClientConfig) *CANopenClient {
 	timeout := cfg.Timeout
 	if timeout == 0 {
@@ -51,10 +53,16 @@ func (c *CANopenClient) ReadInt32(ctx context.Context, paramID, instance int) (i
 }
 
 func (c *CANopenClient) ReadBulk(ctx context.Context, params []Parameter) ([]float64, error) {
+	if err := validateParameterList(params); err != nil {
+		return nil, err
+	}
 	values := make([]float64, 0, len(params))
 	for _, param := range params {
 		value, err := c.readNumeric(ctx, param.ID, param.Instance)
 		if err != nil {
+			if readBulkShouldReturnError(ctx, err) {
+				return values, err
+			}
 			values = append(values, math.NaN())
 			continue
 		}
@@ -67,7 +75,7 @@ func (c *CANopenClient) ReadBulk(ctx context.Context, params []Parameter) ([]flo
 // expedited SDO download. The parameter must be present in the MeCom↔CANopen
 // mapping and marked writable.
 func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
-	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(ctx, paramID, instance)
 	if !ok {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
@@ -84,7 +92,7 @@ func (c *CANopenClient) WriteFloat32(ctx context.Context, paramID, instance int,
 
 // WriteInt32 writes a 32-bit signed integer value via an expedited SDO download.
 func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
-	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(ctx, paramID, instance)
 	if !ok {
 		return fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
@@ -164,7 +172,7 @@ func (c *CANopenClient) ReadRingChunk(context.Context, uint32, uint16) (RingRead
 }
 
 func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) (float64, error) {
-	object, ok := c.canopenSDOObjectForMeCom(paramID, instance)
+	object, ok := c.canopenSDOObjectForMeCom(ctx, paramID, instance)
 	if !ok {
 		return math.NaN(), fmt.Errorf("%w: parameter %d instance %d", ErrUnknownParameter, paramID, instance)
 	}
@@ -222,7 +230,12 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	}
 }
 
-func (c *CANopenClient) canopenSDOObjectForMeCom(paramID, instance int) (CANopenSDOObject, bool) {
+func (c *CANopenClient) canopenSDOObjectForMeCom(ctx context.Context, paramID, instance int) (CANopenSDOObject, bool) {
+	if ctx != nil {
+		if m, ok := SDOMapFromContext(ctx); ok {
+			return m.ObjectForMeCom(paramID, instance)
+		}
+	}
 	if c.sdoMap != nil {
 		return c.sdoMap.ObjectForMeCom(paramID, instance)
 	}

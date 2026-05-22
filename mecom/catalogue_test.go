@@ -17,7 +17,7 @@ func TestBuildMeComTECCatalogueUsesChannelCountWithoutEightSpotAssumption(t *tes
 	if err := catalogue.Validate(); err != nil {
 		t.Fatalf("catalogue did not validate: %v", err)
 	}
-	if catalogue.SourceID != "bench_mecom" || catalogue.SourceFamily != graphsem.SourceFamilyMeComTec {
+	if catalogue.SourceID != "bench_mecom" || catalogue.SourceFamily != DefaultTECCatalogueDefinition().SourceFamily {
 		t.Fatalf("catalogue identity = %q/%q", catalogue.SourceID, catalogue.SourceFamily)
 	}
 	if got, want := len(catalogue.Entries), 48; got != want {
@@ -30,6 +30,151 @@ func TestBuildMeComTECCatalogueUsesChannelCountWithoutEightSpotAssumption(t *tes
 		if entry.SourceSubject != "telemetry.v4.local.lab.bench1.mecom.live" {
 			t.Fatalf("source subject drifted to %q", entry.SourceSubject)
 		}
+	}
+}
+
+func TestBuildMeComCatalogueCarriesFamilyAwareDefinitionMetadata(t *testing.T) {
+	catalogue := BuildMeComCatalogue(MeComCatalogueConfig{
+		Definition:   DefaultTECCatalogueDefinition(),
+		ChannelCount: 1,
+	})
+
+	if err := catalogue.Validate(); err != nil {
+		t.Fatalf("catalogue did not validate: %v", err)
+	}
+	row := findCatalogueEntry(t, catalogue, "mecom.tec_01.object_temp_c")
+	if row.Metadata["definition_ref"] != "meerstetter.tec.v631" ||
+		row.Metadata["definition_system"] != MeComDefinitionSystem ||
+		row.Metadata["definition_family"] != MeerstetterDefinitionFamily ||
+		row.Metadata["definition_sub_family"] != MeerstetterSubFamilyTEC ||
+		row.Metadata["definition_version"] != "v631" {
+		t.Fatalf("definition metadata = %#v", row.Metadata)
+	}
+
+	entries := DefaultTECCatalogueEntries(1)
+	entry := findTECCatalogueProtocolEntry(t, entries, 1000, 1)
+	if entry.Metadata["definition_ref"] != "meerstetter.tec.v631" {
+		t.Fatalf("runtime catalogue definition metadata = %#v", entry.Metadata)
+	}
+}
+
+func TestDefaultLDD130xCatalogueEntriesExposeProtocolCheckedMetadata(t *testing.T) {
+	entries := DefaultLDD130xCatalogueEntries(4)
+	if got, want := len(entries), 275; got < want {
+		t.Fatalf("LDD catalogue entries = %d, want at least %d", got, want)
+	}
+	for _, entry := range entries {
+		if entry.Instance != 1 {
+			t.Fatalf("LDD entry %s instance = %d, want one device-level instance", entry.RawName, entry.Instance)
+		}
+		if entry.Metadata["definition_ref"] != "meerstetter.ldd_130x.v221" ||
+			entry.Metadata["definition_family"] != MeerstetterDefinitionFamily ||
+			entry.Metadata["definition_sub_family"] != MeerstetterSubFamilyLDD ||
+			entry.Metadata["definition_variant"] != MeerstetterVariantLDD130x {
+			t.Fatalf("LDD entry %s definition metadata = %#v", entry.RawName, entry.Metadata)
+		}
+	}
+
+	outputEnable := findTECCatalogueRawName(t, entries, "LDD_OUTPUT_EN")
+	if outputEnable.ID != 2100 ||
+		outputEnable.Access != "metadata" ||
+		outputEnable.Role != "control" ||
+		outputEnable.PreferredReadout != "definition_catalogue" ||
+		outputEnable.SourceStatus != "protocol_documented" {
+		t.Fatalf("LDD output enable row = %#v", outputEnable)
+	}
+	if outputEnable.Metadata["protocol_ids"] != "2100" ||
+		outputEnable.Metadata["canopen_indices"] != "0x2230" {
+		t.Fatalf("LDD output enable protocol metadata = %#v", outputEnable.Metadata)
+	}
+	if !strings.Contains(outputEnable.Help, "Output Enable") || !containsString(outputEnable.ApplicableModes, "ldd") {
+		t.Fatalf("LDD output enable help/modes = %q / %#v", outputEnable.Help, outputEnable.ApplicableModes)
+	}
+
+	minVoltage := findTECCatalogueRawName(t, entries, "LDD_VOLTAGE_LIMIT_MIN")
+	if minVoltage.Unit != "V" ||
+		minVoltage.Metadata["protocol_ids"] != "2125" ||
+		minVoltage.Metadata["canopen_indices"] != "0x2255" ||
+		minVoltage.Metadata["documentation_cross_check"] != "min_nominal_voltage_protocol_mapping" {
+		t.Fatalf("LDD minimum-voltage metadata = unit:%q metadata:%#v", minVoltage.Unit, minVoltage.Metadata)
+	}
+
+	featureLimitBypass := findTECCatalogueRawName(t, entries, "IGNORE_FEATURE_FIRMW_LIM")
+	if featureLimitBypass.SourceStatus != "service_software_only" ||
+		featureLimitBypass.Role != "metadata" ||
+		!containsString(featureLimitBypass.ApplicableModes, "metadata") ||
+		!strings.Contains(featureLimitBypass.SafetyNote, "metadata candidates") {
+		t.Fatalf("LDD service-only bypass row = %#v", featureLimitBypass)
+	}
+
+	featureKeyStore := findTECCatalogueRawName(t, entries, "FEATURE_KEY_STORE")
+	if featureKeyStore.ID != 54000 ||
+		featureKeyStore.SourceStatus != "protocol_documented" ||
+		featureKeyStore.Metadata["documentation_cross_check"] != "feature_unlock_license_metadata" {
+		t.Fatalf("LDD feature key store row = %#v metadata=%#v", featureKeyStore, featureKeyStore.Metadata)
+	}
+}
+
+func TestBuildMeComCatalogueUsesDefinitionTracePrefix(t *testing.T) {
+	definition := DefaultTECCatalogueDefinition()
+	definition.TracePrefix = "fixture.meerstetter.tec"
+	definition.SourceFamily = graphsem.SourceFamily("fixture_meerstetter")
+	definition.DefaultSourceID = "fixture_meerstetter"
+	definition.DefinitionID = "fixture.meerstetter.tec.v1"
+
+	catalogue := BuildMeComCatalogue(MeComCatalogueConfig{
+		Definition:   definition,
+		ChannelCount: 1,
+	})
+
+	if catalogue.SourceFamily != graphsem.SourceFamily("fixture_meerstetter") {
+		t.Fatalf("source family = %q", catalogue.SourceFamily)
+	}
+	row := findCatalogueEntry(t, catalogue, "fixture.meerstetter.tec_01.object_temp_c")
+	if strings.HasPrefix(row.TraceID, "mecom.tec_") {
+		t.Fatalf("trace id still uses hardcoded TEC prefix: %q", row.TraceID)
+	}
+	if row.Metadata["definition_ref"] != "fixture.meerstetter.tec.v1" {
+		t.Fatalf("definition metadata = %#v", row.Metadata)
+	}
+
+	readouts := DefaultMeComReadoutParameters(definition, 1)
+	if len(readouts) == 0 {
+		t.Fatalf("readout sensor prefix missing")
+	}
+	if readouts[0].Sensor != "fixture.meerstetter.tec_01.object_temp_c" {
+		t.Fatalf("readout sensor prefix = %q", readouts[0].Sensor)
+	}
+}
+
+func TestResolveMeComCatalogueDefinitionRecognizesOpenSubFamilies(t *testing.T) {
+	cases := []struct {
+		subFamily        string
+		wantSub          string
+		wantVar          string
+		wantSourceFamily graphsem.SourceFamily
+	}{
+		{subFamily: "", wantSub: MeerstetterSubFamilyTEC, wantVar: MeerstetterSubFamilyTEC, wantSourceFamily: graphsem.SourceFamily(DefaultMeComTECCatalogueSourceID)},
+		{subFamily: "tec", wantSub: MeerstetterSubFamilyTEC, wantVar: MeerstetterSubFamilyTEC, wantSourceFamily: graphsem.SourceFamily(DefaultMeComTECCatalogueSourceID)},
+		{subFamily: "ldd", wantSub: MeerstetterSubFamilyLDD, wantVar: MeerstetterSubFamilyLDD, wantSourceFamily: graphsem.SourceFamily("mecom_ldd")},
+		{subFamily: "LDD-130x", wantSub: MeerstetterSubFamilyLDD, wantVar: MeerstetterVariantLDD130x, wantSourceFamily: graphsem.SourceFamily("mecom_ldd_130x")},
+		{subFamily: "daq", wantSub: MeerstetterSubFamilyDAQ, wantVar: MeerstetterSubFamilyDAQ, wantSourceFamily: graphsem.SourceFamily("mecom_daq")},
+	}
+	for _, tc := range cases {
+		definition, ok := ResolveMeComCatalogueDefinition("", "", tc.subFamily)
+		if !ok {
+			t.Fatalf("definition %q did not resolve", tc.subFamily)
+		}
+		if definition.System != MeComDefinitionSystem ||
+			definition.Family != MeerstetterDefinitionFamily ||
+			definition.SubFamily != tc.wantSub ||
+			definition.Variant != tc.wantVar ||
+			definition.SourceFamily != tc.wantSourceFamily {
+			t.Fatalf("definition %q = %#v", tc.subFamily, definition)
+		}
+	}
+	if _, ok := ResolveMeComCatalogueDefinition("", "", "unknown"); ok {
+		t.Fatalf("unexpected resolution for unknown subfamily")
 	}
 }
 
@@ -240,6 +385,26 @@ func findTECCatalogueProtocolEntry(t *testing.T, entries []TECCatalogueEntry, id
 	}
 	t.Fatalf("missing TEC catalogue entry %d:%d", id, instance)
 	return TECCatalogueEntry{}
+}
+
+func findTECCatalogueRawName(t *testing.T, entries []TECCatalogueEntry, rawName string) TECCatalogueEntry {
+	t.Helper()
+	for _, entry := range entries {
+		if entry.RawName == rawName {
+			return entry
+		}
+	}
+	t.Fatalf("missing TEC catalogue entry raw name %q", rawName)
+	return TECCatalogueEntry{}
+}
+
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func assertCounterpart(t *testing.T, entry TECCatalogueEntry, role string, ids ...int) {

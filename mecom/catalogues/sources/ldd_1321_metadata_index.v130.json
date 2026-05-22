@@ -1,0 +1,2337 @@
+{
+  "schema_version": "mecom_ldd_1321_metadata_index.v1",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_1321.v130",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1321",
+    "version": "v130"
+  },
+  "sources": [
+    {
+      "id": "ldd_1321_default_config",
+      "path": "5293D LDD-1321 Default Configuration.ini",
+      "method": "parsed [SRV_PAR] key/value defaults",
+      "status": "harvested",
+      "sha256": "6c387f36462bff0517fdcb70967f14d6f20fbc8a2029a2c63ca771ca6b9faaf1",
+      "bytes": 7267,
+      "text_encoding": "ascii",
+      "parameter_count": 222
+    },
+    {
+      "id": "ldd_1321_canopen_eds",
+      "path": "LDD-1321 STM32 v1.30 CanOpen.eds",
+      "method": "parsed CANopen EDS object dictionary",
+      "status": "harvested",
+      "sha256": "10170b4af33927659ff925d5bfbbe751f1596ce9d1eb4f108ddf0185c90042b3",
+      "bytes": 135171,
+      "text_encoding": "utf-8-sig",
+      "object_count": 278
+    },
+    {
+      "id": "ldd_1321_service_software",
+      "path": "ServiceSoftware.exe",
+      "method": "resource string scan for UI label keys, parameter context, paths, and tooltip-like notes",
+      "status": "harvested",
+      "sha256": "83b5f04b6526ad605887a9cfabd293e99593a0d9ffc3b197bcec93181c61e65d",
+      "bytes": 626112,
+      "text_encoding": "utf-16le",
+      "strings_output_encoding": "ascii",
+      "label_count": 298,
+      "software_only_label_count": 77,
+      "parameter_context_count": 298,
+      "parameter_path_count": 79,
+      "ui_note_count": 35,
+      "ui_string_count": 885
+    },
+    {
+      "id": "ldd_1321_ui_metadata",
+      "path": "ldd_1321_ui_metadata.v130.json",
+      "method": "generated source JSON from ServiceSoftware resource strings",
+      "status": "generated",
+      "text_encoding": "utf-8",
+      "parameter_context_count": 298,
+      "parameter_path_count": 79,
+      "ui_note_count": 35,
+      "ui_string_count": 885
+    },
+    {
+      "id": "ldd_1321_release_notes",
+      "path": "LDD-1321 Software Release Notes 5299F.pdf",
+      "method": "pdftotext release-note parse",
+      "status": "harvested",
+      "sha256": "1af5f36b7cf3a07479d5d03e665d6a27acb4a3b7cea0ecebd4e792d0b606572a",
+      "bytes": 320380,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_1321_communication_protocol",
+      "path": "LDD-130x Communication Protocol 5260H.pdf",
+      "method": "pdftotext protocol cross-check against generated LDD catalogue sources",
+      "status": "cross_checked",
+      "sha256": "cd309209c37197be77e18d86937ed6038f7b5411f8244add20a2dc15f6eaa6df",
+      "bytes": 1914112,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_1321_user_manual",
+      "path": "LDD-130x User Manual 5261H.pdf",
+      "method": "pdftotext manual cross-check for tooltip-like UI metadata",
+      "status": "cross_checked",
+      "sha256": "45a6f6a38f8ca30370dfc22f29a8e759dde93a900fb1a470c3f49d3ff254dc5b",
+      "bytes": 1539432,
+      "text_encoding": "utf-8"
+    },
+    {
+      "id": "ldd_1321_firmware_hex",
+      "path": "LDD-132x STM32 v1.30.hex",
+      "method": "packaged firmware image; retained as provenance only",
+      "status": "available",
+      "sha256": "07dcaa64cc40341ec40fb91d085ee6e87b01ee92fb4b2e6986bef85e4148f2f6",
+      "bytes": 440995
+    },
+    {
+      "id": "ldd_1321_lookup_table_example",
+      "path": "LookupTable Example.csv",
+      "method": "packaged CSV example; retained as lookup table provenance",
+      "status": "available",
+      "sha256": "04e72a79d2f3dd0862290a8b4ba3867e47ae13eab0a6d28f89ec46ed63251032",
+      "bytes": 5944,
+      "text_encoding": "ascii"
+    },
+    {
+      "id": "ldd_1321_lookup_table_example_xlsx",
+      "path": "LookupTable Example.xlsx",
+      "method": "packaged XLSX example; retained as lookup table provenance only",
+      "status": "available",
+      "sha256": "f9e9d30115a15f43313543722d3e61e0d8480afcca73e8e03530bbb996890627",
+      "bytes": 28164
+    }
+  ],
+  "software_labels": [
+    "label_PAR_ANALOG_IN_IV_FACTOR",
+    "label_PAR_ANALOG_IN_RAW_ADC",
+    "label_PAR_ANALOG_IN_VOLTAGE",
+    "label_PAR_AUTORESET_TIME",
+    "label_PAR_CANOPEN_BITRATE",
+    "label_PAR_CANOPEN_CAN1EN",
+    "label_PAR_CANOPEN_NODEID",
+    "label_PAR_CONNECT_WATCH_DOG",
+    "label_PAR_DEBUG_TEC_ABS_PWM_LA",
+    "label_PAR_DEBUG_TEC_ABS_PWM_LB",
+    "label_PAR_DEBUG_TEC_IA",
+    "label_PAR_DEBUG_TEC_IB",
+    "label_PAR_DEBUG_TEC_REL_PWM_LEV",
+    "label_PAR_DEBUG_TEC_UA",
+    "label_PAR_DEBUG_TEC_UB",
+    "label_PAR_DEVICE_TYPE",
+    "label_PAR_ERROR_INSTANCE",
+    "label_PAR_ERROR_PARAMETER",
+    "label_PAR_EXTT_ADCADJ_A01",
+    "label_PAR_EXTT_ADCADJ_A02",
+    "label_PAR_EXTT_ADCADJ_A11",
+    "label_PAR_EXTT_ADCADJ_A12",
+    "label_PAR_EXTT_ADC_OBSERVE1",
+    "label_PAR_EXTT_ADC_OBSERVE2",
+    "label_PAR_EXTT_MAX_R1",
+    "label_PAR_EXTT_MAX_R2",
+    "label_PAR_EXTT_MAX_T1",
+    "label_PAR_EXTT_MAX_T2",
+    "label_PAR_EXTT_MIN_R1",
+    "label_PAR_EXTT_MIN_R2",
+    "label_PAR_EXTT_MIN_T1",
+    "label_PAR_EXTT_MIN_T2",
+    "label_PAR_EXTT_NTC_R11",
+    "label_PAR_EXTT_NTC_R12",
+    "label_PAR_EXTT_NTC_R21",
+    "label_PAR_EXTT_NTC_R22",
+    "label_PAR_EXTT_NTC_R31",
+    "label_PAR_EXTT_NTC_R32",
+    "label_PAR_EXTT_NTC_T11",
+    "label_PAR_EXTT_NTC_T12",
+    "label_PAR_EXTT_NTC_T21",
+    "label_PAR_EXTT_NTC_T22",
+    "label_PAR_EXTT_NTC_T31",
+    "label_PAR_EXTT_NTC_T32",
+    "label_PAR_EXTT_R1",
+    "label_PAR_EXTT_R2",
+    "label_PAR_EXTT_RAW_ADC1",
+    "label_PAR_EXTT_RAW_ADC2",
+    "label_PAR_EXTT_TADJ_A01",
+    "label_PAR_EXTT_TADJ_A02",
+    "label_PAR_EXTT_TADJ_A11",
+    "label_PAR_EXTT_TADJ_A12",
+    "label_PAR_EXTT_TEMPERATURE1",
+    "label_PAR_EXTT_TEMPERATURE2",
+    "label_PAR_EXTT_TEMP_OBSERVE1",
+    "label_PAR_EXTT_TEMP_OBSERVE2",
+    "label_PAR_EXTT_TEMP_OVER1",
+    "label_PAR_EXTT_TEMP_OVER2",
+    "label_PAR_EXTT_TEMP_UNDER1",
+    "label_PAR_EXTT_TEMP_UNDER2",
+    "label_PAR_EXTV_ADCADJ_A0",
+    "label_PAR_EXTV_ADCADJ_A1",
+    "label_PAR_EXTV_VADJ_A0",
+    "label_PAR_EXTV_VADJ_A1",
+    "label_PAR_FAN_ACT_SPEED1",
+    "label_PAR_FAN_ACT_SPEED2",
+    "label_PAR_FAN_ENABLE1",
+    "label_PAR_FAN_ENABLE2",
+    "label_PAR_FAN_ERROR_DISABLE1",
+    "label_PAR_FAN_ERROR_DISABLE2",
+    "label_PAR_FAN_REL_COOL_POWER1",
+    "label_PAR_FAN_REL_COOL_POWER2",
+    "label_PAR_FAN_SPEED_BYPASS1",
+    "label_PAR_FAN_SPEED_BYPASS2",
+    "label_PAR_FAN_SPEED_FPWM",
+    "label_PAR_FAN_SPEED_KP1",
+    "label_PAR_FAN_SPEED_KP2",
+    "label_PAR_FAN_SPEED_MAX1",
+    "label_PAR_FAN_SPEED_MAX2",
+    "label_PAR_FAN_SPEED_MIN1",
+    "label_PAR_FAN_SPEED_MIN2",
+    "label_PAR_FAN_SPEED_START1",
+    "label_PAR_FAN_SPEED_START2",
+    "label_PAR_FAN_SPEED_STOP1",
+    "label_PAR_FAN_SPEED_STOP2",
+    "label_PAR_FAN_SPEED_TD1",
+    "label_PAR_FAN_SPEED_TD2",
+    "label_PAR_FAN_SPEED_TI1",
+    "label_PAR_FAN_SPEED_TI2",
+    "label_PAR_FAN_TEMPR_KP1",
+    "label_PAR_FAN_TEMPR_KP2",
+    "label_PAR_FAN_TEMPR_TD1",
+    "label_PAR_FAN_TEMPR_TD2",
+    "label_PAR_FAN_TEMPR_TI1",
+    "label_PAR_FAN_TEMPR_TI2",
+    "label_PAR_FAN_TEMP_ACT_SRC1",
+    "label_PAR_FAN_TEMP_ACT_SRC2",
+    "label_PAR_FAN_TEMP_TARGET1",
+    "label_PAR_FAN_TEMP_TARGET2",
+    "label_PAR_GPIO_CHANNEL1",
+    "label_PAR_GPIO_CHANNEL10",
+    "label_PAR_GPIO_CHANNEL2",
+    "label_PAR_GPIO_CHANNEL3",
+    "label_PAR_GPIO_CHANNEL4",
+    "label_PAR_GPIO_CHANNEL5",
+    "label_PAR_GPIO_CHANNEL6",
+    "label_PAR_GPIO_CHANNEL7",
+    "label_PAR_GPIO_CHANNEL8",
+    "label_PAR_GPIO_CHANNEL9",
+    "label_PAR_HWTEST_COMM_ERR_EN",
+    "label_PAR_HWTEST_GPIO_ERR_EN",
+    "label_PAR_HWTEST_STATE",
+    "label_PAR_HW_TEST_MODE",
+    "label_PAR_IGNORE_BRANCH_ID",
+    "label_PAR_LDD_CURRENT_ACT",
+    "label_PAR_LDD_CURRENT_ADCADJ_A0",
+    "label_PAR_LDD_CURRENT_ADCADJ_A1",
+    "label_PAR_LDD_CURRENT_ERROR_THRESH",
+    "label_PAR_LDD_CURRENT_IADJ_A0",
+    "label_PAR_LDD_CURRENT_IADJ_A1",
+    "label_PAR_LDD_CURRENT_LIMIT_MAX",
+    "label_PAR_LDD_CURRENT_LIMIT_MIN",
+    "label_PAR_LDD_CURRENT_NOISE",
+    "label_PAR_LDD_CURRENT_RAW_ADC",
+    "label_PAR_LDD_DAC_CODE_ACT",
+    "label_PAR_LDD_GATE_VOLTAGE",
+    "label_PAR_LDD_LDVOLTAGE_ACT",
+    "label_PAR_LDD_LDVOLTAGE_ERROR_THRESH",
+    "label_PAR_LDD_NOM_CURRENT",
+    "label_PAR_LDD_NOM_CURRENT_RAMP",
+    "label_PAR_LDD_NOM_CURRENT_SOURCE",
+    "label_PAR_LDD_NOM_SLOPE_LIMIT",
+    "label_PAR_LDD_OUTPUT_EN",
+    "label_PAR_LDD_OUTPUT_RESET_OFF",
+    "label_PAR_LDD_SET_DACADJ_A0",
+    "label_PAR_LDD_SET_DACADJ_A1",
+    "label_PAR_LDD_SET_IADJ_A0",
+    "label_PAR_LDD_SET_IADJ_A1",
+    "label_PAR_LDD_SET_R85",
+    "label_PAR_LDD_SET_R87",
+    "label_PAR_LDD_VLDA_ACT",
+    "label_PAR_LDD_VLDA_DIFF_RES",
+    "label_PAR_LDD_VLDA_EN",
+    "label_PAR_LDD_VLDA_FWD_VOLTAGE",
+    "label_PAR_LDD_VLDA_NOM",
+    "label_PAR_LDD_VLDA_VADJ_A0",
+    "label_PAR_LDD_VLDA_VADJ_A1",
+    "label_PAR_LDD_VLDK",
+    "label_PAR_LPC_NOM_POWER",
+    "label_PAR_LPC_NOM_SLOPE_LIMIT",
+    "label_PAR_LPC_OUTPUT_LEVEL_MONITOR",
+    "label_PAR_LPC_PID_KP",
+    "label_PAR_LPC_PID_TD",
+    "label_PAR_LPC_PID_TI",
+    "label_PAR_LPC_POWER_LIMIT_MAX",
+    "label_PAR_LPC_POWER_LIMIT_MIN",
+    "label_PAR_LUT_INTERVAL_CYCLES",
+    "label_PAR_LUT_INTERVAL_MS",
+    "label_PAR_LUT_LOOP",
+    "label_PAR_M3V3",
+    "label_PAR_M5V",
+    "label_PAR_M8V",
+    "label_PAR_MEPARFLASHV2_WRITECYCLES",
+    "label_PAR_MIN_FW_VERSION",
+    "label_PAR_MIN_FW_VERSION_Moni",
+    "label_PAR_MN3V3",
+    "label_PAR_MPWR",
+    "label_PAR_OUT_CURRENT_MAX",
+    "label_PAR_PBC_GPIO10_InputState",
+    "label_PAR_PBC_GPIO1_InputState",
+    "label_PAR_PBC_GPIO2_InputState",
+    "label_PAR_PBC_GPIO3_InputState",
+    "label_PAR_PBC_GPIO4_InputState",
+    "label_PAR_PBC_GPIO5_InputState",
+    "label_PAR_PBC_GPIO6_InputState",
+    "label_PAR_PBC_GPIO7_InputState",
+    "label_PAR_PBC_GPIO8_InputState",
+    "label_PAR_PBC_GPIO9_InputState",
+    "label_PAR_PBC_GPIO_FUNC1",
+    "label_PAR_PBC_GPIO_FUNC10",
+    "label_PAR_PBC_GPIO_FUNC2",
+    "label_PAR_PBC_GPIO_FUNC3",
+    "label_PAR_PBC_GPIO_FUNC4",
+    "label_PAR_PBC_GPIO_FUNC5",
+    "label_PAR_PBC_GPIO_FUNC6",
+    "label_PAR_PBC_GPIO_FUNC7",
+    "label_PAR_PBC_GPIO_FUNC8",
+    "label_PAR_PBC_GPIO_FUNC9",
+    "label_PAR_PBC_GPIO_HWCONF1",
+    "label_PAR_PBC_GPIO_HWCONF10",
+    "label_PAR_PBC_GPIO_HWCONF2",
+    "label_PAR_PBC_GPIO_HWCONF3",
+    "label_PAR_PBC_GPIO_HWCONF4",
+    "label_PAR_PBC_GPIO_HWCONF5",
+    "label_PAR_PBC_GPIO_HWCONF6",
+    "label_PAR_PBC_GPIO_HWCONF7",
+    "label_PAR_PBC_GPIO_HWCONF8",
+    "label_PAR_PBC_GPIO_HWCONF9",
+    "label_PAR_PBC_GPIO_LOGIC1",
+    "label_PAR_PBC_GPIO_LOGIC10",
+    "label_PAR_PBC_GPIO_LOGIC2",
+    "label_PAR_PBC_GPIO_LOGIC3",
+    "label_PAR_PBC_GPIO_LOGIC4",
+    "label_PAR_PBC_GPIO_LOGIC5",
+    "label_PAR_PBC_GPIO_LOGIC6",
+    "label_PAR_PBC_GPIO_LOGIC7",
+    "label_PAR_PBC_GPIO_LOGIC8",
+    "label_PAR_PBC_GPIO_LOGIC9",
+    "label_PAR_PBC_RES_InputState",
+    "label_PAR_PHOTODIODE_CURRENT",
+    "label_PAR_PHOTODIODE_LP_SYSTEMSCALE",
+    "label_PAR_PHOTODIODE_POWER",
+    "label_PAR_PHOTODIODE_RS",
+    "label_PAR_PUMP_OFF_THRESHOLD1",
+    "label_PAR_PUMP_OFF_THRESHOLD2",
+    "label_PAR_PUMP_ON_THRESHOLD1",
+    "label_PAR_PUMP_ON_THRESHOLD2",
+    "label_PAR_PUMP_TEMP_SRC1",
+    "label_PAR_PUMP_TEMP_SRC2",
+    "label_PAR_RS485_1_ADDRESS",
+    "label_PAR_RS485_1_RPL_DELAY",
+    "label_PAR_SIGGEN_CURRENT_HIGH",
+    "label_PAR_SIGGEN_CURRENT_HIGH_GRAPH",
+    "label_PAR_SIGGEN_CURRENT_LOW",
+    "label_PAR_SIGGEN_CURRENT_LOW_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_FALL_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_FALL_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_FALL_MS",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_HIGH_MS",
+    "label_PAR_SIGGEN_CUSTOM_LOW_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_LOW_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_LOW_MS",
+    "label_PAR_SIGGEN_CUSTOM_RISE_CYCLES",
+    "label_PAR_SIGGEN_CUSTOM_RISE_GRAPH",
+    "label_PAR_SIGGEN_CUSTOM_RISE_MS",
+    "label_PAR_SIGGEN_FUNCTION",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_GRAPH",
+    "label_PAR_SIGGEN_PRESET_SIGNAL_MS",
+    "label_PAR_TEC_ALT_TARGET_TEMP1",
+    "label_PAR_TEC_ALT_TARGET_TEMP2",
+    "label_PAR_TEC_ALT_TARGET_TEMP3",
+    "label_PAR_TEC_Act_I_AVG",
+    "label_PAR_TEC_Act_U_AVG",
+    "label_PAR_TEC_CURRENT_MAX",
+    "label_PAR_TEC_CURRENT_TARGET_TEMP",
+    "label_PAR_TEC_DEVICE_TYPE",
+    "label_PAR_TEC_ERRORLIMIT_I",
+    "label_PAR_TEC_ERRORLIMIT_U",
+    "label_PAR_TEC_HW_SERNR",
+    "label_PAR_TEC_HW_VERSION",
+    "label_PAR_TEC_LIMIT_I",
+    "label_PAR_TEC_LIMIT_U",
+    "label_PAR_TEC_OBJ_TEMPERATURE",
+    "label_PAR_TEC_OFF_ON_LDD_ERR",
+    "label_PAR_TEC_OUTPUT_EN",
+    "label_PAR_TEC_OWMEMORY_SAVEDATA",
+    "label_PAR_TEC_PELT_DTMAX",
+    "label_PAR_TEC_PELT_HOCO_BOUND_L",
+    "label_PAR_TEC_PELT_HOCO_BOUND_U",
+    "label_PAR_TEC_PELT_IMAX",
+    "label_PAR_TEC_PELT_INOM_NOM",
+    "label_PAR_TEC_PELT_POLARITY",
+    "label_PAR_TEC_PID_CTRL_VAR",
+    "label_PAR_TEC_PID_LIM_N",
+    "label_PAR_TEC_PID_LIM_P",
+    "label_PAR_TEC_PWRSTG_F",
+    "label_PAR_TEC_R_IMAX",
+    "label_PAR_TEC_R_R",
+    "label_PAR_TEC_SINK_TEMPERATURE",
+    "label_PAR_TEC_SINK_TEMP_FIXED_TEMP",
+    "label_PAR_TEC_SINK_TEMP_SRC",
+    "label_PAR_TEC_STABILITY_IND_MAXT",
+    "label_PAR_TEC_STABILITY_IND_TEMP",
+    "label_PAR_TEC_STABILITY_IND_TIME",
+    "label_PAR_TEC_SUPPLY_LIM_ERR_TIME",
+    "label_PAR_TEC_SUPPLY_SOURCE",
+    "label_PAR_TEC_Set_I",
+    "label_PAR_TEC_Set_U",
+    "label_PAR_TEC_TEMP_CTRL_D_PT1",
+    "label_PAR_TEC_TEMP_CTRL_KP",
+    "label_PAR_TEC_TEMP_CTRL_MOD_MODE",
+    "label_PAR_TEC_TEMP_CTRL_TD",
+    "label_PAR_TEC_TEMP_CTRL_TEMP_SRC",
+    "label_PAR_TEC_TEMP_CTRL_TI",
+    "label_PAR_TEC_TEMP_CTRL_TNOM",
+    "label_PAR_TEC_TEMP_TNOM_PWDT",
+    "label_PAR_TEC_TEMP_TNOM_RMP",
+    "label_PAR_TEC_TEMP_TNOM_RMP_NOM",
+    "label_PAR_T_PWR_STG_R1",
+    "label_PAR_T_PWR_STG_R2",
+    "label_PAR_UART_BAUDRATE1",
+    "label_PAR_UART_BAUDRATE3",
+    "label_PAR_UART_DELAY3",
+    "label_PAR_VER_HW_SERNR",
+    "label_PAR_VER_HW_VERSION"
+  ],
+  "release_notes": {
+    "document": "",
+    "release_date": "",
+    "current_version": "1.30",
+    "current_release_date": "2025-06-16",
+    "current_service_software_version": "1.30",
+    "current_firmware_version": "1.30",
+    "supported_devices": [],
+    "versions": [
+      {
+        "version": "1.30",
+        "release_date": "2025-06-16",
+        "service_software_version": "1.30",
+        "firmware_version": "1.30",
+        "supported_devices": [],
+        "new_features": [
+          "None."
+        ],
+        "resolved_issues": [
+          "None."
+        ],
+        "known_issues": [
+          "None known at time of release. LDD-1321 Software Release Notes 5299F Meerstetter Engineering GmbH 9 A Change History Date of change Doc/Version Changed/ Change / Reason Approved 2024-01-24 A RS / HS * Release v1.10 2024-03-26 B RS / SC * Expand hardware compatibility range 2024-04-30 C RS / HS * Update hardware compatibility range",
+          "Release v1.11 2024-07-03 D SC / RS * Release v1.20 2025-03-21 E SC / MLO * Release v1.30 (withdrawn) 2025-06-16 F RS / MLO, SC * Release v1.30 LDD-1321 Software Release Notes 5299F Meerstetter Engineering GmbH 10"
+        ]
+      }
+    ],
+    "risk_notes": []
+  },
+  "documentation_cross_checks": {
+    "protocol_document": {
+      "source": "LDD-130x Communication Protocol 5260H.pdf",
+      "document": "",
+      "release_date": "",
+      "text_encoding": "utf-8"
+    },
+    "manual_document": {
+      "source": "LDD-130x User Manual 5261H.pdf",
+      "document": "",
+      "release_date": "",
+      "text_encoding": "utf-8"
+    },
+    "checks": [
+      {
+        "id": "output_enable_protocol_mapping",
+        "status": "missing",
+        "summary": "Output Enable is MeCom ID 2100 in the LDD protocol and CANopen object 0x2230 in the EDS; keep the UI/default key LDD_OUTPUT_EN mapped to those documented protocol identities.",
+        "source_evidence": [
+          "ldd_1321_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 499",
+          "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_OUTPUT_EN"
+        ],
+        "default_key": "LDD_OUTPUT_EN",
+        "mecom_id": "2100",
+        "canopen_index": "2230",
+        "ui_path": "Operation.Input Source Selection.Output Enable"
+      },
+      {
+        "id": "min_nominal_voltage_protocol_mapping",
+        "status": "missing",
+        "summary": "Min Nominal Voltage is MeCom ID 2125 in the LDD protocol and CANopen object 0x2255 in the EDS; the manual warning text explains the overcurrent risk of setting the lower voltage limit too high.",
+        "source_evidence": [],
+        "default_key": "LDD_VOLTAGE_LIMIT_MIN",
+        "mecom_id": "2125",
+        "canopen_index": "2255",
+        "ui_path": "Operation.Output Stage Limits.Min Nominal Voltage"
+      },
+      {
+        "id": "feature_unlock_license_metadata",
+        "status": "missing",
+        "summary": "Feature unlock metadata is documented by the protocol Feature Licenses table; ServiceSoftware adds license guidance text that is useful as tooltip-style metadata.",
+        "source_evidence": [],
+        "mecom_id": "54000",
+        "protocol_name": "Feature Key Store"
+      },
+      {
+        "id": "bootloader_ignore_feature_fw_limit_service_only",
+        "status": "",
+        "summary": "Ignore Feature FW Limit is present in the ServiceSoftware bootloader UI strings, but it is not documented as an LDD protocol parameter in 5260H; treat it as service-software UI metadata only.",
+        "source_evidence": [
+          "ldd_1321_communication_protocol:LDD-130x Communication Protocol 5260H.pdf:line 27"
+        ],
+        "ui_key": "IGNORE_FEATURE_FIRMW_LIM",
+        "ui_path": "ME.Bootloader.Ignore Feature FW Limit"
+      }
+    ]
+  },
+  "hidden_candidates": [
+    {
+      "key": "ANALOG_IN_IV_FACTOR",
+      "label_key": "label_PAR_ANALOG_IN_IV_FACTOR",
+      "group": "analog",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_ANALOG_IN_IV_FACTOR"
+      ]
+    },
+    {
+      "key": "CANOPEN_BITRATE",
+      "label_key": "label_PAR_CANOPEN_BITRATE",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_BITRATE"
+      ]
+    },
+    {
+      "key": "CANOPEN_CAN1EN",
+      "label_key": "label_PAR_CANOPEN_CAN1EN",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_CAN1EN"
+      ]
+    },
+    {
+      "key": "CANOPEN_NODEID",
+      "label_key": "label_PAR_CANOPEN_NODEID",
+      "group": "canopen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_NODEID"
+      ]
+    },
+    {
+      "key": "DEVICE_TYPE",
+      "label_key": "label_PAR_DEVICE_TYPE",
+      "group": "device",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_DEVICE_TYPE"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A01",
+      "label_key": "label_PAR_EXTT_ADCADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A01"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A02",
+      "label_key": "label_PAR_EXTT_ADCADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A02"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A11",
+      "label_key": "label_PAR_EXTT_ADCADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A11"
+      ]
+    },
+    {
+      "key": "EXTT_ADCADJ_A12",
+      "label_key": "label_PAR_EXTT_ADCADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A12"
+      ]
+    },
+    {
+      "key": "EXTT_ADC_OBSERVE1",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE1"
+      ]
+    },
+    {
+      "key": "EXTT_ADC_OBSERVE2",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE2"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_R1",
+      "label_key": "label_PAR_EXTT_MAX_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_R1"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_R2",
+      "label_key": "label_PAR_EXTT_MAX_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_R2"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_T1",
+      "label_key": "label_PAR_EXTT_MAX_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_T1"
+      ]
+    },
+    {
+      "key": "EXTT_MAX_T2",
+      "label_key": "label_PAR_EXTT_MAX_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_T2"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_R1",
+      "label_key": "label_PAR_EXTT_MIN_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_R1"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_R2",
+      "label_key": "label_PAR_EXTT_MIN_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_R2"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_T1",
+      "label_key": "label_PAR_EXTT_MIN_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_T1"
+      ]
+    },
+    {
+      "key": "EXTT_MIN_T2",
+      "label_key": "label_PAR_EXTT_MIN_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_T2"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R11",
+      "label_key": "label_PAR_EXTT_NTC_R11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R11"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R12",
+      "label_key": "label_PAR_EXTT_NTC_R12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R12"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R21",
+      "label_key": "label_PAR_EXTT_NTC_R21",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R21"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R22",
+      "label_key": "label_PAR_EXTT_NTC_R22",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R22"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R31",
+      "label_key": "label_PAR_EXTT_NTC_R31",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R31"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_R32",
+      "label_key": "label_PAR_EXTT_NTC_R32",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R32"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T11",
+      "label_key": "label_PAR_EXTT_NTC_T11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T11"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T12",
+      "label_key": "label_PAR_EXTT_NTC_T12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T12"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T21",
+      "label_key": "label_PAR_EXTT_NTC_T21",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T21"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T22",
+      "label_key": "label_PAR_EXTT_NTC_T22",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T22"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T31",
+      "label_key": "label_PAR_EXTT_NTC_T31",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T31"
+      ]
+    },
+    {
+      "key": "EXTT_NTC_T32",
+      "label_key": "label_PAR_EXTT_NTC_T32",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T32"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A01",
+      "label_key": "label_PAR_EXTT_TADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A01"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A02",
+      "label_key": "label_PAR_EXTT_TADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A02"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A11",
+      "label_key": "label_PAR_EXTT_TADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A11"
+      ]
+    },
+    {
+      "key": "EXTT_TADJ_A12",
+      "label_key": "label_PAR_EXTT_TADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A12"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OBSERVE1",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OBSERVE2",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE2"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OVER1",
+      "label_key": "label_PAR_EXTT_TEMP_OVER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_OVER2",
+      "label_key": "label_PAR_EXTT_TEMP_OVER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER2"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_UNDER1",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER1"
+      ]
+    },
+    {
+      "key": "EXTT_TEMP_UNDER2",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER2"
+      ]
+    },
+    {
+      "key": "EXTV_ADCADJ_A0",
+      "label_key": "label_PAR_EXTV_ADCADJ_A0",
+      "group": "extv",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_ADCADJ_A0"
+      ]
+    },
+    {
+      "key": "EXTV_ADCADJ_A1",
+      "label_key": "label_PAR_EXTV_ADCADJ_A1",
+      "group": "extv",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_ADCADJ_A1"
+      ]
+    },
+    {
+      "key": "EXTV_VADJ_A0",
+      "label_key": "label_PAR_EXTV_VADJ_A0",
+      "group": "extv",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_VADJ_A0"
+      ]
+    },
+    {
+      "key": "EXTV_VADJ_A1",
+      "label_key": "label_PAR_EXTV_VADJ_A1",
+      "group": "extv",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_VADJ_A1"
+      ]
+    },
+    {
+      "key": "FAN_ENABLE1",
+      "label_key": "label_PAR_FAN_ENABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ENABLE1"
+      ]
+    },
+    {
+      "key": "FAN_ENABLE2",
+      "label_key": "label_PAR_FAN_ENABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ENABLE2"
+      ]
+    },
+    {
+      "key": "FAN_ERROR_DISABLE1",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE1"
+      ]
+    },
+    {
+      "key": "FAN_ERROR_DISABLE2",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_BYPASS1",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_BYPASS2",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_FPWM",
+      "label_key": "label_PAR_FAN_SPEED_FPWM",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_FPWM"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_KP1",
+      "label_key": "label_PAR_FAN_SPEED_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_KP2",
+      "label_key": "label_PAR_FAN_SPEED_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MAX1",
+      "label_key": "label_PAR_FAN_SPEED_MAX1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MAX2",
+      "label_key": "label_PAR_FAN_SPEED_MAX2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MIN1",
+      "label_key": "label_PAR_FAN_SPEED_MIN1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_MIN2",
+      "label_key": "label_PAR_FAN_SPEED_MIN2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_START1",
+      "label_key": "label_PAR_FAN_SPEED_START1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_START1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_START2",
+      "label_key": "label_PAR_FAN_SPEED_START2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_START2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_STOP1",
+      "label_key": "label_PAR_FAN_SPEED_STOP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_STOP2",
+      "label_key": "label_PAR_FAN_SPEED_STOP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TD1",
+      "label_key": "label_PAR_FAN_SPEED_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TD2",
+      "label_key": "label_PAR_FAN_SPEED_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD2"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TI1",
+      "label_key": "label_PAR_FAN_SPEED_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI1"
+      ]
+    },
+    {
+      "key": "FAN_SPEED_TI2",
+      "label_key": "label_PAR_FAN_SPEED_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_KP1",
+      "label_key": "label_PAR_FAN_TEMPR_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_KP2",
+      "label_key": "label_PAR_FAN_TEMPR_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TD1",
+      "label_key": "label_PAR_FAN_TEMPR_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TD2",
+      "label_key": "label_PAR_FAN_TEMPR_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD2"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TI1",
+      "label_key": "label_PAR_FAN_TEMPR_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI1"
+      ]
+    },
+    {
+      "key": "FAN_TEMPR_TI2",
+      "label_key": "label_PAR_FAN_TEMPR_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI2"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_ACT_SRC1",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC1"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_ACT_SRC2",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC2"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_TARGET1",
+      "label_key": "label_PAR_FAN_TEMP_TARGET1",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET1"
+      ]
+    },
+    {
+      "key": "FAN_TEMP_TARGET2",
+      "label_key": "label_PAR_FAN_TEMP_TARGET2",
+      "group": "fan",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET2"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL1",
+      "label_key": "label_PAR_GPIO_CHANNEL1",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL1"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL10",
+      "label_key": "label_PAR_GPIO_CHANNEL10",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL10"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL2",
+      "label_key": "label_PAR_GPIO_CHANNEL2",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL2"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL3",
+      "label_key": "label_PAR_GPIO_CHANNEL3",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL3"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL4",
+      "label_key": "label_PAR_GPIO_CHANNEL4",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL4"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL5",
+      "label_key": "label_PAR_GPIO_CHANNEL5",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL5"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL6",
+      "label_key": "label_PAR_GPIO_CHANNEL6",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL6"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL7",
+      "label_key": "label_PAR_GPIO_CHANNEL7",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL7"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL8",
+      "label_key": "label_PAR_GPIO_CHANNEL8",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL8"
+      ]
+    },
+    {
+      "key": "GPIO_CHANNEL9",
+      "label_key": "label_PAR_GPIO_CHANNEL9",
+      "group": "gpio",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL9"
+      ]
+    },
+    {
+      "key": "HWTEST_COMM_ERR_EN",
+      "label_key": "label_PAR_HWTEST_COMM_ERR_EN",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_COMM_ERR_EN"
+      ]
+    },
+    {
+      "key": "HWTEST_GPIO_ERR_EN",
+      "label_key": "label_PAR_HWTEST_GPIO_ERR_EN",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_GPIO_ERR_EN"
+      ]
+    },
+    {
+      "key": "HWTEST_STATE",
+      "label_key": "label_PAR_HWTEST_STATE",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_STATE"
+      ]
+    },
+    {
+      "key": "HW_TEST_MODE",
+      "label_key": "label_PAR_HW_TEST_MODE",
+      "group": "hw",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HW_TEST_MODE"
+      ]
+    },
+    {
+      "key": "IGNORE_BRANCH_ID",
+      "label_key": "label_PAR_IGNORE_BRANCH_ID",
+      "group": "ignore",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_IGNORE_BRANCH_ID"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_ADCADJ_A0",
+      "label_key": "label_PAR_LDD_CURRENT_ADCADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_ADCADJ_A0"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_ADCADJ_A1",
+      "label_key": "label_PAR_LDD_CURRENT_ADCADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_ADCADJ_A1"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_IADJ_A0",
+      "label_key": "label_PAR_LDD_CURRENT_IADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_IADJ_A0"
+      ]
+    },
+    {
+      "key": "LDD_CURRENT_IADJ_A1",
+      "label_key": "label_PAR_LDD_CURRENT_IADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_IADJ_A1"
+      ]
+    },
+    {
+      "key": "LDD_LDVOLTAGE_ERROR_THRESH",
+      "label_key": "label_PAR_LDD_LDVOLTAGE_ERROR_THRESH",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_LDVOLTAGE_ERROR_THRESH"
+      ]
+    },
+    {
+      "key": "LDD_SET_DACADJ_A0",
+      "label_key": "label_PAR_LDD_SET_DACADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_DACADJ_A0"
+      ]
+    },
+    {
+      "key": "LDD_SET_DACADJ_A1",
+      "label_key": "label_PAR_LDD_SET_DACADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_DACADJ_A1"
+      ]
+    },
+    {
+      "key": "LDD_SET_IADJ_A0",
+      "label_key": "label_PAR_LDD_SET_IADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_IADJ_A0"
+      ]
+    },
+    {
+      "key": "LDD_SET_IADJ_A1",
+      "label_key": "label_PAR_LDD_SET_IADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_IADJ_A1"
+      ]
+    },
+    {
+      "key": "LDD_SET_R85",
+      "label_key": "label_PAR_LDD_SET_R85",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_R85"
+      ]
+    },
+    {
+      "key": "LDD_SET_R87",
+      "label_key": "label_PAR_LDD_SET_R87",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_R87"
+      ]
+    },
+    {
+      "key": "LDD_VLDA_DIFF_RES",
+      "label_key": "label_PAR_LDD_VLDA_DIFF_RES",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_DIFF_RES"
+      ]
+    },
+    {
+      "key": "LDD_VLDA_EN",
+      "label_key": "label_PAR_LDD_VLDA_EN",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_EN"
+      ]
+    },
+    {
+      "key": "LDD_VLDA_FWD_VOLTAGE",
+      "label_key": "label_PAR_LDD_VLDA_FWD_VOLTAGE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_FWD_VOLTAGE"
+      ]
+    },
+    {
+      "key": "LDD_VLDA_VADJ_A0",
+      "label_key": "label_PAR_LDD_VLDA_VADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_VADJ_A0"
+      ]
+    },
+    {
+      "key": "LDD_VLDA_VADJ_A1",
+      "label_key": "label_PAR_LDD_VLDA_VADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_VADJ_A1"
+      ]
+    },
+    {
+      "key": "LUT_INTERVAL_CYCLES",
+      "label_key": "label_PAR_LUT_INTERVAL_CYCLES",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LUT_INTERVAL_CYCLES"
+      ]
+    },
+    {
+      "key": "LUT_LOOP",
+      "label_key": "label_PAR_LUT_LOOP",
+      "group": "lut",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LUT_LOOP"
+      ]
+    },
+    {
+      "key": "MIN_FW_VERSION",
+      "label_key": "label_PAR_MIN_FW_VERSION",
+      "group": "min",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_MIN_FW_VERSION"
+      ]
+    },
+    {
+      "key": "OUT_CURRENT_MAX",
+      "label_key": "label_PAR_OUT_CURRENT_MAX",
+      "group": "out",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_OUT_CURRENT_MAX"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC1",
+      "label_key": "label_PAR_PBC_GPIO_FUNC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC10",
+      "label_key": "label_PAR_PBC_GPIO_FUNC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC2",
+      "label_key": "label_PAR_PBC_GPIO_FUNC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC3",
+      "label_key": "label_PAR_PBC_GPIO_FUNC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC4",
+      "label_key": "label_PAR_PBC_GPIO_FUNC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC5",
+      "label_key": "label_PAR_PBC_GPIO_FUNC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC6",
+      "label_key": "label_PAR_PBC_GPIO_FUNC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC7",
+      "label_key": "label_PAR_PBC_GPIO_FUNC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC8",
+      "label_key": "label_PAR_PBC_GPIO_FUNC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_FUNC9",
+      "label_key": "label_PAR_PBC_GPIO_FUNC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC9"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF1",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF10",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF2",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF3",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF4",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF5",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF6",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF7",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF8",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_HWCONF9",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF9"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC1",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC1"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC10",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC10"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC2",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC2"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC3",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC3"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC4",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC4"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC5",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC5"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC6",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC6"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC7",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC7"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC8",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC8"
+      ]
+    },
+    {
+      "key": "PBC_GPIO_LOGIC9",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC9"
+      ]
+    },
+    {
+      "key": "PBC_RES_InputState",
+      "label_key": "label_PAR_PBC_RES_InputState",
+      "group": "pbc",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_RES_InputState"
+      ]
+    },
+    {
+      "key": "PHOTODIODE_LP_SYSTEMSCALE",
+      "label_key": "label_PAR_PHOTODIODE_LP_SYSTEMSCALE",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PHOTODIODE_LP_SYSTEMSCALE"
+      ]
+    },
+    {
+      "key": "PUMP_OFF_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD1"
+      ]
+    },
+    {
+      "key": "PUMP_OFF_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD2"
+      ]
+    },
+    {
+      "key": "PUMP_ON_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD1"
+      ]
+    },
+    {
+      "key": "PUMP_ON_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD2"
+      ]
+    },
+    {
+      "key": "PUMP_TEMP_SRC1",
+      "label_key": "label_PAR_PUMP_TEMP_SRC1",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC1"
+      ]
+    },
+    {
+      "key": "PUMP_TEMP_SRC2",
+      "label_key": "label_PAR_PUMP_TEMP_SRC2",
+      "group": "pump",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC2"
+      ]
+    },
+    {
+      "key": "RS485_1_ADDRESS",
+      "label_key": "label_PAR_RS485_1_ADDRESS",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_RS485_1_ADDRESS"
+      ]
+    },
+    {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "group": "rs485",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_RS485_1_RPL_DELAY"
+      ]
+    },
+    {
+      "key": "SIGGEN_CURRENT_HIGH",
+      "label_key": "label_PAR_SIGGEN_CURRENT_HIGH",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_HIGH"
+      ]
+    },
+    {
+      "key": "SIGGEN_CURRENT_LOW",
+      "label_key": "label_PAR_SIGGEN_CURRENT_LOW",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_LOW"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_FALL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_FALL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_FALL_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_HIGH_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_LOW_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_LOW_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_LOW_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_CUSTOM_RISE_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_RISE_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_RISE_CYCLES"
+      ]
+    },
+    {
+      "key": "SIGGEN_FUNCTION",
+      "label_key": "label_PAR_SIGGEN_FUNCTION",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_FUNCTION"
+      ]
+    },
+    {
+      "key": "SIGGEN_PRESET_SIGNAL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES"
+      ]
+    },
+    {
+      "key": "TEC_ALT_TARGET_TEMP1",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP1",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP1"
+      ]
+    },
+    {
+      "key": "TEC_ALT_TARGET_TEMP2",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP2",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP2"
+      ]
+    },
+    {
+      "key": "TEC_ALT_TARGET_TEMP3",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP3",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP3"
+      ]
+    },
+    {
+      "key": "TEC_CURRENT_MAX",
+      "label_key": "label_PAR_TEC_CURRENT_MAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_CURRENT_MAX"
+      ]
+    },
+    {
+      "key": "TEC_DEVICE_TYPE",
+      "label_key": "label_PAR_TEC_DEVICE_TYPE",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_DEVICE_TYPE"
+      ]
+    },
+    {
+      "key": "TEC_ERRORLIMIT_I",
+      "label_key": "label_PAR_TEC_ERRORLIMIT_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ERRORLIMIT_I"
+      ]
+    },
+    {
+      "key": "TEC_ERRORLIMIT_U",
+      "label_key": "label_PAR_TEC_ERRORLIMIT_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ERRORLIMIT_U"
+      ]
+    },
+    {
+      "key": "TEC_HW_SERNR",
+      "label_key": "label_PAR_TEC_HW_SERNR",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_HW_SERNR"
+      ]
+    },
+    {
+      "key": "TEC_HW_VERSION",
+      "label_key": "label_PAR_TEC_HW_VERSION",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_HW_VERSION"
+      ]
+    },
+    {
+      "key": "TEC_LIMIT_I",
+      "label_key": "label_PAR_TEC_LIMIT_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_LIMIT_I"
+      ]
+    },
+    {
+      "key": "TEC_LIMIT_U",
+      "label_key": "label_PAR_TEC_LIMIT_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_LIMIT_U"
+      ]
+    },
+    {
+      "key": "TEC_OFF_ON_LDD_ERR",
+      "label_key": "label_PAR_TEC_OFF_ON_LDD_ERR",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OFF_ON_LDD_ERR"
+      ]
+    },
+    {
+      "key": "TEC_OUTPUT_EN",
+      "label_key": "label_PAR_TEC_OUTPUT_EN",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OUTPUT_EN"
+      ]
+    },
+    {
+      "key": "TEC_OWMEMORY_SAVEDATA",
+      "label_key": "label_PAR_TEC_OWMEMORY_SAVEDATA",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OWMEMORY_SAVEDATA"
+      ]
+    },
+    {
+      "key": "TEC_PELT_DTMAX",
+      "label_key": "label_PAR_TEC_PELT_DTMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_DTMAX"
+      ]
+    },
+    {
+      "key": "TEC_PELT_HOCO_BOUND_L",
+      "label_key": "label_PAR_TEC_PELT_HOCO_BOUND_L",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_HOCO_BOUND_L"
+      ]
+    },
+    {
+      "key": "TEC_PELT_HOCO_BOUND_U",
+      "label_key": "label_PAR_TEC_PELT_HOCO_BOUND_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_HOCO_BOUND_U"
+      ]
+    },
+    {
+      "key": "TEC_PELT_IMAX",
+      "label_key": "label_PAR_TEC_PELT_IMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_IMAX"
+      ]
+    },
+    {
+      "key": "TEC_PELT_POLARITY",
+      "label_key": "label_PAR_TEC_PELT_POLARITY",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_POLARITY"
+      ]
+    },
+    {
+      "key": "TEC_PWRSTG_F",
+      "label_key": "label_PAR_TEC_PWRSTG_F",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PWRSTG_F"
+      ]
+    },
+    {
+      "key": "TEC_R_IMAX",
+      "label_key": "label_PAR_TEC_R_IMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_R_IMAX"
+      ]
+    },
+    {
+      "key": "TEC_R_R",
+      "label_key": "label_PAR_TEC_R_R",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_R_R"
+      ]
+    },
+    {
+      "key": "TEC_SINK_TEMP_FIXED_TEMP",
+      "label_key": "label_PAR_TEC_SINK_TEMP_FIXED_TEMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SINK_TEMP_FIXED_TEMP"
+      ]
+    },
+    {
+      "key": "TEC_SINK_TEMP_SRC",
+      "label_key": "label_PAR_TEC_SINK_TEMP_SRC",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SINK_TEMP_SRC"
+      ]
+    },
+    {
+      "key": "TEC_STABILITY_IND_MAXT",
+      "label_key": "label_PAR_TEC_STABILITY_IND_MAXT",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_MAXT"
+      ]
+    },
+    {
+      "key": "TEC_STABILITY_IND_TEMP",
+      "label_key": "label_PAR_TEC_STABILITY_IND_TEMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_TEMP"
+      ]
+    },
+    {
+      "key": "TEC_STABILITY_IND_TIME",
+      "label_key": "label_PAR_TEC_STABILITY_IND_TIME",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_TIME"
+      ]
+    },
+    {
+      "key": "TEC_SUPPLY_LIM_ERR_TIME",
+      "label_key": "label_PAR_TEC_SUPPLY_LIM_ERR_TIME",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SUPPLY_LIM_ERR_TIME"
+      ]
+    },
+    {
+      "key": "TEC_SUPPLY_SOURCE",
+      "label_key": "label_PAR_TEC_SUPPLY_SOURCE",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SUPPLY_SOURCE"
+      ]
+    },
+    {
+      "key": "TEC_Set_I",
+      "label_key": "label_PAR_TEC_Set_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_Set_I"
+      ]
+    },
+    {
+      "key": "TEC_Set_U",
+      "label_key": "label_PAR_TEC_Set_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_Set_U"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_D_PT1",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_D_PT1",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_D_PT1"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_KP",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_KP",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_KP"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_MOD_MODE",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_MOD_MODE",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_MOD_MODE"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_TD",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TD",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TD"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_TEMP_SRC",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TEMP_SRC",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TEMP_SRC"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_TI",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TI",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TI"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_CTRL_TNOM",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TNOM",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TNOM"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_TNOM_PWDT",
+      "label_key": "label_PAR_TEC_TEMP_TNOM_PWDT",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_TNOM_PWDT"
+      ]
+    },
+    {
+      "key": "TEC_TEMP_TNOM_RMP",
+      "label_key": "label_PAR_TEC_TEMP_TNOM_RMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_TNOM_RMP"
+      ]
+    },
+    {
+      "key": "UART_BAUDRATE1",
+      "label_key": "label_PAR_UART_BAUDRATE1",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_BAUDRATE1"
+      ]
+    },
+    {
+      "key": "UART_BAUDRATE3",
+      "label_key": "label_PAR_UART_BAUDRATE3",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_BAUDRATE3"
+      ]
+    },
+    {
+      "key": "UART_DELAY3",
+      "label_key": "label_PAR_UART_DELAY3",
+      "group": "uart",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_DELAY3"
+      ]
+    },
+    {
+      "key": "VER_HW_SERNR",
+      "label_key": "label_PAR_VER_HW_SERNR",
+      "group": "ver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_VER_HW_SERNR"
+      ]
+    },
+    {
+      "key": "VER_HW_VERSION",
+      "label_key": "label_PAR_VER_HW_VERSION",
+      "group": "ver",
+      "visibility": "advanced",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_VER_HW_VERSION"
+      ]
+    }
+  ],
+  "safety_policy": "Advanced LDD source entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review."
+}

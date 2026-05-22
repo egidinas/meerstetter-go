@@ -1,0 +1,2900 @@
+{
+  "schema_version": "mecom_ldd_1321_defaults.v1",
+  "source": "5293D LDD-1321 Default Configuration.ini",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_1321.v130",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_1321",
+    "version": "v130"
+  },
+  "parameters": {
+    "LDD_OUTPUT_EN": {
+      "key": "LDD_OUTPUT_EN",
+      "label_key": "label_PAR_LDD_OUTPUT_EN",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_OUTPUT_EN"
+      ]
+    },
+    "LDD_OUTPUT_RESET_OFF": {
+      "key": "LDD_OUTPUT_RESET_OFF",
+      "label_key": "label_PAR_LDD_OUTPUT_RESET_OFF",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_OUTPUT_RESET_OFF"
+      ]
+    },
+    "LDD_NOM_CURRENT_SOURCE": {
+      "key": "LDD_NOM_CURRENT_SOURCE",
+      "label_key": "label_PAR_LDD_NOM_CURRENT_SOURCE",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": "Set Current",
+      "default_value_text": "Set Current",
+      "value_kind": "text",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_NOM_CURRENT_SOURCE"
+      ]
+    },
+    "LDD_NOM_CURRENT": {
+      "key": "LDD_NOM_CURRENT",
+      "label_key": "label_PAR_LDD_NOM_CURRENT",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_NOM_CURRENT"
+      ]
+    },
+    "LDD_NOM_SLOPE_LIMIT": {
+      "key": "LDD_NOM_SLOPE_LIMIT",
+      "label_key": "label_PAR_LDD_NOM_SLOPE_LIMIT",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_NOM_SLOPE_LIMIT"
+      ]
+    },
+    "LDD_VLDA_EN": {
+      "key": "LDD_VLDA_EN",
+      "label_key": "label_PAR_LDD_VLDA_EN",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_EN"
+      ]
+    },
+    "LDD_VLDA_FWD_VOLTAGE": {
+      "key": "LDD_VLDA_FWD_VOLTAGE",
+      "label_key": "label_PAR_LDD_VLDA_FWD_VOLTAGE",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_FWD_VOLTAGE"
+      ]
+    },
+    "LDD_VLDA_DIFF_RES": {
+      "key": "LDD_VLDA_DIFF_RES",
+      "label_key": "label_PAR_LDD_VLDA_DIFF_RES",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_DIFF_RES"
+      ]
+    },
+    "LDD_CURRENT_LIMIT_MAX": {
+      "key": "LDD_CURRENT_LIMIT_MAX",
+      "label_key": "label_PAR_LDD_CURRENT_LIMIT_MAX",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": 0.5,
+      "default_value_text": "0.5",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_LIMIT_MAX"
+      ]
+    },
+    "LDD_CURRENT_LIMIT_MIN": {
+      "key": "LDD_CURRENT_LIMIT_MIN",
+      "label_key": "label_PAR_LDD_CURRENT_LIMIT_MIN",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_LIMIT_MIN"
+      ]
+    },
+    "LDD_CURRENT_ERROR_THRESH": {
+      "key": "LDD_CURRENT_ERROR_THRESH",
+      "label_key": "label_PAR_LDD_CURRENT_ERROR_THRESH",
+      "group": "ldd",
+      "visibility": "operator",
+      "default_value": 0.6,
+      "default_value_text": "0.6",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_ERROR_THRESH"
+      ]
+    },
+    "LDD_LDVOLTAGE_ERROR_THRESH": {
+      "key": "LDD_LDVOLTAGE_ERROR_THRESH",
+      "label_key": "label_PAR_LDD_LDVOLTAGE_ERROR_THRESH",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_LDVOLTAGE_ERROR_THRESH"
+      ]
+    },
+    "UART_BAUDRATE1": {
+      "key": "UART_BAUDRATE1",
+      "label_key": "label_PAR_UART_BAUDRATE1",
+      "group": "uart",
+      "visibility": "advanced",
+      "default_value": 57600,
+      "default_value_text": "57600",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_BAUDRATE1"
+      ]
+    },
+    "label_RS485_CH1_BaudRate": {
+      "key": "label_RS485_CH1_BaudRate",
+      "label_key": "label_RS485_CH1_BaudRate",
+      "group": "label",
+      "visibility": "metadata",
+      "default_value": 57600,
+      "default_value_text": "57600",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_RS485_CH1_BaudRate"
+      ]
+    },
+    "RS485_1_RPL_DELAY": {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "group": "rs485",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_RS485_1_RPL_DELAY"
+      ]
+    },
+    "UART_BAUDRATE3": {
+      "key": "UART_BAUDRATE3",
+      "label_key": "label_PAR_UART_BAUDRATE3",
+      "group": "uart",
+      "visibility": "advanced",
+      "default_value": 57600,
+      "default_value_text": "57600",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_BAUDRATE3"
+      ]
+    },
+    "UART_DELAY3": {
+      "key": "UART_DELAY3",
+      "label_key": "label_PAR_UART_DELAY3",
+      "group": "uart",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_UART_DELAY3"
+      ]
+    },
+    "CONNECT_WATCH_DOG": {
+      "key": "CONNECT_WATCH_DOG",
+      "label_key": "label_PAR_CONNECT_WATCH_DOG",
+      "group": "system",
+      "visibility": "metadata",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CONNECT_WATCH_DOG"
+      ]
+    },
+    "TEC_SUPPLY_SOURCE": {
+      "key": "TEC_SUPPLY_SOURCE",
+      "label_key": "label_PAR_TEC_SUPPLY_SOURCE",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "Fixed Current/Voltage",
+      "default_value_text": "Fixed Current/Voltage",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SUPPLY_SOURCE"
+      ]
+    },
+    "TEC_OUTPUT_EN": {
+      "key": "TEC_OUTPUT_EN",
+      "label_key": "label_PAR_TEC_OUTPUT_EN",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OUTPUT_EN"
+      ]
+    },
+    "TEC_Set_I": {
+      "key": "TEC_Set_I",
+      "label_key": "label_PAR_TEC_Set_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_Set_I"
+      ]
+    },
+    "TEC_Set_U": {
+      "key": "TEC_Set_U",
+      "label_key": "label_PAR_TEC_Set_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_Set_U"
+      ]
+    },
+    "TEC_LIMIT_I": {
+      "key": "TEC_LIMIT_I",
+      "label_key": "label_PAR_TEC_LIMIT_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 4,
+      "default_value_text": "4",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_LIMIT_I"
+      ]
+    },
+    "TEC_LIMIT_U": {
+      "key": "TEC_LIMIT_U",
+      "label_key": "label_PAR_TEC_LIMIT_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 19,
+      "default_value_text": "19",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_LIMIT_U"
+      ]
+    },
+    "TEC_ERRORLIMIT_I": {
+      "key": "TEC_ERRORLIMIT_I",
+      "label_key": "label_PAR_TEC_ERRORLIMIT_I",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 5.6,
+      "default_value_text": "5.6",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ERRORLIMIT_I"
+      ]
+    },
+    "TEC_ERRORLIMIT_U": {
+      "key": "TEC_ERRORLIMIT_U",
+      "label_key": "label_PAR_TEC_ERRORLIMIT_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 22.8,
+      "default_value_text": "22.8",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ERRORLIMIT_U"
+      ]
+    },
+    "TEC_TEMP_CTRL_TNOM": {
+      "key": "TEC_TEMP_CTRL_TNOM",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TNOM",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TNOM"
+      ]
+    },
+    "TEC_TEMP_TNOM_RMP": {
+      "key": "TEC_TEMP_TNOM_RMP",
+      "label_key": "label_PAR_TEC_TEMP_TNOM_RMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_TNOM_RMP"
+      ]
+    },
+    "TEC_TEMP_TNOM_PWDT": {
+      "key": "TEC_TEMP_TNOM_PWDT",
+      "label_key": "label_PAR_TEC_TEMP_TNOM_PWDT",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_TNOM_PWDT"
+      ]
+    },
+    "TEC_TEMP_CTRL_KP": {
+      "key": "TEC_TEMP_CTRL_KP",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_KP",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_KP"
+      ]
+    },
+    "TEC_TEMP_CTRL_TI": {
+      "key": "TEC_TEMP_CTRL_TI",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TI",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 300,
+      "default_value_text": "300",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TI"
+      ]
+    },
+    "TEC_TEMP_CTRL_TD": {
+      "key": "TEC_TEMP_CTRL_TD",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TD",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TD"
+      ]
+    },
+    "TEC_TEMP_CTRL_D_PT1": {
+      "key": "TEC_TEMP_CTRL_D_PT1",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_D_PT1",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 0.3,
+      "default_value_text": "0.3",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_D_PT1"
+      ]
+    },
+    "TEC_TEMP_CTRL_MOD_MODE": {
+      "key": "TEC_TEMP_CTRL_MOD_MODE",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_MOD_MODE",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "Peltier, Full Control",
+      "default_value_text": "Peltier, Full Control",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_MOD_MODE"
+      ]
+    },
+    "TEC_PELT_IMAX": {
+      "key": "TEC_PELT_IMAX",
+      "label_key": "label_PAR_TEC_PELT_IMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 15,
+      "default_value_text": "15",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_IMAX"
+      ]
+    },
+    "TEC_PELT_DTMAX": {
+      "key": "TEC_PELT_DTMAX",
+      "label_key": "label_PAR_TEC_PELT_DTMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 68,
+      "default_value_text": "68",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_DTMAX"
+      ]
+    },
+    "TEC_PELT_POLARITY": {
+      "key": "TEC_PELT_POLARITY",
+      "label_key": "label_PAR_TEC_PELT_POLARITY",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "Cooling",
+      "default_value_text": "Cooling",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_POLARITY"
+      ]
+    },
+    "TEC_PELT_HOCO_BOUND_U": {
+      "key": "TEC_PELT_HOCO_BOUND_U",
+      "label_key": "label_PAR_TEC_PELT_HOCO_BOUND_U",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 50,
+      "default_value_text": "50",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_HOCO_BOUND_U"
+      ]
+    },
+    "TEC_PELT_HOCO_BOUND_L": {
+      "key": "TEC_PELT_HOCO_BOUND_L",
+      "label_key": "label_PAR_TEC_PELT_HOCO_BOUND_L",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 5,
+      "default_value_text": "5",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PELT_HOCO_BOUND_L"
+      ]
+    },
+    "TEC_R_R": {
+      "key": "TEC_R_R",
+      "label_key": "label_PAR_TEC_R_R",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1.65,
+      "default_value_text": "1.65",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_R_R"
+      ]
+    },
+    "TEC_R_IMAX": {
+      "key": "TEC_R_IMAX",
+      "label_key": "label_PAR_TEC_R_IMAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_R_IMAX"
+      ]
+    },
+    "TEC_STABILITY_IND_TEMP": {
+      "key": "TEC_STABILITY_IND_TEMP",
+      "label_key": "label_PAR_TEC_STABILITY_IND_TEMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_TEMP"
+      ]
+    },
+    "TEC_STABILITY_IND_TIME": {
+      "key": "TEC_STABILITY_IND_TIME",
+      "label_key": "label_PAR_TEC_STABILITY_IND_TIME",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_TIME"
+      ]
+    },
+    "TEC_STABILITY_IND_MAXT": {
+      "key": "TEC_STABILITY_IND_MAXT",
+      "label_key": "label_PAR_TEC_STABILITY_IND_MAXT",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_STABILITY_IND_MAXT"
+      ]
+    },
+    "EXTT_TEMP_UNDER1": {
+      "key": "EXTT_TEMP_UNDER1",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": -45,
+      "default_value_text": "-45",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER1"
+      ]
+    },
+    "EXTT_TEMP_OVER1": {
+      "key": "EXTT_TEMP_OVER1",
+      "label_key": "label_PAR_EXTT_TEMP_OVER1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 70,
+      "default_value_text": "70",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER1"
+      ]
+    },
+    "EXTT_ADC_OBSERVE1": {
+      "key": "EXTT_ADC_OBSERVE1",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE1"
+      ]
+    },
+    "EXTT_TEMP_OBSERVE1": {
+      "key": "EXTT_TEMP_OBSERVE1",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE1"
+      ]
+    },
+    "EXTT_TEMP_UNDER2": {
+      "key": "EXTT_TEMP_UNDER2",
+      "label_key": "label_PAR_EXTT_TEMP_UNDER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": -45,
+      "default_value_text": "-45",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_UNDER2"
+      ]
+    },
+    "EXTT_TEMP_OVER2": {
+      "key": "EXTT_TEMP_OVER2",
+      "label_key": "label_PAR_EXTT_TEMP_OVER2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 70,
+      "default_value_text": "70",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OVER2"
+      ]
+    },
+    "EXTT_ADC_OBSERVE2": {
+      "key": "EXTT_ADC_OBSERVE2",
+      "label_key": "label_PAR_EXTT_ADC_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADC_OBSERVE2"
+      ]
+    },
+    "EXTT_TEMP_OBSERVE2": {
+      "key": "EXTT_TEMP_OBSERVE2",
+      "label_key": "label_PAR_EXTT_TEMP_OBSERVE2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": "None",
+      "default_value_text": "None",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TEMP_OBSERVE2"
+      ]
+    },
+    "EXTT_MIN_R1": {
+      "key": "EXTT_MIN_R1",
+      "label_key": "label_PAR_EXTT_MIN_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 297,
+      "default_value_text": "297",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_R1"
+      ]
+    },
+    "EXTT_MIN_R2": {
+      "key": "EXTT_MIN_R2",
+      "label_key": "label_PAR_EXTT_MIN_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 297,
+      "default_value_text": "297",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_R2"
+      ]
+    },
+    "EXTT_MAX_R1": {
+      "key": "EXTT_MAX_R1",
+      "label_key": "label_PAR_EXTT_MAX_R1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 110151,
+      "default_value_text": "110151",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_R1"
+      ]
+    },
+    "EXTT_MAX_R2": {
+      "key": "EXTT_MAX_R2",
+      "label_key": "label_PAR_EXTT_MAX_R2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 110151,
+      "default_value_text": "110151",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_R2"
+      ]
+    },
+    "EXTT_MIN_T1": {
+      "key": "EXTT_MIN_T1",
+      "label_key": "label_PAR_EXTT_MIN_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 130.4,
+      "default_value_text": "130.4",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_T1"
+      ]
+    },
+    "EXTT_MIN_T2": {
+      "key": "EXTT_MIN_T2",
+      "label_key": "label_PAR_EXTT_MIN_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 130.4,
+      "default_value_text": "130.4",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MIN_T2"
+      ]
+    },
+    "EXTT_MAX_T1": {
+      "key": "EXTT_MAX_T1",
+      "label_key": "label_PAR_EXTT_MAX_T1",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": -22.2,
+      "default_value_text": "-22.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_T1"
+      ]
+    },
+    "EXTT_MAX_T2": {
+      "key": "EXTT_MAX_T2",
+      "label_key": "label_PAR_EXTT_MAX_T2",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": -22.2,
+      "default_value_text": "-22.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_MAX_T2"
+      ]
+    },
+    "EXTT_TADJ_A01": {
+      "key": "EXTT_TADJ_A01",
+      "label_key": "label_PAR_EXTT_TADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A01"
+      ]
+    },
+    "EXTT_TADJ_A11": {
+      "key": "EXTT_TADJ_A11",
+      "label_key": "label_PAR_EXTT_TADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A11"
+      ]
+    },
+    "EXTT_TADJ_A02": {
+      "key": "EXTT_TADJ_A02",
+      "label_key": "label_PAR_EXTT_TADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A02"
+      ]
+    },
+    "EXTT_TADJ_A12": {
+      "key": "EXTT_TADJ_A12",
+      "label_key": "label_PAR_EXTT_TADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_TADJ_A12"
+      ]
+    },
+    "EXTT_NTC_T11": {
+      "key": "EXTT_NTC_T11",
+      "label_key": "label_PAR_EXTT_NTC_T11",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T11"
+      ]
+    },
+    "EXTT_NTC_R11": {
+      "key": "EXTT_NTC_R11",
+      "label_key": "label_PAR_EXTT_NTC_R11",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 32650,
+      "default_value_text": "32650",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R11"
+      ]
+    },
+    "EXTT_NTC_T21": {
+      "key": "EXTT_NTC_T21",
+      "label_key": "label_PAR_EXTT_NTC_T21",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T21"
+      ]
+    },
+    "EXTT_NTC_R21": {
+      "key": "EXTT_NTC_R21",
+      "label_key": "label_PAR_EXTT_NTC_R21",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R21"
+      ]
+    },
+    "EXTT_NTC_T31": {
+      "key": "EXTT_NTC_T31",
+      "label_key": "label_PAR_EXTT_NTC_T31",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 60,
+      "default_value_text": "60",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T31"
+      ]
+    },
+    "EXTT_NTC_R31": {
+      "key": "EXTT_NTC_R31",
+      "label_key": "label_PAR_EXTT_NTC_R31",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 2488,
+      "default_value_text": "2488",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R31"
+      ]
+    },
+    "EXTT_NTC_T12": {
+      "key": "EXTT_NTC_T12",
+      "label_key": "label_PAR_EXTT_NTC_T12",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T12"
+      ]
+    },
+    "EXTT_NTC_R12": {
+      "key": "EXTT_NTC_R12",
+      "label_key": "label_PAR_EXTT_NTC_R12",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 32650,
+      "default_value_text": "32650",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R12"
+      ]
+    },
+    "EXTT_NTC_T22": {
+      "key": "EXTT_NTC_T22",
+      "label_key": "label_PAR_EXTT_NTC_T22",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T22"
+      ]
+    },
+    "EXTT_NTC_R22": {
+      "key": "EXTT_NTC_R22",
+      "label_key": "label_PAR_EXTT_NTC_R22",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R22"
+      ]
+    },
+    "EXTT_NTC_T32": {
+      "key": "EXTT_NTC_T32",
+      "label_key": "label_PAR_EXTT_NTC_T32",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 60,
+      "default_value_text": "60",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_T32"
+      ]
+    },
+    "EXTT_NTC_R32": {
+      "key": "EXTT_NTC_R32",
+      "label_key": "label_PAR_EXTT_NTC_R32",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 2488,
+      "default_value_text": "2488",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_NTC_R32"
+      ]
+    },
+    "EXTT_ADCADJ_A01": {
+      "key": "EXTT_ADCADJ_A01",
+      "label_key": "label_PAR_EXTT_ADCADJ_A01",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A01"
+      ]
+    },
+    "EXTT_ADCADJ_A11": {
+      "key": "EXTT_ADCADJ_A11",
+      "label_key": "label_PAR_EXTT_ADCADJ_A11",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A11"
+      ]
+    },
+    "EXTT_ADCADJ_A02": {
+      "key": "EXTT_ADCADJ_A02",
+      "label_key": "label_PAR_EXTT_ADCADJ_A02",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A02"
+      ]
+    },
+    "EXTT_ADCADJ_A12": {
+      "key": "EXTT_ADCADJ_A12",
+      "label_key": "label_PAR_EXTT_ADCADJ_A12",
+      "group": "extt",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTT_ADCADJ_A12"
+      ]
+    },
+    "LDD_CURRENT_IADJ_A0": {
+      "key": "LDD_CURRENT_IADJ_A0",
+      "label_key": "label_PAR_LDD_CURRENT_IADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_IADJ_A0"
+      ]
+    },
+    "LDD_CURRENT_IADJ_A1": {
+      "key": "LDD_CURRENT_IADJ_A1",
+      "label_key": "label_PAR_LDD_CURRENT_IADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_IADJ_A1"
+      ]
+    },
+    "LDD_SET_IADJ_A0": {
+      "key": "LDD_SET_IADJ_A0",
+      "label_key": "label_PAR_LDD_SET_IADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_IADJ_A0"
+      ]
+    },
+    "LDD_SET_IADJ_A1": {
+      "key": "LDD_SET_IADJ_A1",
+      "label_key": "label_PAR_LDD_SET_IADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_IADJ_A1"
+      ]
+    },
+    "LDD_CURRENT_ADCADJ_A0": {
+      "key": "LDD_CURRENT_ADCADJ_A0",
+      "label_key": "label_PAR_LDD_CURRENT_ADCADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_ADCADJ_A0"
+      ]
+    },
+    "LDD_CURRENT_ADCADJ_A1": {
+      "key": "LDD_CURRENT_ADCADJ_A1",
+      "label_key": "label_PAR_LDD_CURRENT_ADCADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_CURRENT_ADCADJ_A1"
+      ]
+    },
+    "LDD_SET_DACADJ_A0": {
+      "key": "LDD_SET_DACADJ_A0",
+      "label_key": "label_PAR_LDD_SET_DACADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_DACADJ_A0"
+      ]
+    },
+    "LDD_SET_DACADJ_A1": {
+      "key": "LDD_SET_DACADJ_A1",
+      "label_key": "label_PAR_LDD_SET_DACADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_DACADJ_A1"
+      ]
+    },
+    "LDD_VLDA_VADJ_A0": {
+      "key": "LDD_VLDA_VADJ_A0",
+      "label_key": "label_PAR_LDD_VLDA_VADJ_A0",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_VADJ_A0"
+      ]
+    },
+    "LDD_VLDA_VADJ_A1": {
+      "key": "LDD_VLDA_VADJ_A1",
+      "label_key": "label_PAR_LDD_VLDA_VADJ_A1",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_VLDA_VADJ_A1"
+      ]
+    },
+    "LPC_NOM_POWER": {
+      "key": "LPC_NOM_POWER",
+      "label_key": "label_PAR_LPC_NOM_POWER",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_NOM_POWER"
+      ]
+    },
+    "LPC_PID_KP": {
+      "key": "LPC_PID_KP",
+      "label_key": "label_PAR_LPC_PID_KP",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_PID_KP"
+      ]
+    },
+    "LPC_PID_TI": {
+      "key": "LPC_PID_TI",
+      "label_key": "label_PAR_LPC_PID_TI",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_PID_TI"
+      ]
+    },
+    "LPC_PID_TD": {
+      "key": "LPC_PID_TD",
+      "label_key": "label_PAR_LPC_PID_TD",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_PID_TD"
+      ]
+    },
+    "LPC_NOM_SLOPE_LIMIT": {
+      "key": "LPC_NOM_SLOPE_LIMIT",
+      "label_key": "label_PAR_LPC_NOM_SLOPE_LIMIT",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_NOM_SLOPE_LIMIT"
+      ]
+    },
+    "LPC_POWER_LIMIT_MAX": {
+      "key": "LPC_POWER_LIMIT_MAX",
+      "label_key": "label_PAR_LPC_POWER_LIMIT_MAX",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_POWER_LIMIT_MAX"
+      ]
+    },
+    "LPC_POWER_LIMIT_MIN": {
+      "key": "LPC_POWER_LIMIT_MIN",
+      "label_key": "label_PAR_LPC_POWER_LIMIT_MIN",
+      "group": "lpc",
+      "visibility": "operator",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Laser driver control parameter; require explicit operator intent and confirmed readback before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LPC_POWER_LIMIT_MIN"
+      ]
+    },
+    "LUT_LOOP": {
+      "key": "LUT_LOOP",
+      "label_key": "label_PAR_LUT_LOOP",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": "OFF",
+      "default_value_text": "OFF",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LUT_LOOP"
+      ]
+    },
+    "LUT_INTERVAL_CYCLES": {
+      "key": "LUT_INTERVAL_CYCLES",
+      "label_key": "label_PAR_LUT_INTERVAL_CYCLES",
+      "group": "lut",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LUT_INTERVAL_CYCLES"
+      ]
+    },
+    "SIGGEN_FUNCTION": {
+      "key": "SIGGEN_FUNCTION",
+      "label_key": "label_PAR_SIGGEN_FUNCTION",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": "Custom",
+      "default_value_text": "Custom",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_FUNCTION"
+      ]
+    },
+    "SIGGEN_CURRENT_HIGH": {
+      "key": "SIGGEN_CURRENT_HIGH",
+      "label_key": "label_PAR_SIGGEN_CURRENT_HIGH",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 0.1,
+      "default_value_text": "0.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_HIGH"
+      ]
+    },
+    "SIGGEN_CURRENT_LOW": {
+      "key": "SIGGEN_CURRENT_LOW",
+      "label_key": "label_PAR_SIGGEN_CURRENT_LOW",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CURRENT_LOW"
+      ]
+    },
+    "SIGGEN_CUSTOM_RISE_CYCLES": {
+      "key": "SIGGEN_CUSTOM_RISE_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_RISE_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 50,
+      "default_value_text": "50",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_RISE_CYCLES"
+      ]
+    },
+    "SIGGEN_CUSTOM_FALL_CYCLES": {
+      "key": "SIGGEN_CUSTOM_FALL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_FALL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 50,
+      "default_value_text": "50",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_FALL_CYCLES"
+      ]
+    },
+    "SIGGEN_CUSTOM_HIGH_CYCLES": {
+      "key": "SIGGEN_CUSTOM_HIGH_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 50,
+      "default_value_text": "50",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_HIGH_CYCLES"
+      ]
+    },
+    "SIGGEN_CUSTOM_LOW_CYCLES": {
+      "key": "SIGGEN_CUSTOM_LOW_CYCLES",
+      "label_key": "label_PAR_SIGGEN_CUSTOM_LOW_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 50,
+      "default_value_text": "50",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_CUSTOM_LOW_CYCLES"
+      ]
+    },
+    "SIGGEN_PRESET_SIGNAL_CYCLES": {
+      "key": "SIGGEN_PRESET_SIGNAL_CYCLES",
+      "label_key": "label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES",
+      "group": "siggen",
+      "visibility": "advanced",
+      "default_value": 100,
+      "default_value_text": "100",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_SIGGEN_PRESET_SIGNAL_CYCLES"
+      ]
+    },
+    "TEC_SUPPLY_LIM_ERR_TIME": {
+      "key": "TEC_SUPPLY_LIM_ERR_TIME",
+      "label_key": "label_PAR_TEC_SUPPLY_LIM_ERR_TIME",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SUPPLY_LIM_ERR_TIME"
+      ]
+    },
+    "TEC_TEMP_CTRL_TEMP_SRC": {
+      "key": "TEC_TEMP_CTRL_TEMP_SRC",
+      "label_key": "label_PAR_TEC_TEMP_CTRL_TEMP_SRC",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "Ext Temp 1",
+      "default_value_text": "Ext Temp 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_TEMP_CTRL_TEMP_SRC"
+      ]
+    },
+    "TEC_SINK_TEMP_FIXED_TEMP": {
+      "key": "TEC_SINK_TEMP_FIXED_TEMP",
+      "label_key": "label_PAR_TEC_SINK_TEMP_FIXED_TEMP",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 25,
+      "default_value_text": "25",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SINK_TEMP_FIXED_TEMP"
+      ]
+    },
+    "TEC_SINK_TEMP_SRC": {
+      "key": "TEC_SINK_TEMP_SRC",
+      "label_key": "label_PAR_TEC_SINK_TEMP_SRC",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "Fixed Value",
+      "default_value_text": "Fixed Value",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_SINK_TEMP_SRC"
+      ]
+    },
+    "TEC_OFF_ON_LDD_ERR": {
+      "key": "TEC_OFF_ON_LDD_ERR",
+      "label_key": "label_PAR_TEC_OFF_ON_LDD_ERR",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "ON",
+      "default_value_text": "ON",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OFF_ON_LDD_ERR"
+      ]
+    },
+    "PHOTODIODE_LP_SYSTEMSCALE": {
+      "key": "PHOTODIODE_LP_SYSTEMSCALE",
+      "label_key": "label_PAR_PHOTODIODE_LP_SYSTEMSCALE",
+      "group": "photodiode",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PHOTODIODE_LP_SYSTEMSCALE"
+      ]
+    },
+    "EXTV_VADJ_A0": {
+      "key": "EXTV_VADJ_A0",
+      "label_key": "label_PAR_EXTV_VADJ_A0",
+      "group": "extv",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_VADJ_A0"
+      ]
+    },
+    "EXTV_VADJ_A1": {
+      "key": "EXTV_VADJ_A1",
+      "label_key": "label_PAR_EXTV_VADJ_A1",
+      "group": "extv",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_VADJ_A1"
+      ]
+    },
+    "ANALOG_IN_IV_FACTOR": {
+      "key": "ANALOG_IN_IV_FACTOR",
+      "label_key": "label_PAR_ANALOG_IN_IV_FACTOR",
+      "group": "analog",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_ANALOG_IN_IV_FACTOR"
+      ]
+    },
+    "EXTV_ADCADJ_A0": {
+      "key": "EXTV_ADCADJ_A0",
+      "label_key": "label_PAR_EXTV_ADCADJ_A0",
+      "group": "extv",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_ADCADJ_A0"
+      ]
+    },
+    "EXTV_ADCADJ_A1": {
+      "key": "EXTV_ADCADJ_A1",
+      "label_key": "label_PAR_EXTV_ADCADJ_A1",
+      "group": "extv",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_EXTV_ADCADJ_A1"
+      ]
+    },
+    "PBC_GPIO_FUNC1": {
+      "key": "PBC_GPIO_FUNC1",
+      "label_key": "label_PAR_PBC_GPIO_FUNC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC1"
+      ]
+    },
+    "PBC_GPIO_FUNC2": {
+      "key": "PBC_GPIO_FUNC2",
+      "label_key": "label_PAR_PBC_GPIO_FUNC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC2"
+      ]
+    },
+    "PBC_GPIO_FUNC3": {
+      "key": "PBC_GPIO_FUNC3",
+      "label_key": "label_PAR_PBC_GPIO_FUNC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC3"
+      ]
+    },
+    "PBC_GPIO_FUNC4": {
+      "key": "PBC_GPIO_FUNC4",
+      "label_key": "label_PAR_PBC_GPIO_FUNC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC4"
+      ]
+    },
+    "PBC_GPIO_FUNC5": {
+      "key": "PBC_GPIO_FUNC5",
+      "label_key": "label_PAR_PBC_GPIO_FUNC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC5"
+      ]
+    },
+    "PBC_GPIO_FUNC6": {
+      "key": "PBC_GPIO_FUNC6",
+      "label_key": "label_PAR_PBC_GPIO_FUNC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC6"
+      ]
+    },
+    "PBC_GPIO_FUNC7": {
+      "key": "PBC_GPIO_FUNC7",
+      "label_key": "label_PAR_PBC_GPIO_FUNC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC7"
+      ]
+    },
+    "PBC_GPIO_FUNC8": {
+      "key": "PBC_GPIO_FUNC8",
+      "label_key": "label_PAR_PBC_GPIO_FUNC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC8"
+      ]
+    },
+    "PBC_GPIO_FUNC9": {
+      "key": "PBC_GPIO_FUNC9",
+      "label_key": "label_PAR_PBC_GPIO_FUNC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC9"
+      ]
+    },
+    "PBC_GPIO_FUNC10": {
+      "key": "PBC_GPIO_FUNC10",
+      "label_key": "label_PAR_PBC_GPIO_FUNC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "No Function",
+      "default_value_text": "No Function",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_FUNC10"
+      ]
+    },
+    "PBC_GPIO_HWCONF1": {
+      "key": "PBC_GPIO_HWCONF1",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF1"
+      ]
+    },
+    "PBC_GPIO_HWCONF2": {
+      "key": "PBC_GPIO_HWCONF2",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF2"
+      ]
+    },
+    "PBC_GPIO_HWCONF3": {
+      "key": "PBC_GPIO_HWCONF3",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF3"
+      ]
+    },
+    "PBC_GPIO_HWCONF4": {
+      "key": "PBC_GPIO_HWCONF4",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF4"
+      ]
+    },
+    "PBC_GPIO_HWCONF5": {
+      "key": "PBC_GPIO_HWCONF5",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF5"
+      ]
+    },
+    "PBC_GPIO_HWCONF6": {
+      "key": "PBC_GPIO_HWCONF6",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF6"
+      ]
+    },
+    "PBC_GPIO_HWCONF7": {
+      "key": "PBC_GPIO_HWCONF7",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF7"
+      ]
+    },
+    "PBC_GPIO_HWCONF8": {
+      "key": "PBC_GPIO_HWCONF8",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF8"
+      ]
+    },
+    "PBC_GPIO_HWCONF9": {
+      "key": "PBC_GPIO_HWCONF9",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF9"
+      ]
+    },
+    "PBC_GPIO_HWCONF10": {
+      "key": "PBC_GPIO_HWCONF10",
+      "label_key": "label_PAR_PBC_GPIO_HWCONF10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "IN WeakNo",
+      "default_value_text": "IN WeakNo",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_HWCONF10"
+      ]
+    },
+    "PBC_GPIO_LOGIC1": {
+      "key": "PBC_GPIO_LOGIC1",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC1",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC1"
+      ]
+    },
+    "PBC_GPIO_LOGIC2": {
+      "key": "PBC_GPIO_LOGIC2",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC2",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC2"
+      ]
+    },
+    "PBC_GPIO_LOGIC3": {
+      "key": "PBC_GPIO_LOGIC3",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC3",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC3"
+      ]
+    },
+    "PBC_GPIO_LOGIC4": {
+      "key": "PBC_GPIO_LOGIC4",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC4",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC4"
+      ]
+    },
+    "PBC_GPIO_LOGIC5": {
+      "key": "PBC_GPIO_LOGIC5",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC5",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC5"
+      ]
+    },
+    "PBC_GPIO_LOGIC6": {
+      "key": "PBC_GPIO_LOGIC6",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC6",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC6"
+      ]
+    },
+    "PBC_GPIO_LOGIC7": {
+      "key": "PBC_GPIO_LOGIC7",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC7",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC7"
+      ]
+    },
+    "PBC_GPIO_LOGIC8": {
+      "key": "PBC_GPIO_LOGIC8",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC8",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC8"
+      ]
+    },
+    "PBC_GPIO_LOGIC9": {
+      "key": "PBC_GPIO_LOGIC9",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC9",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC9"
+      ]
+    },
+    "PBC_GPIO_LOGIC10": {
+      "key": "PBC_GPIO_LOGIC10",
+      "label_key": "label_PAR_PBC_GPIO_LOGIC10",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": "Positive",
+      "default_value_text": "Positive",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_GPIO_LOGIC10"
+      ]
+    },
+    "GPIO_CHANNEL1": {
+      "key": "GPIO_CHANNEL1",
+      "label_key": "label_PAR_GPIO_CHANNEL1",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL1"
+      ]
+    },
+    "GPIO_CHANNEL2": {
+      "key": "GPIO_CHANNEL2",
+      "label_key": "label_PAR_GPIO_CHANNEL2",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL2"
+      ]
+    },
+    "GPIO_CHANNEL3": {
+      "key": "GPIO_CHANNEL3",
+      "label_key": "label_PAR_GPIO_CHANNEL3",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL3"
+      ]
+    },
+    "GPIO_CHANNEL4": {
+      "key": "GPIO_CHANNEL4",
+      "label_key": "label_PAR_GPIO_CHANNEL4",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL4"
+      ]
+    },
+    "GPIO_CHANNEL5": {
+      "key": "GPIO_CHANNEL5",
+      "label_key": "label_PAR_GPIO_CHANNEL5",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL5"
+      ]
+    },
+    "GPIO_CHANNEL6": {
+      "key": "GPIO_CHANNEL6",
+      "label_key": "label_PAR_GPIO_CHANNEL6",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL6"
+      ]
+    },
+    "GPIO_CHANNEL7": {
+      "key": "GPIO_CHANNEL7",
+      "label_key": "label_PAR_GPIO_CHANNEL7",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL7"
+      ]
+    },
+    "GPIO_CHANNEL8": {
+      "key": "GPIO_CHANNEL8",
+      "label_key": "label_PAR_GPIO_CHANNEL8",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL8"
+      ]
+    },
+    "GPIO_CHANNEL9": {
+      "key": "GPIO_CHANNEL9",
+      "label_key": "label_PAR_GPIO_CHANNEL9",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL9"
+      ]
+    },
+    "GPIO_CHANNEL10": {
+      "key": "GPIO_CHANNEL10",
+      "label_key": "label_PAR_GPIO_CHANNEL10",
+      "group": "gpio",
+      "visibility": "advanced",
+      "default_value": "Channel 1",
+      "default_value_text": "Channel 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_GPIO_CHANNEL10"
+      ]
+    },
+    "PUMP_TEMP_SRC1": {
+      "key": "PUMP_TEMP_SRC1",
+      "label_key": "label_PAR_PUMP_TEMP_SRC1",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": "External 1",
+      "default_value_text": "External 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC1"
+      ]
+    },
+    "PUMP_TEMP_SRC2": {
+      "key": "PUMP_TEMP_SRC2",
+      "label_key": "label_PAR_PUMP_TEMP_SRC2",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": "External 1",
+      "default_value_text": "External 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_TEMP_SRC2"
+      ]
+    },
+    "PUMP_ON_THRESHOLD1": {
+      "key": "PUMP_ON_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": 40,
+      "default_value_text": "40",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD1"
+      ]
+    },
+    "PUMP_ON_THRESHOLD2": {
+      "key": "PUMP_ON_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_ON_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": 40,
+      "default_value_text": "40",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_ON_THRESHOLD2"
+      ]
+    },
+    "PUMP_OFF_THRESHOLD1": {
+      "key": "PUMP_OFF_THRESHOLD1",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD1",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": 35,
+      "default_value_text": "35",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD1"
+      ]
+    },
+    "PUMP_OFF_THRESHOLD2": {
+      "key": "PUMP_OFF_THRESHOLD2",
+      "label_key": "label_PAR_PUMP_OFF_THRESHOLD2",
+      "group": "pump",
+      "visibility": "advanced",
+      "default_value": 35,
+      "default_value_text": "35",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PUMP_OFF_THRESHOLD2"
+      ]
+    },
+    "TEC_ALT_TARGET_TEMP1": {
+      "key": "TEC_ALT_TARGET_TEMP1",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP1",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP1"
+      ]
+    },
+    "TEC_ALT_TARGET_TEMP2": {
+      "key": "TEC_ALT_TARGET_TEMP2",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP2",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP2"
+      ]
+    },
+    "TEC_ALT_TARGET_TEMP3": {
+      "key": "TEC_ALT_TARGET_TEMP3",
+      "label_key": "label_PAR_TEC_ALT_TARGET_TEMP3",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_ALT_TARGET_TEMP3"
+      ]
+    },
+    "PBC_RES_InputState": {
+      "key": "PBC_RES_InputState",
+      "label_key": "label_PAR_PBC_RES_InputState",
+      "group": "pbc",
+      "visibility": "advanced",
+      "default_value": 80,
+      "default_value_text": "80",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_PBC_RES_InputState"
+      ]
+    },
+    "FAN_ENABLE1": {
+      "key": "FAN_ENABLE1",
+      "label_key": "label_PAR_FAN_ENABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ENABLE1"
+      ]
+    },
+    "FAN_TEMP_ACT_SRC1": {
+      "key": "FAN_TEMP_ACT_SRC1",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "External 1",
+      "default_value_text": "External 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC1"
+      ]
+    },
+    "FAN_TEMP_TARGET1": {
+      "key": "FAN_TEMP_TARGET1",
+      "label_key": "label_PAR_FAN_TEMP_TARGET1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 40,
+      "default_value_text": "40",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET1"
+      ]
+    },
+    "FAN_TEMPR_KP1": {
+      "key": "FAN_TEMPR_KP1",
+      "label_key": "label_PAR_FAN_TEMPR_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 30,
+      "default_value_text": "30",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP1"
+      ]
+    },
+    "FAN_TEMPR_TI1": {
+      "key": "FAN_TEMPR_TI1",
+      "label_key": "label_PAR_FAN_TEMPR_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 120,
+      "default_value_text": "120",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI1"
+      ]
+    },
+    "FAN_TEMPR_TD1": {
+      "key": "FAN_TEMPR_TD1",
+      "label_key": "label_PAR_FAN_TEMPR_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD1"
+      ]
+    },
+    "FAN_SPEED_MIN1": {
+      "key": "FAN_SPEED_MIN1",
+      "label_key": "label_PAR_FAN_SPEED_MIN1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN1"
+      ]
+    },
+    "FAN_SPEED_MAX1": {
+      "key": "FAN_SPEED_MAX1",
+      "label_key": "label_PAR_FAN_SPEED_MAX1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX1"
+      ]
+    },
+    "FAN_SPEED_START1": {
+      "key": "FAN_SPEED_START1",
+      "label_key": "label_PAR_FAN_SPEED_START1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 2000,
+      "default_value_text": "2000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_START1"
+      ]
+    },
+    "FAN_SPEED_STOP1": {
+      "key": "FAN_SPEED_STOP1",
+      "label_key": "label_PAR_FAN_SPEED_STOP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 500,
+      "default_value_text": "500",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP1"
+      ]
+    },
+    "FAN_SPEED_KP1": {
+      "key": "FAN_SPEED_KP1",
+      "label_key": "label_PAR_FAN_SPEED_KP1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0.0005,
+      "default_value_text": "0.0005",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP1"
+      ]
+    },
+    "FAN_SPEED_TI1": {
+      "key": "FAN_SPEED_TI1",
+      "label_key": "label_PAR_FAN_SPEED_TI1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 2,
+      "default_value_text": "2",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI1"
+      ]
+    },
+    "FAN_SPEED_TD1": {
+      "key": "FAN_SPEED_TD1",
+      "label_key": "label_PAR_FAN_SPEED_TD1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD1"
+      ]
+    },
+    "FAN_SPEED_BYPASS1": {
+      "key": "FAN_SPEED_BYPASS1",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "No",
+      "default_value_text": "No",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS1"
+      ]
+    },
+    "FAN_ERROR_DISABLE1": {
+      "key": "FAN_ERROR_DISABLE1",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE1",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "Enabled",
+      "default_value_text": "Enabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE1"
+      ]
+    },
+    "FAN_ENABLE2": {
+      "key": "FAN_ENABLE2",
+      "label_key": "label_PAR_FAN_ENABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ENABLE2"
+      ]
+    },
+    "FAN_TEMP_ACT_SRC2": {
+      "key": "FAN_TEMP_ACT_SRC2",
+      "label_key": "label_PAR_FAN_TEMP_ACT_SRC2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "External 1",
+      "default_value_text": "External 1",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_ACT_SRC2"
+      ]
+    },
+    "FAN_TEMP_TARGET2": {
+      "key": "FAN_TEMP_TARGET2",
+      "label_key": "label_PAR_FAN_TEMP_TARGET2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 40,
+      "default_value_text": "40",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMP_TARGET2"
+      ]
+    },
+    "FAN_TEMPR_KP2": {
+      "key": "FAN_TEMPR_KP2",
+      "label_key": "label_PAR_FAN_TEMPR_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 30,
+      "default_value_text": "30",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_KP2"
+      ]
+    },
+    "FAN_TEMPR_TI2": {
+      "key": "FAN_TEMPR_TI2",
+      "label_key": "label_PAR_FAN_TEMPR_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 120,
+      "default_value_text": "120",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TI2"
+      ]
+    },
+    "FAN_TEMPR_TD2": {
+      "key": "FAN_TEMPR_TD2",
+      "label_key": "label_PAR_FAN_TEMPR_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_TEMPR_TD2"
+      ]
+    },
+    "FAN_SPEED_MIN2": {
+      "key": "FAN_SPEED_MIN2",
+      "label_key": "label_PAR_FAN_SPEED_MIN2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MIN2"
+      ]
+    },
+    "FAN_SPEED_MAX2": {
+      "key": "FAN_SPEED_MAX2",
+      "label_key": "label_PAR_FAN_SPEED_MAX2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 10000,
+      "default_value_text": "10000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_MAX2"
+      ]
+    },
+    "FAN_SPEED_START2": {
+      "key": "FAN_SPEED_START2",
+      "label_key": "label_PAR_FAN_SPEED_START2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 2000,
+      "default_value_text": "2000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_START2"
+      ]
+    },
+    "FAN_SPEED_STOP2": {
+      "key": "FAN_SPEED_STOP2",
+      "label_key": "label_PAR_FAN_SPEED_STOP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 500,
+      "default_value_text": "500",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_STOP2"
+      ]
+    },
+    "FAN_SPEED_KP2": {
+      "key": "FAN_SPEED_KP2",
+      "label_key": "label_PAR_FAN_SPEED_KP2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0.0005,
+      "default_value_text": "0.0005",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_KP2"
+      ]
+    },
+    "FAN_SPEED_TI2": {
+      "key": "FAN_SPEED_TI2",
+      "label_key": "label_PAR_FAN_SPEED_TI2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 2,
+      "default_value_text": "2",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TI2"
+      ]
+    },
+    "FAN_SPEED_TD2": {
+      "key": "FAN_SPEED_TD2",
+      "label_key": "label_PAR_FAN_SPEED_TD2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_TD2"
+      ]
+    },
+    "FAN_SPEED_BYPASS2": {
+      "key": "FAN_SPEED_BYPASS2",
+      "label_key": "label_PAR_FAN_SPEED_BYPASS2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "No",
+      "default_value_text": "No",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_BYPASS2"
+      ]
+    },
+    "FAN_ERROR_DISABLE2": {
+      "key": "FAN_ERROR_DISABLE2",
+      "label_key": "label_PAR_FAN_ERROR_DISABLE2",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "Enabled",
+      "default_value_text": "Enabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_ERROR_DISABLE2"
+      ]
+    },
+    "FAN_SPEED_FPWM": {
+      "key": "FAN_SPEED_FPWM",
+      "label_key": "label_PAR_FAN_SPEED_FPWM",
+      "group": "fan",
+      "visibility": "advanced",
+      "default_value": "25kHz",
+      "default_value_text": "25kHz",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_FAN_SPEED_FPWM"
+      ]
+    },
+    "AUTORESET_TIME": {
+      "key": "AUTORESET_TIME",
+      "label_key": "label_PAR_AUTORESET_TIME",
+      "group": "autoreset",
+      "visibility": "operator",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Fault recovery timing parameter; review against safety procedures before changing.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_AUTORESET_TIME"
+      ]
+    },
+    "VER_HW_SERNR": {
+      "key": "VER_HW_SERNR",
+      "label_key": "label_PAR_VER_HW_SERNR",
+      "group": "ver",
+      "visibility": "advanced",
+      "default_value": 104,
+      "default_value_text": "104",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_VER_HW_SERNR"
+      ]
+    },
+    "VER_HW_VERSION": {
+      "key": "VER_HW_VERSION",
+      "label_key": "label_PAR_VER_HW_VERSION",
+      "group": "ver",
+      "visibility": "advanced",
+      "default_value": 1.2,
+      "default_value_text": "1.2",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_VER_HW_VERSION"
+      ]
+    },
+    "DEVICE_TYPE": {
+      "key": "DEVICE_TYPE",
+      "label_key": "label_PAR_DEVICE_TYPE",
+      "group": "device",
+      "visibility": "advanced",
+      "default_value": 1321,
+      "default_value_text": "1321",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_DEVICE_TYPE"
+      ]
+    },
+    "HW_TEST_MODE": {
+      "key": "HW_TEST_MODE",
+      "label_key": "label_PAR_HW_TEST_MODE",
+      "group": "hw",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HW_TEST_MODE"
+      ]
+    },
+    "MIN_FW_VERSION": {
+      "key": "MIN_FW_VERSION",
+      "label_key": "label_PAR_MIN_FW_VERSION",
+      "group": "min",
+      "visibility": "advanced",
+      "default_value": 1.1,
+      "default_value_text": "1.1",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_MIN_FW_VERSION"
+      ]
+    },
+    "OUT_CURRENT_MAX": {
+      "key": "OUT_CURRENT_MAX",
+      "label_key": "label_PAR_OUT_CURRENT_MAX",
+      "group": "out",
+      "visibility": "advanced",
+      "default_value": 1.5,
+      "default_value_text": "1.5",
+      "value_kind": "number",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_OUT_CURRENT_MAX"
+      ]
+    },
+    "LDD_SET_R85": {
+      "key": "LDD_SET_R85",
+      "label_key": "label_PAR_LDD_SET_R85",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 3300,
+      "default_value_text": "3300",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_R85"
+      ]
+    },
+    "LDD_SET_R87": {
+      "key": "LDD_SET_R87",
+      "label_key": "label_PAR_LDD_SET_R87",
+      "group": "ldd",
+      "visibility": "advanced",
+      "default_value": 100,
+      "default_value_text": "100",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_LDD_SET_R87"
+      ]
+    },
+    "HWTEST_STATE": {
+      "key": "HWTEST_STATE",
+      "label_key": "label_PAR_HWTEST_STATE",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "default_value": "Stopped",
+      "default_value_text": "Stopped",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_STATE"
+      ]
+    },
+    "HWTEST_GPIO_ERR_EN": {
+      "key": "HWTEST_GPIO_ERR_EN",
+      "label_key": "label_PAR_HWTEST_GPIO_ERR_EN",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_GPIO_ERR_EN"
+      ]
+    },
+    "HWTEST_COMM_ERR_EN": {
+      "key": "HWTEST_COMM_ERR_EN",
+      "label_key": "label_PAR_HWTEST_COMM_ERR_EN",
+      "group": "hwtest",
+      "visibility": "advanced",
+      "default_value": 0,
+      "default_value_text": "0",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_HWTEST_COMM_ERR_EN"
+      ]
+    },
+    "IGNORE_BRANCH_ID": {
+      "key": "IGNORE_BRANCH_ID",
+      "label_key": "label_PAR_IGNORE_BRANCH_ID",
+      "group": "ignore",
+      "visibility": "advanced",
+      "default_value": "No",
+      "default_value_text": "No",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_IGNORE_BRANCH_ID"
+      ]
+    },
+    "TEC_CURRENT_MAX": {
+      "key": "TEC_CURRENT_MAX",
+      "label_key": "label_PAR_TEC_CURRENT_MAX",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 4,
+      "default_value_text": "4",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_CURRENT_MAX"
+      ]
+    },
+    "TEC_HW_VERSION": {
+      "key": "TEC_HW_VERSION",
+      "label_key": "label_PAR_TEC_HW_VERSION",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_HW_VERSION"
+      ]
+    },
+    "TEC_HW_SERNR": {
+      "key": "TEC_HW_SERNR",
+      "label_key": "label_PAR_TEC_HW_SERNR",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 5,
+      "default_value_text": "5",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_HW_SERNR"
+      ]
+    },
+    "TEC_DEVICE_TYPE": {
+      "key": "TEC_DEVICE_TYPE",
+      "label_key": "label_PAR_TEC_DEVICE_TYPE",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 1191,
+      "default_value_text": "1191",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_DEVICE_TYPE"
+      ]
+    },
+    "TEC_OWMEMORY_SAVEDATA": {
+      "key": "TEC_OWMEMORY_SAVEDATA",
+      "label_key": "label_PAR_TEC_OWMEMORY_SAVEDATA",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": "No",
+      "default_value_text": "No",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_OWMEMORY_SAVEDATA"
+      ]
+    },
+    "TEC_PWRSTG_F": {
+      "key": "TEC_PWRSTG_F",
+      "label_key": "label_PAR_TEC_PWRSTG_F",
+      "group": "tec",
+      "visibility": "advanced",
+      "default_value": 300000,
+      "default_value_text": "300000",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_TEC_PWRSTG_F"
+      ]
+    },
+    "RS485_1_ADDRESS": {
+      "key": "RS485_1_ADDRESS",
+      "label_key": "label_PAR_RS485_1_ADDRESS",
+      "group": "rs485",
+      "visibility": "advanced",
+      "default_value": 1,
+      "default_value_text": "1",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_RS485_1_ADDRESS"
+      ]
+    },
+    "CANOPEN_NODEID": {
+      "key": "CANOPEN_NODEID",
+      "label_key": "label_PAR_CANOPEN_NODEID",
+      "group": "canopen",
+      "visibility": "advanced",
+      "default_value": 127,
+      "default_value_text": "127",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_NODEID"
+      ]
+    },
+    "CANOPEN_BITRATE": {
+      "key": "CANOPEN_BITRATE",
+      "label_key": "label_PAR_CANOPEN_BITRATE",
+      "group": "canopen",
+      "visibility": "advanced",
+      "default_value": 10,
+      "default_value_text": "10",
+      "value_kind": "integer",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_BITRATE"
+      ]
+    },
+    "CANOPEN_CAN1EN": {
+      "key": "CANOPEN_CAN1EN",
+      "label_key": "label_PAR_CANOPEN_CAN1EN",
+      "group": "canopen",
+      "visibility": "advanced",
+      "default_value": "Disabled",
+      "default_value_text": "Disabled",
+      "value_kind": "text",
+      "safety_note": "Advanced LDD setting harvested from vendor software; keep out of routine operator writes until mapped to a reviewed control surface.",
+      "source_evidence": [
+        "LDD-1321 Software v130 MSI payload:5293D LDD-1321 Default Configuration.ini:[SRV_PAR].label_PAR_CANOPEN_CAN1EN"
+      ]
+    }
+  }
+}

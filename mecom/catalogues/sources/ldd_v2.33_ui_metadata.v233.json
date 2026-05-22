@@ -1,0 +1,6170 @@
+{
+  "schema_version": "mecom_ldd_v2.33_ui_metadata.v1",
+  "definition": {
+    "definition_ref": "meerstetter.ldd_v2.33.v233",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "ldd",
+    "variant": "ldd_v2.33",
+    "version": "v233"
+  },
+  "source": "Service_LDD.exe",
+  "resource_string_encoding": "utf-16le",
+  "strings_output_encoding": "ascii",
+  "parameter_contexts": {
+    "SYSTICK_AVG_CYCLE": {
+      "key": "SYSTICK_AVG_CYCLE",
+      "label_key": "label_PAR_SYSTICK_AVG_CYCLE",
+      "primary_display_candidate": "Main Process Execution Time Max [us]",
+      "display_candidates": [
+        "System Debug Values",
+        "UniqueId",
+        "Main Process Execution Time AVG [us]",
+        "Main Process Execution Time Max [us]",
+        "Error Status",
+        "Error Description"
+      ],
+      "context_stack": [
+        "Monitor",
+        "Laser Diode Values (Details)",
+        "Laser Light Values",
+        "System Debug Values"
+      ],
+      "neighbor_controls": [
+        "pictureBox1",
+        "groupBox_SystemDebugValues",
+        "label_UniqueId",
+        "label192",
+        "label47",
+        "label187",
+        "label_PAR_SYSTICK_AVG_CYCLE",
+        "label_PAR_SYSTICK_MAX_CYCLE",
+        "groupBox5",
+        "groupBox17",
+        "label_ErrorDescription",
+        "label49"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[102]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "SYSTICK_MAX_CYCLE": {
+      "key": "SYSTICK_MAX_CYCLE",
+      "label_key": "label_PAR_SYSTICK_MAX_CYCLE",
+      "primary_display_candidate": "Main Process Execution Time Max [us]",
+      "display_candidates": [
+        "System Debug Values",
+        "UniqueId",
+        "Main Process Execution Time AVG [us]",
+        "Main Process Execution Time Max [us]",
+        "Error Status",
+        "Error Description",
+        "Error Parameter"
+      ],
+      "context_stack": [
+        "Monitor",
+        "Laser Diode Values (Details)",
+        "Laser Light Values",
+        "System Debug Values"
+      ],
+      "neighbor_controls": [
+        "groupBox_SystemDebugValues",
+        "label_UniqueId",
+        "label192",
+        "label47",
+        "label187",
+        "label_PAR_SYSTICK_AVG_CYCLE",
+        "label_PAR_SYSTICK_MAX_CYCLE",
+        "groupBox5",
+        "groupBox17",
+        "label_ErrorDescription",
+        "label49"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[103]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "ERROR_PARAMETER": {
+      "key": "ERROR_PARAMETER",
+      "label_key": "label_PAR_ERROR_PARAMETER",
+      "primary_display_candidate": "Error Instance",
+      "display_candidates": [
+        "Error Status",
+        "Error Description",
+        "Error Parameter",
+        "Error Instance",
+        "Debug",
+        "VDM Voltage [V]"
+      ],
+      "context_stack": [
+        "Monitor",
+        "System Debug Values",
+        "Error Status",
+        "Error Description"
+      ],
+      "neighbor_controls": [
+        "label_PAR_SYSTICK_MAX_CYCLE",
+        "groupBox5",
+        "groupBox17",
+        "label_ErrorDescription",
+        "label49",
+        "label46",
+        "label_PAR_ERROR_PARAMETER",
+        "label_PAR_ERROR_INSTANCE",
+        "groupBox_MonitorDebug",
+        "label181",
+        "label_PAR_VOLTAGE_VDM",
+        "label182"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[113]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "ERROR_INSTANCE": {
+      "key": "ERROR_INSTANCE",
+      "label_key": "label_PAR_ERROR_INSTANCE",
+      "primary_display_candidate": "Error Instance",
+      "display_candidates": [
+        "Error Status",
+        "Error Description",
+        "Error Parameter",
+        "Error Instance",
+        "Debug",
+        "VDM Voltage [V]",
+        "Laser Diode Voltage Internal [V]"
+      ],
+      "context_stack": [
+        "Monitor",
+        "System Debug Values",
+        "Error Status",
+        "Error Description"
+      ],
+      "neighbor_controls": [
+        "groupBox5",
+        "groupBox17",
+        "label_ErrorDescription",
+        "label49",
+        "label46",
+        "label_PAR_ERROR_PARAMETER",
+        "label_PAR_ERROR_INSTANCE",
+        "groupBox_MonitorDebug",
+        "label181",
+        "label_PAR_VOLTAGE_VDM",
+        "label182"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[114]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "VOLTAGE_VDM": {
+      "key": "VOLTAGE_VDM",
+      "label_key": "label_PAR_VOLTAGE_VDM",
+      "primary_display_candidate": "VDM Voltage [V]",
+      "display_candidates": [
+        "Error Parameter",
+        "Error Instance",
+        "Debug",
+        "VDM Voltage [V]",
+        "Laser Diode Voltage Internal [V]",
+        "LDD Current Internal [A]"
+      ],
+      "context_stack": [
+        "Monitor",
+        "Error Status",
+        "Error Description",
+        "Debug"
+      ],
+      "neighbor_controls": [
+        "label49",
+        "label46",
+        "label_PAR_ERROR_PARAMETER",
+        "label_PAR_ERROR_INSTANCE",
+        "groupBox_MonitorDebug",
+        "label181",
+        "label_PAR_VOLTAGE_VDM",
+        "label182",
+        "label_PAR_LD_ACT_U_INT",
+        "label19",
+        "label_CUR_Int",
+        "groupBox3"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[119]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LD_ACT_U_INT": {
+      "key": "LD_ACT_U_INT",
+      "label_key": "label_PAR_LD_ACT_U_INT",
+      "primary_display_candidate": "Laser Diode Voltage Internal [V]",
+      "display_candidates": [
+        "Error Instance",
+        "Debug",
+        "VDM Voltage [V]",
+        "Laser Diode Voltage Internal [V]",
+        "LDD Current Internal [A]",
+        "Firmware and Hardware Versions",
+        "Device Type"
+      ],
+      "context_stack": [
+        "Monitor",
+        "Error Status",
+        "Error Description",
+        "Debug"
+      ],
+      "neighbor_controls": [
+        "label_PAR_ERROR_PARAMETER",
+        "label_PAR_ERROR_INSTANCE",
+        "groupBox_MonitorDebug",
+        "label181",
+        "label_PAR_VOLTAGE_VDM",
+        "label182",
+        "label_PAR_LD_ACT_U_INT",
+        "label19",
+        "label_CUR_Int",
+        "groupBox3",
+        "label63"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[122]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "SIGGEN_SINGLESEQ": {
+      "key": "SIGGEN_SINGLESEQ",
+      "label_key": "label_PAR_SIGGEN_SINGLESEQ",
+      "primary_display_candidate": "HW Pin",
+      "display_candidates": [
+        "Power Supplies",
+        "Operation Control",
+        "Single Sequence",
+        "Input Source",
+        "HW Pin",
+        "Enable Settings",
+        "Enable NA",
+        "Data Interfaces"
+      ],
+      "context_stack": [
+        "Operation Control",
+        "Driver Values",
+        "Power Supplies",
+        "Single Sequence"
+      ],
+      "neighbor_controls": [
+        "groupBox_Moni_Power",
+        "tabPage_Operation",
+        "groupBox36",
+        "label193",
+        "comboBox_PAR_SIGGEN_SINGLESEQ",
+        "label_PAR_SIGGEN_SINGLESEQ",
+        "groupBox19",
+        "label62",
+        "label_Enable_Source",
+        "button_Enable"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[163]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC8": {
+      "key": "PBC_RES_FUNC8",
+      "label_key": "label_PAR_PBC_RES_FUNC8",
+      "primary_display_candidate": "PBC RES8",
+      "display_candidates": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "PBC RES8",
+        "No Function",
+        "Pulse Trigger",
+        "----",
+        "Current Update",
+        "PBC RES7"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label_Trigger",
+        "label_TimeBase",
+        "label165",
+        "label166",
+        "tabPage_Settings",
+        "groupBox96",
+        "label417",
+        "label_PAR_PBC_RES_FUNC8",
+        "comboBox_PAR_PBC_RES_FUNC8",
+        "label415"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[393]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC7": {
+      "key": "PBC_RES_FUNC7",
+      "label_key": "label_PAR_PBC_RES_FUNC7",
+      "primary_display_candidate": "PBC RES7",
+      "display_candidates": [
+        "PBC RES8",
+        "No Function",
+        "Pulse Trigger",
+        "----",
+        "Current Update",
+        "PBC RES7",
+        "LDD Run",
+        "LDD OK",
+        "LDD Error",
+        "PBC RES6"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label417",
+        "label_PAR_PBC_RES_FUNC8",
+        "comboBox_PAR_PBC_RES_FUNC8",
+        "label415",
+        "label_PAR_PBC_RES_FUNC7",
+        "comboBox_PAR_PBC_RES_FUNC7",
+        "label413",
+        "label_PAR_PBC_RES_FUNC6"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[401]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC6": {
+      "key": "PBC_RES_FUNC6",
+      "label_key": "label_PAR_PBC_RES_FUNC6",
+      "primary_display_candidate": "PBC RES6",
+      "display_candidates": [
+        "PBC RES7",
+        "LDD Run",
+        "LDD OK",
+        "LDD Error",
+        "PBC RES6",
+        "PBC RES5",
+        "PBC RES4"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "comboBox_PAR_PBC_RES_FUNC8",
+        "label415",
+        "label_PAR_PBC_RES_FUNC7",
+        "comboBox_PAR_PBC_RES_FUNC7",
+        "label413",
+        "label_PAR_PBC_RES_FUNC6",
+        "comboBox_PAR_PBC_RES_FUNC6",
+        "label410",
+        "label_PAR_PBC_RES_FUNC5",
+        "comboBox_PAR_PBC_RES_FUNC5",
+        "label400"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[408]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC5": {
+      "key": "PBC_RES_FUNC5",
+      "label_key": "label_PAR_PBC_RES_FUNC5",
+      "primary_display_candidate": "PBC RES5",
+      "display_candidates": [
+        "LDD Run",
+        "LDD OK",
+        "LDD Error",
+        "PBC RES6",
+        "PBC RES5",
+        "PBC RES4",
+        "Current Analog"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "comboBox_PAR_PBC_RES_FUNC7",
+        "label413",
+        "label_PAR_PBC_RES_FUNC6",
+        "comboBox_PAR_PBC_RES_FUNC6",
+        "label410",
+        "label_PAR_PBC_RES_FUNC5",
+        "comboBox_PAR_PBC_RES_FUNC5",
+        "label400",
+        "label_PAR_PBC_RES_FUNC4",
+        "comboBox_PAR_PBC_RES_FUNC4",
+        "label398"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[412]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC4": {
+      "key": "PBC_RES_FUNC4",
+      "label_key": "label_PAR_PBC_RES_FUNC4",
+      "primary_display_candidate": "PBC RES4",
+      "display_candidates": [
+        "PBC RES6",
+        "PBC RES5",
+        "PBC RES4",
+        "Current Analog",
+        "PBC RES3"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label413",
+        "label_PAR_PBC_RES_FUNC6",
+        "comboBox_PAR_PBC_RES_FUNC6",
+        "label410",
+        "label_PAR_PBC_RES_FUNC5",
+        "comboBox_PAR_PBC_RES_FUNC5",
+        "label400",
+        "label_PAR_PBC_RES_FUNC4",
+        "comboBox_PAR_PBC_RES_FUNC4",
+        "label398",
+        "label_PAR_PBC_RES_FUNC3",
+        "comboBox_PAR_PBC_RES_FUNC3",
+        "label390"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[416]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC3": {
+      "key": "PBC_RES_FUNC3",
+      "label_key": "label_PAR_PBC_RES_FUNC3",
+      "primary_display_candidate": "PBC RES3",
+      "display_candidates": [
+        "PBC RES5",
+        "PBC RES4",
+        "Current Analog",
+        "PBC RES3",
+        "PBC RES2",
+        "PBC RES1"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label_PAR_PBC_RES_FUNC5",
+        "comboBox_PAR_PBC_RES_FUNC5",
+        "label400",
+        "label_PAR_PBC_RES_FUNC4",
+        "comboBox_PAR_PBC_RES_FUNC4",
+        "label398",
+        "label_PAR_PBC_RES_FUNC3",
+        "comboBox_PAR_PBC_RES_FUNC3",
+        "label390",
+        "label_PAR_PBC_RES_FUNC2",
+        "comboBox_PAR_PBC_RES_FUNC2",
+        "label397"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[421]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC2": {
+      "key": "PBC_RES_FUNC2",
+      "label_key": "label_PAR_PBC_RES_FUNC2",
+      "primary_display_candidate": "PBC RES2",
+      "display_candidates": [
+        "PBC RES4",
+        "Current Analog",
+        "PBC RES3",
+        "PBC RES2",
+        "PBC RES1"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label_PAR_PBC_RES_FUNC4",
+        "comboBox_PAR_PBC_RES_FUNC4",
+        "label398",
+        "label_PAR_PBC_RES_FUNC3",
+        "comboBox_PAR_PBC_RES_FUNC3",
+        "label390",
+        "label_PAR_PBC_RES_FUNC2",
+        "comboBox_PAR_PBC_RES_FUNC2",
+        "label397",
+        "label_PAR_PBC_RES_FUNC1",
+        "comboBox_PAR_PBC_RES_FUNC1",
+        "label419",
+        "label420"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[425]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "PBC_RES_FUNC1": {
+      "key": "PBC_RES_FUNC1",
+      "label_key": "label_PAR_PBC_RES_FUNC1",
+      "primary_display_candidate": "PBC RES1",
+      "display_candidates": [
+        "PBC RES3",
+        "PBC RES2",
+        "PBC RES1",
+        "Device Address"
+      ],
+      "context_stack": [
+        "Settings",
+        "Chart Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)"
+      ],
+      "neighbor_controls": [
+        "label398",
+        "label_PAR_PBC_RES_FUNC3",
+        "comboBox_PAR_PBC_RES_FUNC3",
+        "label390",
+        "label_PAR_PBC_RES_FUNC2",
+        "comboBox_PAR_PBC_RES_FUNC2",
+        "label397",
+        "label_PAR_PBC_RES_FUNC1",
+        "comboBox_PAR_PBC_RES_FUNC1",
+        "label419",
+        "label420",
+        "groupBox18",
+        "label78",
+        "label96"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[429]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "RS485_1_ADDR": {
+      "key": "RS485_1_ADDR",
+      "label_key": "label_PAR_RS485_1_ADDR",
+      "primary_display_candidate": "Device Address [..]",
+      "display_candidates": [
+        "Device Address",
+        "Device Address [..]",
+        "*Reset required",
+        "NTC Sensor Characteristics"
+      ],
+      "context_stack": [
+        "Settings",
+        "Data Acquisition Settings (Device Parameter)",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address"
+      ],
+      "neighbor_controls": [
+        "comboBox_PAR_PBC_RES_FUNC1",
+        "label419",
+        "label420",
+        "groupBox18",
+        "label78",
+        "label96",
+        "label43",
+        "textBox_PAR_RS485_1_ADDR",
+        "label_PAR_RS485_1_ADDR",
+        "label75",
+        "groupBox66",
+        "label73",
+        "label74",
+        "label71"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[440]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_R3": {
+      "key": "TLD_NTC_R3",
+      "label_key": "label_PAR_TLD_NTC_R3",
+      "primary_display_candidate": "Temperature [",
+      "display_candidates": [
+        "Resistance [",
+        "Temperature ["
+      ],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label93",
+        "label94",
+        "label95",
+        "label299",
+        "label300",
+        "label301",
+        "label302",
+        "textBox_PAR_TLD_NTC_R3",
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[466]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_T3": {
+      "key": "TLD_NTC_T3",
+      "label_key": "label_PAR_TLD_NTC_T3",
+      "primary_display_candidate": "Temperature [",
+      "display_candidates": [
+        "Temperature ["
+      ],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label94",
+        "label95",
+        "label299",
+        "label300",
+        "label301",
+        "label302",
+        "textBox_PAR_TLD_NTC_R3",
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1",
+        "label_PAR_TLD_NTC_R1",
+        "textBox_PAR_TLD_NTC_T1"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[468]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_R2": {
+      "key": "TLD_NTC_R2",
+      "label_key": "label_PAR_TLD_NTC_R2",
+      "primary_display_candidate": "Temperature [",
+      "display_candidates": [],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label95",
+        "label299",
+        "label300",
+        "label301",
+        "label302",
+        "textBox_PAR_TLD_NTC_R3",
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1",
+        "label_PAR_TLD_NTC_R1",
+        "textBox_PAR_TLD_NTC_T1",
+        "label_PAR_TLD_NTC_T1",
+        "groupBox9"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[470]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_T2": {
+      "key": "TLD_NTC_T2",
+      "label_key": "label_PAR_TLD_NTC_T2",
+      "primary_display_candidate": "",
+      "display_candidates": [
+        "Laser Diode Temperature Settings"
+      ],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label300",
+        "label301",
+        "label302",
+        "textBox_PAR_TLD_NTC_R3",
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1",
+        "label_PAR_TLD_NTC_R1",
+        "textBox_PAR_TLD_NTC_T1",
+        "label_PAR_TLD_NTC_T1",
+        "groupBox9",
+        "label154"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[472]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_R1": {
+      "key": "TLD_NTC_R1",
+      "label_key": "label_PAR_TLD_NTC_R1",
+      "primary_display_candidate": "",
+      "display_candidates": [
+        "Laser Diode Temperature Settings",
+        "Upper Error Threshold ["
+      ],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label302",
+        "textBox_PAR_TLD_NTC_R3",
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1",
+        "label_PAR_TLD_NTC_R1",
+        "textBox_PAR_TLD_NTC_T1",
+        "label_PAR_TLD_NTC_T1",
+        "groupBox9",
+        "label154",
+        "label153"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[474]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_NTC_T1": {
+      "key": "TLD_NTC_T1",
+      "label_key": "label_PAR_TLD_NTC_T1",
+      "primary_display_candidate": "",
+      "display_candidates": [
+        "Laser Diode Temperature Settings",
+        "Upper Error Threshold [",
+        "Lower Error Threshold ["
+      ],
+      "context_stack": [
+        "Settings",
+        "PBC Configuration (RES1 ... RES8)",
+        "Device Address",
+        "NTC Sensor Characteristics"
+      ],
+      "neighbor_controls": [
+        "label_PAR_TLD_NTC_R3",
+        "textBox_PAR_TLD_NTC_T3",
+        "label_PAR_TLD_NTC_T3",
+        "textBox_PAR_TLD_NTC_R2",
+        "label_PAR_TLD_NTC_R2",
+        "textBox_PAR_TLD_NTC_T2",
+        "label_PAR_TLD_NTC_T2",
+        "textBox_PAR_TLD_NTC_R1",
+        "label_PAR_TLD_NTC_R1",
+        "textBox_PAR_TLD_NTC_T1",
+        "label_PAR_TLD_NTC_T1",
+        "groupBox9",
+        "label154",
+        "label153",
+        "textBox_PAR_TLD_TEMP_OVER"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[476]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_TEMP_UNDER": {
+      "key": "TLD_TEMP_UNDER",
+      "label_key": "label_PAR_TLD_TEMP_UNDER",
+      "primary_display_candidate": "Lower Error Threshold [",
+      "display_candidates": [
+        "Laser Diode Temperature Settings",
+        "Upper Error Threshold [",
+        "Lower Error Threshold [",
+        "Communication",
+        "Comm. Watchdog [s]"
+      ],
+      "context_stack": [
+        "Settings",
+        "Device Address",
+        "NTC Sensor Characteristics",
+        "Laser Diode Temperature Settings"
+      ],
+      "neighbor_controls": [
+        "groupBox9",
+        "label154",
+        "label153",
+        "textBox_PAR_TLD_TEMP_OVER",
+        "textBox_PAR_TLD_TEMP_UNDER",
+        "label91",
+        "label92",
+        "label_PAR_TLD_TEMP_UNDER",
+        "label_PAR_TLD_TEMP_OVER",
+        "groupBox6",
+        "label54",
+        "textBox_Com_WatchDog",
+        "label_Com_WatchDog"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[487]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_TEMP_OVER": {
+      "key": "TLD_TEMP_OVER",
+      "label_key": "label_PAR_TLD_TEMP_OVER",
+      "primary_display_candidate": "Lower Error Threshold [",
+      "display_candidates": [
+        "Laser Diode Temperature Settings",
+        "Upper Error Threshold [",
+        "Lower Error Threshold [",
+        "Communication",
+        "Comm. Watchdog [s]"
+      ],
+      "context_stack": [
+        "Settings",
+        "Device Address",
+        "NTC Sensor Characteristics",
+        "Laser Diode Temperature Settings"
+      ],
+      "neighbor_controls": [
+        "label154",
+        "label153",
+        "textBox_PAR_TLD_TEMP_OVER",
+        "textBox_PAR_TLD_TEMP_UNDER",
+        "label91",
+        "label92",
+        "label_PAR_TLD_TEMP_UNDER",
+        "label_PAR_TLD_TEMP_OVER",
+        "groupBox6",
+        "label54",
+        "textBox_Com_WatchDog",
+        "label_Com_WatchDog",
+        "label44"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[488]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "MAX_CURRENT_ERROR": {
+      "key": "MAX_CURRENT_ERROR",
+      "label_key": "label_PAR_MAX_CURRENT_ERROR",
+      "primary_display_candidate": "Current Limit Max [A]",
+      "display_candidates": [
+        "Max Current Error* [A]",
+        "Slope Limit [A/us]",
+        "Current Limit Max [A]",
+        "Analog Control"
+      ],
+      "context_stack": [
+        "Settings",
+        "Communication",
+        "PID Current Control Parameters",
+        "Maximum Values"
+      ],
+      "neighbor_controls": [
+        "label42",
+        "label29",
+        "textBox_CURRENT_MIN",
+        "label_CURRENT_MIN",
+        "textBox_SlopeLimit",
+        "textBox_PAR_MAX_CURRENT_ERROR",
+        "textBox_CURRENT_LIMIT",
+        "label_PAR_MAX_CURRENT_ERROR",
+        "label_SlopeLimit",
+        "label_CURRENT_LIMIT",
+        "label26",
+        "label27",
+        "groupBox7",
+        "label25"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[526]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "RS485_1_RPL_DELAY": {
+      "key": "RS485_1_RPL_DELAY",
+      "label_key": "label_PAR_RS485_1_RPL_DELAY",
+      "primary_display_candidate": "Baud Rate* [..]",
+      "display_candidates": [
+        "RS485 Channel 1 Settings",
+        "Response Delay [us]",
+        "Baud Rate* [..]",
+        "Maintenance"
+      ],
+      "context_stack": [
+        "Settings",
+        "Maximum Values",
+        "Analog Control",
+        "RS485 Channel 1 Settings"
+      ],
+      "neighbor_controls": [
+        "label_ANALOG_INT_FACTOR",
+        "label23",
+        "label24",
+        "groupBox13",
+        "label48",
+        "label38",
+        "textBox_PAR_RS485_1_RPL_DELAY",
+        "label_PAR_RS485_1_RPL_DELAY",
+        "textBox_RS485_CH1_BaudRate",
+        "label_RS485_CH1_BaudRate",
+        "label34",
+        "label35",
+        "tabPage_Maintenance",
+        "groupBox93"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[546]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_TOTEMP_RV": {
+      "key": "TLD_TOTEMP_RV",
+      "label_key": "label_PAR_TLD_TOTEMP_RV",
+      "primary_display_candidate": "ADC Calibration Gain",
+      "display_candidates": [
+        "Temperature Offset [",
+        "ADC Rv [",
+        "Temperature Gain  [",
+        "ADC Calibration Gain",
+        "ADC Calibration Offset"
+      ],
+      "context_stack": [
+        "HW Adjustment",
+        "Device Boot Loader (STM32 / FPGA)",
+        "STM32 Internal Boot Loader",
+        "Laser Diode Temperature Measurement Settings"
+      ],
+      "neighbor_controls": [
+        "label79",
+        "label84",
+        "label70",
+        "label_TLD_TEMP_Gain",
+        "textBox_PAR_TLD_TOTEMP_RV",
+        "textBox_TLD_TEMP_Gain",
+        "label_PAR_TLD_TOTEMP_RV",
+        "label_TLD_TEMP_Offset",
+        "textBox_TLD_TEMP_Offset",
+        "label100",
+        "label101",
+        "label69",
+        "textBox_PAR_TLD_ADCADJ_A0"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[639]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_ADCADJ_A0": {
+      "key": "TLD_ADCADJ_A0",
+      "label_key": "label_PAR_TLD_ADCADJ_A0",
+      "primary_display_candidate": "ADC Calibration Offset",
+      "display_candidates": [
+        "ADC Calibration Offset",
+        "Import the Expert Settings only when the Serial Number of the connected device is equal to the Serial Number stored in the ini File.",
+        "Current Measurement Settings"
+      ],
+      "context_stack": [
+        "HW Adjustment",
+        "Device Boot Loader (STM32 / FPGA)",
+        "STM32 Internal Boot Loader",
+        "Laser Diode Temperature Measurement Settings"
+      ],
+      "neighbor_controls": [
+        "textBox_PAR_TLD_TOTEMP_RV",
+        "textBox_TLD_TEMP_Gain",
+        "label_PAR_TLD_TOTEMP_RV",
+        "label_TLD_TEMP_Offset",
+        "textBox_TLD_TEMP_Offset",
+        "label100",
+        "label101",
+        "label69",
+        "textBox_PAR_TLD_ADCADJ_A0",
+        "label_PAR_TLD_ADCADJ_A0",
+        "textBox_PAR_TLD_ADCADJ_A1",
+        "label_PAR_TLD_ADCADJ_A1",
+        "checkBox_ImportExpertSettings",
+        "groupBox27",
+        "button_CalcCurrentCorr"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[647]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "TLD_ADCADJ_A1": {
+      "key": "TLD_ADCADJ_A1",
+      "label_key": "label_PAR_TLD_ADCADJ_A1",
+      "primary_display_candidate": "ADC Calibration Offset",
+      "display_candidates": [
+        "ADC Calibration Offset",
+        "Import the Expert Settings only when the Serial Number of the connected device is equal to the Serial Number stored in the ini File.",
+        "Current Measurement Settings",
+        "Calculate Current Factors"
+      ],
+      "context_stack": [
+        "HW Adjustment",
+        "Device Boot Loader (STM32 / FPGA)",
+        "STM32 Internal Boot Loader",
+        "Laser Diode Temperature Measurement Settings"
+      ],
+      "neighbor_controls": [
+        "label_PAR_TLD_TOTEMP_RV",
+        "label_TLD_TEMP_Offset",
+        "textBox_TLD_TEMP_Offset",
+        "label100",
+        "label101",
+        "label69",
+        "textBox_PAR_TLD_ADCADJ_A0",
+        "label_PAR_TLD_ADCADJ_A0",
+        "textBox_PAR_TLD_ADCADJ_A1",
+        "label_PAR_TLD_ADCADJ_A1",
+        "checkBox_ImportExpertSettings",
+        "groupBox27",
+        "button_CalcCurrentCorr",
+        "textBox_CorrINomH"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[649]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LUT_WAVE_SELECT": {
+      "key": "LUT_WAVE_SELECT",
+      "label_key": "label_PAR_LUT_WAVE_SELECT",
+      "primary_display_candidate": "Table Instance Selection",
+      "display_candidates": [
+        "Table Selection",
+        "Table Instance Selection",
+        "Table Step Intervall Time",
+        "Table 4 Interval Time [us]"
+      ],
+      "context_stack": [
+        "Table Selection",
+        "Laser Power Measurement Settings",
+        "Calculate Light Factors"
+      ],
+      "neighbor_controls": [
+        "label126",
+        "label127",
+        "label_Light_ADJ_A0",
+        "label_Light_ADJ_A1",
+        "tabPage4",
+        "groupBox35",
+        "label199",
+        "comboBox_PAR_LUT_WAVE_SELECT",
+        "label_PAR_LUT_WAVE_SELECT",
+        "label201",
+        "label202",
+        "groupBox31",
+        "label178",
+        "textBox_PAR_LUT_WAVE_INT4"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[722]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LUT_WAVE_INT4": {
+      "key": "LUT_WAVE_INT4",
+      "label_key": "label_PAR_LUT_WAVE_INT4",
+      "primary_display_candidate": "Table 4 Interval Time [us]",
+      "display_candidates": [
+        "Table Instance Selection",
+        "Table Step Intervall Time",
+        "Table 4 Interval Time [us]",
+        "Table 3 Interval Time [us]",
+        "Table 2 Interval Time [us]",
+        "Table 1 Interval Time [us]"
+      ],
+      "context_stack": [
+        "Table Selection",
+        "Calculate Light Factors",
+        "Table Step Intervall Time"
+      ],
+      "neighbor_controls": [
+        "comboBox_PAR_LUT_WAVE_SELECT",
+        "label_PAR_LUT_WAVE_SELECT",
+        "label201",
+        "label202",
+        "groupBox31",
+        "label178",
+        "textBox_PAR_LUT_WAVE_INT4",
+        "label_PAR_LUT_WAVE_INT4",
+        "label188",
+        "label189",
+        "label191",
+        "textBox_PAR_LUT_WAVE_INT3"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[730]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LUT_WAVE_INT3": {
+      "key": "LUT_WAVE_INT3",
+      "label_key": "label_PAR_LUT_WAVE_INT3",
+      "primary_display_candidate": "Table 1 Interval Time [us]",
+      "display_candidates": [
+        "Table 3 Interval Time [us]",
+        "Table 2 Interval Time [us]",
+        "Table 1 Interval Time [us]",
+        "Lookup Table Download"
+      ],
+      "context_stack": [
+        "Table Selection",
+        "Calculate Light Factors",
+        "Table Step Intervall Time"
+      ],
+      "neighbor_controls": [
+        "label_PAR_LUT_WAVE_INT4",
+        "label188",
+        "label189",
+        "label191",
+        "textBox_PAR_LUT_WAVE_INT3",
+        "textBox_PAR_LUT_WAVE_INT2",
+        "textBox_PAR_LUT_WAVE_INT1",
+        "label_PAR_LUT_WAVE_INT3",
+        "label_PAR_LUT_WAVE_INT2",
+        "label_PAR_LUT_WAVE_INT1",
+        "label197",
+        "label198",
+        "groupBox85",
+        "label_LUT_Download_Info"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[740]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LUT_WAVE_INT2": {
+      "key": "LUT_WAVE_INT2",
+      "label_key": "label_PAR_LUT_WAVE_INT2",
+      "primary_display_candidate": "Table 1 Interval Time [us]",
+      "display_candidates": [
+        "Table 3 Interval Time [us]",
+        "Table 2 Interval Time [us]",
+        "Table 1 Interval Time [us]",
+        "Lookup Table Download"
+      ],
+      "context_stack": [
+        "Table Selection",
+        "Calculate Light Factors",
+        "Table Step Intervall Time"
+      ],
+      "neighbor_controls": [
+        "label188",
+        "label189",
+        "label191",
+        "textBox_PAR_LUT_WAVE_INT3",
+        "textBox_PAR_LUT_WAVE_INT2",
+        "textBox_PAR_LUT_WAVE_INT1",
+        "label_PAR_LUT_WAVE_INT3",
+        "label_PAR_LUT_WAVE_INT2",
+        "label_PAR_LUT_WAVE_INT1",
+        "label197",
+        "label198",
+        "groupBox85",
+        "label_LUT_Download_Info",
+        "progressBar_LUT_Download"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[741]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "LUT_WAVE_INT1": {
+      "key": "LUT_WAVE_INT1",
+      "label_key": "label_PAR_LUT_WAVE_INT1",
+      "primary_display_candidate": "Table 1 Interval Time [us]",
+      "display_candidates": [
+        "Table 3 Interval Time [us]",
+        "Table 2 Interval Time [us]",
+        "Table 1 Interval Time [us]",
+        "Lookup Table Download"
+      ],
+      "context_stack": [
+        "Table Selection",
+        "Calculate Light Factors",
+        "Table Step Intervall Time"
+      ],
+      "neighbor_controls": [
+        "label189",
+        "label191",
+        "textBox_PAR_LUT_WAVE_INT3",
+        "textBox_PAR_LUT_WAVE_INT2",
+        "textBox_PAR_LUT_WAVE_INT1",
+        "label_PAR_LUT_WAVE_INT3",
+        "label_PAR_LUT_WAVE_INT2",
+        "label_PAR_LUT_WAVE_INT1",
+        "label197",
+        "label198",
+        "groupBox85",
+        "label_LUT_Download_Info",
+        "progressBar_LUT_Download",
+        "button_LUT_LoadCSVFile"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[742]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "FLASH_SAVE_OFF": {
+      "key": "FLASH_SAVE_OFF",
+      "label_key": "label_PAR_FLASH_SAVE_OFF",
+      "primary_display_candidate": "Disabled",
+      "display_candidates": [
+        "Download",
+        "Misc",
+        "Parameter System Save to Flash Configuration",
+        "Save Data to Flash",
+        "Enabled",
+        "Disabled",
+        "Parallel",
+        "LDD Parallel Master / Slave Configuration*"
+      ],
+      "context_stack": [
+        "Misc",
+        "Table Step Intervall Time",
+        "Lookup Table Download",
+        "Parameter System Save to Flash Configuration"
+      ],
+      "neighbor_controls": [
+        "tabPage2",
+        "groupBox105",
+        "label416",
+        "comboBox_PAR_FLASH_SAVE_OFF",
+        "label_PAR_FLASH_SAVE_OFF",
+        "label436",
+        "label445",
+        "tabPage3",
+        "label185",
+        "groupBox33"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[762]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "FSS_SLAVE_ID": {
+      "key": "FSS_SLAVE_ID",
+      "label_key": "label_PAR_FSS_SLAVE_ID",
+      "primary_display_candidate": "Master: Number Of Slaves*",
+      "display_candidates": [
+        "Parallel",
+        "LDD Parallel Master / Slave Configuration*",
+        "Slave: Slave ID*",
+        "Master: Number Of Slaves*",
+        "RS485 Sync. Channel*",
+        "RS485 CH1",
+        "RS485 CH2"
+      ],
+      "context_stack": [
+        "Parallel",
+        "Lookup Table Download",
+        "Parameter System Save to Flash Configuration",
+        "LDD Parallel Master / Slave Configuration*"
+      ],
+      "neighbor_controls": [
+        "tabPage3",
+        "label185",
+        "groupBox33",
+        "label190",
+        "label186",
+        "textBox_PAR_FSS_SLAVE_ID",
+        "label_PAR_FSS_SLAVE_ID",
+        "textBox_PAR_FSS_NROF_SLAVES",
+        "label_PAR_FSS_NROF_SLAVES",
+        "label184",
+        "comboBox_PAR_FSS_RS485CH"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[775]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "FSS_NROF_SLAVES": {
+      "key": "FSS_NROF_SLAVES",
+      "label_key": "label_PAR_FSS_NROF_SLAVES",
+      "primary_display_candidate": "Master: Number Of Slaves*",
+      "display_candidates": [
+        "LDD Parallel Master / Slave Configuration*",
+        "Slave: Slave ID*",
+        "Master: Number Of Slaves*",
+        "RS485 Sync. Channel*",
+        "RS485 CH1",
+        "RS485 CH2"
+      ],
+      "context_stack": [
+        "Parallel",
+        "Lookup Table Download",
+        "Parameter System Save to Flash Configuration",
+        "LDD Parallel Master / Slave Configuration*"
+      ],
+      "neighbor_controls": [
+        "label185",
+        "groupBox33",
+        "label190",
+        "label186",
+        "textBox_PAR_FSS_SLAVE_ID",
+        "label_PAR_FSS_SLAVE_ID",
+        "textBox_PAR_FSS_NROF_SLAVES",
+        "label_PAR_FSS_NROF_SLAVES",
+        "label184",
+        "comboBox_PAR_FSS_RS485CH",
+        "label_PAR_FSS_RS485CH",
+        "label13"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[777]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "FSS_RS485CH": {
+      "key": "FSS_RS485CH",
+      "label_key": "label_PAR_FSS_RS485CH",
+      "primary_display_candidate": "RS485 CH2",
+      "display_candidates": [
+        "Master: Number Of Slaves*",
+        "RS485 Sync. Channel*",
+        "RS485 CH1",
+        "RS485 CH2",
+        "Parallel Function / Type*",
+        "Master",
+        "Slave"
+      ],
+      "context_stack": [
+        "Parallel",
+        "Lookup Table Download",
+        "Parameter System Save to Flash Configuration",
+        "LDD Parallel Master / Slave Configuration*"
+      ],
+      "neighbor_controls": [
+        "textBox_PAR_FSS_SLAVE_ID",
+        "label_PAR_FSS_SLAVE_ID",
+        "textBox_PAR_FSS_NROF_SLAVES",
+        "label_PAR_FSS_NROF_SLAVES",
+        "label184",
+        "comboBox_PAR_FSS_RS485CH",
+        "label_PAR_FSS_RS485CH",
+        "label13",
+        "comboBox_PAR_FSS_LDD_TYPE",
+        "label_PAR_FSS_LDD_TYPE",
+        "label180"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[783]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "FSS_LDD_TYPE": {
+      "key": "FSS_LDD_TYPE",
+      "label_key": "label_PAR_FSS_LDD_TYPE",
+      "primary_display_candidate": "Slave",
+      "display_candidates": [
+        "RS485 Sync. Channel*",
+        "RS485 CH1",
+        "RS485 CH2",
+        "Parallel Function / Type*",
+        "Master",
+        "Slave",
+        "Control",
+        "Get and Set Commands"
+      ],
+      "context_stack": [
+        "Parallel",
+        "Lookup Table Download",
+        "Parameter System Save to Flash Configuration",
+        "LDD Parallel Master / Slave Configuration*"
+      ],
+      "neighbor_controls": [
+        "comboBox_PAR_FSS_RS485CH",
+        "label_PAR_FSS_RS485CH",
+        "label13",
+        "comboBox_PAR_FSS_LDD_TYPE",
+        "label_PAR_FSS_LDD_TYPE",
+        "label180",
+        "label183",
+        "tabPage_Control",
+        "groupBox10",
+        "groupBox15"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[789]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "DEBUG_WRITE1": {
+      "key": "DEBUG_WRITE1",
+      "label_key": "label_PAR_DEBUG_WRITE1",
+      "primary_display_candidate": "Debug Parameter",
+      "display_candidates": [
+        "?VI (Version Info)",
+        "Query Result",
+        "?IF (Device Information)",
+        "Debug Parameter",
+        "Debug 1"
+      ],
+      "context_stack": [
+        "Debug Parameter",
+        "Parameter",
+        "Query Result"
+      ],
+      "neighbor_controls": [
+        "groupBox11",
+        "listBox_QueryResult",
+        "button_QueryDeviceInformation",
+        "tabPage_Debug",
+        "groupBox14",
+        "textBox_PAR_DEBUG_WRITE1",
+        "label_PAR_DEBUG_WRITE1",
+        "label39",
+        "label40",
+        "label41",
+        "listBox_Debug",
+        "tabPage_ME",
+        "groupBox30"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[839]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "RACK_OUTPUT": {
+      "key": "RACK_OUTPUT",
+      "label_key": "label_PAR_RACK_OUTPUT",
+      "primary_display_candidate": "LDD -> Rack Terminal",
+      "display_candidates": [
+        "Rack Settings",
+        "Output Derating [W]",
+        "LDD -> Rack Terminal",
+        "Hardware Test for PBC connector",
+        "Hardware Test*"
+      ],
+      "context_stack": [
+        "Rack Settings",
+        "Query Result",
+        "Debug Parameter"
+      ],
+      "neighbor_controls": [
+        "label177",
+        "textBox_OutputDerating",
+        "label_OutputDerating",
+        "label170",
+        "label171",
+        "label172",
+        "textBox_PAR_RACK_OUTPUT",
+        "label_PAR_RACK_OUTPUT",
+        "groupBox4",
+        "label_PAR_HW_TEST_MODE",
+        "label51",
+        "label52",
+        "label53"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[857]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "HW_TEST_MODE": {
+      "key": "HW_TEST_MODE",
+      "label_key": "label_PAR_HW_TEST_MODE",
+      "primary_display_candidate": "Hardware Test for PBC connector",
+      "display_candidates": [
+        "LDD -> Rack Terminal",
+        "Hardware Test for PBC connector",
+        "Hardware Test*",
+        "System Settings"
+      ],
+      "context_stack": [
+        "Rack Settings",
+        "Debug Parameter",
+        "Hardware Test for PBC connector"
+      ],
+      "neighbor_controls": [
+        "textBox_OutputDerating",
+        "label_OutputDerating",
+        "label170",
+        "label171",
+        "label172",
+        "textBox_PAR_RACK_OUTPUT",
+        "label_PAR_RACK_OUTPUT",
+        "groupBox4",
+        "label_PAR_HW_TEST_MODE",
+        "label51",
+        "label52",
+        "label53",
+        "comboBox_PAR_HW_TEST_MODE",
+        "groupBox32"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[860]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "VER_HW_VERSION": {
+      "key": "VER_HW_VERSION",
+      "label_key": "label_PAR_VER_HW_VERSION",
+      "primary_display_candidate": "Voltage",
+      "display_candidates": [
+        "Voltage",
+        "Configuration file",
+        "Export Config"
+      ],
+      "context_stack": [
+        "Rack Settings",
+        "Hardware Test for PBC connector",
+        "System Settings"
+      ],
+      "neighbor_controls": [
+        "comboBox_MeasSystem",
+        "label17",
+        "textBox_DeviceType",
+        "label_DeviceType",
+        "label136",
+        "label137",
+        "label149",
+        "label151",
+        "textBox_PAR_VER_HW_VERSION",
+        "label_PAR_VER_HW_VERSION",
+        "textBox_PAR_VER_HW_SERNR",
+        "label_PAR_VER_HW_SERNR",
+        "button_ExportConfig",
+        "button_ImportConfig"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[885]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    },
+    "VER_HW_SERNR": {
+      "key": "VER_HW_SERNR",
+      "label_key": "label_PAR_VER_HW_SERNR",
+      "primary_display_candidate": "Voltage",
+      "display_candidates": [
+        "Configuration file",
+        "Export Config",
+        "Import Config"
+      ],
+      "context_stack": [
+        "Rack Settings",
+        "Hardware Test for PBC connector",
+        "System Settings"
+      ],
+      "neighbor_controls": [
+        "label17",
+        "textBox_DeviceType",
+        "label_DeviceType",
+        "label136",
+        "label137",
+        "label149",
+        "label151",
+        "textBox_PAR_VER_HW_VERSION",
+        "label_PAR_VER_HW_VERSION",
+        "textBox_PAR_VER_HW_SERNR",
+        "label_PAR_VER_HW_SERNR",
+        "button_ExportConfig",
+        "button_ImportConfig",
+        "button_Reset"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[887]"
+      ],
+      "protocol_status": "service_software_only",
+      "protocol_ids": [],
+      "canopen_indices": []
+    }
+  },
+  "parameter_paths": [
+    {
+      "path": "ME.System Settings.Hardware Version",
+      "tree": [
+        "ME",
+        "System Settings",
+        "Hardware Version"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1159]"
+      ]
+    },
+    {
+      "path": "ME.System Settings.Serial Number",
+      "tree": [
+        "ME",
+        "System Settings",
+        "Serial Number"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1160]"
+      ]
+    },
+    {
+      "path": "ME.System Settings.Device Type",
+      "tree": [
+        "ME",
+        "System Settings",
+        "Device Type"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1161]"
+      ]
+    },
+    {
+      "path": "ME.System Settings.High Voltage Type",
+      "tree": [
+        "ME",
+        "System Settings",
+        "High Voltage Type"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1162]"
+      ]
+    },
+    {
+      "path": "ME.System Settings.Input Source",
+      "tree": [
+        "ME",
+        "System Settings",
+        "Input Source"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1163]"
+      ]
+    },
+    {
+      "path": "ME.Hardware Test for PBC Connector",
+      "tree": [
+        "ME",
+        "Hardware Test for PBC Connector"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1164]"
+      ]
+    },
+    {
+      "path": "Monitor.Firmware and Hardware Versions.Serial Number",
+      "tree": [
+        "Monitor",
+        "Firmware and Hardware Versions",
+        "Serial Number"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1168]"
+      ]
+    },
+    {
+      "path": "Monitor.Firmware and Hardware Versions.Hardware Version",
+      "tree": [
+        "Monitor",
+        "Firmware and Hardware Versions",
+        "Hardware Version"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1169]"
+      ]
+    },
+    {
+      "path": "Monitor.Firmware and Hardware Versions.Firmware Version",
+      "tree": [
+        "Monitor",
+        "Firmware and Hardware Versions",
+        "Firmware Version"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1170]"
+      ]
+    },
+    {
+      "path": "Monitor.Firmware and Hardware Versions.Firmware Build Number",
+      "tree": [
+        "Monitor",
+        "Firmware and Hardware Versions",
+        "Firmware Build Number"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1171]"
+      ]
+    },
+    {
+      "path": "Monitor.Firmware and Hardware Versions.FPGA Version",
+      "tree": [
+        "Monitor",
+        "Firmware and Hardware Versions",
+        "FPGA Version"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1172]"
+      ]
+    },
+    {
+      "path": "Monitor.Laser Diode Values.Laser Diode Current",
+      "tree": [
+        "Monitor",
+        "Laser Diode Values",
+        "Laser Diode Current"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1173]"
+      ]
+    },
+    {
+      "path": "Monitor.Laser Diode Values.Laser Diode Voltage",
+      "tree": [
+        "Monitor",
+        "Laser Diode Values",
+        "Laser Diode Voltage"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1174]"
+      ]
+    },
+    {
+      "path": "Monitor.Laser Diode Values.Laser Diode Temperature",
+      "tree": [
+        "Monitor",
+        "Laser Diode Values",
+        "Laser Diode Temperature"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1175]"
+      ]
+    },
+    {
+      "path": "Monitor.Power Supplies.Driver Input Voltage",
+      "tree": [
+        "Monitor",
+        "Power Supplies",
+        "Driver Input Voltage"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1176]"
+      ]
+    },
+    {
+      "path": "Monitor.Power Supplies.Medium Voltage",
+      "tree": [
+        "Monitor",
+        "Power Supplies",
+        "Medium Voltage"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1177]"
+      ]
+    },
+    {
+      "path": "Monitor.Power Supplies.3.3V Internal Supply",
+      "tree": [
+        "Monitor",
+        "Power Supplies",
+        "3",
+        "3V Internal Supply"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1178]"
+      ]
+    },
+    {
+      "path": "Monitor.Power Supplies.1.2V Internal Supply",
+      "tree": [
+        "Monitor",
+        "Power Supplies",
+        "1",
+        "2V Internal Supply"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1179]"
+      ]
+    },
+    {
+      "path": "Monitor.Driver Values.Buck Converter 1 Current",
+      "tree": [
+        "Monitor",
+        "Driver Values",
+        "Buck Converter 1 Current"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1180]"
+      ]
+    },
+    {
+      "path": "Monitor.Driver Values.Buck Converter 2 Current",
+      "tree": [
+        "Monitor",
+        "Driver Values",
+        "Buck Converter 2 Current"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1181]"
+      ]
+    },
+    {
+      "path": "Monitor.Driver Values.Buck Converter 3 Current",
+      "tree": [
+        "Monitor",
+        "Driver Values",
+        "Buck Converter 3 Current"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1182]"
+      ]
+    },
+    {
+      "path": "Monitor.Driver Values.Base Plate Temperature",
+      "tree": [
+        "Monitor",
+        "Driver Values",
+        "Base Plate Temperature"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1183]"
+      ]
+    },
+    {
+      "path": "Monitor.Error Status.Error Number",
+      "tree": [
+        "Monitor",
+        "Error Status",
+        "Error Number"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1184]"
+      ]
+    },
+    {
+      "path": "Monitor.Error Status.Error Instance",
+      "tree": [
+        "Monitor",
+        "Error Status",
+        "Error Instance"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1185]"
+      ]
+    },
+    {
+      "path": "Monitor.Error Status.Error Parameter",
+      "tree": [
+        "Monitor",
+        "Error Status",
+        "Error Parameter"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1186]"
+      ]
+    },
+    {
+      "path": "Monitor.Debug.Laser Diode Internal Voltage",
+      "tree": [
+        "Monitor",
+        "Debug",
+        "Laser Diode Internal Voltage"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1187]"
+      ]
+    },
+    {
+      "path": "Monitor.Debug.VDM Voltage",
+      "tree": [
+        "Monitor",
+        "Debug",
+        "VDM Voltage"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1188]"
+      ]
+    },
+    {
+      "path": "Monitor.Laser Light Values.Photo Diode Current",
+      "tree": [
+        "Monitor",
+        "Laser Light Values",
+        "Photo Diode Current"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1189]"
+      ]
+    },
+    {
+      "path": "Monitor.UniqueId",
+      "tree": [
+        "Monitor",
+        "UniqueId"
+      ],
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1190]"
+      ]
+    }
+  ],
+  "ui_notes": [
+    {
+      "id": "sun_sunday_mon_monday_tue_tuesday_wed_wednesday_thu_thur",
+      "kind": "note",
+      "text": ":Sun:Sunday:Mon:Monday:Tue:Tuesday:Wed:Wednesday:Thu:Thursday:Fri:Friday:Sat:Saturday :Jan:January:Feb:February:Mar:March:Apr:April:May:May:Jun:June:Jul:July:Aug:August:Sep:September:Oct:October:Nov:November:Dec:December :AM:am:PM:pm",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1-3]"
+      ]
+    },
+    {
+      "id": "conversion_from_widechar_to_multibyte_failed_please_chec",
+      "kind": "note",
+      "text": "Conversion from WideChar to MultiByte failed. Please check the content of the string and/or locale settings. Size of string exceeds INT_MAX. Conversion from MultiByte to WideChar failed. Please check the content of the string and/or locale settings.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[12-14]"
+      ]
+    },
+    {
+      "id": "serial_number",
+      "kind": "note",
+      "text": "Serial Number",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[132-132]"
+      ]
+    },
+    {
+      "id": "only_the_new_fields_are_exported_to_this_file_use_export",
+      "kind": "calibration",
+      "text": "Only the 'New' Fields are exported to this file. Use 'Export Config' and 'Import Config' to move the values from 'Actual' to 'New'. Consider the Temperature Measurement Calibration Values!",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[563-563]"
+      ]
+    },
+    {
+      "id": "this_function_is_only_available_when_a_device_was_connec",
+      "kind": "note",
+      "text": "This Function is only available when a Device was connected to this software.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[565-565]"
+      ]
+    },
+    {
+      "id": "set_device_address_based_on_serial_number_and_type",
+      "kind": "note",
+      "text": "Set Device Address based on Serial Number and Type",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[569-569]"
+      ]
+    },
+    {
+      "id": "application_arguments_for_starting_the_service_software_",
+      "kind": "note",
+      "text": "Application Arguments for starting the Service Software with the currently active Communication Settings.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[590-590]"
+      ]
+    },
+    {
+      "id": "import_the_expert_settings_only_when_the_serial_number_o",
+      "kind": "note",
+      "text": "Import the Expert Settings only when the Serial Number of the connected device is equal to the Serial Number stored in the ini File.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[651-651]"
+      ]
+    },
+    {
+      "id": "cannot_open_the_ftdi_driver_please_install_the_driver_or",
+      "kind": "error",
+      "text": "Cannot open the FTDI driver. Please Install the driver or connect over ethernet. Error while searching number of connected USB devices",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[917-918]"
+      ]
+    },
+    {
+      "id": "connected_to_ftdi_service_functions_disabled_restart_ser",
+      "kind": "note",
+      "text": "Connected to FTDI: Service functions disabled! Restart Service SW to re Enable! Connected: Service functions disabled!",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[922-923]"
+      ]
+    },
+    {
+      "id": "stm32_is_now_in_bootloader_mode_please_restart_the_servi",
+      "kind": "safety_warning",
+      "text": "STM32 is now in Bootloader Mode. Please restart the Service Software to reconnect. Device Address Warning Changing the 'Device Address' will result in an LTR-1200 communication error! Rebooting the LTR-1200 will be required.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[938-940]"
+      ]
+    },
+    {
+      "id": "serial_number_is_0_option_field_is_255_new_address_field",
+      "kind": "note",
+      "text": "Serial Number is <0 Option Field is >255 New Address Field is >255",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[964-966]"
+      ]
+    },
+    {
+      "id": "the_firmware_version_is_not_exactly_the_same_as_it_was_w",
+      "kind": "firmware",
+      "text": "- The firmware version is not exactly the same as it was while the *.mepar file has been created - The *.mepar File was created for an other device. Unknown feedback from microcontroller",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[974-976]"
+      ]
+    },
+    {
+      "id": "firmware_update_error",
+      "kind": "firmware",
+      "text": "Firmware Update Error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[994-994]"
+      ]
+    },
+    {
+      "id": "internal_parameter_system_malfunction_access_to_a_non_ex",
+      "kind": "error",
+      "text": "Internal parameter system malfunction (Access to a non-existing instance) Parameter Error:",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1015-1016]"
+      ]
+    },
+    {
+      "id": "dead_man_safety_feature_fpga_supervision_over_mcu_fpga_a",
+      "kind": "error",
+      "text": "'Dead Man' safety feature: FPGA supervision over MCU, FPGA and intracommunication, has switched off LDD output power system (Timeout > 30 ms) Supervision Error: Difference between smallest and greatest measured currents through 3 individual buck converter channels too big Communication Timeout Error: USB and/or RS485 communication timeout > 'Com. Watchdog' [user set] LDD Paralleling:",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1105-1111]"
+      ]
+    },
+    {
+      "id": "me_system_settings_serial_number",
+      "kind": "note",
+      "text": "ME.System Settings.Serial Number",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1160-1160]"
+      ]
+    },
+    {
+      "id": "monitor_firmware_and_hardware_versions_serial_number",
+      "kind": "note",
+      "text": "Monitor.Firmware and Hardware Versions.Serial Number",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1168-1168]"
+      ]
+    },
+    {
+      "id": "the_csv_file_must_have_at_least_2_columns_one_table_inst",
+      "kind": "note",
+      "text": "The CSV file must have at least 2 columns. One 'Table Instance' column and 1-4 Data columns. The CSV file is limited to maximum {0} columns. One 'Table Instance' column and 1-4 Data columns.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1194-1195]"
+      ]
+    },
+    {
+      "id": "some_rows_do_not_contain_the_same_number_of_columns_like",
+      "kind": "safety_warning",
+      "text": "Some rows do not contain the same number of columns like the header does. Row {0}; Column {1}: Contains an not empty field under an field that could not be converted to a floating point value. The maximum allowed values is {0}. CSV File read Error! The minimum allowed values / table is 2!",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1201-1205]"
+      ]
+    },
+    {
+      "id": "a_nested_exception_occurred_after_the_primary_exception_",
+      "kind": "note",
+      "text": "A nested exception occurred after the primary exception that caused the C++ module to fail to load.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1225-1225]"
+      ]
+    },
+    {
+      "id": "the_c_module_failed_to_load_during_registration_for_the_",
+      "kind": "note",
+      "text": "The C++ module failed to load during registration for the unload events.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1240-1240]"
+      ]
+    },
+    {
+      "id": "a_nested_exception_occurred_after_the_primary_exception__2",
+      "kind": "note",
+      "text": "A nested exception occurred after the primary exception that caused the C++ module to fail to load.",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1242-1242]"
+      ]
+    },
+    {
+      "id": "rany_use_of_this_certificate_constitutes_acceptance_of_t",
+      "kind": "note",
+      "text": "RAny use of this Certificate constitutes acceptance of the DigiCert CP/CPS and the Relying Party Agreement which limit liability and are incorporated herein by reference",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1248-1248]"
+      ]
+    }
+  ],
+  "ui_strings": [
+    {
+      "text": ":Sun:Sunday:Mon:Monday:Tue:Tuesday:Wed:Wednesday:Thu:Thursday:Fri:Friday:Sat:Saturday",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1]"
+      ]
+    },
+    {
+      "text": ":Jan:January:Feb:February:Mar:March:Apr:April:May:May:Jun:June:Jul:July:Aug:August:Sep:September:Oct:October:Nov:November:Dec:December",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[2]"
+      ]
+    },
+    {
+      "text": ":AM:am:PM:pm",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[3]"
+      ]
+    },
+    {
+      "text": "pictureBox1.Image",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[5]"
+      ]
+    },
+    {
+      "text": "pictureBox_Light.Image",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[6]"
+      ]
+    },
+    {
+      "text": "pictureBox_Light.InitialImage",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[7]"
+      ]
+    },
+    {
+      "text": "pictureBox_Modulation.Image",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[8]"
+      ]
+    },
+    {
+      "text": "pictureBox_Modulation.InitialImage",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[9]"
+      ]
+    },
+    {
+      "text": "pictureBox_Pulse.Image",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[10]"
+      ]
+    },
+    {
+      "text": "pictureBox_Pulse.InitialImage",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[11]"
+      ]
+    },
+    {
+      "text": "Conversion from WideChar to MultiByte failed.  Please check the content of the string and/or locale settings.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[12]"
+      ]
+    },
+    {
+      "text": "Size of string exceeds INT_MAX.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[13]"
+      ]
+    },
+    {
+      "text": "Conversion from MultiByte to WideChar failed.  Please check the content of the string and/or locale settings.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[14]"
+      ]
+    },
+    {
+      "text": "Current",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[15]"
+      ]
+    },
+    {
+      "text": "Login",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[19]"
+      ]
+    },
+    {
+      "text": "Connect:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[21]"
+      ]
+    },
+    {
+      "text": "Read Config",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[24]"
+      ]
+    },
+    {
+      "text": "Write Config",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[26]"
+      ]
+    },
+    {
+      "text": "Buck Converter 1 Current [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[28]"
+      ]
+    },
+    {
+      "text": "Buck Converter 2 Current [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[32]"
+      ]
+    },
+    {
+      "text": "1.2V Internal Supply [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[35]"
+      ]
+    },
+    {
+      "text": "Buck Converter 3 Current [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[37]"
+      ]
+    },
+    {
+      "text": "Base Plate Temperature [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[40]"
+      ]
+    },
+    {
+      "text": "Driver Input Voltage [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[43]"
+      ]
+    },
+    {
+      "text": "3.3V Internal Supply [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[46]"
+      ]
+    },
+    {
+      "text": "Medium Internal Supply [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[49]"
+      ]
+    },
+    {
+      "text": "Error Number",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[52]"
+      ]
+    },
+    {
+      "text": "FPGA Version",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[55]"
+      ]
+    },
+    {
+      "text": "Laser Diode Temperature [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[58]"
+      ]
+    },
+    {
+      "text": "RES3",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[62]"
+      ]
+    },
+    {
+      "text": "Monitor",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[65]"
+      ]
+    },
+    {
+      "text": "Laser Diode Values (Details)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[67]"
+      ]
+    },
+    {
+      "text": "Laser Diode Voltage Pulse [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[69]"
+      ]
+    },
+    {
+      "text": "Laser Diode Current CW [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[71]"
+      ]
+    },
+    {
+      "text": "Laser Diode Current Actual [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[75]"
+      ]
+    },
+    {
+      "text": "Laser Diode Current Pulse [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[78]"
+      ]
+    },
+    {
+      "text": "Laser Diode Voltage Actual [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[81]"
+      ]
+    },
+    {
+      "text": "Laser Light Values",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[84]"
+      ]
+    },
+    {
+      "text": "Laser Power [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[86]"
+      ]
+    },
+    {
+      "text": "Photo Diode Current [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[89]"
+      ]
+    },
+    {
+      "text": "System Debug Values",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[94]"
+      ]
+    },
+    {
+      "text": "UniqueId",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[97]"
+      ]
+    },
+    {
+      "text": "Main Process Execution Time AVG [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[99]"
+      ]
+    },
+    {
+      "text": "Main Process Execution Time Max [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[101]"
+      ]
+    },
+    {
+      "text": "Error Status",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[105]"
+      ]
+    },
+    {
+      "text": "Error Description",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[107]"
+      ]
+    },
+    {
+      "text": "Error Parameter",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[110]"
+      ]
+    },
+    {
+      "text": "Error Instance",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[112]"
+      ]
+    },
+    {
+      "text": "Debug",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[116]"
+      ]
+    },
+    {
+      "text": "VDM Voltage [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[118]"
+      ]
+    },
+    {
+      "text": "Laser Diode Voltage Internal [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[121]"
+      ]
+    },
+    {
+      "text": "LDD Current Internal [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[124]"
+      ]
+    },
+    {
+      "text": "Firmware and Hardware Versions",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[127]"
+      ]
+    },
+    {
+      "text": "Device Type",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[129]"
+      ]
+    },
+    {
+      "text": "Serial Number",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[132]"
+      ]
+    },
+    {
+      "text": "Hardware Version",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[134]"
+      ]
+    },
+    {
+      "text": "Firmware Build Number",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[136]"
+      ]
+    },
+    {
+      "text": "Firmware Version (STM32)",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[138]"
+      ]
+    },
+    {
+      "text": "Laser Diode Values",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[144]"
+      ]
+    },
+    {
+      "text": "Laser Diode Voltage [V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[146]"
+      ]
+    },
+    {
+      "text": "Laser Diode Current [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[149]"
+      ]
+    },
+    {
+      "text": "Driver Values",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[152]"
+      ]
+    },
+    {
+      "text": "Power Supplies",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[154]"
+      ]
+    },
+    {
+      "text": "Operation Control",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[156]"
+      ]
+    },
+    {
+      "text": "Single Sequence",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[158]"
+      ]
+    },
+    {
+      "text": "Input Source",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[160]"
+      ]
+    },
+    {
+      "text": "HW Pin",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[161]"
+      ]
+    },
+    {
+      "text": "Enable Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[165]"
+      ]
+    },
+    {
+      "text": "Enable NA",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[169]"
+      ]
+    },
+    {
+      "text": "Data Interfaces",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[170]"
+      ]
+    },
+    {
+      "text": "Actual",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[173]"
+      ]
+    },
+    {
+      "text": "Nominal Pulse Graph",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[176]"
+      ]
+    },
+    {
+      "text": "Nominal Current Graph",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[183]"
+      ]
+    },
+    {
+      "text": "Current Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[194]"
+      ]
+    },
+    {
+      "text": "Generator Trigger",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[196]"
+      ]
+    },
+    {
+      "text": "Current CW [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[200]"
+      ]
+    },
+    {
+      "text": "High Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[202]"
+      ]
+    },
+    {
+      "text": "Low Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[205]"
+      ]
+    },
+    {
+      "text": "Current High [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[207]"
+      ]
+    },
+    {
+      "text": "Fall Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[209]"
+      ]
+    },
+    {
+      "text": "Current Low [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[211]"
+      ]
+    },
+    {
+      "text": "Rise Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[213]"
+      ]
+    },
+    {
+      "text": "Int. Generator",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[217]"
+      ]
+    },
+    {
+      "text": "Lookup Table",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[218]"
+      ]
+    },
+    {
+      "text": "Pulse Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[235]"
+      ]
+    },
+    {
+      "text": "Pulse NA",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[240]"
+      ]
+    },
+    {
+      "text": "Laser Power Control",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[250]"
+      ]
+    },
+    {
+      "text": "Laser Power (LP) Measurement Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[252]"
+      ]
+    },
+    {
+      "text": "LP System Scale [A/W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[256]"
+      ]
+    },
+    {
+      "text": "Laser Power Control Soft-Start Configuration",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[260]"
+      ]
+    },
+    {
+      "text": "Current Limiter Ramp [A/us]",
+      "kind": "limit",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[262]"
+      ]
+    },
+    {
+      "text": "Current Limiter Start Val. [A]",
+      "kind": "limit",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[264]"
+      ]
+    },
+    {
+      "text": "PID Laser Power Control Parameters",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[272]"
+      ]
+    },
+    {
+      "text": "Slope Limit [W/us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[274]"
+      ]
+    },
+    {
+      "text": "Td [s]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[278]"
+      ]
+    },
+    {
+      "text": "Ti [s]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[280]"
+      ]
+    },
+    {
+      "text": "Kp [A/W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[282]"
+      ]
+    },
+    {
+      "text": "Nominal Laser Power Graph",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[292]"
+      ]
+    },
+    {
+      "text": "Laser Power (LP) Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[303]"
+      ]
+    },
+    {
+      "text": "LP CW [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[305]"
+      ]
+    },
+    {
+      "text": "LP High [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[310]"
+      ]
+    },
+    {
+      "text": "LP Low [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[313]"
+      ]
+    },
+    {
+      "text": "Chart",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[334]"
+      ]
+    },
+    {
+      "text": "Microsoft Sans Serif",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[335]"
+      ]
+    },
+    {
+      "text": "Data Acquisition",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[337]"
+      ]
+    },
+    {
+      "text": "in Progress",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[338]"
+      ]
+    },
+    {
+      "text": "Time [ms]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[339]"
+      ]
+    },
+    {
+      "text": "ChartArea",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[340]"
+      ]
+    },
+    {
+      "text": "Legend1",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[341]"
+      ]
+    },
+    {
+      "text": "Laser Power",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[342]"
+      ]
+    },
+    {
+      "text": "Chart Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[344]"
+      ]
+    },
+    {
+      "text": "Bandwidth Limit",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[350]"
+      ]
+    },
+    {
+      "text": "Zoom [%]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[354]"
+      ]
+    },
+    {
+      "text": "Time Offset [ms]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[356]"
+      ]
+    },
+    {
+      "text": "1k Fast",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[357]"
+      ]
+    },
+    {
+      "text": "16k Slow",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[358]"
+      ]
+    },
+    {
+      "text": "Display Data Points",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[363]"
+      ]
+    },
+    {
+      "text": "Single Update",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[368]"
+      ]
+    },
+    {
+      "text": "Auto Update",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[370]"
+      ]
+    },
+    {
+      "text": "Data Acquisition Settings (Device Parameter)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[373]"
+      ]
+    },
+    {
+      "text": "None",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[374]"
+      ]
+    },
+    {
+      "text": "Enable",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[375]"
+      ]
+    },
+    {
+      "text": "Pulse",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[376]"
+      ]
+    },
+    {
+      "text": "Trigger Source",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[379]"
+      ]
+    },
+    {
+      "text": "Sampling Interval [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[381]"
+      ]
+    },
+    {
+      "text": "Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[388]"
+      ]
+    },
+    {
+      "text": "PBC Configuration (RES1 ... RES8)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[390]"
+      ]
+    },
+    {
+      "text": "PBC RES8",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[392]"
+      ]
+    },
+    {
+      "text": "No Function",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[394]"
+      ]
+    },
+    {
+      "text": "Pulse Trigger",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[395]"
+      ]
+    },
+    {
+      "text": "----",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[396]"
+      ]
+    },
+    {
+      "text": "Current Update",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[397]"
+      ]
+    },
+    {
+      "text": "PBC RES7",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[400]"
+      ]
+    },
+    {
+      "text": "LDD Run",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[402]"
+      ]
+    },
+    {
+      "text": "LDD OK",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[403]"
+      ]
+    },
+    {
+      "text": "LDD Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[404]"
+      ]
+    },
+    {
+      "text": "PBC RES6",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[407]"
+      ]
+    },
+    {
+      "text": "PBC RES5",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[411]"
+      ]
+    },
+    {
+      "text": "PBC RES4",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[415]"
+      ]
+    },
+    {
+      "text": "Current Analog",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[417]"
+      ]
+    },
+    {
+      "text": "PBC RES3",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[420]"
+      ]
+    },
+    {
+      "text": "PBC RES2",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[424]"
+      ]
+    },
+    {
+      "text": "PBC RES1",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[428]"
+      ]
+    },
+    {
+      "text": "Device Address",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[434]"
+      ]
+    },
+    {
+      "text": "Device Address [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[438]"
+      ]
+    },
+    {
+      "text": "*Reset required",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[442]"
+      ]
+    },
+    {
+      "text": "NTC Sensor Characteristics",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[444]"
+      ]
+    },
+    {
+      "text": "Upper Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[450]"
+      ]
+    },
+    {
+      "text": "Middle Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[452]"
+      ]
+    },
+    {
+      "text": "Lower Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[454]"
+      ]
+    },
+    {
+      "text": "Resistance [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[456]"
+      ]
+    },
+    {
+      "text": "Temperature [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[458]"
+      ]
+    },
+    {
+      "text": "Laser Diode Temperature Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[478]"
+      ]
+    },
+    {
+      "text": "Upper Error Threshold [",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[480]"
+      ]
+    },
+    {
+      "text": "Lower Error Threshold [",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[482]"
+      ]
+    },
+    {
+      "text": "Communication",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[490]"
+      ]
+    },
+    {
+      "text": "Comm. Watchdog [s]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[492]"
+      ]
+    },
+    {
+      "text": "PID Current Control Parameters",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[498]"
+      ]
+    },
+    {
+      "text": "Kp [%/A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[502]"
+      ]
+    },
+    {
+      "text": "Maximum Values",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[512]"
+      ]
+    },
+    {
+      "text": "Current Limit Min [A]",
+      "kind": "limit",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[514]"
+      ]
+    },
+    {
+      "text": "Max Current Error* [A]",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[516]"
+      ]
+    },
+    {
+      "text": "Slope Limit [A/us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[518]"
+      ]
+    },
+    {
+      "text": "Current Limit Max [A]",
+      "kind": "limit",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[520]"
+      ]
+    },
+    {
+      "text": "Analog Control",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[532]"
+      ]
+    },
+    {
+      "text": "Current Factor [A/V]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[534]"
+      ]
+    },
+    {
+      "text": "RS485 Channel 1 Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[540]"
+      ]
+    },
+    {
+      "text": "Response Delay [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[542]"
+      ]
+    },
+    {
+      "text": "Baud Rate* [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[544]"
+      ]
+    },
+    {
+      "text": "Maintenance",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[552]"
+      ]
+    },
+    {
+      "text": "Send *.mepar String (Single Setting Download)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[554]"
+      ]
+    },
+    {
+      "text": "Add only one Line:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[556]"
+      ]
+    },
+    {
+      "text": "Send String",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[559]"
+      ]
+    },
+    {
+      "text": "Create *.mepar File (for Settings Dump)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[561]"
+      ]
+    },
+    {
+      "text": "Only the 'New' Fields are exported to this file. Use 'Export Config' and 'Import Config' to move the values from 'Actual' to 'New'. Consider the Temperature Measurement Calibration Values!",
+      "kind": "calibration",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[563]"
+      ]
+    },
+    {
+      "text": "This Function is only available when a Device was connected to this software.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[565]"
+      ]
+    },
+    {
+      "text": "Create File",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[567]"
+      ]
+    },
+    {
+      "text": "Set Device Address based on Serial Number and Type",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[569]"
+      ]
+    },
+    {
+      "text": "Enable (Disables all Service SW Functions)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[571]"
+      ]
+    },
+    {
+      "text": "Send Broadcast (255) Package",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[573]"
+      ]
+    },
+    {
+      "text": "Device Type to be Addressed [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[575]"
+      ]
+    },
+    {
+      "text": "New Device Address [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[577]"
+      ]
+    },
+    {
+      "text": "Option (0 is default) [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[579]"
+      ]
+    },
+    {
+      "text": "Device S/N to be Addressed [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[581]"
+      ]
+    },
+    {
+      "text": "Service Communication Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[587]"
+      ]
+    },
+    {
+      "text": "Application Arguments for starting the Service Software with the currently active Communication Settings.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[590]"
+      ]
+    },
+    {
+      "text": "(IP Address or Hostname)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[592]"
+      ]
+    },
+    {
+      "text": "Ethernet",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[593]"
+      ]
+    },
+    {
+      "text": "Communication Interface",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[596]"
+      ]
+    },
+    {
+      "text": "Ethernet Address [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[599]"
+      ]
+    },
+    {
+      "text": "Set and Reconnect",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[603]"
+      ]
+    },
+    {
+      "text": "Device to be Addressed [..]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[605]"
+      ]
+    },
+    {
+      "text": "Device Boot Loader (STM32 / FPGA)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[611]"
+      ]
+    },
+    {
+      "text": "Load Hex File",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[614]"
+      ]
+    },
+    {
+      "text": "UpdateDevice",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[616]"
+      ]
+    },
+    {
+      "text": "STM32 Internal Boot Loader",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[618]"
+      ]
+    },
+    {
+      "text": "Jump to Internal Bootloader",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[620]"
+      ]
+    },
+    {
+      "text": "Expert",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[622]"
+      ]
+    },
+    {
+      "text": "HW Adjustment",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[625]"
+      ]
+    },
+    {
+      "text": "Laser Diode Temperature Measurement Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[627]"
+      ]
+    },
+    {
+      "text": "Temperature Offset [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[629]"
+      ]
+    },
+    {
+      "text": "ADC Rv [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[631]"
+      ]
+    },
+    {
+      "text": "Temperature Gain  [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[633]"
+      ]
+    },
+    {
+      "text": "ADC Calibration Gain",
+      "kind": "calibration",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[635]"
+      ]
+    },
+    {
+      "text": "ADC Calibration Offset",
+      "kind": "calibration",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[645]"
+      ]
+    },
+    {
+      "text": "Import the Expert Settings only when the Serial Number of the connected device is equal to the Serial Number stored in the ini File.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[651]"
+      ]
+    },
+    {
+      "text": "Current Measurement Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[653]"
+      ]
+    },
+    {
+      "text": "Calculate Current Factors",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[655]"
+      ]
+    },
+    {
+      "text": "Calibration Calculator",
+      "kind": "calibration",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[659]"
+      ]
+    },
+    {
+      "text": "Current Upper Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[661]"
+      ]
+    },
+    {
+      "text": "Current Lower Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[663]"
+      ]
+    },
+    {
+      "text": "Nominal",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[667]"
+      ]
+    },
+    {
+      "text": "Measured",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[669]"
+      ]
+    },
+    {
+      "text": "Current Gain [A/A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[673]"
+      ]
+    },
+    {
+      "text": "Current Offset [A]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[675]"
+      ]
+    },
+    {
+      "text": "Laser Power Measurement Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[683]"
+      ]
+    },
+    {
+      "text": "Measurement Rs [",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[685]"
+      ]
+    },
+    {
+      "text": "Calculate Light Factors",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[692]"
+      ]
+    },
+    {
+      "text": "Laser Power Upper Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[697]"
+      ]
+    },
+    {
+      "text": "Laser Power Lower Point",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[699]"
+      ]
+    },
+    {
+      "text": "Laser Power Gain [W/W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[707]"
+      ]
+    },
+    {
+      "text": "Laser Power Offset [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[709]"
+      ]
+    },
+    {
+      "text": "Table Selection",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[718]"
+      ]
+    },
+    {
+      "text": "Table Instance Selection",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[720]"
+      ]
+    },
+    {
+      "text": "Table Step Intervall Time",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[726]"
+      ]
+    },
+    {
+      "text": "Table 4 Interval Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[728]"
+      ]
+    },
+    {
+      "text": "Table 3 Interval Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[732]"
+      ]
+    },
+    {
+      "text": "Table 2 Interval Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[734]"
+      ]
+    },
+    {
+      "text": "Table 1 Interval Time [us]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[736]"
+      ]
+    },
+    {
+      "text": "Lookup Table Download",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[746]"
+      ]
+    },
+    {
+      "text": "Load CSV File",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[750]"
+      ]
+    },
+    {
+      "text": "Download",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[752]"
+      ]
+    },
+    {
+      "text": "Misc",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[754]"
+      ]
+    },
+    {
+      "text": "Parameter System Save to Flash Configuration",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[756]"
+      ]
+    },
+    {
+      "text": "Save Data to Flash",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[758]"
+      ]
+    },
+    {
+      "text": "Enabled",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[759]"
+      ]
+    },
+    {
+      "text": "Disabled",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[760]"
+      ]
+    },
+    {
+      "text": "Parallel",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[766]"
+      ]
+    },
+    {
+      "text": "LDD Parallel Master / Slave Configuration*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[769]"
+      ]
+    },
+    {
+      "text": "Slave: Slave ID*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[771]"
+      ]
+    },
+    {
+      "text": "Master: Number Of Slaves*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[773]"
+      ]
+    },
+    {
+      "text": "RS485 Sync. Channel*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[779]"
+      ]
+    },
+    {
+      "text": "RS485 CH1",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[780]"
+      ]
+    },
+    {
+      "text": "RS485 CH2",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[781]"
+      ]
+    },
+    {
+      "text": "Parallel Function / Type*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[785]"
+      ]
+    },
+    {
+      "text": "Master",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[786]"
+      ]
+    },
+    {
+      "text": "Slave",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[787]"
+      ]
+    },
+    {
+      "text": "Control",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[793]"
+      ]
+    },
+    {
+      "text": "Get and Set Commands",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[795]"
+      ]
+    },
+    {
+      "text": "RS485 test tool",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[797]"
+      ]
+    },
+    {
+      "text": "1000000",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[799]"
+      ]
+    },
+    {
+      "text": "57600",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[801]"
+      ]
+    },
+    {
+      "text": "Hi Com Speed",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[803]"
+      ]
+    },
+    {
+      "text": "Initial Com Speed",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[805]"
+      ]
+    },
+    {
+      "text": "Disable Service Communication",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[807]"
+      ]
+    },
+    {
+      "text": "Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[809]"
+      ]
+    },
+    {
+      "text": "Read Limit",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[811]"
+      ]
+    },
+    {
+      "text": "Set as  INT32 Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[813]"
+      ]
+    },
+    {
+      "text": "Set as FLOAT32 Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[815]"
+      ]
+    },
+    {
+      "text": "Read Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[817]"
+      ]
+    },
+    {
+      "text": "Parameter Value",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[819]"
+      ]
+    },
+    {
+      "text": "Parameter Instance",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[821]"
+      ]
+    },
+    {
+      "text": "Parameter ID",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[823]"
+      ]
+    },
+    {
+      "text": "1000",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[827]"
+      ]
+    },
+    {
+      "text": "?VI (Version Info)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[829]"
+      ]
+    },
+    {
+      "text": "Query Result",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[831]"
+      ]
+    },
+    {
+      "text": "?IF (Device Information)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[834]"
+      ]
+    },
+    {
+      "text": "Debug Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[837]"
+      ]
+    },
+    {
+      "text": "Debug 1",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[843]"
+      ]
+    },
+    {
+      "text": "Rack Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[847]"
+      ]
+    },
+    {
+      "text": "Output Derating [W]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[849]"
+      ]
+    },
+    {
+      "text": "LDD -> Rack Terminal",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[853]"
+      ]
+    },
+    {
+      "text": "Hardware Test for PBC connector",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[859]"
+      ]
+    },
+    {
+      "text": "Hardware Test*",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[864]"
+      ]
+    },
+    {
+      "text": "System Settings",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[867]"
+      ]
+    },
+    {
+      "text": "High Voltage Type (38V)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[869]"
+      ]
+    },
+    {
+      "text": "Light",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[874]"
+      ]
+    },
+    {
+      "text": "Voltage",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[875]"
+      ]
+    },
+    {
+      "text": "Configuration file",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[888]"
+      ]
+    },
+    {
+      "text": "Export Config",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[891]"
+      ]
+    },
+    {
+      "text": "Import Config",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[893]"
+      ]
+    },
+    {
+      "text": "Reset LDD",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[895]"
+      ]
+    },
+    {
+      "text": "Firmware",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[896]"
+      ]
+    },
+    {
+      "text": "Device Status",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[899]"
+      ]
+    },
+    {
+      "text": "mepar",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[900]"
+      ]
+    },
+    {
+      "text": "Settings Dump File",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[901]"
+      ]
+    },
+    {
+      "text": "Power",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[904]"
+      ]
+    },
+    {
+      "text": "Temp.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[907]"
+      ]
+    },
+    {
+      "text": "Laser Diode Monitoring",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[911]"
+      ]
+    },
+    {
+      "text": "Form1",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[914]"
+      ]
+    },
+    {
+      "text": "LDD Service Software",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[915]"
+      ]
+    },
+    {
+      "text": "Scanning USB: ...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[916]"
+      ]
+    },
+    {
+      "text": "Cannot open the FTDI driver. Please Install the driver or connect over ethernet.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[917]"
+      ]
+    },
+    {
+      "text": "Error while searching number of connected USB devices",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[918]"
+      ]
+    },
+    {
+      "text": "Error while searching devices",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[919]"
+      ]
+    },
+    {
+      "text": "No compatible USB device connected",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[920]"
+      ]
+    },
+    {
+      "text": "No compatible device free",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[921]"
+      ]
+    },
+    {
+      "text": "Connected to FTDI: Service functions disabled! Restart Service SW to re Enable!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[922]"
+      ]
+    },
+    {
+      "text": "Connected: Service functions disabled!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[923]"
+      ]
+    },
+    {
+      "text": "Wrong Address Nr",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[924]"
+      ]
+    },
+    {
+      "text": "Wrong Sequence Nr",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[925]"
+      ]
+    },
+    {
+      "text": "Query Timeout!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[926]"
+      ]
+    },
+    {
+      "text": "Wrong CRC",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[927]"
+      ]
+    },
+    {
+      "text": "Wrong Address",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[928]"
+      ]
+    },
+    {
+      "text": "Set Timeout!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[929]"
+      ]
+    },
+    {
+      "text": "Device DataLink Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[930]"
+      ]
+    },
+    {
+      "text": "Device DataLink connected",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[931]"
+      ]
+    },
+    {
+      "text": "Connected: Serice functions disabled!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[932]"
+      ]
+    },
+    {
+      "text": "Connected",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[933]"
+      ]
+    },
+    {
+      "text": "Communication error with Device",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[934]"
+      ]
+    },
+    {
+      "text": "Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[935]"
+      ]
+    },
+    {
+      "text": "Read Configuration Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[936]"
+      ]
+    },
+    {
+      "text": "Write Configuration Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[937]"
+      ]
+    },
+    {
+      "text": "STM32 is now in Bootloader Mode. Please restart the Service Software to reconnect.",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[938]"
+      ]
+    },
+    {
+      "text": "Device Address Warning",
+      "kind": "safety_warning",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[939]"
+      ]
+    },
+    {
+      "text": "Changing the 'Device Address' will result in an LTR-1200 communication error! Rebooting the LTR-1200 will be required.",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[940]"
+      ]
+    },
+    {
+      "text": "Please make sure that the new",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[941]"
+      ]
+    },
+    {
+      "text": "is only used once in this LTR-1200.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[943]"
+      ]
+    },
+    {
+      "text": "Do you really want to change the Device Address?",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[944]"
+      ]
+    },
+    {
+      "text": "/IP",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[945]"
+      ]
+    },
+    {
+      "text": "/DevAddr",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[946]"
+      ]
+    },
+    {
+      "text": "Connecting Ehernet: ...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[947]"
+      ]
+    },
+    {
+      "text": "V",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[948]"
+      ]
+    },
+    {
+      "text": "Ethernet:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[949]"
+      ]
+    },
+    {
+      "text": "USB:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[950]"
+      ]
+    },
+    {
+      "text": "#",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[951]"
+      ]
+    },
+    {
+      "text": "Enable ON",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[952]"
+      ]
+    },
+    {
+      "text": "Enable OFF",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[953]"
+      ]
+    },
+    {
+      "text": "Pulse ON",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[954]"
+      ]
+    },
+    {
+      "text": "Pulse OFF",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[955]"
+      ]
+    },
+    {
+      "text": "Typ Err",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[956]"
+      ]
+    },
+    {
+      "text": "SRV_PAR",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[957]"
+      ]
+    },
+    {
+      "text": "ERROR!",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[958]"
+      ]
+    },
+    {
+      "text": "Reading Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[959]"
+      ]
+    },
+    {
+      "text": "Writing Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[960]"
+      ]
+    },
+    {
+      "text": "Set Address Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[961]"
+      ]
+    },
+    {
+      "text": "Please write a decimal number to the fields!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[962]"
+      ]
+    },
+    {
+      "text": "Device type is <0",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[963]"
+      ]
+    },
+    {
+      "text": "Serial Number is <0",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[964]"
+      ]
+    },
+    {
+      "text": "Option Field is >255",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[965]"
+      ]
+    },
+    {
+      "text": "New Address Field is >255",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[966]"
+      ]
+    },
+    {
+      "text": "Set Address",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[967]"
+      ]
+    },
+    {
+      "text": "Package sent!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[968]"
+      ]
+    },
+    {
+      "text": "Send mepar String",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[969]"
+      ]
+    },
+    {
+      "text": "String is too long!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[970]"
+      ]
+    },
+    {
+      "text": "String accepted",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[971]"
+      ]
+    },
+    {
+      "text": "CRC wrong: Possible causes:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[972]"
+      ]
+    },
+    {
+      "text": "- The *.mepar File has been modified",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[973]"
+      ]
+    },
+    {
+      "text": "- The firmware version is not exactly the same as it was while the *.mepar file has been created",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[974]"
+      ]
+    },
+    {
+      "text": "- The *.mepar File was created for an other device.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[975]"
+      ]
+    },
+    {
+      "text": "Unknown feedback from microcontroller",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[976]"
+      ]
+    },
+    {
+      "text": "Init",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[977]"
+      ]
+    },
+    {
+      "text": "Ready",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[978]"
+      ]
+    },
+    {
+      "text": "Bootloader",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[979]"
+      ]
+    },
+    {
+      "text": "Resetting...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[980]"
+      ]
+    },
+    {
+      "text": "Unknow",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[981]"
+      ]
+    },
+    {
+      "text": "true",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[982]"
+      ]
+    },
+    {
+      "text": "True",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[983]"
+      ]
+    },
+    {
+      "text": "TRUE",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[984]"
+      ]
+    },
+    {
+      "text": "ERROR",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[985]"
+      ]
+    },
+    {
+      "text": "Hex File Read Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[986]"
+      ]
+    },
+    {
+      "text": "Could not Activate",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[987]"
+      ]
+    },
+    {
+      "text": "Erase Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[988]"
+      ]
+    },
+    {
+      "text": "Communication Timeout",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[989]"
+      ]
+    },
+    {
+      "text": "Write Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[990]"
+      ]
+    },
+    {
+      "text": "Wrong Firmware or CRC",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[991]"
+      ]
+    },
+    {
+      "text": "Check Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[992]"
+      ]
+    },
+    {
+      "text": "Start Update Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[993]"
+      ]
+    },
+    {
+      "text": "Firmware Update Error",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[994]"
+      ]
+    },
+    {
+      "text": "Bootloader Error",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[995]"
+      ]
+    },
+    {
+      "text": "No Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[996]"
+      ]
+    },
+    {
+      "text": "Processor Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[997]"
+      ]
+    },
+    {
+      "text": "MCU system malfunction",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[998]"
+      ]
+    },
+    {
+      "text": "Emergency Stop:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[999]"
+      ]
+    },
+    {
+      "text": "Emergency Stop triggered",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1000]"
+      ]
+    },
+    {
+      "text": "HMI-Free:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1001]"
+      ]
+    },
+    {
+      "text": "HMI-Free timeout occured",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1002]"
+      ]
+    },
+    {
+      "text": "Lost communication with HMI",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1003]"
+      ]
+    },
+    {
+      "text": "Parameter Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1004]"
+      ]
+    },
+    {
+      "text": "Internal parameter system malfunction",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1005]"
+      ]
+    },
+    {
+      "text": "Parameter set corrupt (Configuration flash empty or defect)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1007]"
+      ]
+    },
+    {
+      "text": "Load .ini file saved prior to FW update, or Default.ini",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1008]"
+      ]
+    },
+    {
+      "text": "Parameter set incompatible with current firmware version",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1010]"
+      ]
+    },
+    {
+      "text": "Firmware does not recognize valid device",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1013]"
+      ]
+    },
+    {
+      "text": "Internal parameter system malfunction (Access to a non-existing instance)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1015]"
+      ]
+    },
+    {
+      "text": "Internal limit system malfunction",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1017]"
+      ]
+    },
+    {
+      "text": "Parameter write or read wrong datatype function used",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1019]"
+      ]
+    },
+    {
+      "text": "Parameter write value out of range",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1021]"
+      ]
+    },
+    {
+      "text": "Parameter save to flash called from interrupt.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1023]"
+      ]
+    },
+    {
+      "text": "Power Supply Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1024]"
+      ]
+    },
+    {
+      "text": "Input voltage net < 10.5 V",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1025]"
+      ]
+    },
+    {
+      "text": "Input voltage net > 27 V",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1027]"
+      ]
+    },
+    {
+      "text": "Internal Medium power net too low",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1029]"
+      ]
+    },
+    {
+      "text": "Internal Medium power net too high",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1031]"
+      ]
+    },
+    {
+      "text": "Internal 3.3V power net < 3.1 V",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1033]"
+      ]
+    },
+    {
+      "text": "Internal 3.3V power net > 3.5 V",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1035]"
+      ]
+    },
+    {
+      "text": "Flash Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1036]"
+      ]
+    },
+    {
+      "text": "On-board flash failure",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1037]"
+      ]
+    },
+    {
+      "text": "Write Timeout",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1038]"
+      ]
+    },
+    {
+      "text": "Erase Timeout",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1041]"
+      ]
+    },
+    {
+      "text": "Invalid Address",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1044]"
+      ]
+    },
+    {
+      "text": "UART Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1045]"
+      ]
+    },
+    {
+      "text": "Send buffer overflow error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1046]"
+      ]
+    },
+    {
+      "text": "Temperature Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1047]"
+      ]
+    },
+    {
+      "text": "Device running too hot (> 60",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1048]"
+      ]
+    },
+    {
+      "text": "C @ base plate)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1049]"
+      ]
+    },
+    {
+      "text": "External Hardware Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1050]"
+      ]
+    },
+    {
+      "text": "Communication error with I/O hardware during factory test",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1051]"
+      ]
+    },
+    {
+      "text": "RTOS Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1052]"
+      ]
+    },
+    {
+      "text": "Stack Overflow occured",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1053]"
+      ]
+    },
+    {
+      "text": "Could not allocate Memory",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1055]"
+      ]
+    },
+    {
+      "text": "FPGA Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1056]"
+      ]
+    },
+    {
+      "text": "Wrong checksum for FPGA config memory",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1057]"
+      ]
+    },
+    {
+      "text": "Reinstall FW / FPGA config via internal bootloader",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1058]"
+      ]
+    },
+    {
+      "text": "FPGA malfunction",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1060]"
+      ]
+    },
+    {
+      "text": "Microcontroller firmware and FPGA configuration incompatible",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1062]"
+      ]
+    },
+    {
+      "text": "Reinstall STM32 FW and FPGA config via internal bootloader",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1063]"
+      ]
+    },
+    {
+      "text": "Operation Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1064]"
+      ]
+    },
+    {
+      "text": "PWM saturation error (e.g. saturation reached for more than 100us)",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1065]"
+      ]
+    },
+    {
+      "text": "Typ. PWM saturation time > 100us (100x1us)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1066]"
+      ]
+    },
+    {
+      "text": "Check input current is sufficient and Vout not set too close to Vin",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1067]"
+      ]
+    },
+    {
+      "text": "Measured laser diode temperature < 'Lower Error Threshold' [user set]",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1069]"
+      ]
+    },
+    {
+      "text": "Measured laser diode temperature > 'Upper Error Threshold' [user set]",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1071]"
+      ]
+    },
+    {
+      "text": "Safety monitor settings readback fault",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1073]"
+      ]
+    },
+    {
+      "text": "Save .ini file for diagnosis",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1074]"
+      ]
+    },
+    {
+      "text": "Allowed total output power reached",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1076]"
+      ]
+    },
+    {
+      "text": "Reduce Output Power",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1077]"
+      ]
+    },
+    {
+      "text": "Supervision Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1078]"
+      ]
+    },
+    {
+      "text": "Overcurrent. Fast switch-off was triggered",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1079]"
+      ]
+    },
+    {
+      "text": "Current > 'Max Current Error' [user set]",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1080]"
+      ]
+    },
+    {
+      "text": "Overcurrent in buck converter 1. Hardware protection active",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1082]"
+      ]
+    },
+    {
+      "text": "Try to optimize PID parameters",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1083]"
+      ]
+    },
+    {
+      "text": "Overcurrent in buck converter 2. Hardware protection active",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1085]"
+      ]
+    },
+    {
+      "text": "Overcurrent in buck converter 3. Hardware protection active",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1088]"
+      ]
+    },
+    {
+      "text": "LDD input voltage out of range",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1091]"
+      ]
+    },
+    {
+      "text": "(10.5 V < MPWR < 27 V)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1092]"
+      ]
+    },
+    {
+      "text": "Medium internal supply out of range",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1094]"
+      ]
+    },
+    {
+      "text": "3.3 V internal supply out of range",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1096]"
+      ]
+    },
+    {
+      "text": "(3.15 V < M33V < 3.45 V)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1097]"
+      ]
+    },
+    {
+      "text": "1.2 V internal supply out of range",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1099]"
+      ]
+    },
+    {
+      "text": "(1.14 V < M1V < 1.26 V)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1100]"
+      ]
+    },
+    {
+      "text": "Maximum possible channel balancing by PWM correction reached",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1102]"
+      ]
+    },
+    {
+      "text": "'Dead Man' safety feature: FPGA supervision over MCU, FPGA and intracommunication, has switched off LDD output power system",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1105]"
+      ]
+    },
+    {
+      "text": "(Timeout > 30 ms)",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1106]"
+      ]
+    },
+    {
+      "text": "Difference between smallest and greatest measured currents through 3 individual buck converter channels too big",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1108]"
+      ]
+    },
+    {
+      "text": "Communication Timeout Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1109]"
+      ]
+    },
+    {
+      "text": "USB and/or RS485 communication timeout > 'Com. Watchdog' [user set]",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1110]"
+      ]
+    },
+    {
+      "text": "LDD Paralleling:",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1111]"
+      ]
+    },
+    {
+      "text": "Slave has lost a Stream Frame",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1112]"
+      ]
+    },
+    {
+      "text": "One Slave has an Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1114]"
+      ]
+    },
+    {
+      "text": "Check Slave for Error Code",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1115]"
+      ]
+    },
+    {
+      "text": "Master has an Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1117]"
+      ]
+    },
+    {
+      "text": "Check Master for Error Code",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1118]"
+      ]
+    },
+    {
+      "text": "Slave does not known this Command",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1120]"
+      ]
+    },
+    {
+      "text": "Master has lost some Data",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1122]"
+      ]
+    },
+    {
+      "text": "Slave and Master SW Version does not match",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1124]"
+      ]
+    },
+    {
+      "text": "Slave and Master Device Type does not match",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1126]"
+      ]
+    },
+    {
+      "text": "Slave has not answered the ACK Command",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1128]"
+      ]
+    },
+    {
+      "text": "Stream update was too slow",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1130]"
+      ]
+    },
+    {
+      "text": "Error Signal is not OK",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1132]"
+      ]
+    },
+    {
+      "text": "LUT Error:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1133]"
+      ]
+    },
+    {
+      "text": "Table header data not valid.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1134]"
+      ]
+    },
+    {
+      "text": "Please download the LUT Table again.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1135]"
+      ]
+    },
+    {
+      "text": "Table CRC is not valid.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1137]"
+      ]
+    },
+    {
+      "text": "Create mepar File",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1139]"
+      ]
+    },
+    {
+      "text": "Firmware or Build Version conversion error.",
+      "kind": "firmware",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1140]"
+      ]
+    },
+    {
+      "text": "!OK_IF_NO_COM_ERROR!",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1141]"
+      ]
+    },
+    {
+      "text": "ERROR COM",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1142]"
+      ]
+    },
+    {
+      "text": "Is Connected",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1143]"
+      ]
+    },
+    {
+      "text": "Set Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1144]"
+      ]
+    },
+    {
+      "text": "Get Parameter",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1145]"
+      ]
+    },
+    {
+      "text": "Import Expert HWAdj",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1146]"
+      ]
+    },
+    {
+      "text": "IsFlashReady",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1147]"
+      ]
+    },
+    {
+      "text": "DownloadHexFile",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1148]"
+      ]
+    },
+    {
+      "text": "Command not supported",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1149]"
+      ]
+    },
+    {
+      "text": "ERROR file does not exist",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1150]"
+      ]
+    },
+    {
+      "text": "ERROR Exception:",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1151]"
+      ]
+    },
+    {
+      "text": "ERROR Directory does not exist",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1152]"
+      ]
+    },
+    {
+      "text": "Reset is pending",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1153]"
+      ]
+    },
+    {
+      "text": "Operation Control.Current Settings.Input Source",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1154]"
+      ]
+    },
+    {
+      "text": "Operation Control.Current Settings.Current CW",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1155]"
+      ]
+    },
+    {
+      "text": "Operation Control.Pulse Settings.Input Source",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1156]"
+      ]
+    },
+    {
+      "text": "Operation Control.Enable Settings.Input Source",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1157]"
+      ]
+    },
+    {
+      "text": "Expert.HW Adjustment.Laser Power Measurement Settings.Measurement Rs",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1158]"
+      ]
+    },
+    {
+      "text": "ME.System Settings.Hardware Version",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1159]"
+      ]
+    },
+    {
+      "text": "ME.System Settings.Serial Number",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1160]"
+      ]
+    },
+    {
+      "text": "ME.System Settings.Device Type",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1161]"
+      ]
+    },
+    {
+      "text": "ME.System Settings.High Voltage Type",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1162]"
+      ]
+    },
+    {
+      "text": "ME.System Settings.Input Source",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1163]"
+      ]
+    },
+    {
+      "text": "ME.Hardware Test for PBC Connector",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1164]"
+      ]
+    },
+    {
+      "text": "Error Parameter not supported",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1165]"
+      ]
+    },
+    {
+      "text": "Error value out of Range",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1166]"
+      ]
+    },
+    {
+      "text": "Error value not available",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1167]"
+      ]
+    },
+    {
+      "text": "Monitor.Firmware and Hardware Versions.Serial Number",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1168]"
+      ]
+    },
+    {
+      "text": "Monitor.Firmware and Hardware Versions.Hardware Version",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1169]"
+      ]
+    },
+    {
+      "text": "Monitor.Firmware and Hardware Versions.Firmware Version",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1170]"
+      ]
+    },
+    {
+      "text": "Monitor.Firmware and Hardware Versions.Firmware Build Number",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1171]"
+      ]
+    },
+    {
+      "text": "Monitor.Firmware and Hardware Versions.FPGA Version",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1172]"
+      ]
+    },
+    {
+      "text": "Monitor.Laser Diode Values.Laser Diode Current",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1173]"
+      ]
+    },
+    {
+      "text": "Monitor.Laser Diode Values.Laser Diode Voltage",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1174]"
+      ]
+    },
+    {
+      "text": "Monitor.Laser Diode Values.Laser Diode Temperature",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1175]"
+      ]
+    },
+    {
+      "text": "Monitor.Power Supplies.Driver Input Voltage",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1176]"
+      ]
+    },
+    {
+      "text": "Monitor.Power Supplies.Medium Voltage",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1177]"
+      ]
+    },
+    {
+      "text": "Monitor.Power Supplies.3.3V Internal Supply",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1178]"
+      ]
+    },
+    {
+      "text": "Monitor.Power Supplies.1.2V Internal Supply",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1179]"
+      ]
+    },
+    {
+      "text": "Monitor.Driver Values.Buck Converter 1 Current",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1180]"
+      ]
+    },
+    {
+      "text": "Monitor.Driver Values.Buck Converter 2 Current",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1181]"
+      ]
+    },
+    {
+      "text": "Monitor.Driver Values.Buck Converter 3 Current",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1182]"
+      ]
+    },
+    {
+      "text": "Monitor.Driver Values.Base Plate Temperature",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1183]"
+      ]
+    },
+    {
+      "text": "Monitor.Error Status.Error Number",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1184]"
+      ]
+    },
+    {
+      "text": "Monitor.Error Status.Error Instance",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1185]"
+      ]
+    },
+    {
+      "text": "Monitor.Error Status.Error Parameter",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1186]"
+      ]
+    },
+    {
+      "text": "Monitor.Debug.Laser Diode Internal Voltage",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1187]"
+      ]
+    },
+    {
+      "text": "Monitor.Debug.VDM Voltage",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1188]"
+      ]
+    },
+    {
+      "text": "Monitor.Laser Light Values.Photo Diode Current",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1189]"
+      ]
+    },
+    {
+      "text": "Monitor.UniqueId",
+      "kind": "parameter_path",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1190]"
+      ]
+    },
+    {
+      "text": "Error Field 1 Parameter not supported",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1191]"
+      ]
+    },
+    {
+      "text": "IsReady",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1192]"
+      ]
+    },
+    {
+      "text": "Finished",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1193]"
+      ]
+    },
+    {
+      "text": "The CSV file must have at least 2 columns. One 'Table Instance' column and 1-4 Data columns.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1194]"
+      ]
+    },
+    {
+      "text": "The CSV file is limited to maximum {0} columns. One 'Table Instance' column and 1-4 Data columns.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1195]"
+      ]
+    },
+    {
+      "text": "Table Instance",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1196]"
+      ]
+    },
+    {
+      "text": "The name of the A1 Cell must be 'Table Instance'.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1197]"
+      ]
+    },
+    {
+      "text": "The 'Table Instance' must be a number.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1198]"
+      ]
+    },
+    {
+      "text": "The 'Table Instance' must be between 1-{0}.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1199]"
+      ]
+    },
+    {
+      "text": "The 'Table Instance' number must be different.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1200]"
+      ]
+    },
+    {
+      "text": "Some rows do not contain the same number of columns like the header does.",
+      "kind": "safety_warning",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1201]"
+      ]
+    },
+    {
+      "text": "Row {0}; Column {1}: Contains an not empty field under an field that could not be converted to a floating point value.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1202]"
+      ]
+    },
+    {
+      "text": "The maximum allowed values is {0}.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1203]"
+      ]
+    },
+    {
+      "text": "CSV File read Error!",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1204]"
+      ]
+    },
+    {
+      "text": "The minimum allowed values / table is 2!",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1205]"
+      ]
+    },
+    {
+      "text": "Lookup Table loaded successful.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1206]"
+      ]
+    },
+    {
+      "text": "Start downloading...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1207]"
+      ]
+    },
+    {
+      "text": "Device is busy. Waiting...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1209]"
+      ]
+    },
+    {
+      "text": "Communication Timeout. Please Try again.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1210]"
+      ]
+    },
+    {
+      "text": "Error. Unexpected Status({0}). Please Try again.",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1211]"
+      ]
+    },
+    {
+      "text": "Download Successful",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1212]"
+      ]
+    },
+    {
+      "text": "Verification is running...",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1213]"
+      ]
+    },
+    {
+      "text": "Error. Tables not ok. Please Try again.",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1214]"
+      ]
+    },
+    {
+      "text": "Lookup Table Error",
+      "kind": "error",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1215]"
+      ]
+    },
+    {
+      "text": "/LoSpeed",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1218]"
+      ]
+    },
+    {
+      "text": "/HiSpeed",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1219]"
+      ]
+    },
+    {
+      "text": "/Speed",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1220]"
+      ]
+    },
+    {
+      "text": "/SeSoTCP_Interface",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1221]"
+      ]
+    },
+    {
+      "text": "/NoUSBDelay",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1222]"
+      ]
+    },
+    {
+      "text": "hwcfg",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1223]"
+      ]
+    },
+    {
+      "text": "expert",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1224]"
+      ]
+    },
+    {
+      "text": "A nested exception occurred after the primary exception that caused the C++ module to fail to load.",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1225]"
+      ]
+    },
+    {
+      "text": "--- Start of primary exception ---",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1227]"
+      ]
+    },
+    {
+      "text": "--- End of primary exception ---",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1228]"
+      ]
+    },
+    {
+      "text": "--- Start of nested exception ---",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1229]"
+      ]
+    },
+    {
+      "text": "--- End of nested exception ---",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1230]"
+      ]
+    },
+    {
+      "text": "NestedException",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1231]"
+      ]
+    },
+    {
+      "text": "The C++ module failed to load during vtable initialization.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1232]"
+      ]
+    },
+    {
+      "text": "api-ms-win-crt-",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1235]"
+      ]
+    },
+    {
+      "text": "msvcp",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1236]"
+      ]
+    },
+    {
+      "text": "vcruntime",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1237]"
+      ]
+    },
+    {
+      "text": "concrt",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1238]"
+      ]
+    },
+    {
+      "text": "The C++ module failed to load during appdomain initialization.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1239]"
+      ]
+    },
+    {
+      "text": "The C++ module failed to load during registration for the unload events.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1240]"
+      ]
+    },
+    {
+      "text": "The C++ module failed to load.",
+      "kind": "label",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1241]"
+      ]
+    },
+    {
+      "text": "RAny use of this Certificate constitutes acceptance of the DigiCert CP/CPS and the Relying Party Agreement which limit liability and are incorporated herein by reference",
+      "kind": "note",
+      "source_evidence": [
+        "ldd_v2.33_service_software:Service_LDD.exe managed resource strings:strings[1248]"
+      ]
+    }
+  ]
+}

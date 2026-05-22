@@ -14,9 +14,13 @@ import (
 type fakeCANTransceiver struct {
 	sent    []canopen.Frame
 	replies []canopen.Frame
+	sendErr error
 }
 
 func (f *fakeCANTransceiver) Send(frame canopen.Frame) error {
+	if f.sendErr != nil {
+		return f.sendErr
+	}
 	f.sent = append(f.sent, frame)
 	return nil
 }
@@ -132,5 +136,50 @@ func TestCANClientRejectsOutOfRangeParameterAddressBeforeSend(t *testing.T) {
 				t.Fatalf("sent frames=%d, want 0", len(fake.sent))
 			}
 		})
+	}
+}
+
+func TestCANClientReadBulkBestEffortNaN(t *testing.T) {
+	var value1 [4]byte
+	binary.BigEndian.PutUint32(value1[:], math.Float32bits(42.5))
+
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x41f, DLC: 8, Data: [8]byte{0x81, 0x1f, 0x00, 0x01, value1[0], value1[1], value1[2], value1[3]}},
+		},
+	}
+	client := NewCANClient(fake, ClientConfig{Address: 0x1f, Timeout: 10 * time.Millisecond})
+
+	got, err := client.ReadBulk(context.Background(), []Parameter{
+		{ID: 1000, Instance: 1, Type: DataTypeFloat32},
+		{ID: 1001, Instance: 1, Type: DataTypeFloat32},
+	})
+	if err != nil {
+		t.Fatalf("ReadBulk returned error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("ReadBulk returned %d values, want 2", len(got))
+	}
+	if math.Abs(got[0]-42.5) > 0.001 {
+		t.Errorf("got[0]=%f, want 42.5", got[0])
+	}
+	if !math.IsNaN(got[1]) {
+		t.Errorf("got[1]=%f, want NaN", got[1])
+	}
+}
+
+func TestCANClientReadBulkReturnsTransportError(t *testing.T) {
+	sendErr := errors.New("send failed")
+	fake := &fakeCANTransceiver{sendErr: sendErr}
+	client := NewCANClient(fake, ClientConfig{Address: 0x1f, Timeout: time.Second})
+
+	got, err := client.ReadBulk(context.Background(), []Parameter{
+		{ID: 1000, Instance: 1, Type: DataTypeFloat32},
+	})
+	if !errors.Is(err, sendErr) {
+		t.Fatalf("ReadBulk error = %v, want send error", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("ReadBulk returned partial values on initial transport failure: %#v", got)
 	}
 }

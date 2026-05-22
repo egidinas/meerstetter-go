@@ -9,6 +9,7 @@ If you want to evaluate the gateway or wire your own UI on top of it:
 | Document | What it covers |
 |---|---|
 | [`../README.md`](../README.md) | Project overview, quick-start, full feature and limitation list |
+| [`../walkthrough.md`](../walkthrough.md) | Current capability walkthrough, device-family status, catalogue assets, runtime semantics, and explicit non-claims |
 | [`../deploy/README.md`](../deploy/README.md) | How to run the device server and gateway on real hardware |
 | [`gateway/openapi.yaml`](gateway/openapi.yaml) | **Authoritative HTTP API reference** — every route, request/response shape, SSE events |
 | [`gateway/types.d.ts`](gateway/types.d.ts) | TypeScript types matching the gateway JSON responses (use directly in a browser client) |

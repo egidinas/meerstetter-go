@@ -1,0 +1,1587 @@
+{
+  "schema_version": "mecom_ldd130x_canopen_sdo_map.v1",
+  "source_policy": "Runtime CANopen SDO routing uses MeCom parameter IDs as the primary key. CANopen object indexes and decimal object IDs are aliases, not replacement MeCom IDs.",
+  "mappings": [
+    {
+      "mecom_id": 100,
+      "name": "Ignore Branch ID",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "fixed",
+        "fixed": 1
+      },
+      "canopen": {
+        "index": "0x1000",
+        "subindex": "0x00",
+        "subindex_mode": "fixed",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x1000"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 4096
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IGNORE_BRANCH_ID",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.1000"
+      ]
+    },
+    {
+      "mecom_id": 101,
+      "name": "Firmware and Hardware Versions",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2001",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2001"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8193
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.MIN_FW_VERSION_Moni",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2001"
+      ]
+    },
+    {
+      "mecom_id": 102,
+      "name": "Serial Number*",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2002",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2002"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8194
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.VER_HW_VERSION",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2002"
+      ]
+    },
+    {
+      "mecom_id": 105,
+      "name": "External Temperature Measurement 1",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2005",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2005"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8197
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.EXTT_RAW_ADC1",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2005"
+      ]
+    },
+    {
+      "mecom_id": 106,
+      "name": "LDD Current Noise [A]",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2006",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2006"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8198
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_CURRENT_NOISE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2006"
+      ]
+    },
+    {
+      "mecom_id": 107,
+      "name": "Error Parameter",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2007",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2007"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8199
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.ERROR_INSTANCE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2007"
+      ]
+    },
+    {
+      "mecom_id": 1061,
+      "name": "12V Internal Supply [V]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2011",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2011"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8209
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.M12V",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2011"
+      ]
+    },
+    {
+      "mecom_id": 1062,
+      "name": "-5V Internal Supply [V]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2012",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2012"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8210
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.M5V",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2012"
+      ]
+    },
+    {
+      "mecom_id": 1063,
+      "name": "3.3V Internal Supply [V]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2013",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2013"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8211
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.M3V3",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2013"
+      ]
+    },
+    {
+      "mecom_id": 1065,
+      "name": "Device Temperature [",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2015",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2015"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8213
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.MN5V",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2015"
+      ]
+    },
+    {
+      "mecom_id": 1212,
+      "name": "Actual Fan Speed [rpm]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2302",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2302"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8962
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_REL_COOL_POWER2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2302"
+      ]
+    },
+    {
+      "mecom_id": 1403,
+      "name": "LPC Output Level",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2053",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2053"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8275
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LPC_OUTPUT_LEVEL_MONITOR",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2053"
+      ]
+    },
+    {
+      "mecom_id": 1500,
+      "name": "Analog Voltage Input [V]",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2070",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2070"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8304
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.ANALOG_IN_VOLTAGE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2070"
+      ]
+    },
+    {
+      "mecom_id": 1501,
+      "name": "Photodiode Input",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2071",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2071"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8305
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.PHOTODIODE_LP_SYSTEMSCALE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2071"
+      ]
+    },
+    {
+      "mecom_id": 2051,
+      "name": "Device Address*",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2201",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2201"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8705
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.RS485_1_ADDRESS",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2201"
+      ]
+    },
+    {
+      "mecom_id": 2052,
+      "name": "Response Delay* [us]",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2202",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2202"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8706
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.UART_BAUDRATE3",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2202"
+      ]
+    },
+    {
+      "mecom_id": 2060,
+      "name": "Timeout [s]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2210",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2210"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8720
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.CONNECT_WATCH_DOG",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2210"
+      ]
+    },
+    {
+      "mecom_id": 2100,
+      "name": "Output Enable",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2230",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2230"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8752
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_OUTPUT_EN",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2230"
+      ]
+    },
+    {
+      "mecom_id": 2102,
+      "name": "Set Current [A]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2232",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2232"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8754
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_NOM_CURRENT",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2232"
+      ]
+    },
+    {
+      "mecom_id": 2113,
+      "name": "Modeling Enable*",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2243",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2243"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8771
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_ENABLE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2243"
+      ]
+    },
+    {
+      "mecom_id": 2123,
+      "name": "Min Nominal Current [A]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2253",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2253"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8787
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_CURRENT_LIMIT_MAX",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2253"
+      ]
+    },
+    {
+      "mecom_id": 2125,
+      "name": "Min Nominal Voltage [V]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2255",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2255"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8789
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_VOLTAGE_LIMIT_MIN",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2255"
+      ]
+    },
+    {
+      "mecom_id": 3001,
+      "name": "Set Power [W]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2401",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2401"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9217
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LPC_NOM_POWER",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2401"
+      ]
+    },
+    {
+      "mecom_id": 3022,
+      "name": "Min Nominal Power [W]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2421",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2421"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9249
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LPC_POWER_LIMIT_MAX",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2421"
+      ]
+    },
+    {
+      "mecom_id": 5040,
+      "name": "External Temperature Errors Enable 1",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2630",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2630"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9776
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.EXTT_ADC_OBSERVE1",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2630"
+      ]
+    },
+    {
+      "mecom_id": 5041,
+      "name": "Highest Resistance [",
+      "value_type": "float32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2631",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2631"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9777
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.EXTT_MAX_R2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2631"
+      ]
+    },
+    {
+      "mecom_id": 5100,
+      "name": "External Temperature: Measurement: Offset [\u00b0C]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2601",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2601"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9729
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.EXTT_NTC_R21",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2601"
+      ]
+    },
+    {
+      "mecom_id": 5101,
+      "name": "Gain [%]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2602",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2602"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 9730
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_FEEDFORWARD_GAIN",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2602"
+      ]
+    },
+    {
+      "mecom_id": 6110,
+      "name": "Source*",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3200",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3200"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 12800
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.LDD_T_CORR_GAIN",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3200"
+      ]
+    },
+    {
+      "mecom_id": 6121,
+      "name": "ON Threshold [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3121",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3121"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 12577
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.PUMP_ON_THRESHOLD1",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3121"
+      ]
+    },
+    {
+      "mecom_id": 6122,
+      "name": "OFF Threshold [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3122",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3122"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 12578
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.PUMP_OFF_THRESHOLD1",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3122"
+      ]
+    },
+    {
+      "mecom_id": 6211,
+      "name": "CH2 Fan Temperature Controller",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3311",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3311"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13073
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_TEMPR_TI2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3311"
+      ]
+    },
+    {
+      "mecom_id": 6212,
+      "name": "Kp [%/rpm]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3312",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3312"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13074
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_KP2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3312"
+      ]
+    },
+    {
+      "mecom_id": 6213,
+      "name": "Ti [s]**",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3313",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3313"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13075
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_TI2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3313"
+      ]
+    },
+    {
+      "mecom_id": 6214,
+      "name": "Td [s]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3314",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3314"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13076
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_TD2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3314"
+      ]
+    },
+    {
+      "mecom_id": 6220,
+      "name": "0% Speed [rpm]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3320",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3320"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13088
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_MIN2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3320"
+      ]
+    },
+    {
+      "mecom_id": 6221,
+      "name": "100% Speed [rpm]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3321",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3321"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13089
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_MAX2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3321"
+      ]
+    },
+    {
+      "mecom_id": 6226,
+      "name": "Min Speed Start [rpm]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3328",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3328"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13096
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_STOP2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3328"
+      ]
+    },
+    {
+      "mecom_id": 6230,
+      "name": "1kHz",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3328",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3328"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13096
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.FAN_SPEED_FPWM",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3328"
+      ]
+    },
+    {
+      "mecom_id": 6310,
+      "name": "Delay until Reset [s]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x3400",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x3400"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 13312
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.AUTORESET_TIME",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.3400"
+      ]
+    },
+    {
+      "mecom_id": 7000,
+      "name": "Signal Source*",
+      "value_type": "int32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2800",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2800"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10240
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.DAC_OUT_SOURCE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2800"
+      ]
+    },
+    {
+      "mecom_id": 7002,
+      "name": "Sync Scaling [V/A]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2802",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2802"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10242
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.DAC_OUTPUT_VALUE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2802"
+      ]
+    },
+    {
+      "mecom_id": 7011,
+      "name": "Analog Output DAC Calibration",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2E10",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2E10"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 11792
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.DAC_ADJ_A1",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2E10"
+      ]
+    },
+    {
+      "mecom_id": 7012,
+      "name": "Analog Input",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2812",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2812"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10258
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.ANALOG_POWER_FACTOR",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2812"
+      ]
+    },
+    {
+      "mecom_id": 7013,
+      "name": "External Temperature Measurement Settings 1",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2813",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2813"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 10259
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.EXTT_TADJ_A11",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2813"
+      ]
+    },
+    {
+      "mecom_id": 10008,
+      "name": "Thermal Voltage [V]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2B08",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2B08"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 11016
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_CALC_SATURATION_CURRENT",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2B08"
+      ]
+    },
+    {
+      "mecom_id": 10012,
+      "name": "Series Resistance [",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2B0C",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2B0C"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 11020
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_SERIES_RESISTANCE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2B0C"
+      ]
+    },
+    {
+      "mecom_id": 10100,
+      "name": "PID Kp [%/A]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2240",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2240"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8768
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_PID_KP",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2240"
+      ]
+    },
+    {
+      "mecom_id": 10101,
+      "name": "Reset",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2241",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2241"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8769
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_PID_FREEZE",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2241"
+      ]
+    },
+    {
+      "mecom_id": 10102,
+      "name": "PID Td [s]",
+      "value_type": "float32",
+      "access": "rw",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x2242",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0008"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x2242"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 8770
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.IVCURVE_PID_OPTION",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.2242"
+      ]
+    },
+    {
+      "mecom_id": 52103,
+      "name": "GPIO Signal Control: Read Input States",
+      "value_type": "int32",
+      "access": "ro",
+      "instances": {
+        "mode": "subindex",
+        "min": 1,
+        "max": 255
+      },
+      "canopen": {
+        "index": "0x5103",
+        "subindex": "instance",
+        "subindex_mode": "instance",
+        "data_type": "0x0004"
+      },
+      "aliases": [
+        {
+          "space": "canopen_index",
+          "id": "0x5103"
+        },
+        {
+          "space": "canopen_object_decimal",
+          "id": 20739
+        }
+      ],
+      "source_evidence": [
+        "catalogues/sources/ldd_130x_ui_metadata.v221.json#parameter_contexts.PBC_GPIO_FUNC2",
+        "catalogues/sources/ldd_130x_canopen_eds.v221.json#objects.5103"
+      ]
+    }
+  ],
+  "bridge_transforms": []
+}

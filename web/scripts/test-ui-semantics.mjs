@@ -147,6 +147,65 @@ assert.match(
   /export function valueAgeKind/,
   "value freshness severity must be reusable by dictionary and tree rows",
 );
+const signalDictionaryViewFn = dict.slice(
+  dict.indexOf("export function SignalDictionaryView"),
+  dict.indexOf("function ChannelsEditor"),
+);
+assert.match(
+  signalDictionaryViewFn,
+  /useGatewayTick\(\)/,
+  "signal dictionary must subscribe to gateway polling ticks so live catalogue/channel updates re-render",
+);
+assert.doesNotMatch(
+  signalDictionaryViewFn,
+  /useMemo\(\(\)\s*=>\s*MecomAPI\.catalogue\(\),\s*\[\]\)/,
+  "signal dictionary must not freeze the catalogue at first render before live discovery finishes",
+);
+assert.match(
+  api,
+  /const\s+SUPPLY_POLL_PARAM_IDS\s*=/,
+  "live dictionary reads must use a named supply poll set instead of row-scale ad hoc reads",
+);
+assert.match(
+  api,
+  /const\s+TEMP_POLL_PARAM_IDS\s*=/,
+  "live dictionary reads must use a named temperature poll set instead of row-scale ad hoc reads",
+);
+assert.match(
+  api,
+  /isPolledSignal\(role,\s*paramId\)/,
+  "frontend components must be able to tell which dictionary signals are backed by live polling",
+);
+assert.match(
+  api,
+  /hasLiveValue\(deviceId,\s*paramId,\s*instance\?\)/,
+  "dictionary rows must be able to render already-cached live values without forcing fresh exact reads",
+);
+assert.match(
+  atoms,
+  /opts\?\.enabled\s*!==\s*false/,
+  "live value hooks must support disabled catalogue rows without queuing device reads",
+);
+assert.match(
+  atoms,
+  /MecomAPI\.isPolledSignal\?\.\(role,\s*param\.id\)[\s\S]*MecomAPI\.hasLiveValue\?\.\(resolvedDeviceId,\s*param\.id,\s*instance\)/,
+  "signal dictionary rows must gate live reads to polled or already-cached values",
+);
+assert.match(
+  atoms,
+  /useLiveValue\(resolvedDeviceId,\s*param\.id,\s*instance,\s*\{\s*enabled:\s*liveEnabled\s*\}\)/,
+  "signal dictionary rows must pass live-read gating into useLiveValue",
+);
+assert.match(
+  atoms,
+  /<SparklineWrapper deviceId=\{resolvedDeviceId\} paramId=\{param\.id\} instance=\{instance\} enabled=\{liveEnabled\} \/>/,
+  "signal dictionary sparklines must be gated with the same live-read policy as values",
+);
+assert.doesNotMatch(
+  atoms,
+  /\/api\/graph\/sparklines/,
+  "dictionary sparklines must not fetch the gateway once per rendered catalogue row",
+);
 assert.match(
   atoms,
   /className=\{"qtag "/,
@@ -189,6 +248,16 @@ assert.match(
 );
 assert.match(
   api,
+  /import\s+lddCatalogueJson\s+from\s+"..\/data\/mecom-ldd-130x-catalogue\.json\?raw"/,
+  "LDD catalogue must be loaded as a first-class JSON definition beside the TEC catalogue",
+);
+assert.match(
+  api,
+  /import\s+catalogueDefinitionsJson\s+from\s+"..\/data\/mecom-catalogue-definitions\.json\?raw"/,
+  "catalogue definition metadata must be loaded from JSON instead of hardcoded UI branches",
+);
+assert.match(
+  api,
   /import\s+operatorProjectionJson\s+from\s+"..\/data\/mecom-operator-projection\.json\?raw"/,
   "operator-facing signal projection must be loaded from JSON settings, not hardcoded in React",
 );
@@ -196,6 +265,31 @@ assert.match(
   api,
   /function\s+mergeLiveCatalogueEntries/,
   "live catalogue discovery must merge onto the full static catalogue instead of replacing non-priority/lazy signals",
+);
+assert.match(
+  api,
+  /function\s+entryDefinitionRef/,
+  "catalogue entries must expose a normalized definition identity before merging or filtering",
+);
+assert.match(
+  api,
+  /function\s+catalogueDefinitionSummaries/,
+  "signal dictionary must expose available catalogue definitions with counts",
+);
+assert.match(
+  api,
+  /function\s+catalogueEntriesForDefinition/,
+  "signal dictionary must be able to filter catalogue entries by definition",
+);
+assert.match(
+  api,
+  /function\s+catalogueSignalKey\(entry\)[\s\S]*entryDefinitionRef\(entry\)[\s\S]*Number\(entry && entry\.id\)/,
+  "catalogue merge identity must include definition_ref so TEC and LDD numeric IDs cannot collide",
+);
+assert.match(
+  api,
+  /const\s+key\s*=\s*`\$\{definitionRef\}:\$\{id\}:\$\{instance\}`/,
+  "live catalogue entries must also de-duplicate by definition_ref plus parameter and instance",
 );
 assert.match(
   api,
@@ -283,6 +377,26 @@ assert.match(
   api,
   /path:\s*\["MeCom protocol",\s*mecomParameterFamily\(fallbackId\),\s*`Parameter \$\{fallbackId\}`,\s*protocolName\]/,
   "MeCom protocol tree must group entries by generated parameter family before individual IDs",
+);
+assert.match(
+  signalDictionaryViewFn,
+  /const\s+\[definitionFilter,\s*setDefinitionFilter\]\s*=\s*useState\(""\)/,
+  "signal dictionary must keep catalogue definition selection as UI state",
+);
+assert.match(
+  signalDictionaryViewFn,
+  /MecomAPI\.catalogueDefinitions\(\)/,
+  "signal dictionary must list definitions from the API",
+);
+assert.match(
+  signalDictionaryViewFn,
+  /MecomAPI\.catalogueForDefinition\(definitionFilter\)/,
+  "signal dictionary must feed the tree with definition-filtered catalogue rows",
+);
+assert.match(
+  styles,
+  /\.dict-definition-bar/,
+  "signal dictionary must render a visible definition selector for TEC/LDD/DAQ catalogues",
 );
 assert.match(
   mainView,
@@ -572,29 +686,29 @@ assert.match(
   "manual x-axis changes must mark the view as manual before applying the selected range",
 );
 assert.match(
-  dict,
-  /const\s+\[open,\s+setOpen\]\s*=\s*useState\(false\)/,
-  "signal dictionary groups must be collapsed by default",
+  atoms,
+  /const\s+isCollapsed\s*=\s*collapsed\[group\]\s*!==\s*undefined\s*\?\s*collapsed\[group\]\s*:\s*!hasActiveFilter/,
+  "signal dictionary groups must be collapsed by default until a filter/search is active",
 );
 assert.match(
-  dict,
-  /formatValueAge/,
-  "standalone dictionary rows must show live value age",
+  atoms,
+  /formatValueAge\(ageMs,\s*quality\)/,
+  "signal dictionary instance rows must show live value age",
 );
 assert.match(
-  dict,
-  /valueAgeKind/,
-  "standalone dictionary rows must style stale or missing values",
+  atoms,
+  /valueAgeKind\(ageMs,\s*quality\)/,
+  "signal dictionary instance rows must style stale or missing values",
 );
 assert.match(
-  dict,
-  /<th>Age<\/th>/,
-  "standalone dictionary tables must include an Age column",
+  atoms,
+  /<span className=\{"age " \+ valueAgeKind\(ageMs,\s*quality\)\}>\{formatValueAge\(ageMs,\s*quality\)\}<\/span>/,
+  "signal dictionary instance rows must render age as visible row metadata",
 );
 assert.match(
-  dict,
-  /MecomAPI\.formatWithUnit\(v\.value,\s*signal\.unit,\s*signal\.id\)/,
-  "standalone dictionary live values must render proper units such as degree Celsius",
+  atoms,
+  /formatWithUnit\(value,\s*param\.unit,\s*param\.id\)/,
+  "signal dictionary live values must render proper units such as degree Celsius",
 );
 
 console.log("ui semantics tests ok");

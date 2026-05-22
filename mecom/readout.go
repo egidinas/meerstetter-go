@@ -2,6 +2,7 @@ package mecom
 
 import (
 	"context"
+	"errors"
 	"math"
 	"time"
 )
@@ -26,11 +27,32 @@ const (
 type ReadClient interface {
 	ReadFloat32(context.Context, int, int) (float64, error)
 	ReadInt32(context.Context, int, int) (int32, error)
+	// ReadBulk reads multiple parameters. If an individual parameter cannot be
+	// retrieved (due to timeout, unsupported parameter on device, etc.), its slot
+	// in the returned slice is set to math.NaN() and processing continues rather
+	// than returning a top-level error. A non-nil error is only returned for general
+	// transport or validation failures.
 	ReadBulk(context.Context, []Parameter) ([]float64, error)
 	ConfigureRingCapture(context.Context, uint16, []RingCaptureParameter) error
 	TriggerRingSync(context.Context) error
 	ReadRingPointer(context.Context) (uint32, error)
 	ReadRingChunk(context.Context, uint32, uint16) (RingReadResponse, error)
+}
+
+func readBulkShouldReturnError(ctx context.Context, err error) bool {
+	if err == nil {
+		return false
+	}
+	if ctx != nil && ctx.Err() != nil {
+		return true
+	}
+	if errors.Is(err, context.Canceled) {
+		return true
+	}
+	if errors.Is(err, ErrTimeout) || errors.Is(err, ErrUnknownParameter) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
+	return true
 }
 
 // RingReadoutCapability lets transport adapters report whether the controller
