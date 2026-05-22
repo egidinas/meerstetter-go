@@ -135,8 +135,11 @@ The currently represented Meerstetter definitions are:
 | Definition | Runtime status |
 |------------|----------------|
 | `meerstetter.tec.v631` | Active runtime/UI catalogue and CANopen bridge baseline |
+| `meerstetter.ldd_1137.v150` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
 | `meerstetter.ldd_130x.v221` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
-| `meerstetter.ldd.v1`, `meerstetter.ldd_1321.v1`, `meerstetter.daq.v1` | Family/variant scaffolds for future catalogues |
+| `meerstetter.ldd_1321.v130` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
+| `meerstetter.ldd.v233` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
+| `meerstetter.daq.v1` | Family/variant scaffolds for future catalogues |
 
 The CAN-backed CoSo compatibility bridge has one explicit crosswalk for
 MeCom-to-CANopen SDO routing:
@@ -305,3 +308,4 @@ scripts/            Build and catalogue harvest scripts
 - [`go.bug.st/serial`](https://github.com/bugst/go-serial) — serial port support
 - [`apache/arrow-go`](https://github.com/apache/arrow-go) — Arrow IPC for graph history export
 - [`egidinas/signalforge`](https://github.com/egidinas/signalforge) — reusable graph, source-catalogue, and control-program contracts
+ reusable graph, source-catalogue, and control-program contracts

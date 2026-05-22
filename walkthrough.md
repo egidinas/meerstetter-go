@@ -18,7 +18,7 @@ private lab deployment:
 | Multi-device routing | `cmd/mecomvseriald` exposes one address-routed TCP listener and fans MeCom frames out to serial, TCP, or CAN downstreams. |
 | HTTP gateway | `cmd/mecomgw` exposes browser-safe JSON/SSE routes for device status, catalogue lookup, reads, polling, writes with leases, command logs, graph history, graph tiles, and log import/export. |
 | Browser UI | `web/` provides a Vite/React UI for fleet overview, per-device drill-down, lease-managed writes, graph wall tiles, signal dictionary browsing, and help text. |
-| Diagnostics | `cmd/mecomprobe`, `cmd/mecomset`, `cmd/mecompoll`, `cmd/mecomrun`, and `cmd/teccanprobe` cover bounded reads, writes, polling, typed automation scripts, and SocketCAN discovery. |
+| Diagnostics | `cmd/coso-puppet`, `cmd/mecomprobe`, `cmd/mecomset`, `cmd/mecompoll`, `cmd/mecomrun`, and `cmd/teccanprobe` cover UI puppeteering, bounded reads, writes, polling, typed automation scripts, and SocketCAN discovery. |
 | Edge capture | `canring` stores bounded chunked CAN receive history and merges RAM/flash snapshots for recent-frame recovery. |
 | SignalForge integration | Uses public SignalForge graph/source-catalogue/control-program contracts while keeping MeCom, CANopen SDO maps, transport probes, and device-specific recovery in this repository. |
 
@@ -72,6 +72,7 @@ The harvested and reverse-engineered source data live in
 | `ldd_130x_metadata_index.v221.json` | LDD-130x definition metadata, 155 hidden candidates, 275 software labels, and 3 documentation cross-check groups. |
 | `ldd_130x_ui_metadata.v221.json` | LDD-130x UI/resource metadata, 275 parameter contexts, 68 UI tree paths, and 791 harvested UI strings. |
 | `ldd_130x_default_config_5261h.v221.json` | LDD-130x default-configuration source data. |
+| `ldd_1137_*`, `ldd_1321_*`, `ldd_v2.33_*` | Corresponding harvested metadata, EDS, SDO maps, and default configs for these LDD variants. |
 
 Harvest scripts preserve source encodings in metadata instead of relying on
 unlabelled hardcoded assumptions. LDD-130x UI resources currently record
@@ -137,3 +138,5 @@ controls.
 - Use `docs/gateway/readout_scheduling.md` before implementing polling loops.
 - Use `docs/tmtc_signalforge_boundary.md` before moving generic dictionary,
   graph, or control-program behavior between repositories.
+r between repositories.
+ behavior between repositories.
