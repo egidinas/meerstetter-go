@@ -721,8 +721,8 @@ assert.match(
 );
 assert.match(
   atoms,
-  /setManualX\(true\);\s*setTimeRange\(range\);/,
-  "manual x-axis changes must mark the view as manual before applying the selected range",
+  /const full = isFullTimeRange\(range,\s*fullTimeRange\);[\s\S]*setManualX\(!full\);[\s\S]*setTimeRange\(full \? fullTimeRange : range\);/,
+  "manual x-axis changes must mark subranges as manual while full-range selections return to full tracking",
 );
 assert.match(
   atoms,
@@ -757,6 +757,11 @@ assert.match(
 );
 assert.match(
   hero,
+  /<MultiChart[\s\S]*titleOverride=\{wall\.label\}[\s\S]*headerExtras=\{/,
+  "hero graph titles and history controls must live in the chart setup bar instead of a separate header row",
+);
+assert.match(
+  hero,
   /<MultiChart[\s\S]*height=\{height\}[\s\S]*minHeight=\{minPlotHeight\}/,
   "hero graphs must pass the compact plot floor to MultiChart instead of reusing the nominal height as a hard minimum",
 );
@@ -777,33 +782,33 @@ assert.doesNotMatch(
 );
 assert.match(
   styles,
-  /\.fleet-heroes\s*\{[\s\S]*height:\s*calc\(100dvh - 72px\)/,
+  /\.fleet-heroes\s*\{[\s\S]*height:\s*calc\(100dvh - 58px\)/,
   "fleet graph stack must reserve only the compact viewport budget below the toolbar",
 );
 assert.match(
   styles,
-  /\.fleet-heroes \.hero\s*\{[\s\S]*grid-template-rows:\s*auto minmax\(150px,\s*1fr\) clamp\(72px,\s*18dvh,\s*116px\)/,
+  /\.fleet-heroes \.hero\s*\{[\s\S]*grid-template-rows:\s*minmax\(170px,\s*1fr\) clamp\(54px,\s*11dvh,\s*82px\)/,
   "fleet heroes must bound the settings table row and prioritize plot height",
 );
 assert.match(
   styles,
-  /\.hero-head\s*\{[\s\S]*padding:\s*4px 8px 3px/,
-  "hero headers must stay compact enough not to dominate the graph area",
+  /\.chart-setup-bar\s*\{[\s\S]*grid-template-rows:\s*auto auto/,
+  "graph title, y controls, and shared time controls must share the graph setup area above the plot",
 );
 assert.match(
   styles,
-  /\.hero-head h2\s*\{[\s\S]*font-size:\s*12px/,
-  "hero titles must use compact dashboard-scale type",
+  /\.chart-title\s*\{[\s\S]*font-size:\s*11px/,
+  "graph titles must use compact dashboard-scale type inside the setup bar",
 );
 assert.match(
   styles,
-  /\.hero-head \.sf-history-ctrl\s*\{[\s\S]*flex-direction:\s*row[\s\S]*padding:\s*2px 4px/,
-  "shared history controls must collapse to a compact toolbar when mounted in a hero header",
+  /\.chart-setup-bar \.operator-shared-time-axis\s*\{[\s\S]*grid-template-columns:\s*34px minmax\(0,\s*1fr\)/,
+  "SignalForge shared time zoom and scroll controls must be mounted above the graph in compact form",
 );
 assert.match(
   styles,
-  /\.hero-head \.sf-live-status\s*\{[\s\S]*display:\s*none/,
-  "hero headers must not spend vertical space on redundant streaming status prose",
+  /\.hero-settings \.supply-inputs-inline\s*\{[\s\S]*flex-direction:\s*row/,
+  "voltage command and limit controls must fit on one line inside the settings row",
 );
 const lastChartControls = styles.slice(styles.lastIndexOf(".chart-controls {"));
 assert.match(
@@ -813,8 +818,33 @@ assert.match(
 );
 assert.match(
   lastChartControls,
-  /padding:\s*2px 6px/,
+  /padding:\s*0/,
   "chart controls must not consume a full row of vertical padding inside fleet heroes",
+);
+assert.match(
+  atoms,
+  /autoY=\{autoY\}[\s\S]*yRange=\{parsedYRange\}/,
+  "automatic y scaling must stay on the SignalForge/uPlot renderer default while manual bounds use the existing yRange contract",
+);
+assert.doesNotMatch(
+  atoms,
+  /tightAutoYRange/,
+  "fleet charts must avoid custom autoscale helpers when the SignalForge renderer can use native autoY",
+);
+assert.match(
+  atoms,
+  /<SharedTimeAxis[\s\S]*tickCount=\{16\}[\s\S]*\/>/,
+  "graphs must keep the existing SignalForge shared time axis and its tick density",
+);
+assert.doesNotMatch(
+  atoms,
+  /<div className="chart-plot"[\s\S]*<SharedTimeAxis/,
+  "shared time zoom and scroll controls must not remain as a separate bottom row below the plot",
+);
+assert.match(
+  graphTilesBackend,
+  /graphTileTargetPointCount\s*=\s*2400/,
+  "backend graph tiles must target roughly one sample per 1080p plot pixel before frontend rendering",
 );
 
 console.log("ui semantics tests ok");

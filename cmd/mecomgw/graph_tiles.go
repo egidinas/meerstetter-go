@@ -28,7 +28,7 @@ const (
 	defaultGraphTileLevel        = "session"
 	graphHistoryHotRetention     = 15 * time.Minute
 	graphHistoryFinestLOD        = 2 * time.Second
-	graphTileTargetPointCount    = 1000
+	graphTileTargetPointCount    = 2400
 	defaultGraphHistoryRetention = 3 * 24 * time.Hour
 	maxGraphHistoryImportSeries  = 512
 	maxGraphHistoryImportSamples = 1_000_000

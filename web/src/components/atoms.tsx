@@ -249,7 +249,22 @@ function formatTraceReadoutValue(value, unit) {
   return unit ? `${formatted} ${unit}` : formatted;
 }
 
-export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSeries = [], fill = false, minHeight = 220 }) {
+function isFullTimeRange(range, fullRange) {
+  if (!range || !fullRange) return false;
+  return Math.abs(range.start - fullRange.start) <= 2 && Math.abs(range.end - fullRange.end) <= 2;
+}
+
+export function MultiChart({
+  tile,
+  height = 320,
+  timeWindowMs = 90_000,
+  hiddenSeries = [],
+  fill = false,
+  minHeight = 220,
+  titleOverride = null,
+  subtitle = null,
+  headerExtras = null,
+}) {
   useGatewayTick();
   const graphTile = useMemo(() => normalizeGraphTile(tile || emptyGraphTile({ timeWindowMs }), { timeWindowMs }), [tile, timeWindowMs]);
   const hidden = useMemo(() => new Set(hiddenSeries || []), [hiddenSeries.join ? hiddenSeries.join("|") : String(hiddenSeries)]);
@@ -303,61 +318,52 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
     if (max <= min) return null;
     return [min, max];
   }, [yMin, yMax]);
-  
-  const zoomIn = () => {
-    const start = timeRange.start;
-    const end = timeRange.end;
-    const center = (start + end) / 2;
-    const halfWidth = (end - start) / 4;
-    setTimeRange({ start: center - halfWidth, end: center + halfWidth });
-    setManualX(true);
-  };
-  const zoomOut = () => {
-    const start = timeRange.start;
-    const end = timeRange.end;
-    const center = (start + end) / 2;
-    const halfWidth = (end - start);
-    setTimeRange({ start: center - halfWidth, end: center + halfWidth });
-    setManualX(true);
-  };
-  const panLeft = () => {
-    const shift = (timeRange.end - timeRange.start) * 0.25;
-    setTimeRange({ start: timeRange.start - shift, end: timeRange.end - shift });
-    setManualX(true);
-  };
-  const panRight = () => {
-    const shift = (timeRange.end - timeRange.start) * 0.25;
-    setTimeRange({ start: timeRange.start + shift, end: timeRange.end + shift });
-    setManualX(true);
-  };
+  const displayTitle = titleOverride || title;
+  const applyTimeRange = useCallback((range) => {
+    const full = isFullTimeRange(range, fullTimeRange);
+    setManualX(!full);
+    setTimeRange(full ? fullTimeRange : range);
+    if (full) setViewToken((n) => n + 1);
+  }, [fullTimeRange.start, fullTimeRange.end]);
+
   return (
     <div
       style={{
         width: "100%",
         minWidth: 0,
-        ...(fill ? { height: "100%", display: "grid", gridTemplateRows: "auto minmax(0, 1fr) auto" } : {}),
+        ...(fill ? { height: "100%", display: "grid", gridTemplateRows: "auto minmax(0, 1fr)" } : {}),
       }}
       data-graph-tile={graphTile.tile_id || graphTile.id || ""}
       data-graph-renderer={CANONICAL_TILE_RENDERER}
       data-series-count={orderedSeries.length}
       data-hidden-series-count={hidden.size}
-      title={title}
+      title={displayTitle}
     >
-      <div className="chart-controls">
-        <div className="btn-group">
-          <button className="btn sm" onClick={panLeft} title="Pan left">←</button>
-          <button className="btn sm" onClick={zoomIn} title="Zoom in">+</button>
-          <button className="btn sm" onClick={zoomOut} title="Zoom out">−</button>
-          <button className="btn sm" onClick={panRight} title="Pan right">→</button>
+      <div className="chart-setup-bar">
+        <div className="chart-setup-row">
+          <div className="chart-title-block">
+            <span className="chart-title">{displayTitle}</span>
+            {subtitle && <span className="chart-subtitle">{subtitle}</span>}
+          </div>
+          {headerExtras && <div className="chart-header-extras">{headerExtras}</div>}
+          <div className="chart-controls">
+            <label className="toggle-sm">
+              <input type="checkbox" checked={autoY} onChange={(e) => setAutoY(e.target.checked)} />
+              Auto Y
+            </label>
+            <input className="select-sm axis-bound" type="number" step="any" placeholder="Y min" value={yMin} onChange={(e) => setYMin(e.target.value)} disabled={autoY} />
+            <input className="select-sm axis-bound" type="number" step="any" placeholder="Y max" value={yMax} onChange={(e) => setYMax(e.target.value)} disabled={autoY} />
+            <button className="btn sm" onClick={() => { setYMin(""); setYMax(""); setAutoY(true); }} title="Return to automatic y-axis scaling">Reset Y</button>
+          </div>
         </div>
-        <button className="btn sm" onClick={() => { setManualX(false); setTimeRange(fullTimeRange); setViewToken((n) => n + 1); }} title="Reset the x-axis to the full tile range">Auto X</button>
-        <label className="toggle-sm">
-          <input type="checkbox" checked={autoY} onChange={(e) => setAutoY(e.target.checked)} />
-          Auto Y
-        </label>
-        <input className="select-sm axis-bound" type="number" step="any" placeholder="Y min" value={yMin} onChange={(e) => setYMin(e.target.value)} disabled={autoY} />
-        <input className="select-sm axis-bound" type="number" step="any" placeholder="Y max" value={yMax} onChange={(e) => setYMax(e.target.value)} disabled={autoY} />
-        <button className="btn sm" onClick={() => { setYMin(""); setYMax(""); setAutoY(true); }} title="Return to automatic y-axis scaling">Reset Y</button>
+        <SharedTimeAxis
+          fullRange={fullTimeRange}
+          timeRange={timeRange}
+          currentTimeMs={currentTimeMs}
+          hoverTimeMs={hoverTimeMs}
+          onTimeRange={applyTimeRange}
+          tickCount={16}
+        />
       </div>
       <div
         className="chart-plot"
@@ -396,13 +402,6 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
           </div>
         )}
       </div>
-      <SharedTimeAxis
-        fullRange={fullTimeRange}
-        timeRange={timeRange}
-        currentTimeMs={currentTimeMs}
-        onTimeRange={(range) => { setManualX(true); setTimeRange(range); }}
-        tickCount={16}
-      />
     </div>
   );
 }

@@ -181,27 +181,10 @@ export function HeroGraph({ wall, role, tile, height = 280, minPlotHeight = 150,
 
   const effectiveTile = isLiveLocal ? tile : (historicalTile || tile);
   const isStreaming = isLiveLocal && live;
+  const chartSubtitle = `${tileSeriesCount} tile series · ${isStreaming ? "live" : "historical"}`;
 
   return (
     <div className={"hero" + (isStreaming ? " live" : "")}>
-      <div className="hero-head">
-        <div className="title-grp">
-          {isStreaming && <span className="live-dot"></span>}
-          {!isStreaming && <span className="history-icon">◔</span>}
-          <h2>{wall.label}</h2>
-          <span className="sub">
-            · {tileSeriesCount} tile series · {isStreaming ? "live" : "historical"}
-          </span>
-        </div>
-        <div className="badge-row">
-          <Chip kind={isStreaming ? "accent" : "info"}>{axisBadgeLabel(role, effectiveTile)}</Chip>
-          <HistoryController 
-            isLive={isLiveLocal} 
-            onSetLive={setIsLiveLocal}
-            onRangeChange={(t0, t1) => setRange({ t0, t1 })}
-          />
-        </div>
-      </div>
       <div className="hero-chart-row">
         <div className="hero-plot">
           {tileSeriesCount === 0 ? (
@@ -209,7 +192,27 @@ export function HeroGraph({ wall, role, tile, height = 280, minPlotHeight = 150,
               No signals assigned. Add from the Signal Dictionary →
             </div>
           ) : (
-            <MultiChart tile={effectiveTile} height={height} hiddenSeries={effectiveHiddenSeries} fill minHeight={minPlotHeight} />
+            <MultiChart
+              tile={effectiveTile}
+              height={height}
+              hiddenSeries={effectiveHiddenSeries}
+              fill
+              minHeight={minPlotHeight}
+              titleOverride={wall.label}
+              subtitle={chartSubtitle}
+              headerExtras={
+                <>
+                  {isStreaming && <span className="live-dot"></span>}
+                  {!isStreaming && <span className="history-icon">◔</span>}
+                  <Chip kind={isStreaming ? "accent" : "info"}>{axisBadgeLabel(role, effectiveTile)}</Chip>
+                  <HistoryController
+                    isLive={isLiveLocal}
+                    onSetLive={setIsLiveLocal}
+                    onRangeChange={(t0, t1) => setRange({ t0, t1 })}
+                  />
+                </>
+              }
+            />
           )}
         </div>
         <div className="hero-legend">
@@ -651,13 +654,13 @@ function SupplySettingsRow({
         <span className="chan-name">{ch.device_id}</span>
         <span className="chan-sub">/{ch.instance} · {ch.label}</span>
       </td>
-      <td className="supply-cell">
+      <td className="supply-cell supply-cell-voltage">
         <div className="supply-measured">
           <SemanticValuePopup param={measuredVoltageSignal} value={actV.value} quality={actV.quality} className="semantic-inline-value">
             <span className="live-val">{MecomAPI.formatWithUnit(actV.value, "V", PARAM_OUTPUT_VOLTAGE)}</span>
           </SemanticValuePopup>
         </div>
-        <div className="supply-inputs">
+        <div className="supply-inputs supply-inputs-inline">
           <div className="input-group">
             <span className="input-label">Cmd</span>
             <span className="quick-input">

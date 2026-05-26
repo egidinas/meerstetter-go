@@ -1715,17 +1715,102 @@ hr.sep {
   display: flex;
   align-items: center;
   gap: 4px;
-  flex-wrap: wrap;
-  padding: 0 0 4px;
+  flex-wrap: nowrap;
+  padding: 0;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--muted);
+  min-width: 0;
 }
 .chart-controls .axis-bound {
-  width: 72px;
-  min-width: 72px;
-  padding: 0 8px;
-  height: 22px;
+  width: 52px;
+  min-width: 52px;
+  flex: 0 0 52px;
+  padding: 0 5px;
+  height: 20px;
+}
+.chart-controls .toggle-sm {
+  height: 20px;
+  padding: 0 6px;
+  gap: 4px;
+  font-size: 10px;
+  flex: 0 0 auto;
+}
+.chart-controls button.btn.sm {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.chart-setup-bar {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 1px;
+  padding: 2px 4px 1px;
+  background: #04060a;
+  border-bottom: 1px solid var(--hairline);
+  min-width: 0;
+}
+.chart-setup-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.chart-title-block {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+}
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.chart-subtitle {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chart-header-extras {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+.chart-header-extras .chip {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 10px;
+  flex: 0 0 auto;
+}
+.chart-header-extras .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--live-pulse);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live-pulse) 22%, transparent);
+  animation: pulse-amber 2.2s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+.chart-header-extras .history-icon {
+  color: var(--muted);
+  font-size: 11px;
+  flex: 0 0 auto;
 }
 
 .operator-shared-time-axis {
@@ -1806,6 +1891,35 @@ hr.sep {
 .operator-shared-time-axis .time-axis-scrollbar {
   flex: 1 1 auto;
   min-width: 90px;
+}
+
+.chart-setup-bar .operator-shared-time-axis {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 4px;
+  padding-top: 0;
+  align-items: center;
+}
+.chart-setup-bar .operator-shared-time-axis .time-axis-label { font-size: 9px; }
+.chart-setup-bar .operator-shared-time-axis .time-axis-track { height: 14px; }
+.chart-setup-bar .operator-shared-time-axis .time-axis-sub-row {
+  gap: 4px;
+  min-height: 18px;
+}
+.chart-setup-bar .operator-shared-time-axis .time-axis-controls {
+  align-items: center;
+}
+.chart-setup-bar .operator-shared-time-axis .time-axis-controls span,
+.chart-setup-bar .operator-shared-time-axis .time-axis-controls small,
+.chart-setup-bar .operator-shared-time-axis .time-axis-scrollbar small {
+  font-size: 9px;
+}
+.chart-setup-bar .operator-shared-time-axis .time-axis-controls button {
+  height: 17px;
+  padding: 0 5px;
+  font-size: 9px;
+}
+.chart-setup-bar .operator-shared-time-axis .time-axis-scrollbar {
+  min-width: 120px;
 }
 
 .semantic-stack,
@@ -2276,13 +2390,13 @@ hr.sep {
   gap: 4px;
   align-items: center;
   flex-wrap: nowrap;
-  min-height: 24px;
-  padding: 2px 6px;
-  background: var(--bg-soft);
-  border-bottom: 1px solid var(--line);
+  min-height: 20px;
+  padding: 0;
+  background: transparent;
+  border-bottom: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  font: 10.5px var(--font-mono);
+  font: 10px var(--font-mono);
 }
 .chart-controls::-webkit-scrollbar { display: none; }
 .btn-group {
@@ -2424,7 +2538,7 @@ hr.sep {
   border-radius: var(--radius);
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
 }
@@ -2557,22 +2671,22 @@ hr.sep {
   min-width: 760px;
   border-collapse: collapse;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 9.5px;
 }
 .hero-settings thead th {
   background: var(--bg-rail);
   color: var(--muted);
   font-weight: 600;
-  font-size: 9px;
+  font-size: 8.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 3px 6px;
+  padding: 2px 4px;
   text-align: left;
   border-bottom: 1px solid var(--hairline);
 }
 .hero.live .hero-settings thead th { background: color-mix(in srgb, var(--bg-live) 92%, var(--panel) 8%); }
 .hero-settings tbody td {
-  padding: 3px 6px;
+  padding: 2px 4px;
   border-bottom: 1px solid var(--hairline);
   vertical-align: middle;
   color: var(--text);
@@ -2600,22 +2714,22 @@ hr.sep {
   gap: 4px;
 }
 .hero-settings .quick-input input {
-  width: 64px;
+  width: 56px;
   background: #06090f;
   border: 1px solid var(--line);
   border-radius: 3px;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 3px 6px;
+  font-size: 10px;
+  padding: 2px 4px;
   outline: none;
 }
 .hero-settings .quick-input input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .hero-settings .quick-input input.staged { border-color: var(--series-cmd); color: var(--series-cmd); }
 .hero-settings .quick-input button {
-  height: 22px;
-  padding: 0 6px;
-  font-size: 10px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 9.5px;
   background: var(--panel-2);
   border: 1px solid var(--line);
   color: var(--text-soft);
@@ -2631,7 +2745,7 @@ hr.sep {
 .hero-settings .quick-input button:disabled { opacity: 0.45; cursor: not-allowed; }
 .hero-settings .quick-write-cell {
   display: grid;
-  gap: 4px;
+  gap: 2px;
 }
 .hero-settings .cmd-live-line {
   display: block;
@@ -2642,12 +2756,12 @@ hr.sep {
   line-height: 1.35;
 }
 .hero-settings .write-inline-trace {
-  margin-top: 4px;
-  min-width: 250px;
+  margin-top: 2px;
+  min-width: 180px;
 }
 .hero-settings .write-inline-trace .write-lifecycle-trace {
-  padding: 6px;
-  gap: 5px;
+  padding: 4px;
+  gap: 3px;
 }
 .hero-settings .write-inline-trace .write-lifecycle-trace__steps {
   display: none;
@@ -2665,11 +2779,11 @@ hr.sep {
   border-radius: 999px;
   overflow: hidden;
   cursor: pointer;
-  font-size: 9.5px;
-  height: 20px;
+  font-size: 9px;
+  height: 18px;
 }
 .hero-settings .out-toggle span {
-  padding: 3px 8px;
+  padding: 2px 6px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
@@ -2680,12 +2794,12 @@ hr.sep {
 
 .hero-settings .supply-cell {
   vertical-align: top;
-  padding: 4px 8px;
+  padding: 2px 4px;
 }
 .hero-settings .supply-measured {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 700;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
   display: flex;
   align-items: center;
 }
@@ -2695,27 +2809,49 @@ hr.sep {
 .hero-settings .supply-inputs {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+}
+.hero-settings .supply-inputs-inline {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
 }
 .hero-settings .input-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
 }
 .hero-settings .input-label {
   display: inline-block;
   width: 75px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 8.5px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+.hero-settings .supply-inputs-inline .input-group {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+.hero-settings .supply-inputs-inline .input-label {
+  width: auto;
+  min-width: 30px;
+}
+.hero-settings .supply-cell-voltage .quick-input input {
+  width: 50px;
+}
+.hero-settings .supply-cell-voltage .write-inline-trace {
+  min-width: 0;
+  margin-top: 0;
+}
 .hero-settings .status-cell {
   vertical-align: top;
-  padding: 4px 8px;
+  padding: 2px 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 
@@ -2724,10 +2860,10 @@ hr.sep {
    ======================================================== */
 .fleet-heroes {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  height: calc(100dvh - 72px);
+  height: calc(100dvh - 58px);
   min-height: 0;
   min-width: 0;
   align-content: stretch;
@@ -2735,7 +2871,7 @@ hr.sep {
 .fleet-heroes .hero {
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(150px, 1fr) clamp(72px, 18dvh, 116px);
+  grid-template-rows: minmax(170px, 1fr) clamp(54px, 11dvh, 82px);
 }
 .fleet-heroes .hero .chart-plot {
   min-height: 0;
@@ -2814,6 +2950,29 @@ hr.sep {
   }
   .hero-head .badge-row .chip {
     flex: 0 0 auto;
+  }
+  .chart-setup-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 3px;
+  }
+  .chart-header-extras,
+  .chart-controls {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chart-header-extras::-webkit-scrollbar,
+  .chart-controls::-webkit-scrollbar {
+    display: none;
+  }
+  .chart-setup-bar .operator-shared-time-axis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chart-setup-bar .operator-shared-time-axis .time-axis-label {
+    display: none;
+  }
+  .chart-setup-bar .operator-shared-time-axis .time-axis-sub-row {
+    grid-column: 1;
   }
   .hero-chart-row,
   .chart-layout {
@@ -3938,5 +4097,44 @@ hr.sep {
   display: none;
 }
 .hero-head .sf-availability-info {
+  display: none;
+}
+
+.chart-header-extras .sf-history-ctrl {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-size: 10px;
+  min-width: 0;
+}
+.chart-header-extras .sf-mode-toggle {
+  padding: 1px;
+  border-radius: 5px;
+  flex: 0 0 auto;
+}
+.chart-header-extras .sf-mode-toggle button {
+  padding: 2px 6px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.chart-header-extras .sf-history-options {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.chart-header-extras .sf-presets,
+.chart-header-extras .sf-custom {
+  gap: 3px;
+}
+.chart-header-extras .sf-presets button,
+.chart-header-extras .sf-custom input {
+  padding: 1px 4px;
+  font-size: 9.5px;
+}
+.chart-header-extras .sf-live-status,
+.chart-header-extras .sf-availability-info {
   display: none;
 }
