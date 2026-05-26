@@ -639,12 +639,12 @@ hr.sep {
 /* ========== Fleet view ========== */
 
 .fleet {
-  padding: 8px;
+  padding: 6px;
   display: grid;
-  gap: 8px;
-  grid-template-rows: minmax(0, 1fr);
-  height: auto;
-  min-height: 100%;
+  gap: 6px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
   min-width: 0;
 }
 
@@ -1566,8 +1566,27 @@ hr.sep {
 .chart-toolbar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+}
+.fleet-chart-toolbar {
+  min-height: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.fleet-chart-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.fleet-chart-toolbar select {
+  height: 22px;
+  min-width: 110px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--text);
+  font: 11px var(--font-mono);
 }
 .toggle-sm {
   display: inline-flex;
@@ -1695,27 +1714,27 @@ hr.sep {
 .chart-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
-  padding: 0 0 8px;
+  padding: 0 0 4px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--muted);
 }
 .chart-controls .axis-bound {
-  width: 88px;
-  min-width: 88px;
+  width: 72px;
+  min-width: 72px;
   padding: 0 8px;
-  height: 28px;
+  height: 22px;
 }
 
 .operator-shared-time-axis {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 6px;
   align-items: center;
   min-width: 0;
-  padding-top: 6px;
+  padding-top: 2px;
   font-family: var(--font-mono);
   color: var(--muted);
 }
@@ -1727,7 +1746,7 @@ hr.sep {
 .operator-shared-time-axis .time-axis-track {
   position: relative;
   min-width: 0;
-  height: 24px;
+  height: 18px;
   border-top: 1px solid var(--line);
 }
 .operator-shared-time-axis .time-axis-elapsed {
@@ -1753,21 +1772,21 @@ hr.sep {
 .operator-shared-time-axis .time-axis-tick i {
   display: block;
   width: 1px;
-  height: 5px;
+  height: 4px;
   background: var(--line);
-  margin: 0 auto 2px;
+  margin: 0 auto 1px;
 }
 .operator-shared-time-axis .time-axis-tick em {
   display: block;
   font-style: normal;
-  font-size: 10px;
+  font-size: 9.5px;
   white-space: nowrap;
 }
 .operator-shared-time-axis .time-axis-sub-row {
   grid-column: 2;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 .operator-shared-time-axis .time-axis-controls {
@@ -1775,14 +1794,14 @@ hr.sep {
   gap: 4px;
 }
 .operator-shared-time-axis .time-axis-controls button {
-  height: 22px;
-  padding: 0 7px;
+  height: 18px;
+  padding: 0 5px;
   border: 1px solid var(--line);
   background: var(--panel-2);
   color: var(--text);
-  border-radius: 6px;
+  border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9.5px;
 }
 .operator-shared-time-axis .time-axis-scrollbar {
   flex: 1 1 auto;
@@ -2254,12 +2273,18 @@ hr.sep {
 }
 .chart-controls {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
-  padding: 4px 8px;
+  flex-wrap: nowrap;
+  min-height: 24px;
+  padding: 2px 6px;
   background: var(--bg-soft);
   border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+  font: 10.5px var(--font-mono);
 }
+.chart-controls::-webkit-scrollbar { display: none; }
 .btn-group {
   display: flex;
   background: var(--bg);
@@ -2272,7 +2297,9 @@ hr.sep {
   border-radius: 0;
   border-right: 1px solid var(--line);
   background: transparent;
-  min-width: 28px;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 6px;
 }
 .btn-group .btn:last-child {
   border-right: none;
@@ -2409,25 +2436,26 @@ hr.sep {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px 6px;
+  gap: 6px;
+  padding: 4px 8px 3px;
   border-bottom: 1px solid var(--hairline);
   min-width: 0;
 }
 .hero.live .hero-head { border-bottom-color: var(--border-live); }
-.hero-head .title-grp { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.hero-head .title-grp { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 .hero-head h2 {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1.15;
   letter-spacing: 0;
   white-space: nowrap;
 }
 .hero-head .sub {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2435,9 +2463,12 @@ hr.sep {
 }
 .hero-head .badge-row {
   display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-wrap: nowrap;
   align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 .hero-head .live-dot {
   width: 7px; height: 7px;
@@ -2453,7 +2484,7 @@ hr.sep {
 
 .hero-chart-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px;
+  grid-template-columns: minmax(0, 1fr) 178px;
   grid-template-rows: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
@@ -2461,7 +2492,7 @@ hr.sep {
 }
 .hero.live .hero-chart-row { border-bottom-color: var(--border-live); }
 .hero-plot {
-  padding: 4px 4px 0;
+  padding: 2px 3px 0;
   background: #04060a;
   position: relative;
   min-width: 0;
@@ -2480,16 +2511,18 @@ hr.sep {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 5px 7px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9.5px;
+  line-height: 1.2;
   color: var(--text-soft);
   background: var(--bg-rail);
   border-left: 1px solid var(--hairline);
+  overflow: auto;
 }
 .hero.live .hero-legend { background: color-mix(in srgb, var(--bg-live) 90%, var(--panel) 10%); border-left-color: var(--border-live); }
-.hero-legend .item { display: inline-flex; align-items: center; gap: 5px; }
+.hero-legend .item { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; }
 .hero-legend .item.off { opacity: 0.4; }
 .hero-legend .quality-mini,
 .chart-legend .quality-mini {
@@ -2511,9 +2544,10 @@ hr.sep {
 .hero-settings-wrap {
   max-width: 100%;
   min-width: 0;
+  height: 100%;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 130px;
+  max-height: 100%;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
@@ -2523,22 +2557,22 @@ hr.sep {
   min-width: 760px;
   border-collapse: collapse;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
 }
 .hero-settings thead th {
   background: var(--bg-rail);
   color: var(--muted);
   font-weight: 600;
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 5px 8px;
+  padding: 3px 6px;
   text-align: left;
   border-bottom: 1px solid var(--hairline);
 }
 .hero.live .hero-settings thead th { background: color-mix(in srgb, var(--bg-live) 92%, var(--panel) 8%); }
 .hero-settings tbody td {
-  padding: 5px 8px;
+  padding: 3px 6px;
   border-bottom: 1px solid var(--hairline);
   vertical-align: middle;
   color: var(--text);
@@ -2646,12 +2680,12 @@ hr.sep {
 
 .hero-settings .supply-cell {
   vertical-align: top;
-  padding: 8px 12px;
+  padding: 4px 8px;
 }
 .hero-settings .supply-measured {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
   display: flex;
   align-items: center;
 }
@@ -2678,10 +2712,10 @@ hr.sep {
 }
 .hero-settings .status-cell {
   vertical-align: top;
-  padding: 8px 12px;
+  padding: 4px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 
@@ -2690,22 +2724,26 @@ hr.sep {
    ======================================================== */
 .fleet-heroes {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  height: min(820px, calc(100dvh - 92px));
-  min-height: 620px;
+  height: calc(100dvh - 72px);
+  min-height: 0;
   min-width: 0;
   align-content: stretch;
 }
 .fleet-heroes .hero {
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) minmax(88px, auto);
+  grid-template-rows: auto minmax(150px, 1fr) clamp(72px, 18dvh, 116px);
 }
 .fleet-heroes .hero .chart-plot {
   min-height: 0;
   height: 100%;
+}
+.fleet-heroes .hero-settings-wrap {
+  height: 100%;
+  max-height: 100%;
 }
 .fleet-strip {
   display: grid;
@@ -3863,4 +3901,42 @@ hr.sep {
   background: #00d6a3;
   border-radius: 50%;
   box-shadow: 0 0 8px #00d6a3;
+}
+
+.hero-head .sf-history-ctrl {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-size: 10px;
+}
+.hero-head .sf-mode-toggle {
+  padding: 1px;
+  border-radius: 5px;
+}
+.hero-head .sf-mode-toggle button {
+  padding: 2px 6px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.hero-head .sf-history-options {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.hero-head .sf-presets,
+.hero-head .sf-custom {
+  gap: 3px;
+}
+.hero-head .sf-presets button,
+.hero-head .sf-custom input {
+  padding: 1px 4px;
+  font-size: 9.5px;
+}
+.hero-head .sf-live-status {
+  display: none;
+}
+.hero-head .sf-availability-info {
+  display: none;
 }

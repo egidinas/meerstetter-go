@@ -79,7 +79,7 @@ function tileSeriesKey(series) {
   return graphSeriesIdentityKey(series);
 }
 
-export function HeroGraph({ wall, role, tile, height = 280, live = true, initialHiddenSeries = [], children }) {
+export function HeroGraph({ wall, role, tile, height = 280, minPlotHeight = 150, live = true, initialHiddenSeries = [], children }) {
   useGatewayTick();
   const renderedSeries = renderSeriesFromGraphTile(tile);
   const renderedSeriesKey = renderedSeries.map((series) => tileSeriesKey(series)).sort().join("|");
@@ -209,7 +209,7 @@ export function HeroGraph({ wall, role, tile, height = 280, live = true, initial
               No signals assigned. Add from the Signal Dictionary →
             </div>
           ) : (
-            <MultiChart tile={effectiveTile} height={height} hiddenSeries={effectiveHiddenSeries} fill minHeight={height} />
+            <MultiChart tile={effectiveTile} height={height} hiddenSeries={effectiveHiddenSeries} fill minHeight={minPlotHeight} />
           )}
         </div>
         <div className="hero-legend">

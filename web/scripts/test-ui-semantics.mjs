@@ -750,4 +750,71 @@ assert.match(
   "signal dictionary live values must render proper units such as degree Celsius",
 );
 
+assert.match(
+  hero,
+  /export function HeroGraph\(\{[\s\S]*minPlotHeight\s*=\s*150/,
+  "fleet hero graph layout must support a compact plot floor independent of the nominal chart height",
+);
+assert.match(
+  hero,
+  /<MultiChart[\s\S]*height=\{height\}[\s\S]*minHeight=\{minPlotHeight\}/,
+  "hero graphs must pass the compact plot floor to MultiChart instead of reusing the nominal height as a hard minimum",
+);
+assert.match(
+  mainView,
+  /<HeroGraph wall=\{WALLS\.fleetTemp\}[\s\S]*height=\{220\}[\s\S]*minPlotHeight=\{150\}/,
+  "fleet temperature hero must use compact graph sizing so settings cannot squeeze the plot below fold",
+);
+assert.match(
+  mainView,
+  /<HeroGraph wall=\{WALLS\.fleetSupply\}[\s\S]*height=\{220\}[\s\S]*minPlotHeight=\{150\}/,
+  "fleet supply hero must use compact graph sizing so both graph blocks fit above fold",
+);
+assert.doesNotMatch(
+  styles,
+  /\.fleet-heroes\s*\{[\s\S]*min-height:\s*620px/,
+  "fleet graph stack must not force a 620px minimum that wastes vertical space on short viewports",
+);
+assert.match(
+  styles,
+  /\.fleet-heroes\s*\{[\s\S]*height:\s*calc\(100dvh - 72px\)/,
+  "fleet graph stack must reserve only the compact viewport budget below the toolbar",
+);
+assert.match(
+  styles,
+  /\.fleet-heroes \.hero\s*\{[\s\S]*grid-template-rows:\s*auto minmax\(150px,\s*1fr\) clamp\(72px,\s*18dvh,\s*116px\)/,
+  "fleet heroes must bound the settings table row and prioritize plot height",
+);
+assert.match(
+  styles,
+  /\.hero-head\s*\{[\s\S]*padding:\s*4px 8px 3px/,
+  "hero headers must stay compact enough not to dominate the graph area",
+);
+assert.match(
+  styles,
+  /\.hero-head h2\s*\{[\s\S]*font-size:\s*12px/,
+  "hero titles must use compact dashboard-scale type",
+);
+assert.match(
+  styles,
+  /\.hero-head \.sf-history-ctrl\s*\{[\s\S]*flex-direction:\s*row[\s\S]*padding:\s*2px 4px/,
+  "shared history controls must collapse to a compact toolbar when mounted in a hero header",
+);
+assert.match(
+  styles,
+  /\.hero-head \.sf-live-status\s*\{[\s\S]*display:\s*none/,
+  "hero headers must not spend vertical space on redundant streaming status prose",
+);
+const lastChartControls = styles.slice(styles.lastIndexOf(".chart-controls {"));
+assert.match(
+  lastChartControls,
+  /gap:\s*4px/,
+  "chart controls must use compact horizontal gaps inside fleet heroes",
+);
+assert.match(
+  lastChartControls,
+  /padding:\s*2px 6px/,
+  "chart controls must not consume a full row of vertical padding inside fleet heroes",
+);
+
 console.log("ui semantics tests ok");

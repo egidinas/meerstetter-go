@@ -194,10 +194,10 @@ export function FleetView({ onOpenDevice }) {
         <Chip>{fleetTileWindow.label} shared timeline</Chip>
       </div>
       <div className="fleet-heroes">
-        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={260} initialHiddenSeries={defaultTempHidden}>
+        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={220} minPlotHeight={150} initialHiddenSeries={defaultTempHidden}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
         </HeroGraph>
-        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={260} initialHiddenSeries={defaultSupplyHidden}>
+        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={220} minPlotHeight={150} initialHiddenSeries={defaultSupplyHidden}>
           {supplyChannels.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
               No supply-mode channels configured. Set a channel role under Signal Dictionary → Metadata.
