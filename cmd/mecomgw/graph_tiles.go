@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"math"
 	"net/http"
@@ -24,8 +25,10 @@ import (
 
 const (
 	canonicalTileRenderer        = "signalforge.tile.uplot"
-	defaultGraphTileLevel        = "three_day"
+	defaultGraphTileLevel        = "session"
 	graphHistoryHotRetention     = 15 * time.Minute
+	graphHistoryFinestLOD        = 2 * time.Second
+	graphTileTargetPointCount    = 1000
 	defaultGraphHistoryRetention = 3 * 24 * time.Hour
 	maxGraphHistoryImportSeries  = 512
 	maxGraphHistoryImportSamples = 1_000_000
@@ -58,8 +61,10 @@ type graphTileResponse struct {
 	ID             string          `json:"id"`
 	CardID         string          `json:"card_id"`
 	Level          string          `json:"level"`
-	T0             string          `json:"t0"`
-	T1             string          `json:"t1"`
+	T0             string          `json:"t0,omitempty"`
+	T1             string          `json:"t1,omitempty"`
+	RequestedT0    string          `json:"requested_t0,omitempty"`
+	RequestedT1    string          `json:"requested_t1,omitempty"`
 	GeneratedAt    string          `json:"generated_at"`
 	Renderer       string          `json:"renderer"`
 	Kind           string          `json:"kind"`
@@ -98,6 +103,8 @@ type graphTileDiag struct {
 	Renderer                       string `json:"renderer"`
 	TileLevel                      string `json:"tile_level"`
 	TileSource                     string `json:"tile_source"`
+	RequestedT0                    string `json:"requested_t0,omitempty"`
+	RequestedT1                    string `json:"requested_t1,omitempty"`
 	OutlierPolicy                  string `json:"outlier_policy"`
 	SuppressedOpenSensorPoints     int    `json:"suppressed_open_sensor_points,omitempty"`
 	SuppressedInitialOutlierPoints int    `json:"suppressed_initial_outlier_points,omitempty"`
@@ -283,7 +290,7 @@ func (s *server) handleGraphHistoryExport(w http.ResponseWriter, r *http.Request
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	level := firstNonEmpty(r.URL.Query().Get("level"), "three_day")
+	level := firstNonEmpty(r.URL.Query().Get("level"), defaultGraphTileLevel)
 	canonicalLevel, windowMs, ok := graphTileLevel(level)
 	if !ok {
 		http.Error(w, "invalid graph history level", http.StatusBadRequest)
@@ -522,6 +529,7 @@ func (s *server) handleGraphTileArrow(w http.ResponseWriter, r *http.Request, ti
 		canonicalLevel, window, _ = graphTileLevel(defaultGraphTileLevel)
 	}
 	level = canonicalLevel
+	t0, t1, _ := s.graphTileTimeRange(tileID, level, window, seriesReq, now)
 
 	w.Header().Set("Content-Type", "application/vnd.apache.arrow.stream")
 	w.WriteHeader(http.StatusOK)
@@ -551,7 +559,7 @@ func (s *server) handleGraphTileArrow(w http.ResponseWriter, r *http.Request, ti
 	}
 
 	for _, req := range seriesReq {
-		h := s.lookupGraphHistory(req.DeviceID, req.ParamID, req.Instance, window, now)
+		h := s.lookupGraphRange(req.DeviceID, req.ParamID, req.Instance, t0, t1)
 		param, _ := gatewayParameterByID(req.ParamID)
 
 		sensorID := fmt.Sprintf("%s:%d:%d", req.DeviceID, req.ParamID, req.Instance)
@@ -635,12 +643,24 @@ func (s *server) buildGraphTile(tileID, level string, seriesReq []graphTileReque
 		canonicalLevel, window, _ = graphTileLevel(defaultGraphTileLevel)
 	}
 	level = canonicalLevel
-	series, units := s.graphTileSeries(tileID, seriesReq, level, window, now)
+	t0, t1, window := s.graphTileTimeRange(tileID, level, window, seriesReq, now)
+	requestT0, requestT1 := t0, t1
+	series, units := s.graphTileSeries(tileID, seriesReq, level, t0, t1)
 	pointCount := 0
 	suppressedOpenSensorPoints := 0
 	for _, item := range series {
 		pointCount += len(item.Points)
 		suppressedOpenSensorPoints += item.Diagnostics.SuppressedOpenSensorPoints
+	}
+	dataT0, dataT1, hasDataRange := graphTileDataExtent(series)
+	dataT0Text := ""
+	dataT1Text := ""
+	if hasDataRange {
+		if !dataT1.After(dataT0) {
+			dataT1 = dataT0.Add(time.Millisecond)
+		}
+		dataT0Text = dataT0.Format(time.RFC3339Nano)
+		dataT1Text = dataT1.Format(time.RFC3339Nano)
 	}
 	title := tileID
 	if title == "" {
@@ -651,8 +671,10 @@ func (s *server) buildGraphTile(tileID, level string, seriesReq []graphTileReque
 		ID:             tileID,
 		CardID:         tileID,
 		Level:          level,
-		T0:             now.Add(-time.Duration(window) * time.Millisecond).Format(time.RFC3339Nano),
-		T1:             now.Format(time.RFC3339Nano),
+		T0:             dataT0Text,
+		T1:             dataT1Text,
+		RequestedT0:    requestT0.Format(time.RFC3339Nano),
+		RequestedT1:    requestT1.Format(time.RFC3339Nano),
 		GeneratedAt:    now.Format(time.RFC3339Nano),
 		Renderer:       canonicalTileRenderer,
 		Kind:           "timeseries",
@@ -666,7 +688,7 @@ func (s *server) buildGraphTile(tileID, level string, seriesReq []graphTileReque
 		Bands:          []any{},
 		Markers:        []any{},
 		Events:         []any{},
-		Diagnostics:    graphTileDiag{Status: statusForSeries(len(series)), SeriesCount: len(series), PointCount: pointCount, Decimation: decimationForLevel(level), Renderer: canonicalTileRenderer, TileLevel: level, TileSource: sourceForLevel(level), OutlierPolicy: "drop_detached_degC_below_-50_and_initial_out_of_family", SuppressedOpenSensorPoints: suppressedOpenSensorPoints},
+		Diagnostics:    graphTileDiag{Status: statusForSeries(len(series)), SeriesCount: len(series), PointCount: pointCount, Decimation: decimationForWindow(requestT1.Sub(requestT0)), Renderer: canonicalTileRenderer, TileLevel: level, TileSource: sourceForWindow(requestT1.Sub(requestT0)), RequestedT0: requestT0.Format(time.RFC3339Nano), RequestedT1: requestT1.Format(time.RFC3339Nano), OutlierPolicy: "drop_detached_degC_below_-50_and_initial_out_of_family", SuppressedOpenSensorPoints: suppressedOpenSensorPoints},
 		Provenance:     map[string]any{"source": "meerstetter-go.graphwall.assignments", "generated_at": now.Format(time.RFC3339Nano)},
 		Series:         series,
 	}, nil
@@ -674,6 +696,8 @@ func (s *server) buildGraphTile(tileID, level string, seriesReq []graphTileReque
 
 func graphTileLevel(level string) (string, int, bool) {
 	switch level {
+	case "session", "all", "full":
+		return "session", int(defaultGraphHistoryRetention.Milliseconds()), true
 	case "live":
 		return "live", 90_000, true
 	case "minute":
@@ -693,6 +717,7 @@ func graphTileLevel(level string) (string, int, bool) {
 
 func graphTileFiles() []tileFile {
 	return []tileFile{
+		{Level: "session", TimeWindowMs: int(defaultGraphHistoryRetention.Milliseconds())},
 		{Level: "live", TimeWindowMs: 90_000},
 		{Level: "minute", TimeWindowMs: 6 * 60_000},
 		{Level: "hour", TimeWindowMs: 60 * 60_000},
@@ -702,7 +727,91 @@ func graphTileFiles() []tileFile {
 	}
 }
 
-func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, level string, windowMs int, now time.Time) ([]graphTileItem, []string) {
+func (s *server) graphTileTimeRange(tileID, level string, windowMs int, req []graphTileRequestSeries, now time.Time) (time.Time, time.Time, int) {
+	window := time.Duration(windowMs) * time.Millisecond
+	if window <= 0 {
+		window = defaultGraphHistoryRetention
+	}
+	t1 := now.UTC()
+	t0 := t1.Add(-window)
+	if level != "session" {
+		return t0, t1, int(t1.Sub(t0).Milliseconds())
+	}
+	earliest, latest, ok := s.graphSeriesBounds(tileID, req)
+	if !ok {
+		return t0, t1, int(t1.Sub(t0).Milliseconds())
+	}
+	if !latest.IsZero() && now.Sub(latest) > 5*time.Minute {
+		t1 = latest
+	}
+	t0 = t1.Add(-defaultGraphHistoryRetention)
+	if !earliest.IsZero() && earliest.Before(t0) {
+		t0 = earliest
+	}
+	if !t0.Before(t1) {
+		t0 = t1.Add(-defaultGraphHistoryRetention)
+	}
+	return t0, t1, int(t1.Sub(t0).Milliseconds())
+}
+
+func (s *server) graphSeriesBounds(tileID string, req []graphTileRequestSeries) (time.Time, time.Time, bool) {
+	if len(req) == 0 {
+		req = s.defaultGraphTileSeries(tileID)
+	}
+	var earliest time.Time
+	var latest time.Time
+	for _, item := range req {
+		itemEarliest, itemLatest, ok := s.graphHistoryBounds(item.DeviceID, item.ParamID, item.Instance)
+		if !ok {
+			continue
+		}
+		if earliest.IsZero() || itemEarliest.Before(earliest) {
+			earliest = itemEarliest
+		}
+		if latest.IsZero() || itemLatest.After(latest) {
+			latest = itemLatest
+		}
+	}
+	return earliest, latest, !earliest.IsZero() && !latest.IsZero()
+}
+
+func (s *server) graphHistoryBounds(deviceID string, paramID, instance int) (time.Time, time.Time, bool) {
+	key := fmt.Sprintf("%s:%d:%d", deviceID, paramID, instance)
+	s.graphHistoryMu.Lock()
+	histories := []*graphTileHistory{s.graphHistoryDerived[key], s.graphHistoryRaw[key]}
+	s.graphHistoryMu.Unlock()
+
+	var earliest time.Time
+	var latest time.Time
+	for _, h := range histories {
+		if h == nil {
+			continue
+		}
+		h.mu.Lock()
+		if len(h.raw) > 0 {
+			rawEarliest := h.raw[0].At
+			rawLatest := h.raw[len(h.raw)-1].At
+			if earliest.IsZero() || rawEarliest.Before(earliest) {
+				earliest = rawEarliest
+			}
+			if latest.IsZero() || rawLatest.After(latest) {
+				latest = rawLatest
+			}
+		}
+		pyramidEarliest := h.pyramid.Earliest()
+		pyramidLatest := h.pyramid.Latest()
+		h.mu.Unlock()
+		if !pyramidEarliest.IsZero() && (earliest.IsZero() || pyramidEarliest.Before(earliest)) {
+			earliest = pyramidEarliest
+		}
+		if !pyramidLatest.IsZero() && (latest.IsZero() || pyramidLatest.After(latest)) {
+			latest = pyramidLatest
+		}
+	}
+	return earliest, latest, !earliest.IsZero() && !latest.IsZero()
+}
+
+func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, level string, t0, t1 time.Time) ([]graphTileItem, []string) {
 	if len(req) == 0 {
 		req = s.defaultGraphTileSeries(tileID)
 	}
@@ -732,14 +841,14 @@ func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, le
 		if !containsString(units, unit) {
 			units = append(units, unit)
 		}
-		history := s.lookupGraphHistory(item.DeviceID, item.ParamID, item.Instance, windowMs, now)
+		history := s.lookupGraphRange(item.DeviceID, item.ParamID, item.Instance, t0, t1)
 		points := pointsFromHistory(history)
 		itemDiag := graphTileItemDiag{Status: "ok", HistoryPoints: len(points)}
 		if len(points) == 0 && level == "live" {
 			if liveValue, ok := s.readLiveSample(context.Background(), item.DeviceID, item.ParamID, item.Instance); ok {
-				past := now.Add(-time.Second)
-				points = []graphTilePoint{{Timestamp: past.Format(time.RFC3339Nano), Value: liveValue}, {Timestamp: now.Format(time.RFC3339Nano), Value: liveValue}}
-				history = graphTileHistorySet{TS: []string{past.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano)}, V: []float64{liveValue, liveValue}}
+				past := t1.Add(-time.Second)
+				points = []graphTilePoint{{Timestamp: past.Format(time.RFC3339Nano), Value: liveValue}, {Timestamp: t1.Format(time.RFC3339Nano), Value: liveValue}}
+				history = graphTileHistorySet{TS: []string{past.Format(time.RFC3339Nano), t1.Format(time.RFC3339Nano)}, V: []float64{liveValue, liveValue}}
 				itemDiag.LiveRead = "ok"
 				itemDiag.HistoryPoints = len(points)
 			}
@@ -754,7 +863,7 @@ func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, le
 				itemDiag.Message = "no archive history for selected tile level"
 			}
 		} else if len(points) == 1 {
-			before, point := duplicateSingleGraphPoint(points[0], now)
+			before, point := duplicateSingleGraphPoint(points[0], t1)
 			points = []graphTilePoint{before, point}
 			history = graphTileHistorySet{TS: []string{points[0].Timestamp, points[1].Timestamp}, V: []float64{points[0].Value, points[1].Value}}
 			itemDiag.HistoryPoints = len(points)
@@ -779,7 +888,7 @@ func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, le
 			SeriesID:         tileSeriesKeyFromRequest(item),
 			Label:            compactSeriesLabel(item.DeviceID, item.Instance, def),
 			FullLabel:        fmt.Sprintf("device %s · param %d · instance %d · %s", item.DeviceID, item.ParamID, item.Instance, seriesPathLabel(def)),
-			Color:            gatewayParameterColor(def),
+			Color:            gatewaySeriesColor(item.DeviceID, def, item.Instance),
 			Unit:             unit,
 			History:          normalizeGraphTileHistorySet(history),
 			Role:             def.Role,
@@ -799,6 +908,34 @@ func (s *server) graphTileSeries(tileID string, req []graphTileRequestSeries, le
 		})
 	}
 	return out, units
+}
+
+func graphTileDataExtent(series []graphTileItem) (time.Time, time.Time, bool) {
+	var t0, t1 time.Time
+	add := func(raw string) {
+		at, err := parseGraphHistoryTimestamp(raw)
+		if err != nil || at.IsZero() {
+			return
+		}
+		if t0.IsZero() || at.Before(t0) {
+			t0 = at
+		}
+		if t1.IsZero() || at.After(t1) {
+			t1 = at
+		}
+	}
+	for _, item := range series {
+		for _, ts := range item.History.TS {
+			add(ts)
+		}
+		for _, point := range item.Points {
+			add(point.Timestamp)
+		}
+	}
+	if t0.IsZero() || t1.IsZero() {
+		return time.Time{}, time.Time{}, false
+	}
+	return t0, t1, true
 }
 
 func duplicateSingleGraphPoint(point graphTilePoint, now time.Time) (graphTilePoint, graphTilePoint) {
@@ -1058,27 +1195,36 @@ func statusForSeries(seriesCount int) string {
 	return "empty"
 }
 
-func sourceForLevel(level string) string {
-	if graphTileLevelUsesHotBuffer(level) {
+func sourceForWindow(window time.Duration) string {
+	if graphRangeUsesHotBuffer(window) {
 		return "bounded-gateway-hot-buffer"
 	}
 	return "bounded-gateway-history-cache"
 }
 
-func decimationForLevel(level string) string {
-	if graphTileLevelUsesHotBuffer(level) {
+func decimationForWindow(window time.Duration) string {
+	if graphRangeUsesHotBuffer(window) {
 		return "raw hot buffer"
 	}
-	return "1Hz mean"
+	return "SignalForge bucket mean LOD"
 }
 
-func graphTileLevelUsesHotBuffer(level string) bool {
-	switch level {
-	case "live", "minute":
-		return true
-	default:
+func graphTargetInterval(window time.Duration) time.Duration {
+	if window <= 0 {
+		return 0
+	}
+	target := window / time.Duration(graphTileTargetPointCount)
+	if target <= 0 {
+		return time.Nanosecond
+	}
+	return target
+}
+
+func graphRangeUsesHotBuffer(window time.Duration) bool {
+	if window <= 0 || window > graphHistoryHotRetention {
 		return false
 	}
+	return graphTargetInterval(window) < graphHistoryFinestLOD
 }
 
 func pointsFromHistory(history graphTileHistorySet) []graphTilePoint {
@@ -1105,7 +1251,7 @@ func (s *server) lookupGraphRange(deviceID string, paramID, instance int, t0, t1
 	s.graphHistoryMu.Unlock()
 
 	window := t1.Sub(t0)
-	if window <= 15*time.Minute && raw != nil {
+	if graphRangeUsesHotBuffer(window) && raw != nil {
 		raw.mu.Lock()
 		if len(raw.raw) > 0 {
 			out := raw.hotHistoryLocked(t0)
@@ -1124,14 +1270,7 @@ func (s *server) lookupGraphRange(deviceID string, paramID, instance int, t0, t1
 	}
 
 	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if window <= 15*time.Minute && len(h.raw) > 0 {
-		return h.hotHistoryLocked(t0)
-	}
-
-	// 1000 points target for UI performance
-	targetInterval := window / 1000
+	targetInterval := graphTargetInterval(window)
 	snapshot := h.pyramid.Snapshot(targetInterval)
 	out := graphTileHistorySet{TS: make([]string, 0, len(snapshot.Buckets)), V: make([]float64, 0, len(snapshot.Buckets))}
 	for _, bucket := range snapshot.Buckets {
@@ -1140,6 +1279,17 @@ func (s *server) lookupGraphRange(deviceID string, paramID, instance int, t0, t1
 		}
 		out.TS = append(out.TS, bucket.IntervalStart.Format(time.RFC3339Nano))
 		out.V = append(out.V, bucket.Mean)
+	}
+	if len(out.TS) == 0 && h == raw && len(h.raw) > 0 {
+		out = h.hotHistoryLocked(t0)
+	}
+	h.mu.Unlock()
+	if len(out.TS) == 0 && raw != nil && raw != h {
+		raw.mu.Lock()
+		if len(raw.raw) > 0 {
+			out = raw.hotHistoryLocked(t0)
+		}
+		raw.mu.Unlock()
 	}
 	return out
 }
@@ -1423,11 +1573,23 @@ func (s *server) writeGraphTileArrowRange(w io.Writer, tileID string, t0, t1 tim
 
 func (s *server) buildGraphTileRange(tileID string, t0, t1 time.Time, req []graphTileRequestSeries) (graphTileResponse, error) {
 	now := time.Now().UTC()
-	series, levelNames := s.graphTileSeriesRange(tileID, req, t0, t1)
+	series := s.graphTileSeriesRange(tileID, req, t0, t1)
+	window := t1.Sub(t0)
+	requestT0, requestT1 := t0, t1
 
 	pointCount := 0
 	for _, item := range series {
 		pointCount += len(item.History.TS)
+	}
+	dataT0, dataT1, hasDataRange := graphTileDataExtent(series)
+	dataT0Text := ""
+	dataT1Text := ""
+	if hasDataRange {
+		if !dataT1.After(dataT0) {
+			dataT1 = dataT0.Add(time.Millisecond)
+		}
+		dataT0Text = dataT0.Format(time.RFC3339Nano)
+		dataT1Text = dataT1.Format(time.RFC3339Nano)
 	}
 
 	return graphTileResponse{
@@ -1435,23 +1597,28 @@ func (s *server) buildGraphTileRange(tileID string, t0, t1 time.Time, req []grap
 		ID:            tileID,
 		CardID:        tileID,
 		Level:         "range",
-		T0:            t0.Format(time.RFC3339Nano),
-		T1:            t1.Format(time.RFC3339Nano),
+		T0:            dataT0Text,
+		T1:            dataT1Text,
+		RequestedT0:   requestT0.Format(time.RFC3339Nano),
+		RequestedT1:   requestT1.Format(time.RFC3339Nano),
 		GeneratedAt:   now.Format(time.RFC3339Nano),
 		Renderer:      canonicalTileRenderer,
 		Kind:          "timeseries",
 		TileID:        tileID,
 		Title:         s.graphTileTitle(tileID),
-		TimeWindowMs:  int(t1.Sub(t0).Milliseconds()),
+		TimeWindowMs:  int(requestT1.Sub(requestT0).Milliseconds()),
 		Axes:          s.graphTileAxes(tileID, series),
 		Series:        series,
 		Diagnostics: graphTileDiag{
 			Status:      "ok",
 			SeriesCount: len(series),
 			PointCount:  pointCount,
+			Decimation:  decimationForWindow(window),
 			Renderer:    canonicalTileRenderer,
 			TileLevel:   "range",
-			TileSource:  strings.Join(levelNames, ","),
+			TileSource:  sourceForWindow(window),
+			RequestedT0: requestT0.Format(time.RFC3339Nano),
+			RequestedT1: requestT1.Format(time.RFC3339Nano),
 		},
 		Provenance: map[string]any{
 			"source":       "meerstetter-go.graph-history",
@@ -1460,12 +1627,11 @@ func (s *server) buildGraphTileRange(tileID string, t0, t1 time.Time, req []grap
 	}, nil
 }
 
-func (s *server) graphTileSeriesRange(tileID string, req []graphTileRequestSeries, t0, t1 time.Time) ([]graphTileItem, []string) {
+func (s *server) graphTileSeriesRange(tileID string, req []graphTileRequestSeries, t0, t1 time.Time) []graphTileItem {
 	if len(req) == 0 {
 		req = s.defaultGraphTileSeries(tileID)
 	}
 	out := make([]graphTileItem, 0, len(req))
-	sources := make(map[string]struct{})
 	for _, r := range req {
 		h := s.lookupGraphRange(r.DeviceID, r.ParamID, r.Instance, t0, t1)
 		param, _ := gatewayParameterByID(r.ParamID)
@@ -1476,7 +1642,7 @@ func (s *server) graphTileSeriesRange(tileID string, req []graphTileRequestSerie
 			TargetID:  r.DeviceID,
 			Label:     param.Name,
 			FullLabel: fmt.Sprintf("%s / %s", r.DeviceID, param.Name),
-			Color:     gatewayParameterColor(param),
+			Color:     gatewaySeriesColor(r.DeviceID, param, r.Instance),
 			Unit:      param.Unit,
 			History:   h,
 			Role:      mecom.RoleForParam(param.ID),
@@ -1492,13 +1658,8 @@ func (s *server) graphTileSeriesRange(tileID string, req []graphTileRequestSerie
 			DefaultVisible: true,
 		}
 		out = append(out, item)
-		sources["history"] = struct{}{}
 	}
-	srcs := make([]string, 0, len(sources))
-	for s := range sources {
-		srcs = append(srcs, s)
-	}
-	return out, srcs
+	return out
 }
 
 func (s *server) graphTileTitle(tileID string) string {
@@ -1522,6 +1683,30 @@ func (s *server) graphTileAxes(tileID string, series []graphTileItem) []tileAxis
 		axes = append(axes, tileAxis{ID: "default", Unit: "", Side: "left"})
 	}
 	return axes
+}
+
+func gatewaySeriesColor(deviceID string, param mecom.Parameter, instance int) string {
+	if instance < 1 {
+		instance = 1
+	}
+	seed := gatewayDeviceColorSeed(deviceID)
+	hue := (seed + (instance-1)*97 + int(param.ID%11)*23) % 360
+	return fmt.Sprintf("hsl(%d 78%% 58%%)", hue)
+}
+
+func gatewayDeviceColorSeed(deviceID string) int {
+	idx := len(deviceID)
+	for idx > 0 && deviceID[idx-1] >= '0' && deviceID[idx-1] <= '9' {
+		idx--
+	}
+	if idx < len(deviceID) {
+		if serial, err := strconv.Atoi(deviceID[idx:]); err == nil {
+			return (serial % 16) * 47
+		}
+	}
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(deviceID))
+	return int(h.Sum32() % 360)
 }
 
 func gatewayParameterColor(param mecom.Parameter) string {

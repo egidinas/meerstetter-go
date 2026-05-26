@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { MecomAPI } from "../api/mecom";
 import { Chip, Pill, Panel, MultiChart, useToast, useLiveValue, useGatewayTick, categorizeError, DiscoveryTree, SignalValueCard } from "../components/atoms";
-import { DEFAULT_TILE_LEVELS, graphSeriesIdentityKey, renderSeriesFromGraphTile } from "../lib/series";
-import { useAssignments, WALLS, wallForDevice, normalizeAssignment, useGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, graphBucketForParam, DEFAULT_GRAPH_TILE_LEVEL, graphTileWindowForLevel } from "./assignments";
+import { graphSeriesIdentityKey, renderSeriesFromGraphTile } from "../lib/series";
+import { useAssignments, WALLS, wallForDevice, normalizeAssignment, useGraphTileFromAssignments, channelColor, assignmentsWithPriorityDefaults, configDrivenGraphTileAssignments, graphBucketForParam, DEFAULT_GRAPH_TILE_LEVEL, graphTileWindowForLevel, GRAPH_TILE_LEVELS } from "./assignments";
 import { HeroGraph, TempSettingsTable, SupplySettingsTable } from "./hero";
 
 function routeRole(route) {
@@ -90,7 +90,7 @@ function formatRouteLabel(route) {
   return { title: detail ? `${name} · ${detail}` : name, text: `${name} · ${roleText}` };
 }
 
-const GRAPH_TILE_WINDOW_OPTIONS = DEFAULT_TILE_LEVELS;
+const GRAPH_TILE_WINDOW_OPTIONS = GRAPH_TILE_LEVELS;
 
 function channelSortRank(channel) {
   const instance = Number(channel?.instance || 0);
@@ -153,31 +153,27 @@ function defaultHiddenSeriesForTile(tile) {
 
 export function FleetView({ onOpenDevice }) {
   useGatewayTick();
-  const assigns = useAssignments();
   const channels = MecomAPI.channels();
   const settings = MecomAPI.settings();
 
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
-  const fleetTempStored = assigns.forWall(WALLS.fleetTemp.wall_id);
-  const fleetSupplyStored = assigns.forWall(WALLS.fleetSupply.wall_id);
-
-  const fleetTempAssignments = assignmentsWithPriorityDefaults(fleetTempStored, WALLS.fleetTemp.wall_id, tempChannels);
-  const fleetSupplyAssignments = assignmentsWithPriorityDefaults(fleetSupplyStored, WALLS.fleetSupply.wall_id, supplyChannels);
+  const fleetTempAssignments = configDrivenGraphTileAssignments(WALLS.fleetTemp.wall_id, tempChannels);
+  const fleetSupplyAssignments = configDrivenGraphTileAssignments(WALLS.fleetSupply.wall_id, supplyChannels);
   const [fleetTileLevel, setFleetTileLevel] = useState(DEFAULT_GRAPH_TILE_LEVEL);
   const fleetTileWindow = graphTileWindowForLevel(fleetTileLevel);
 
-  const tempTile = useGraphTileFromAssignments(fleetTempAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "thermal"), {
+  const tempTile = useGraphTileFromAssignments(fleetTempAssignments, {
     tile_id: WALLS.fleetTemp.wall_id,
     title: WALLS.fleetTemp.label,
-    colorByChannel: false,
+    colorByChannel: true,
     timeWindowMs: fleetTileWindow.timeWindowMs,
     level: fleetTileLevel,
   });
-  const supplyTile = useGraphTileFromAssignments(fleetSupplyAssignments.filter((a) => graphBucketForParam(normalizeAssignment(a).param_id) === "power"), {
+  const supplyTile = useGraphTileFromAssignments(fleetSupplyAssignments, {
     tile_id: WALLS.fleetSupply.wall_id,
     title: WALLS.fleetSupply.label,
-    colorByChannel: false,
+    colorByChannel: true,
     timeWindowMs: fleetTileWindow.timeWindowMs,
     level: fleetTileLevel,
   });
@@ -198,10 +194,10 @@ export function FleetView({ onOpenDevice }) {
         <Chip>{fleetTileWindow.label} shared timeline</Chip>
       </div>
       <div className="fleet-heroes">
-        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={340} initialHiddenSeries={defaultTempHidden}>
+        <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={260} initialHiddenSeries={defaultTempHidden}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
         </HeroGraph>
-        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={340} initialHiddenSeries={defaultSupplyHidden}>
+        <HeroGraph wall={WALLS.fleetSupply} role="supply" tile={supplyTile} height={260} initialHiddenSeries={defaultSupplyHidden}>
           {supplyChannels.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: 12 }}>
               No supply-mode channels configured. Set a channel role under Signal Dictionary → Metadata.

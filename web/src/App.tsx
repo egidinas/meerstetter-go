@@ -53,6 +53,7 @@ function App() {
   }, [drawerOpen]);
 
   useEffect(() => {
+    if (MecomAPI.isLive && MecomAPI.isLive()) return;
     MecomAPI.setScenario(t.scenario);
     MecomAPI.saveSettings({ scenario: t.scenario });
   }, [t.scenario]);
@@ -75,6 +76,7 @@ function App() {
   const events = MecomAPI.commandEvents();
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
+  const otherChannels = channels.filter((c) => c.role !== "temp" && c.role !== "supply");
   const bound = devices.filter((d) => d.bound).length;
   const errors = devices.filter((d) => d.last_error).length;
   const leasedByMe = leases.filter((l) => l.holder === settings.holder).length;
@@ -149,13 +151,13 @@ function App() {
               <div className="rail-status-row"><span>Devices</span><b>{bound}/{devices.length}</b></div>
               <small>{bound} bound · {errors} errors</small>
               <div className="rail-status-row"><span>Channels</span><b>{channels.length}</b></div>
-              <small>{tempChannels.length} temperature · {supplyChannels.length} supply</small>
+              <small>{tempChannels.length} temperature · {supplyChannels.length} supply{otherChannels.length ? ` · ${otherChannels.length} other` : ""}</small>
               <div className="rail-status-row"><span>Leases</span><b>{leases.length}</b></div>
               <small>{leasedByMe} you · {leases.length - leasedByMe} others</small>
               <div className="rail-status-row"><span>Writes in last minute</span><b>{writesLastMinute}</b></div>
               <small>completed or accepted writes</small>
-              <div className="rail-status-row"><span>Scenario</span><b>{t.scenario.replace("-", " ")}</b></div>
-              <small>change via Tweaks</small>
+              <div className="rail-status-row"><span>{isLive ? "Config" : "Scenario"}</span><b>{isLive ? "live" : t.scenario.replace("-", " ")}</b></div>
+              <small>{isLive ? "gateway config + active devices" : "change via Tweaks"}</small>
             </div>
             <span>holder · {settings.holder}</span>
           </div>

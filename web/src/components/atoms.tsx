@@ -200,6 +200,55 @@ function graphTileWithinTimeRange(tile, range, timeWindowMs) {
   }, { timeWindowMs });
 }
 
+function graphSeriesSamples(series) {
+  const samples = [];
+  if (series?.history && Array.isArray(series.history.ts) && Array.isArray(series.history.v)) {
+    series.history.ts.forEach((ts, idx) => {
+      const t = validTimeMs(ts);
+      const value = Number(series.history.v[idx]);
+      if (t !== null && Number.isFinite(value)) samples.push({ t, value });
+    });
+  }
+  (series?.points || []).forEach((point) => {
+    const t = validTimeMs(point?.timestamp ?? point?.t ?? point?.time);
+    const value = Number(point?.value ?? point?.v);
+    if (t !== null && Number.isFinite(value)) samples.push({ t, value });
+  });
+  samples.sort((a, b) => a.t - b.t);
+  return samples;
+}
+
+function nearestSeriesReadout(series, timeMs) {
+  const samples = graphSeriesSamples(series);
+  if (!samples.length || !Number.isFinite(timeMs)) return null;
+  let best = samples[0];
+  let bestDistance = Math.abs(best.t - timeMs);
+  for (let i = 1; i < samples.length; i += 1) {
+    const distance = Math.abs(samples[i].t - timeMs);
+    if (distance < bestDistance) {
+      best = samples[i];
+      bestDistance = distance;
+    }
+  }
+  return {
+    label: series.label || series.full_label || series.series_id || series.id || "trace",
+    color: series.color || "var(--accent)",
+    unit: series.unit || "",
+    at: best.t,
+    value: best.value,
+  };
+}
+
+function formatTraceReadoutValue(value, unit) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "n/a";
+  const abs = Math.abs(n);
+  const formatted = (abs !== 0 && (abs >= 10_000 || abs < 0.001))
+    ? n.toExponential(3)
+    : n.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
 export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSeries = [], fill = false, minHeight = 220 }) {
   useGatewayTick();
   const graphTile = useMemo(() => normalizeGraphTile(tile || emptyGraphTile({ timeWindowMs }), { timeWindowMs }), [tile, timeWindowMs]);
@@ -209,6 +258,8 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
   const [yMax, setYMax] = useState("");
   const [viewToken, setViewToken] = useState(0);
   const [manualX, setManualX] = useState(false);
+  const [hoverTimeMs, setHoverTimeMs] = useState(null);
+  const [hoverRatio, setHoverRatio] = useState(null);
   const visibleTile = useMemo(() => {
     if (!hidden.size) return graphTile;
     return normalizeGraphTile({
@@ -237,6 +288,14 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
   const orderedSeries = useMemo(() => renderSeriesFromGraphTile(rangedTile), [rangedTile]);
   const title = graphTile.title || graphTile.tile_id || graphTile.id || "graph tile";
   const currentTimeMs = validTimeMs(rangedTile?.t1) ?? fullTimeRange.end;
+  const visibleSignals = useMemo(() => (rangedTile?.series || []).filter((series) => {
+    const key = graphSeriesIdentityKey(series);
+    return !hidden.has(key);
+  }), [rangedTile, hidden]);
+  const hoverRows = useMemo(() => {
+    if (hoverTimeMs === null) return [];
+    return visibleSignals.map((series) => nearestSeriesReadout(series, hoverTimeMs)).filter(Boolean);
+  }, [visibleSignals, hoverTimeMs]);
   const parsedYRange = useMemo(() => {
     const min = Number(yMin);
     const max = Number(yMax);
@@ -300,17 +359,43 @@ export function MultiChart({ tile, height = 320, timeWindowMs = 90_000, hiddenSe
         <input className="select-sm axis-bound" type="number" step="any" placeholder="Y max" value={yMax} onChange={(e) => setYMax(e.target.value)} disabled={autoY} />
         <button className="btn sm" onClick={() => { setYMin(""); setYMax(""); setAutoY(true); }} title="Return to automatic y-axis scaling">Reset Y</button>
       </div>
-      <UPlotTileRenderer
-        tile={rangedTile}
-        height={height}
-        dataGraphRenderer={CANONICAL_TILE_RENDERER}
-        syncKey="meerstetter-go-wall"
-        autoY={autoY}
-        yRange={parsedYRange}
-        viewToken={viewToken}
-        fillContainer={fill}
-        minHeight={minHeight}
-      />
+      <div
+        className="chart-plot"
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / Math.max(1, rect.width)));
+          setHoverRatio(ratio);
+          setHoverTimeMs(timeRange.start + ratio * (timeRange.end - timeRange.start));
+        }}
+        onMouseLeave={() => {
+          setHoverRatio(null);
+          setHoverTimeMs(null);
+        }}
+      >
+        <UPlotTileRenderer
+          tile={rangedTile}
+          height={height}
+          dataGraphRenderer={CANONICAL_TILE_RENDERER}
+          syncKey="meerstetter-go-wall"
+          autoY={autoY}
+          yRange={parsedYRange}
+          viewToken={viewToken}
+          fillContainer={fill}
+          minHeight={minHeight}
+        />
+        {hoverTimeMs !== null && hoverRows.length > 0 && (
+          <div className="trace-readout-popup" style={{ left: `${Math.min(86, Math.max(12, (hoverRatio ?? 0) * 100))}%` }}>
+            <div className="trace-readout-time">{new Date(hoverTimeMs).toLocaleString()}</div>
+            {hoverRows.slice(0, 12).map((row) => (
+              <div className="trace-readout-row" key={`${row.label}:${row.at}`}>
+                <span className="trace-readout-swatch" style={{ background: row.color }}></span>
+                <span className="trace-readout-label">{row.label}</span>
+                <b>{formatTraceReadoutValue(row.value, row.unit)}</b>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <SharedTimeAxis
         fullRange={fullTimeRange}
         timeRange={timeRange}

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MecomAPI } from "../api/mecom";
 import {
   Chip,
@@ -132,35 +132,39 @@ export function HeroGraph({ wall, role, tile, height = 280, live = true, initial
   const validHiddenSeriesKeys = useMemo(() => Array.from(new Set(renderedSeries.map((series) => tileSeriesKey(series)).concat(rawSeriesKeys))), [renderedSeriesKey, rawSeriesKeys.join("|")]);
   const validHiddenSeriesKey = useMemo(() => validHiddenSeriesKeys.slice().sort().join("|"), [validHiddenSeriesKeys.join("|")]);
   const initialHiddenKey = useMemo(() => (initialHiddenSeries || []).slice().sort().join("|"), [initialHiddenSeries.join ? initialHiddenSeries.join("|") : String(initialHiddenSeries)]);
-  const [hiddenSeries, setHiddenSeries] = useState(() => initialHiddenSeries || []);
-  const appliedInitialHiddenKey = useRef("");
+  const [manualHiddenSeries, setManualHiddenSeries] = useState([]);
+  const [manualShownSeries, setManualShownSeries] = useState([]);
+  const [autoHiddenSeries, setAutoHiddenSeries] = useState(() => initialHiddenSeries || []);
   const initialHiddenApplyKey = `${initialHiddenKey}:${validHiddenSeriesKey}`;
-  const hiddenSeriesKey = hiddenSeries.join ? hiddenSeries.join("|") : String(hiddenSeries);
+  const manualHiddenSeriesKey = manualHiddenSeries.join ? manualHiddenSeries.join("|") : String(manualHiddenSeries);
+  const manualShownSeriesKey = manualShownSeries.join ? manualShownSeries.join("|") : String(manualShownSeries);
+  const autoHiddenSeriesKey = autoHiddenSeries.join ? autoHiddenSeries.join("|") : String(autoHiddenSeries);
   const effectiveHiddenSeries = useMemo(() => {
     const valid = new Set(validHiddenSeriesKeys);
-    const next = new Set((hiddenSeries || []).filter((key) => valid.has(key)));
-    if (appliedInitialHiddenKey.current !== initialHiddenApplyKey) {
-      (initialHiddenSeries || []).forEach((key) => {
-        if (valid.has(key)) next.add(key);
-      });
-    }
-    return Array.from(next);
-  }, [hiddenSeriesKey, initialHiddenKey, initialHiddenApplyKey, validHiddenSeriesKey]);
-  useEffect(() => {
-    const applyKey = initialHiddenApplyKey;
-    if (appliedInitialHiddenKey.current === applyKey) return;
-    appliedInitialHiddenKey.current = applyKey;
-    setHiddenSeries((cur) => {
-      const valid = new Set(validHiddenSeriesKeys);
-      const next = new Set((cur || []).filter((key) => valid.has(key)));
-      (initialHiddenSeries || []).forEach((key) => {
-        if (valid.has(key)) next.add(key);
-      });
-      return Array.from(next);
+    const manuallyShown = new Set((manualShownSeries || []).filter((key) => valid.has(key)));
+    const next = new Set();
+    (autoHiddenSeries || []).forEach((key) => {
+      if (valid.has(key) && !manuallyShown.has(key)) next.add(key);
     });
+    (manualHiddenSeries || []).forEach((key) => {
+      if (valid.has(key)) next.add(key);
+    });
+    return Array.from(next);
+  }, [manualHiddenSeriesKey, manualShownSeriesKey, autoHiddenSeriesKey, validHiddenSeriesKey]);
+  useEffect(() => {
+    const valid = new Set(validHiddenSeriesKeys);
+    setAutoHiddenSeries((initialHiddenSeries || []).filter((key) => valid.has(key)));
+    setManualHiddenSeries((cur) => (cur || []).filter((key) => valid.has(key)));
+    setManualShownSeries((cur) => (cur || []).filter((key) => valid.has(key)));
   }, [initialHiddenApplyKey]);
   function toggleSeries(key) {
-    setHiddenSeries((cur) => cur.includes(key) ? cur.filter((item) => item !== key) : cur.concat(key));
+    if (effectiveHiddenSeries.includes(key)) {
+      setManualHiddenSeries((cur) => (cur || []).filter((item) => item !== key));
+      setManualShownSeries((cur) => (cur || []).includes(key) ? cur : (cur || []).concat(key));
+      return;
+    }
+    setManualShownSeries((cur) => (cur || []).filter((item) => item !== key));
+    setManualHiddenSeries((cur) => (cur || []).includes(key) ? cur.filter((item) => item !== key) : (cur || []).concat(key));
   }
 
   const [isLiveLocal, setIsLiveLocal] = useState(true);

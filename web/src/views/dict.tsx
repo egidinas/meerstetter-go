@@ -123,38 +123,44 @@ function ChannelsEditor() {
     });
   });
   return (
-    <div className="channels-editor" style={{ padding: 24, background: "var(--bg-2)", borderTop: "1px solid var(--border)", maxHeight: "40%", overflowY: "auto" }}>
+    <div className="channels-editor" style={{ padding: 24, background: "var(--bg-2)", borderTop: "1px solid var(--border)", maxHeight: "min(54vh, 560px)", overflow: "auto", flex: "0 0 auto" }}>
       <div className="head" style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
         <h3 style={{ margin: 0 }}>Channels configuration</h3>
         <Chip>{channels.length} active</Chip>
       </div>
       <table className="dict-table">
         <thead>
-          <tr><th style={{ width: "26%" }}>Device</th><th>Instance</th><th>Active</th><th>Role</th><th>Label</th><th>User note</th></tr>
+          <tr><th style={{ width: "26%" }}>Device</th><th>Instance</th><th>Active</th><th>Role</th><th>Source</th><th>Label</th><th>User note</th></tr>
         </thead>
         <tbody>
-          {rows.map(({ device, instance, channel }) => (
-            <tr key={device.id + "/" + instance}>
-              <td>
-                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: channel ? channelColor(device.id, instance) : "var(--muted-2)", marginRight: 6 }}></span>
-                {device.label} <span style={{ color: "var(--muted)" }}>{device.id}</span>
-              </td>
-              <td>{instance}</td>
-              <td>{channel ? <Chip kind="ok">active</Chip> : <Chip>inactive</Chip>}</td>
-              <td>
-                <div className="role-toggle">
-                  <button className={"temp " + (channel && channel.role === "temp" ? "on" : "")}
-                          onClick={() => setRole(device.id, instance, "temp")}>Temp ctrl</button>
-                  <button className={"supply " + (channel && channel.role === "supply" ? "on" : "")}
-                          onClick={() => setRole(device.id, instance, "supply")}>Supply</button>
-                  <button className={"ldd " + (channel && channel.role === "ldd" ? "on" : "")}
-                          onClick={() => setRole(device.id, instance, "ldd")}>LDD</button>
-                </div>
-              </td>
-              <td style={{ color: "var(--muted)" }}>{channel ? channel.label : "—"}</td>
-              <td style={{ color: "var(--muted)" }}>{channel && channel.user_note ? channel.user_note : "—"}</td>
-            </tr>
-          ))}
+          {rows.map(({ device, instance, channel }) => {
+            const allowLdd = String(`${device.id} ${device.label} ${channel?.role || ""}`).toLowerCase().includes("ldd");
+            return (
+              <tr key={device.id + "/" + instance}>
+                <td>
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: channel ? channelColor(device.id, instance) : "var(--muted-2)", marginRight: 6 }}></span>
+                  {device.label} <span style={{ color: "var(--muted)" }}>{device.id}</span>
+                </td>
+                <td>{instance}</td>
+                <td>{channel ? <Chip kind="ok">active</Chip> : <Chip>inactive</Chip>}</td>
+                <td>
+                  <div className="role-toggle">
+                    <button className={"temp " + (channel && channel.role === "temp" ? "on" : "")}
+                            onClick={() => setRole(device.id, instance, "temp")}>Temp ctrl</button>
+                    <button className={"supply " + (channel && channel.role === "supply" ? "on" : "")}
+                            onClick={() => setRole(device.id, instance, "supply")}>Supply</button>
+                    {allowLdd && (
+                      <button className={"ldd " + (channel && channel.role === "ldd" ? "on" : "")}
+                              onClick={() => setRole(device.id, instance, "ldd")}>LDD</button>
+                    )}
+                  </div>
+                </td>
+                <td style={{ color: "var(--muted)" }}>{channel ? channel.role_source || "config/default" : "—"}</td>
+                <td style={{ color: "var(--muted)" }}>{channel ? channel.label : "—"}</td>
+                <td style={{ color: "var(--muted)" }}>{channel && channel.user_note ? channel.user_note : "—"}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

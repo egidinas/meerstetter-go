@@ -744,7 +744,8 @@ function loadChannelAliasBundle() {
 
 function saveChannelAliasBundle(bundle) {
   const saved = saveSemanticOverlay(normalizeSemanticOverlayBundle(bundle, CHANNEL_ALIAS_NAMESPACE), { namespace: CHANNEL_ALIAS_NAMESPACE });
-  mock.channels = normalizeChannels(mock.channels, live.active && live.devices ? live.devices : DEVICES_BASE);
+  const devices = live.active && live.devices ? live.devices : DEVICES_BASE;
+  mock.channels = normalizeChannels(mock.channels, devices, { strictDevices: live.active && !!live.devices });
   mock.listeners.forEach((fn) => fn());
   return saved;
 }
@@ -798,7 +799,7 @@ function channelDisplayLabel(channel, opts?) {
 
 function setChannelAlias(deviceId, instance, patch = {}) {
   const devices = live.active && live.devices ? live.devices : DEVICES_BASE;
-  const channels = normalizeChannels(mock.channels, devices);
+  const channels = normalizeChannels(mock.channels, devices, { strictDevices: live.active && !!live.devices });
   const channel = channels.find((ch) => ch.device_id === deviceId && Number(ch.instance) === Number(instance));
   const target = channelAliasTarget(deviceId, instance, channel, devices);
   const bundle = loadChannelAliasBundle();
@@ -952,7 +953,7 @@ function defaultChannelFor(deviceId, instance) {
     device_id: deviceId,
     instance,
     role,
-    role_source: override.role_source || (hasOverride ? "config" : "local-assumption"),
+    role_source: override.role_source || (hasOverride ? "config" : "gateway-default"),
     label: override.label || (role === "ldd" ? `LDD ch${instance}` : role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
     user_note: override.user_note || "",
     hasCascade: override.hasCascade ?? false,
@@ -965,15 +966,41 @@ const DEFAULT_CHANNELS = DEVICES_BASE.flatMap((d) =>
 
 function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
   const byKey = new Map();
-  const deviceById = new Map((Array.isArray(devices) ? devices : []).map((d) => [d.id, d]));
-  const deviceRank = new Map((Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).map((d, idx) => [d.id, idx]));
+  const deviceList = Array.isArray(devices) && devices.length ? devices : DEVICES_BASE;
+  const strictDevices = opts.strictDevices === true && Array.isArray(devices) && devices.length > 0;
+  const deviceById = new Map(deviceList.map((d) => [d.id, d]));
+  const deviceRank = new Map(deviceList.map((d, idx) => [d.id, idx]));
+  deviceList.forEach((d) => {
+    (Array.isArray(d.channels) ? d.channels : []).forEach((rawCh) => {
+      const inst = Number(rawCh && (rawCh.instance ?? rawCh.channel));
+      if (!Number.isFinite(inst) || inst < 1 || inst > channelCountForDevice(d)) return;
+      const base = defaultChannelFor(d.id, inst);
+      const role = String(rawCh.role || "").trim();
+      byKey.set(`${d.id}/${inst}`, {
+        ...base,
+        ...rawCh,
+        device_id: d.id,
+        instance: inst,
+        role: role || base.role,
+        role_source: rawCh.role_source || rawCh.roleSource || (role ? "config" : base.role_source),
+        endpoint: d.endpoint,
+        third_party_power_control_enabled: Boolean(
+          rawCh.third_party_power_control_enabled
+          || rawCh.thirdPartyPowerControlEnabled
+          || d.third_party_power_control_enabled
+          || d.thirdPartyPowerControlEnabled
+        ),
+      });
+    });
+  });
   (Array.isArray(channels) ? channels : []).forEach((ch) => {
     if (!ch || !ch.device_id || !Number.isFinite(Number(ch.instance))) return;
     const inst = Number(ch.instance);
-    const maxInst = channelCountForDevice(deviceById.get(ch.device_id));
+    const dev = deviceById.get(ch.device_id);
+    if (strictDevices && !dev) return;
+    const maxInst = channelCountForDevice(dev);
     if (inst < 1 || inst > maxInst) return;
     const base = defaultChannelFor(ch.device_id, inst);
-    const dev = deviceById.get(ch.device_id);
     const powerControlEnabled = Boolean(
       ch.third_party_power_control_enabled
       || ch.thirdPartyPowerControlEnabled
@@ -987,7 +1014,7 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
       third_party_power_control_enabled: powerControlEnabled,
     });
   });
-  (Array.isArray(devices) && devices.length ? devices : DEVICES_BASE).forEach((d) => {
+  deviceList.forEach((d) => {
     for (let inst = 1; inst <= channelCountForDevice(d); inst++) {
       const key = `${d.id}/${inst}`;
       if (!byKey.has(key)) {
@@ -1004,7 +1031,7 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
     const br = deviceRank.has(b.device_id) ? deviceRank.get(b.device_id) : 9999;
     return ar - br || String(a.device_id).localeCompare(String(b.device_id)) || a.instance - b.instance;
   });
-  return opts.withoutOverlay ? sorted.map(stripChannelOverlayFields) : applyChannelAliasOverlay(sorted, devices);
+  return opts.withoutOverlay ? sorted.map(stripChannelOverlayFields) : applyChannelAliasOverlay(sorted, deviceList);
 }
 
 function loadChannels() {
@@ -1017,7 +1044,7 @@ function loadChannels() {
 }
 function saveChannels(channels) {
   const devices = live.active && live.devices ? live.devices : DEVICES_BASE;
-  const normalized = normalizeChannels((Array.isArray(channels) ? channels : []).map(stripChannelOverlayFields), devices, { withoutOverlay: true });
+  const normalized = normalizeChannels((Array.isArray(channels) ? channels : []).map(stripChannelOverlayFields), devices, { withoutOverlay: true, strictDevices: live.active && !!live.devices });
   localStorage.setItem(LS_CHANNELS, JSON.stringify(normalized));
   localStorage.setItem(LS_CHANNELS_VERSION, CHANNEL_METADATA_VERSION);
   mock.channels = applyChannelAliasOverlay(normalized, devices);
@@ -1305,13 +1332,13 @@ const mockAPIImpl = {
   setChannelRole(deviceId, instance, role, opts?) {
     const idx = mock.channels.findIndex((c) => c.device_id === deviceId && c.instance === instance);
     if (idx >= 0) {
-      mock.channels[idx] = { ...mock.channels[idx], role, role_source: (opts && opts.role_source) || "local-assumption" };
+      mock.channels[idx] = { ...mock.channels[idx], role, role_source: (opts && opts.role_source) || "local-config" };
     } else {
       const base = defaultChannelFor(deviceId, instance);
-      mock.channels.push({ ...base, role, role_source: "local-assumption" });
+      mock.channels.push({ ...base, role, role_source: "local-config" });
     }
     saveChannels(mock.channels);
-    resetScenario(mock.scenario);
+    if (!live.active) resetScenario(mock.scenario);
   },
   leases: () => mock.leases.slice(),
   commandEvents: () => mock.commandEvents.slice(0, 50),
@@ -1839,7 +1866,7 @@ function catalogueEntriesForDefinition(definitionRef) {
 }
 
 async function refreshLiveReads(devices) {
-  const channels = normalizeChannels(mock.channels, devices);
+  const channels = normalizeChannels(mock.channels, devices, { strictDevices: true });
   mock.channels = channels;
   await Promise.all(devices.map(async (dev) => {
     const devChannels = channels.filter((c) => c.device_id === dev.id);
@@ -1919,7 +1946,7 @@ async function refreshLiveOnce() {
     const devices = (devicesBody && devicesBody.devices) || [];
     live.devices = devices.map(normalizeDeviceView);
     live.catalogue = (catalogueBody && catalogueBody.parameters) || [];
-    mock.channels = normalizeChannels(mock.channels, live.devices);
+    mock.channels = normalizeChannels(mock.channels, live.devices, { strictDevices: true });
     live.leases = (leasesBody && leasesBody.leases) || [];
     await refreshLiveReads(live.devices);
     await commandsPromise;
@@ -2033,7 +2060,7 @@ export const MecomAPI = {
   channels() {
     ensureLivePolling();
     if (live.active && live.devices) {
-      mock.channels = normalizeChannels(mock.channels, live.devices);
+      mock.channels = normalizeChannels(mock.channels, live.devices, { strictDevices: true });
       return mock.channels.slice();
     }
     return mockAPIImpl.channels();
@@ -2222,7 +2249,7 @@ export const MecomAPI = {
       params.append("t1", opts.t1);
     }
     const qs = params.toString();
-    const path = `/api/graph/tiles/${encodeURIComponent(tileId || "graph-tile")}/${encodeURIComponent(level || "three_day")}${qs ? "?" + qs : ""}`;
+    const path = `/api/graph/tiles/${encodeURIComponent(tileId || "graph-tile")}/${encodeURIComponent(level || "session")}${qs ? "?" + qs : ""}`;
     const headers = {};
     if (opts && opts.format === "arrow") {
       headers["X-Format"] = "arrow";

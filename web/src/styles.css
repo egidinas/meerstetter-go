@@ -73,6 +73,15 @@
   --rail-w: 200px;
   --tree-w: 300px;
   --drawer-w: 320px;
+
+  /* Signalforge component bridge — maps --sf-* to meerstetter brand tokens */
+  --sf-surface-panel:   var(--panel);
+  --sf-surface-popup:   var(--panel-2);
+  --sf-border-subtle:   var(--line);
+  --sf-shadow-popup:    0 12px 28px rgba(0, 0, 0, 0.65);
+  --sf-radius-panel:    var(--radius);
+  --sf-radius-popup:    var(--radius-lg);
+  --sf-radius-control:  var(--radius-sm);
 }
 
 [data-density="compact"] {
@@ -1596,8 +1605,54 @@ hr.sep {
   background: #04060a;
   overflow: hidden;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  position: relative;
 }
-.chart-plot > [data-graph-renderer="signalforge.tile.uplot"] { height: 100%; }
+.chart-plot > [data-graph-renderer="signalforge.tile.uplot"] { height: 100%; min-height: 0; }
+.trace-readout-popup {
+  position: absolute;
+  top: 10px;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-width: 220px;
+  max-width: min(360px, calc(100% - 24px));
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--hairline));
+  border-radius: 8px;
+  background: rgba(7, 11, 18, 0.94);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+.trace-readout-time {
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.trace-readout-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+.trace-readout-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+.trace-readout-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trace-readout-row b {
+  font-weight: 600;
+  color: var(--text);
+}
 .chart-legend {
   align-content: start;
   align-items: flex-start;
@@ -2401,7 +2456,7 @@ hr.sep {
   grid-template-columns: minmax(0, 1fr) 190px;
   grid-template-rows: minmax(0, 1fr);
   min-width: 0;
-  min-height: 420px;
+  min-height: 0;
   border-bottom: 1px solid var(--hairline);
 }
 .hero.live .hero-chart-row { border-bottom-color: var(--border-live); }
@@ -2410,11 +2465,17 @@ hr.sep {
   background: #04060a;
   position: relative;
   min-width: 0;
-  min-height: 340px;
+  min-height: 0;
   overflow: hidden;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
 }
 .hero-plot > [data-graph-renderer="signalforge.tile.uplot"] { height: 100%; }
+.hero-plot .chart-plot {
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+}
 .hero-legend {
   display: flex;
   flex-direction: column;
@@ -2451,7 +2512,8 @@ hr.sep {
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  max-height: 130px;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
@@ -2630,11 +2692,20 @@ hr.sep {
   display: grid;
   gap: 8px;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(2, minmax(0, auto));
-  height: auto;
-  min-height: 100%;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  height: min(820px, calc(100dvh - 92px));
+  min-height: 620px;
   min-width: 0;
-  align-content: start;
+  align-content: stretch;
+}
+.fleet-heroes .hero {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(88px, auto);
+}
+.fleet-heroes .hero .chart-plot {
+  min-height: 0;
+  height: 100%;
 }
 .fleet-strip {
   display: grid;

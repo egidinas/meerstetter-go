@@ -324,18 +324,18 @@ assert.match(
 );
 assert.match(
   assignments,
-  /DEFAULT_GRAPH_TILE_LEVEL\s*=\s*"three_day"/,
-  "graph assignment tiles must default to the bounded archive history level, not live-only buffers",
+  /DEFAULT_GRAPH_TILE_LEVEL\s*=\s*"session"/,
+  "graph assignment tiles must default to the bounded current-session history level, not live-only buffers",
 );
 assert.match(
   graphTilesBackend,
-  /defaultGraphTileLevel\s*=\s*"three_day"/,
-  "backend graph tile route must default to the bounded archive history level when no level is supplied",
+  /defaultGraphTileLevel\s*=\s*"session"/,
+  "backend graph tile route must default to the bounded current-session history level when no level is supplied",
 );
 assert.match(
   api,
-  /level \|\| "three_day"/,
-  "API graph tile client must also default missing levels to bounded archive history",
+  /level \|\| "session"/,
+  "API graph tile client must also default missing levels to bounded current-session history",
 );
 assert.doesNotMatch(
   graphTilesBackend,
@@ -344,8 +344,8 @@ assert.doesNotMatch(
 );
 assert.match(
   assignments,
-  /const\s+requestedLevel\s*=\s*opts\.level\s*\|\|\s*opts\.tileLevel\s*\|\|\s*DEFAULT_GRAPH_TILE_LEVEL/,
-  "tile loading must choose an explicit archive default level before deriving the window",
+  /const\s+explicitLevel\s*=\s*opts\.level\s*\|\|\s*opts\.tileLevel;[\s\S]*const\s+requestedLevel\s*=\s*explicitLevel\s*\|\|\s*DEFAULT_GRAPH_TILE_LEVEL/,
+  "tile loading must choose an explicit session default level before deriving the window",
 );
 assert.doesNotMatch(
   assignments,
@@ -355,7 +355,7 @@ assert.doesNotMatch(
 assert.match(
   mainView,
   /useState\(DEFAULT_GRAPH_TILE_LEVEL\)/,
-  "device graph walls must default to archive tile history rather than live-only tiles",
+  "device graph walls must default to session tile history rather than live-only tiles",
 );
 const fleetViewFn = mainView.slice(mainView.indexOf("export function FleetView"), mainView.indexOf("export function DeviceMini"));
 assert.doesNotMatch(
@@ -367,6 +367,45 @@ assert.match(
   fleetViewFn,
   /fleetTileLevel/,
   "fleet hero graphs must expose a shared history tile level for aligned temperature and power timelines",
+);
+assert.match(
+  assignments,
+  /export function configDrivenGraphTileAssignments[\s\S]*return\s+\[\];/,
+  "config-driven fleet tiles must let the gateway choose series from the live device/channel config",
+);
+assert.doesNotMatch(
+  fleetViewFn,
+  /fleetTempStored|fleetSupplyStored/,
+  "fleet hero graphs must not merge stale persisted SignalForge assignments into config-driven live tiles",
+);
+assert.match(
+  fleetViewFn,
+  /configDrivenGraphTileAssignments\(WALLS\.fleetTemp\.wall_id,\s*tempChannels\)/,
+  "fleet temperature hero must request the gateway-owned default tile series from current config",
+);
+assert.match(
+  fleetViewFn,
+  /configDrivenGraphTileAssignments\(WALLS\.fleetSupply\.wall_id,\s*supplyChannels\)/,
+  "fleet supply hero must request the gateway-owned default tile series from current config",
+);
+const seedAssignmentsFn = assignments.slice(
+  assignments.indexOf("export function seedAssignments"),
+  assignments.indexOf("export const CHANNEL_COLORS"),
+);
+assert.match(
+  seedAssignmentsFn,
+  /let\s+next\s*=\s*current\.filter[\s\S]*fleetWall[\s\S]*return\s+!fleetWall;/,
+  "assignment seeding must purge stale fleet-wall entries unconditionally",
+);
+assert.doesNotMatch(
+  seedAssignmentsFn,
+  /WALLS\.fleetTemp\.wall_id,\s*tempChannels/,
+  "assignment seeding must not persist fleet temperature defaults when fleet tiles are config-owned",
+);
+assert.doesNotMatch(
+  seedAssignmentsFn,
+  /WALLS\.fleetSupply\.wall_id,\s*supplyChannels/,
+  "assignment seeding must not persist fleet supply defaults when fleet tiles are config-owned",
 );
 assert.match(
   api,

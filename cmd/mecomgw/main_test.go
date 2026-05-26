@@ -604,6 +604,37 @@ func TestGatewayServesGraphTileContract(t *testing.T) {
 	if len(tile.Series[0].Points) < 2 || len(tile.Series[1].Points) < 2 {
 		t.Fatalf("expected history-backed points, got: %+v", tile.Series)
 	}
+	if tile.T0 == "" || tile.T1 == "" || tile.RequestedT0 == "" || tile.RequestedT1 == "" {
+		t.Fatalf("tile ranges missing: t0=%q t1=%q requested=%q/%q", tile.T0, tile.T1, tile.RequestedT0, tile.RequestedT1)
+	}
+	dataT0, err := time.Parse(time.RFC3339Nano, tile.T0)
+	if err != nil {
+		t.Fatalf("parse tile t0: %v", err)
+	}
+	dataT1, err := time.Parse(time.RFC3339Nano, tile.T1)
+	if err != nil {
+		t.Fatalf("parse tile t1: %v", err)
+	}
+	if dataT0.Before(now.Add(-5*time.Second)) || dataT1.After(now.Add(2*time.Second)) {
+		t.Fatalf("tile data range = %s..%s, want plotted data extent near samples", dataT0, dataT1)
+	}
+	reqT0, err := time.Parse(time.RFC3339Nano, tile.RequestedT0)
+	if err != nil {
+		t.Fatalf("parse requested t0: %v", err)
+	}
+	reqT1, err := time.Parse(time.RFC3339Nano, tile.RequestedT1)
+	if err != nil {
+		t.Fatalf("parse requested t1: %v", err)
+	}
+	if reqT1.Sub(reqT0) < 80*time.Second {
+		t.Fatalf("requested live range = %s..%s, want full live window", reqT0, reqT1)
+	}
+	if tile.Diagnostics.RequestedT0 == "" || tile.Diagnostics.RequestedT1 == "" {
+		t.Fatalf("diagnostics requested range missing: %+v", tile.Diagnostics)
+	}
+	if tile.Series[0].Color == "" || tile.Series[1].Color == "" || tile.Series[0].Color == tile.Series[1].Color {
+		t.Fatalf("series colors are not individually identifiable: %q %q", tile.Series[0].Color, tile.Series[1].Color)
+	}
 
 	var defaultTile graphTileResponse
 	getJSON(t, ts.URL+"/api/graph/tiles/default-temp/day", http.StatusOK, &defaultTile)
@@ -624,6 +655,15 @@ func TestGatewayServesGraphTileContract(t *testing.T) {
 	}
 	if !tileFilesContain(defaultTile.TileFiles, "three_hour", 3*60*60_000) {
 		t.Fatalf("three_hour tile file missing from manifest: %+v", defaultTile.TileFiles)
+	}
+	if !tileFilesContain(defaultTile.TileFiles, "session", int(defaultGraphHistoryRetention.Milliseconds())) {
+		t.Fatalf("session tile file missing from manifest: %+v", defaultTile.TileFiles)
+	}
+
+	var implicitDefaultTile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/default-temp?series=tec-75:1000:1", http.StatusOK, &implicitDefaultTile)
+	if implicitDefaultTile.Level != "session" || implicitDefaultTile.TimeWindowMs < int(defaultGraphHistoryRetention.Milliseconds()) {
+		t.Fatalf("implicit default tile = level %s window %d, want session >= 3 days", implicitDefaultTile.Level, implicitDefaultTile.TimeWindowMs)
 	}
 
 	var supplyTile graphTileResponse
@@ -668,12 +708,78 @@ func TestGatewayGraphHistoryKeepsHotRawSamplesAndReducesLongRangeHistory(t *test
 		t.Fatalf("15-minute history values = %+v, want raw samples", hot.V)
 	}
 
+	hour := s.lookupGraphHistory("tec-75", 1000, 1, 60*60*1000, now.Add(time.Second))
+	if len(hour.TS) != 1 || len(hour.V) != 1 {
+		t.Fatalf("1-hour history = %+v, want 1 LOD bucket", hour)
+	}
+	if hour.V[0] != 10.5 {
+		t.Fatalf("1-hour history mean = %v, want 10.5", hour.V[0])
+	}
+
 	long := s.lookupGraphHistory("tec-75", 1000, 1, 3*24*60*60*1000, now.Add(time.Second))
 	if len(long.TS) != 1 || len(long.V) != 1 {
 		t.Fatalf("3-day history = %+v, want 1 mean bucket", long)
 	}
 	if long.V[0] != 10.5 {
 		t.Fatalf("3-day history mean = %v, want 10.5", long.V[0])
+	}
+}
+
+func TestGatewayGraphTileEmptySeriesDoesNotClaimRequestedRange(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	ts := httptest.NewServer(s.routes())
+	defer ts.Close()
+
+	var tile graphTileResponse
+	getJSON(t, ts.URL+"/api/graph/tiles/empty/live?series=tec-75:1000:1", http.StatusOK, &tile)
+
+	if tile.T0 != "" || tile.T1 != "" {
+		t.Fatalf("empty tile claimed plotted data range: t0=%q t1=%q", tile.T0, tile.T1)
+	}
+	if tile.RequestedT0 == "" || tile.RequestedT1 == "" {
+		t.Fatalf("empty tile missing requested range: %+v", tile)
+	}
+	if tile.Diagnostics.RequestedT0 == "" || tile.Diagnostics.RequestedT1 == "" {
+		t.Fatalf("empty tile diagnostics missing requested range: %+v", tile.Diagnostics)
+	}
+	if len(tile.Series) != 1 || tile.Series[0].Diagnostics.Status != gatewayQualityMissing {
+		t.Fatalf("empty tile series diagnostics = %+v", tile.Series)
+	}
+}
+
+func TestGatewayGraphTileSessionLevelExtendsToCurrentLogSession(t *testing.T) {
+	s := newServer(testConfig(), time.Minute, log.New(io.Discard, "", 0))
+	now := time.Now().UTC().Truncate(time.Second)
+	old := now.Add(-4 * 24 * time.Hour)
+	recent := now.Add(-30 * time.Second)
+	s.recordGraphSample("tec-75", 1000, 1, 20.0, "ok", old)
+	s.recordGraphSample("tec-75", 1000, 1, 21.0, "ok", recent)
+
+	tile, err := s.buildGraphTile("fleet-temp", "session", []graphTileRequestSeries{{DeviceID: "tec-75", ParamID: 1000, Instance: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tile.Level != "session" {
+		t.Fatalf("level = %q, want session", tile.Level)
+	}
+	if tile.TimeWindowMs <= int(defaultGraphHistoryRetention.Milliseconds()) {
+		t.Fatalf("session window = %d, want to extend beyond 3 days", tile.TimeWindowMs)
+	}
+	t0, err := time.Parse(time.RFC3339Nano, tile.T0)
+	if err != nil {
+		t.Fatalf("parse t0: %v", err)
+	}
+	if t0.After(old.Add(time.Minute)) {
+		t.Fatalf("session t0 = %s, want to include old log sample near %s", t0, old)
+	}
+	if tile.Diagnostics.TileSource != "bounded-gateway-history-cache" {
+		t.Fatalf("session tile source = %q, want LOD history cache", tile.Diagnostics.TileSource)
+	}
+	if tile.Diagnostics.Decimation != "SignalForge bucket mean LOD" {
+		t.Fatalf("session decimation = %q, want SignalForge LOD", tile.Diagnostics.Decimation)
+	}
+	if len(tile.Series) != 1 || len(tile.Series[0].History.TS) < 2 {
+		t.Fatalf("session tile history = %+v, want old and recent samples from LOD cache", tile.Series)
 	}
 }
 
@@ -2150,6 +2256,92 @@ func TestPowerControlSamplingRequiresExplicitDeviceOptIn(t *testing.T) {
 	}
 	if snap2.binding.ring != nil {
 		t.Fatal("ring reader unexpectedly non-nil")
+	}
+}
+
+func TestGatewayRingCaptureUsesBalancedHighPriorityDataset(t *testing.T) {
+	capture := gatewayRingCaptureParameters(2)
+	if len(capture) > mecom.RingCaptureLimit {
+		t.Fatalf("ring capture len = %d, want <= %d", len(capture), mecom.RingCaptureLimit)
+	}
+	wantIDs := []int{1000, 1001, 3000, 1020, 1021, 1022}
+	seen := make(map[string]mecom.RingCaptureParameter, len(capture))
+	for _, p := range capture {
+		if p.InhibitTime10us != 0 {
+			t.Fatalf("ring capture %d:%d inhibit = %d, want full-rate 0", p.ID, p.Instance, p.InhibitTime10us)
+		}
+		if p.Type == "" {
+			t.Fatalf("ring capture %d:%d has empty data type", p.ID, p.Instance)
+		}
+		seen[gatewayCatalogueKey(p.ID, p.Instance)] = p
+	}
+	for _, id := range wantIDs {
+		for instance := 1; instance <= 2; instance++ {
+			if _, ok := seen[gatewayCatalogueKey(id, instance)]; !ok {
+				t.Fatalf("ring capture missing %d:%d in %+v", id, instance, capture)
+			}
+		}
+	}
+
+	lazy := gatewayLazyReadParameters(2)
+	for _, p := range lazy {
+		if _, duplicate := seen[gatewayCatalogueKey(p.ID, p.Instance)]; duplicate {
+			t.Fatalf("lazy read duplicates ring capture parameter %d:%d", p.ID, p.Instance)
+		}
+	}
+	assertLazyContains := func(id, instance int) {
+		t.Helper()
+		for _, p := range lazy {
+			if p.ID == id && p.Instance == instance {
+				return
+			}
+		}
+		t.Fatalf("lazy read missing overflow/background parameter %d:%d", id, instance)
+	}
+	assertLazyContains(52200, 1)
+	assertLazyContains(40000, 2)
+}
+
+func TestDeviceRingReceiverRecordsRingSamplesIntoGraphHistory(t *testing.T) {
+	s, _ := newPowerControlTestServer(true, stablePowerControlReadback())
+	bound := s.devices["tec-75"]
+	samples := make(chan mecom.RingSample)
+	bound.samplesChan = samples
+	bound.ringStop = make(chan struct{})
+	bound.ring = mecom.NewRingReader(nil, []mecom.RingCaptureParameter{
+		{Parameter: mecom.Parameter{ID: 1000, Instance: 1, Type: mecom.DataTypeFloat32}},
+	}, samples)
+
+	done := make(chan struct{})
+	stop := bound.ringStop
+	go func() {
+		s.runDeviceRingReceiver("tec-75", bound, samples, stop)
+		close(done)
+	}()
+
+	now := time.Date(2026, 5, 26, 11, 30, 0, 123_000_000, time.UTC)
+	samples <- mecom.RingSample{ConfigIndex: 0, Type: mecom.DataTypeFloat32, Value: 20.0, At: now}
+	samples <- mecom.RingSample{ConfigIndex: 0, Type: mecom.DataTypeFloat32, Value: 22.0, At: now.Add(400 * time.Millisecond)}
+	close(stop)
+	select {
+	case <-done:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("ring receiver did not stop")
+	}
+
+	hot := s.lookupGraphHistory("tec-75", 1000, 1, 15*60*1000, now.Add(time.Second))
+	if len(hot.TS) != 2 || len(hot.V) != 2 {
+		t.Fatalf("hot graph history = %+v, want two raw ring samples", hot)
+	}
+	if hot.TS[0] != now.Format(time.RFC3339Nano) || hot.V[0] != 20.0 || hot.V[1] != 22.0 {
+		t.Fatalf("hot graph history samples = ts %v values %+v, want raw ring samples", hot.TS, hot.V)
+	}
+	long := s.lookupGraphHistory("tec-75", 1000, 1, int((3 * 24 * time.Hour).Milliseconds()), now.Add(time.Second))
+	if len(long.TS) != 1 || len(long.V) != 1 {
+		t.Fatalf("long graph history = %+v, want one downsampled LOD point", long)
+	}
+	if long.V[0] != 21.0 {
+		t.Fatalf("long graph history value = %v, want mean 21.0 from high-rate samples", long.V[0])
 	}
 }
 

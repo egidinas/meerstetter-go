@@ -25,12 +25,17 @@ export const WALLS = {
   fleetTemp:   { wall_id: "fleet-temp",   label: "Fleet hero · Temperature" },
   fleetSupply: { wall_id: "fleet-supply", label: "Fleet hero · Power supplies" },
 };
-export const DEFAULT_GRAPH_TILE_LEVEL = "three_day";
+export const DEFAULT_GRAPH_TILE_LEVEL = "session";
+export const SESSION_GRAPH_TILE_LEVEL_SPEC = { level: "session", label: "full session", timeWindowMs: 3 * 24 * 60 * 60_000 };
+export const GRAPH_TILE_LEVELS = [
+  SESSION_GRAPH_TILE_LEVEL_SPEC,
+  ...DEFAULT_TILE_LEVELS.filter((option) => option.level !== "session"),
+];
 export function graphTileWindowForLevel(level) {
-  return DEFAULT_TILE_LEVELS.find((option) => option.level === level)
-    || DEFAULT_TILE_LEVELS.find((option) => option.level === DEFAULT_GRAPH_TILE_LEVEL)
-    || DEFAULT_TILE_LEVELS[0]
-    || { level: DEFAULT_GRAPH_TILE_LEVEL, label: "3 days", timeWindowMs: 3 * 24 * 60 * 60_000 };
+  return GRAPH_TILE_LEVELS.find((option) => option.level === level)
+    || GRAPH_TILE_LEVELS.find((option) => option.level === DEFAULT_GRAPH_TILE_LEVEL)
+    || GRAPH_TILE_LEVELS[0]
+    || SESSION_GRAPH_TILE_LEVEL_SPEC;
 }
 export const GRAPH_ORIGIN_DEVICE_ID = "tec-76";
 export function wallForDevice(deviceId) { return { wall_id: "device-" + deviceId, label: "Device · " + deviceId }; }
@@ -113,6 +118,11 @@ export function defaultAssignmentsForChannels(wallId, channels) {
   return seeds;
 }
 
+export function configDrivenGraphTileAssignments(_wallId, _channels) {
+  // Empty series list asks the gateway for the config-owned tile defaults.
+  return [];
+}
+
 export function assignmentsWithPriorityDefaults(existing, wallId, channels) {
   const out = (existing || []).map(normalizeAssignment);
   const seen = new Set(out.map((a) => `${a.wall_id}:${a.target_id}`));
@@ -129,19 +139,12 @@ export function assignmentsWithPriorityDefaults(existing, wallId, channels) {
 export function seedAssignments() {
   const channels = MecomAPI.channels();
   const current = loadAssignments();
-  let next = current.slice();
+  let next = current.filter((item) => {
+    const a = normalizeAssignment(item);
+    const fleetWall = a.wall_id === WALLS.fleetTemp.wall_id || a.wall_id === WALLS.fleetSupply.wall_id;
+    return !fleetWall;
+  });
   const seedVersion = parseInt(localStorage.getItem("mecomgw.assignments.version") || "0", 10);
-  const tempChannels = channels.filter((c) => c.role === "temp");
-  const supplyChannels = channels.filter((c) => c.role === "supply");
-  if (seedVersion !== SEED_VERSION) {
-    next = next.filter((item) => {
-      const a = normalizeAssignment(item);
-      const fleetWall = a.wall_id === WALLS.fleetTemp.wall_id || a.wall_id === WALLS.fleetSupply.wall_id;
-      return !fleetWall;
-    });
-  }
-  next = assignmentsWithPriorityDefaults(next, WALLS.fleetTemp.wall_id, tempChannels);
-  next = assignmentsWithPriorityDefaults(next, WALLS.fleetSupply.wall_id, supplyChannels);
   channels.forEach((ch) => {
     const wallId = wallForDevice(ch.device_id).wall_id + "-" + ch.instance;
     next = assignmentsWithPriorityDefaults(next, wallId, [ch]);
@@ -151,7 +154,12 @@ export function seedAssignments() {
   localStorage.setItem("mecomgw.assignments.version", String(SEED_VERSION));
 }
 
-export const CHANNEL_COLORS = ["#58a6ff", "#3fb950", "#d29922", "#a371f7", "#56d4dd", "#db61a2", "#e3b341", "#f47067"];
+export const CHANNEL_COLORS = [
+  "#58a6ff", "#3fb950", "#d29922", "#a371f7",
+  "#56d4dd", "#db61a2", "#e3b341", "#f47067",
+  "#2dd4bf", "#f97316", "#84cc16", "#e879f9",
+  "#22c55e", "#fb7185", "#38bdf8", "#facc15",
+];
 export function channelColor(deviceId, instance?) {
   const channels = MecomAPI.channels();
   const idx = channels.findIndex((c) => c.device_id === deviceId && c.instance === instance);
@@ -315,6 +323,16 @@ function fallbackSeriesVisibility(history, filteredHistory, unit) {
   };
 }
 
+function graphTileRequestOptions(opts: any = {}) {
+  const explicitLevel = opts.level || opts.tileLevel;
+  const requestedLevel = explicitLevel || DEFAULT_GRAPH_TILE_LEVEL;
+  const requestedWindow = graphTileWindowForLevel(requestedLevel);
+  const explicitWindow = opts.time_window_ms || opts.timeWindowMs;
+  const timeWindowMs = explicitWindow || requestedWindow.timeWindowMs;
+  const level = explicitLevel || (explicitWindow ? (pickTileLevel(timeWindowMs) || requestedLevel) : requestedLevel);
+  return { level, timeWindowMs };
+}
+
 export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const catalogue = MecomAPI.catalogue();
   const normalized = (assignments || []).map(normalizeAssignment).filter((a) => a.device_id && Number.isFinite(a.param_id));
@@ -322,10 +340,7 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
   const nowMs = Date.now();
   const now = new Date(nowMs).toISOString();
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
-  const requestedLevel = opts.level || opts.tileLevel || DEFAULT_GRAPH_TILE_LEVEL;
-  const requestedWindow = graphTileWindowForLevel(requestedLevel);
-  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || requestedWindow.timeWindowMs;
-  const level = opts.level || opts.tileLevel || pickTileLevel(timeWindowMs) || requestedLevel;
+  const { level, timeWindowMs } = graphTileRequestOptions(opts);
   const series = normalized.map((a) => {
     const paramId = a.options.param_id;
     const deviceId = a.options.device_id;
@@ -384,7 +399,7 @@ export function buildGraphTileFromAssignments(assignments, opts: any = {}) {
     time_window_ms: timeWindowMs,
     latest_endpoint: `/api/graph/tiles/${encodeURIComponent(tileId)}/live`,
     tile_endpoint: `/api/graph/tiles/${encodeURIComponent(tileId)}/${level}`,
-    tile_files: DEFAULT_TILE_LEVELS.map((item) => ({ level: item.level, time_window_ms: item.timeWindowMs })),
+    tile_files: GRAPH_TILE_LEVELS.map((item) => ({ level: item.level, time_window_ms: item.timeWindowMs })),
     axes: units.slice(0, 2).map((unit, idx) => ({ unit, side: idx === 0 ? "left" : "right" })),
     bands: [],
     markers: [],
@@ -476,7 +491,7 @@ function enrichServerGraphTile(tile, assignments, opts: any = {}) {
     const points = (filtered.history.ts || []).map((ts, idx) => ({ timestamp: new Date(ts).toISOString(), value: (filtered.history.v || [])[idx] }));
     const role = raw.role || MecomAPI.roleForParam(paramId);
     const roleMeta = seriesRoleMeta(role);
-    const color = raw.color || (opts.colorByChannel ? channelColor(deviceId, instance) : MecomAPI.colorForRole(role));
+    const color = opts.colorByChannel ? channelColor(deviceId, instance) : (raw.color || MecomAPI.colorForRole(role));
     const signalPath = [def.group, def.subgroup, def.name].filter(Boolean).join(" / ");
     const channelContext = `${deviceId} · channel ${instance}${ch && ch.label ? " · " + ch.label : ""}`;
     return {
@@ -531,10 +546,7 @@ export function useGraphTileFromAssignments(assignments, opts: any = {}) {
   const assignmentsKey = graphTileAssignmentsKey(assignments);
   const normalized = useMemo(() => graphTileSeriesFromAssignments(assignments), [assignmentsKey]);
   const tileId = opts.tile_id || opts.tileId || "graph-tile";
-  const requestedLevel = opts.level || opts.tileLevel || DEFAULT_GRAPH_TILE_LEVEL;
-  const requestedWindow = graphTileWindowForLevel(requestedLevel);
-  const timeWindowMs = opts.time_window_ms || opts.timeWindowMs || requestedWindow.timeWindowMs;
-  const level = opts.level || opts.tileLevel || pickTileLevel(timeWindowMs) || requestedLevel;
+  const { level, timeWindowMs } = graphTileRequestOptions(opts);
   const title = opts.title || "";
   const colorByChannel = !!opts.colorByChannel;
   const ignoreOpenSensorOutliers = opts.ignoreOpenSensorOutliers !== false;
