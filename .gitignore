@@ -11,4 +11,8 @@
 *.cab
 __pycache__/
 /mecomgw
+/mecomvseriald
+/downloads/
+/docs/pdfs/
+/5136_text.txt
 *.exe

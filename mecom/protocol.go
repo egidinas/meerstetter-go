@@ -27,6 +27,7 @@ const (
 	DataTypeFloat32 DataType = "float32"
 	DataTypeInt32   DataType = "int32"
 	DataTypeLatin1  DataType = "latin1"
+	DataTypeByte    DataType = "byte"
 )
 
 // Parameter describes the minimum metadata needed to encode and decode values.
@@ -71,6 +72,7 @@ type RingSample struct {
 	ConfigIndex int
 	Type        DataType
 	Value       float64
+	At          time.Time
 }
 
 // RingFrame is one decoded CRTVStream normal or sync frame.

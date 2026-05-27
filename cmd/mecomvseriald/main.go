@@ -71,6 +71,7 @@ func main() {
 	timeout := flag.Duration("timeout", 2*time.Second, "per-request downstream timeout")
 	reconnectDelay := flag.Duration("reconnect-delay", 500*time.Millisecond, "delay after downstream dial failures")
 	traceFrames := flag.Bool("trace-frames", false, "log client and downstream frame bytes for short diagnostic captures")
+	deviceCacheDir := flag.String("device-cache-dir", os.Getenv("MECOM_DEVICE_CACHE_DIR"), "directory for per-device bridge cache JSON; empty disables")
 	flag.Var(&routes, "route", "address=target route; repeatable, e.g. -route 75=serial:/dev/ttyUSB0@57600")
 	flag.Parse()
 
@@ -95,6 +96,9 @@ func main() {
 	}
 
 	logger := log.New(os.Stderr, "mecomvseriald ", log.LstdFlags|log.Lmicroseconds)
+	restoreDeviceCacheDir := mecomserver.SetDeviceBridgeCacheDir(*deviceCacheDir)
+	defer restoreDeviceCacheDir()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
@@ -104,7 +108,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
-		logger.Printf("listen=%s target=%s", *listen, mode.target)
+		logger.Printf("listen=%s target=%s device-cache-dir=%s", *listen, mode.target, *deviceCacheDir)
 		err = mecomserver.ListenAndServe(ctx, *listen, mecomserver.Config{
 			Target:         mode.target,
 			Downstream:     downstream,
@@ -130,7 +134,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	logger.Printf("listen=%s routes=%s address-zero=%s route-policy=%s", *listen, routes.String(), addressZero.String(), routePolicy)
+	logger.Printf("listen=%s routes=%s address-zero=%s route-policy=%s device-cache-dir=%s", *listen, routes.String(), addressZero.String(), routePolicy, *deviceCacheDir)
 	cfg := &mecomserver.RouterConfig{
 		Routes:           routes,
 		DefaultAddress:   defaultAddress,

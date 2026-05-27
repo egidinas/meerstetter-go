@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/egidinas/meerstetter-go/mecom"
@@ -47,6 +48,7 @@ type routeBroker struct {
 	priority int
 	requests chan request
 	stats    *brokerStatsRecorder
+	state    *deviceBridgeState
 }
 
 // RouterConfig configures a single TCP listener that routes addressed MeCom
@@ -199,6 +201,7 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 	routes := make(preparedRoutes, len(cfg.Routes))
 	stats := make(map[byte]*brokerStatsRecorder, len(cfg.Routes))
 	routeStats := make([]*brokerStatsRecorder, 0, len(cfg.Routes))
+	deviceStates := make(map[byte]*deviceBridgeState, len(cfg.Routes))
 	type brokerStart struct {
 		config   Config
 		requests chan request
@@ -223,12 +226,18 @@ func prepareRoutes(ctx context.Context, cfg *RouterConfig) (preparedRoutes, erro
 			stats[route.Address] = recorder
 		}
 		routeStats = append(routeStats, recorder)
+		state := deviceStates[route.Address]
+		if state == nil {
+			state = newDeviceBridgeState(fmt.Sprintf("0x%02X", route.Address))
+			deviceStates[route.Address] = state
+		}
 		broker := &routeBroker{
 			address:  route.Address,
 			target:   route.Target,
 			priority: priority,
 			requests: requests,
 			stats:    recorder,
+			state:    state,
 		}
 		routes[route.Address] = append(routes[route.Address], broker)
 		routeCfg := Config{
@@ -318,6 +327,15 @@ func handleRoutedClient(ctx context.Context, conn net.Conn, routes preparedRoute
 			resp := deviceServerError(frame, err)
 			if cfg.TraceFrames && cfg.Logger != nil {
 				cfg.Logger.Printf("server -> client remote=%s frame=%s error=%v", conn.RemoteAddr(), describeBytes(resp), err)
+			}
+			if err := writeClientFrame(conn, resp, cfg.ClientIdleTimeout); err != nil {
+				return
+			}
+			continue
+		}
+		if resp, ok := handleDeviceBridgeRouterLocalFrame(candidates[0].state, frame, cfg.RequestTimeout); ok {
+			if cfg.TraceFrames && cfg.Logger != nil {
+				cfg.Logger.Printf("server -> client remote=%s frame=%s router_local_virtual_write=true", conn.RemoteAddr(), describeBytes(resp))
 			}
 			if err := writeClientFrame(conn, resp, cfg.ClientIdleTimeout); err != nil {
 				return
@@ -475,21 +493,32 @@ func routeCandidateScore(candidate *routeBroker, readFrame bool) int {
 	if candidate == nil {
 		return 1 << 30
 	}
-	score := routePriority(candidate)*10 + len(candidate.requests)
+	const (
+		priorityWeight             = 200
+		connectedBonus             = 25
+		configuredPrimaryBonus     = 25
+		recentErrorPenalty         = 250
+		disconnectedErroredPenalty = 250
+	)
+
+	score := routePriority(candidate)*priorityWeight + len(candidate.requests)
 	stats := candidate.stats.Snapshot()
 	if stats.Connected {
-		score -= 100
+		score -= connectedBonus
 	}
-	if !stats.Connected && stats.ErrorCount > 0 {
-		score += 500
-	}
-	if readFrame {
-		score += int(stats.ErrorCount) * 5
-	} else {
-		score += int(stats.ErrorCount) * 50
+	if stats.ErrorCount > 0 {
+		score += recentErrorPenalty
+		if !stats.Connected {
+			score += disconnectedErroredPenalty
+		}
+		if readFrame {
+			score += int(stats.ErrorCount) * 25
+		} else {
+			score += int(stats.ErrorCount) * 50
+		}
 	}
 	if candidate.priority == 0 {
-		score -= 10
+		score -= configuredPrimaryBonus
 	}
 	return score
 }
@@ -542,15 +571,55 @@ func routedRequestFrame(addr byte, seq uint16, payload string) []byte {
 	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16(prefix), mecom.FrameTerminator))
 }
 
+func rewriteRouteAddressZeroRequest(frame []byte, addr byte) []byte {
+	if addr == 0 || !isAddressedRouteFrame(frame, 0) {
+		return frame
+	}
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil || req.address != 0 {
+		return frame
+	}
+	return routedRequestFrame(addr, req.seq, req.payload)
+}
+
+func restoreRouteAddressZeroResponse(requestFrame []byte, responseFrame []byte) []byte {
+	if !isAddressedRouteFrame(requestFrame, 0) {
+		return responseFrame
+	}
+	return rewriteMeComResponseAddress(responseFrame, 0)
+}
+
+func isAddressedRouteFrame(frame []byte, addr byte) bool {
+	s := strings.TrimSpace(string(frame))
+	return len(s) >= 3 && s[0] == '#' && strings.EqualFold(s[1:3], fmt.Sprintf("%02X", addr))
+}
+
+func rewriteMeComResponseAddress(frame []byte, addr byte) []byte {
+	s := strings.TrimSpace(string(frame))
+	if len(s) < 11 || s[0] != '!' {
+		return frame
+	}
+	payloadEnd := len(s) - 4
+	if payloadEnd <= 7 {
+		return frame
+	}
+	prefix := fmt.Sprintf("!%02X%s", addr, s[3:payloadEnd])
+	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
+}
+
 func routeFrame(ctx context.Context, frame []byte, candidates []*routeBroker, requestTimeout time.Duration, traceFrames bool, logger *log.Logger, remote string) ([]byte, error) {
 	if requestTimeout <= 0 {
 		requestTimeout = defaultRequestTimeout
 	}
 	readFrame := isMeComReadFrame(frame)
 	routedFrame := rewriteRouteCompatibilityFrame(frame)
+	if readFrame {
+		candidates = preferNativeMeComRouteForVirtualRead(routedFrame, candidates)
+	}
 	var lastErr error
 candidateLoop:
 	for i, candidate := range candidates {
+		candidateFrame := rewriteRouteAddressZeroRequest(routedFrame, candidate.address)
 		attempts := 1
 		if readFrame {
 			attempts = 2
@@ -559,7 +628,7 @@ candidateLoop:
 			reqCtx, cancelReq := context.WithTimeout(ctx, requestTimeout)
 			result := make(chan response, 1)
 			select {
-			case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), routedFrame...), result: result}:
+			case candidate.requests <- request{ctx: reqCtx, frame: append([]byte(nil), candidateFrame...), result: result}:
 			case <-reqCtx.Done():
 				lastErr = reqCtx.Err()
 				cancelReq()
@@ -575,7 +644,19 @@ candidateLoop:
 			case res := <-result:
 				cancelReq()
 				if res.err == nil {
-					return res.frame, nil
+					// Fall through to the next route only for read-side transport gaps
+					// where another truthful transport may have the value.
+					if readFrame && i+1 < len(candidates) {
+						if code, ok := meComResponseNACKCode(res.frame); ok && shouldFallThroughRouteNACK(candidateFrame, code) {
+							lastErr = fmt.Errorf("route candidate NACK 0x%02X", code)
+							if traceFrames && logger != nil {
+								logger.Printf("route candidate NACK 0x%02X remote=%s address=0x%02X target=%s, trying next route", code, remote, candidate.address, candidate.target)
+							}
+							continue candidateLoop
+						}
+					}
+					deviceBridgeObserveFrame(candidate.state, candidateFrame, res.frame)
+					return restoreRouteAddressZeroResponse(routedFrame, res.frame), nil
 				}
 				lastErr = res.err
 				if traceFrames && logger != nil {
@@ -607,8 +688,75 @@ candidateLoop:
 	return nil, lastErr
 }
 
+func preferNativeMeComRouteForVirtualRead(frame []byte, candidates []*routeBroker) []*routeBroker {
+	if len(candidates) < 2 || !isRouteVirtualRead(frame) {
+		return candidates
+	}
+	out := make([]*routeBroker, 0, len(candidates))
+	for _, candidate := range candidates {
+		if routeTargetIsNativeMeCom(candidate.target) {
+			out = append(out, candidate)
+		}
+	}
+	if len(out) == 0 {
+		return candidates
+	}
+	for _, candidate := range candidates {
+		if !routeTargetIsNativeMeCom(candidate.target) {
+			out = append(out, candidate)
+		}
+	}
+	return out
+}
+
+func routeTargetIsNativeMeCom(target string) bool {
+	lower := strings.ToLower(strings.TrimSpace(target))
+	if strings.HasPrefix(lower, "can:") || strings.HasPrefix(lower, "can-") || strings.HasPrefix(lower, "can_") {
+		return false
+	}
+	ep, ok := mecom.ParseTarget(target)
+	return ok && ep.Network != "can"
+}
+
+func isRouteVirtualRead(frame []byte) bool {
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil {
+		return false
+	}
+	switch {
+	case strings.HasPrefix(req.payload, "?VM") || strings.HasPrefix(req.payload, "?VR"):
+		if len(req.payload) != len("?VM000000") {
+			return false
+		}
+		return deviceBridgeEncodedParameterIsVirtual(req.payload[3:])
+	case strings.HasPrefix(req.payload, "?VX"):
+		if len(req.payload) < len("?VX00") {
+			return false
+		}
+		count64, err := strconv.ParseUint(req.payload[3:5], 16, 8)
+		if err != nil {
+			return false
+		}
+		count := int(count64)
+		if count == 0 || len(req.payload) != 5+count*6 {
+			return false
+		}
+		for i := 0; i < count; i++ {
+			if deviceBridgeEncodedParameterIsVirtual(req.payload[5+i*6 : 11+i*6]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func isTransientRouteReadError(err error) bool {
-	return errors.Is(err, io.ErrClosedPipe) || errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed)
+	return errors.Is(err, io.ErrClosedPipe) ||
+		errors.Is(err, io.EOF) ||
+		errors.Is(err, net.ErrClosed) ||
+		errors.Is(err, syscall.EPIPE) ||
+		errors.Is(err, syscall.ECONNRESET) ||
+		errors.Is(err, syscall.ECONNABORTED)
 }
 
 func isMeComReadFrame(frame []byte) bool {
@@ -620,6 +768,87 @@ func isMeComReadFrame(frame []byte) bool {
 		return s[7] == '?'
 	}
 	return false
+}
+
+func shouldFallThroughRouteNACK(frame []byte, code byte) bool {
+	switch code {
+	case 0x01:
+		return true
+	case 0x03:
+		return isRouteIdentityParameterRead(frame) || isRouteCatalogueParameterRead(frame)
+	case 0x04, 0x05:
+		return isRouteUnsupportedSerialFallbackRead(frame)
+	default:
+		return false
+	}
+}
+
+func isRouteUnsupportedSerialFallbackRead(frame []byte) bool {
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil {
+		return false
+	}
+	payload := req.payload
+	switch {
+	case (strings.HasPrefix(payload, "?VM") || strings.HasPrefix(payload, "?VR")) && len(payload) == len("?VM000000"):
+		paramID, instance, err := parseDeviceBridgeParameter(payload[3:])
+		if err != nil {
+			return false
+		}
+		return instance == 1 && deviceBridgeUnsupportedSerialFallbackRead(paramID)
+	case strings.HasPrefix(payload, "?VX") && len(payload) >= len("?VX00"):
+		count64, err := strconv.ParseUint(payload[3:5], 16, 8)
+		if err != nil {
+			return false
+		}
+		minPayloadLen := 5 + int(count64)*6
+		if len(payload) < minPayloadLen {
+			return false
+		}
+		for i := 0; i < int(count64); i++ {
+			paramID, instance, err := parseDeviceBridgeParameter(payload[5+i*6 : 11+i*6])
+			if err != nil {
+				return false
+			}
+			if instance == 1 && deviceBridgeUnsupportedSerialFallbackRead(paramID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isRouteCatalogueParameterRead(frame []byte) bool {
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil {
+		return false
+	}
+	if !strings.HasPrefix(req.payload, "?VR") || len(req.payload) != len("?VR000000") {
+		return false
+	}
+	paramID, instance, err := parseDeviceBridgeParameter(req.payload[3:])
+	if err != nil {
+		return false
+	}
+	if _, ok := defaultDeviceBridgeParameterTypes[paramID]; !ok {
+		return false
+	}
+	return deviceBridgeValidateParameterInstance(paramID, instance) == nil
+}
+
+func isRouteIdentityParameterRead(frame []byte) bool {
+	req, err := parseDeviceBridgeRequest(frame)
+	if err != nil {
+		return false
+	}
+	if !strings.HasPrefix(req.payload, "?VR") || len(req.payload) != len("?VR000000") {
+		return false
+	}
+	paramID, instance, err := parseDeviceBridgeParameter(req.payload[3:])
+	if err != nil {
+		return false
+	}
+	return paramID == 102 && instance == 1
 }
 
 type addressZeroSelector struct {
@@ -711,6 +940,21 @@ func (s *addressZeroSelector) releaseAddressZeroLeaseFunc(key string) func() {
 			}
 		})
 	}
+}
+
+// meComResponseNACKCode returns the NACK error code from a MeCom response frame
+// and true, or 0 and false if the frame is not a NACK.
+// MeCom NACK format: !<addr2><seq4>-<code2><CRC4><CR>
+func meComResponseNACKCode(frame []byte) (byte, bool) {
+	s := strings.TrimSpace(string(frame))
+	if len(s) < 10 || s[0] != '!' || s[7] != '-' {
+		return 0, false
+	}
+	n, err := strconv.ParseUint(s[8:10], 16, 8)
+	if err != nil {
+		return 0, false
+	}
+	return byte(n), true
 }
 
 func addressZeroRemoteKey(remote net.Addr) string {

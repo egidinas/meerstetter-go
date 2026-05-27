@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -566,6 +567,107 @@ func TestServeRouterDoesNotReplayWriteToDuplicateRoute(t *testing.T) {
 	}
 }
 
+func TestServeRouterHandlesVirtualWritesLocallyAndRoutesVirtualReads(t *testing.T) {
+	deviceBridgeVirtualParameters.reset()
+
+	primaryClient, primaryServer := net.Pipe()
+	defer primaryClient.Close()
+	defer primaryServer.Close()
+	fallbackClient, fallbackServer := net.Pipe()
+	defer fallbackClient.Close()
+	defer fallbackServer.Close()
+
+	primarySeen := make(chan []byte, 2)
+	go func() {
+		reader := bufio.NewReader(primaryServer)
+		for {
+			frame, err := reader.ReadBytes(mecom.FrameTerminator)
+			if err != nil {
+				return
+			}
+			primarySeen <- append([]byte(nil), frame...)
+			req, err := parseDeviceBridgeRequest(frame)
+			if err != nil {
+				return
+			}
+			if req.payload == "?VRCBE801" {
+				_, _ = primaryServer.Write(deviceBridgeInfoTestFrame(req.address, req.seq, "41480000"))
+				continue
+			}
+			_, _ = primaryServer.Write(deviceBridgeNACK(req.address, req.seq, 0x03))
+		}
+	}()
+	fallbackSeen := serveDownstreamPipe(t, fallbackServer, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		done <- ServeRouter(ctx, ln, &RouterConfig{
+			AddressZeroOrder: []byte{0x50, 0x51},
+			RouteSelection:   RouteSelectionDynamic,
+			RequestTimeout:   time.Second,
+			Routes: []Route{
+				{Address: 0x50, Target: "serial-primary", Downstream: func(context.Context) (net.Conn, string, error) {
+					return primaryClient, "serial-primary-live", nil
+				}},
+				{Address: 0x51, Target: "can-fallback", Downstream: func(context.Context) (net.Conn, string, error) {
+					return fallbackClient, "can-fallback-live", nil
+				}},
+			},
+		})
+	}()
+	defer func() {
+		cancel()
+		_ = ln.Close()
+		if err := <-done; err != nil {
+			t.Fatalf("ServeRouter returned error: %v", err)
+		}
+	}()
+
+	client := dialClient(t, ln.Addr().String())
+	defer client.Close()
+
+	writeReq := deviceBridgeTestFrame(0, 1, "VSCBE80141200000")
+	if _, err := client.Write(writeReq); err != nil {
+		t.Fatalf("write virtual parameter: %v", err)
+	}
+	if reply := readFrame(t, client); !bytes.Equal(reply, deviceBridgeOK(0, 1, "")) {
+		t.Fatalf("virtual write reply = %q, want router-local OK", reply)
+	}
+	select {
+	case got := <-primarySeen:
+		t.Fatalf("virtual write reached primary route: %q", got)
+	case got := <-fallbackSeen:
+		t.Fatalf("virtual write reached fallback route: %q", got)
+	case <-time.After(50 * time.Millisecond):
+	}
+
+	readReq := deviceBridgeTestFrame(0, 2, "?VRCBE801")
+	if _, err := client.Write(readReq); err != nil {
+		t.Fatalf("read virtual parameter: %v", err)
+	}
+	if reply := readFrame(t, client); !bytes.Equal(reply, deviceBridgeInfoTestFrame(0, 2, "41480000")) {
+		t.Fatalf("virtual read reply = %q, want downstream live value", reply)
+	}
+
+	select {
+	case got := <-primarySeen:
+		want := deviceBridgeTestFrame(0x50, 2, "?VRCBE801")
+		if !bytes.Equal(got, want) {
+			t.Fatalf("virtual read reached primary route as %q, want %q", got, want)
+		}
+	case got := <-fallbackSeen:
+		t.Fatalf("virtual read reached fallback route: %q", got)
+	case <-time.After(time.Second):
+		t.Fatalf("virtual read did not reach primary route")
+	}
+}
+
 func TestServeRouterDoesNotForwardDuplicateWriteFrame(t *testing.T) {
 	routeClient, routeServer := net.Pipe()
 	defer routeClient.Close()
@@ -729,6 +831,18 @@ func TestOrderRouteCandidatesDynamicCanPreferHealthyReadFallback(t *testing.T) {
 	}
 }
 
+func TestOrderRouteCandidatesDynamicKeepsHealthyConfiguredPrimaryForReads(t *testing.T) {
+	primary := testRouteBroker(0x50, "can-primary")
+	fallback := testRouteBroker(0x50, "serial-fallback")
+	fallback.priority = 1
+	fallback.stats.markConnected("serial-fallback-live")
+
+	got := orderRouteCandidates([]*routeBroker{primary, fallback}, RouteSelectionDynamic, true)
+	if got[0] != primary {
+		t.Fatalf("dynamic read routing chose %q first, want configured primary %q", got[0].target, primary.target)
+	}
+}
+
 func TestOrderRouteCandidatesDynamicKeepsConfiguredPrimaryForWrites(t *testing.T) {
 	primary := testRouteBroker(0x50, "serial-primary")
 	fallback := testRouteBroker(0x50, "can-fallback")
@@ -770,6 +884,114 @@ func TestRouteFrameRetriesTransientReadOnSameCandidate(t *testing.T) {
 	}
 	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
 		t.Fatalf("retry routed frame = %q, want %q", got, reqFrame)
+	}
+}
+
+func TestRouteFrameRetriesStaleTCPWriteOnReadCandidate(t *testing.T) {
+	candidate := testRouteBroker(0x4b, "serial-fallback")
+	reqFrame := testMeComFrame(0x4b, 1, "?VR006601")
+	reply := deviceBridgeInfoTestFrame(0x4b, 1, "0000004B")
+	seen := make(chan []byte, 2)
+	go func() {
+		for i := 0; i < 2; i++ {
+			req := <-candidate.requests
+			seen <- append([]byte(nil), req.frame...)
+			if i == 0 {
+				req.result <- response{err: fmt.Errorf("write tcp: %w", syscall.EPIPE)}
+				continue
+			}
+			req.result <- response{frame: reply}
+		}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, reply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
+		t.Fatalf("first routed frame = %q, want %q", got, reqFrame)
+	}
+	if got := receiveSeen(t, seen); !bytes.Equal(got, reqFrame) {
+		t.Fatalf("retry routed frame = %q, want %q", got, reqFrame)
+	}
+}
+
+func TestRouteFramePrefersNativeMeComForVirtualReads(t *testing.T) {
+	tests := []struct {
+		name    string
+		payload string
+		reply   string
+	}{
+		{name: "metadata", payload: "?VMCBE801", reply: "00030100000001FF8000007F80000041480000"},
+		{name: "single", payload: "?VRCBE801", reply: "41480000"},
+		{name: "bulk", payload: "?VX01CBE801", reply: "41480000"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			primary := testRouteBroker(0x4b, "can:can0/0x4b")
+			fallback := testRouteBroker(0x4b, "tcp:127.0.0.1:51075")
+			reqFrame := testMeComFrame(0x4b, 1, tc.payload)
+			reply := deviceBridgeInfoTestFrame(0x4b, 1, tc.reply)
+
+			go func() {
+				req := <-fallback.requests
+				if !bytes.Equal(req.frame, reqFrame) {
+					req.result <- response{err: fmt.Errorf("fallback request frame = %q, want %q", string(req.frame), string(reqFrame))}
+					return
+				}
+				req.result <- response{frame: reply}
+			}()
+
+			got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+			if err != nil {
+				t.Fatalf("routeFrame returned error: %v", err)
+			}
+			if !bytes.Equal(got, reply) {
+				t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+			}
+			select {
+			case req := <-primary.requests:
+				t.Fatalf("CAN route unexpectedly received virtual read %q", string(req.frame))
+			default:
+			}
+		})
+	}
+}
+
+func TestRouteFrameObservesVirtualMetadataActualIntoDeviceCache(t *testing.T) {
+	dir := withDeviceBridgeCacheDir(t)
+	candidate := testRouteBroker(0x4b, "tcp:127.0.0.1:51075")
+	reqFrame := testMeComFrame(0x4b, 1, "?VMCBE801")
+	payload := "00030100000001FF8000007F80000041480000"
+	reply := deviceBridgeInfoTestFrame(0x4b, 1, payload)
+
+	go func() {
+		req := <-candidate.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: reply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, reply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, reply)
+	}
+
+	snap := readSingleDeviceBridgeCacheSnapshot(t, dir)
+	param := findDeviceBridgeCacheParam(t, snap, 52200, 1)
+	if param.Float32 == nil || *param.Float32 != 12.5 {
+		t.Fatalf("observed virtual metadata cache float32 = %v, want 12.5", param.Float32)
+	}
+	if param.Source != deviceBridgeCacheSourceDownstream || !param.LiveRefresh || param.UpdatedAt == "" {
+		t.Fatalf("cache metadata = source %q live %v updated %q, want downstream live timestamped", param.Source, param.LiveRefresh, param.UpdatedAt)
 	}
 }
 
@@ -1014,11 +1236,13 @@ func TestServeRouterStatsTrackFramesAndErrors(t *testing.T) {
 }
 
 func testRouteBroker(addr byte, target string) *routeBroker {
+	routeID := fmt.Sprintf("0x%02X:0:%s", addr, target)
 	return &routeBroker{
 		address:  addr,
 		target:   target,
 		requests: make(chan request, 256),
-		stats:    newBrokerStatsRecorder(addr, target, fmt.Sprintf("0x%02X:0:%s", addr, target), 0),
+		stats:    newBrokerStatsRecorder(addr, target, routeID, 0),
+		state:    newDeviceBridgeState(routeID),
 	}
 }
 
@@ -1082,4 +1306,263 @@ func containsFrame(frames [][]byte, want []byte) bool {
 func testMeComFrame(addr byte, seq uint16, payload string) []byte {
 	prefix := []byte(fmt.Sprintf("#%02X%04X%s", addr, seq, payload))
 	return []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16(prefix), mecom.FrameTerminator))
+}
+
+func TestRouteFrameObservesSuccessfulReadIntoDeviceCache(t *testing.T) {
+	dir := withDeviceBridgeCacheDir(t)
+	candidate := testRouteBroker(0x4b, "serial:/dev/ttyUSB0@57600")
+
+	reqFrame := testMeComFrame(0x4b, 1, "?VRCB2203")
+	okReply := deviceBridgeInfoTestFrame(0x4b, 1, "00000007")
+
+	go func() {
+		req := <-candidate.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: okReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, okReply) {
+		t.Fatalf("routeFrame reply = %q, want %q", string(got), string(okReply))
+	}
+
+	snap := readSingleDeviceBridgeCacheSnapshot(t, dir)
+	param := findDeviceBridgeCacheParam(t, snap, 52002, 3)
+	if param.Int32 == nil || *param.Int32 != 7 {
+		t.Fatalf("observed route cache int32 = %v, want 7", param.Int32)
+	}
+	if param.Source != deviceBridgeCacheSourceDownstream || !param.LiveRefresh || param.UpdatedAt == "" {
+		t.Fatalf("cache metadata = source %q live %v updated %q, want downstream live timestamped", param.Source, param.LiveRefresh, param.UpdatedAt)
+	}
+}
+
+// TestRouteFrameFallsThroughOnCMDNotAvailable verifies that a read frame which
+// receives NACK 0x01 (CMD_NOT_AVAILABLE) from the primary route is retried on
+// the next route rather than returned to the client. This covers the serial →
+// CAN fallback for commands (e.g. ?VX bulk read) that serial hardware does not
+// implement but the CAN bridge does.
+func TestRouteFrameFallsThroughOnCMDNotAvailable(t *testing.T) {
+	primary := testRouteBroker(0x50, "serial-primary")
+	fallback := testRouteBroker(0x50, "can-fallback")
+
+	reqFrame := testMeComFrame(0x50, 1, "?VX010068010000")
+	// Primary returns NACK 0x01 (CMD_NOT_AVAILABLE): serial hw doesn't support ?VX.
+	nackReply := []byte("!500001-010000\r")
+	// Fallback returns a valid bulk-read response.
+	okReply := []byte("!50000100000000ABCD\r")
+
+	go func() {
+		req := <-primary.requests
+		req.result <- response{frame: nackReply}
+	}()
+	go func() {
+		req := <-fallback.requests
+		req.result <- response{frame: okReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, okReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (fallback)", got, okReply)
+	}
+}
+
+// TestRouteFrameFallsThroughOnIdentityParameterUnavailable verifies CoSo's
+// serial-number device-selection read can fall through from a transport that
+// cannot answer the parameter to one that can.
+func TestRouteFrameFallsThroughOnIdentityParameterUnavailable(t *testing.T) {
+	primary := testRouteBroker(0x4b, "can-primary")
+	fallback := testRouteBroker(0x4b, "serial-fallback")
+
+	reqFrame := testMeComFrame(0x4b, 1, "?VR006601")
+	nackReply := deviceBridgeNACK(0x4b, 1, 0x03)
+	okReply := deviceBridgeInfoTestFrame(0x4b, 1, "0000004B")
+
+	go func() {
+		req := <-primary.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("primary request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: nackReply}
+	}()
+	go func() {
+		req := <-fallback.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("fallback request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: okReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, okReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (fallback)", got, okReply)
+	}
+}
+
+// TestRouteFrameFallsThroughOnCatalogueParameterUnavailable verifies CoSo's
+// early firmware-version gate can fall through from a CAN route that cannot
+// expose the scalar to a serial route that can, but only because the parameter
+// is present in the canonical catalogue.
+func TestRouteFrameFallsThroughOnCatalogueParameterUnavailable(t *testing.T) {
+	primary := testRouteBroker(0x4b, "can-primary")
+	fallback := testRouteBroker(0x4b, "serial-fallback")
+
+	reqFrame := testMeComFrame(0x4b, 1, "?VR007001")
+	nackReply := deviceBridgeNACK(0x4b, 1, 0x03)
+	okReply := deviceBridgeInfoTestFrame(0x4b, 1, "40C9EB85")
+
+	go func() {
+		req := <-primary.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("primary request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: nackReply}
+	}()
+	go func() {
+		req := <-fallback.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("fallback request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: okReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, okReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (fallback)", got, okReply)
+	}
+}
+
+func TestRouteFrameDoesNotTreatCANopenNVCByteConfigAsSerialFallback(t *testing.T) {
+	for _, payload := range []string{
+		"?VM086601",
+		"?VR086601",
+		"?VX010866010000",
+	} {
+		if isRouteUnsupportedSerialFallbackRead(testMeComFrame(0x4b, 1, payload)) {
+			t.Fatalf("payload %q unexpectedly treated CANopen NVC byte/PDO config as serial fallback", payload)
+		}
+	}
+}
+
+func TestRouteFrameRewritesAddressZeroToCandidateAndRestoresResponse(t *testing.T) {
+	candidate := testRouteBroker(0x4b, "serial")
+
+	clientReq := testMeComFrame(0x00, 1, "?VR006601")
+	downstreamReq := testMeComFrame(0x4b, 1, "?VR006601")
+	downstreamReply := deviceBridgeInfoTestFrame(0x4b, 1, "0000004B")
+	clientReply := deviceBridgeInfoTestFrame(0x00, 1, "0000004B")
+
+	go func() {
+		req := <-candidate.requests
+		if !bytes.Equal(req.frame, downstreamReq) {
+			req.result <- response{err: fmt.Errorf("downstream request frame = %q, want %q", string(req.frame), string(downstreamReq))}
+			return
+		}
+		req.result <- response{frame: downstreamReply}
+	}()
+
+	got, err := routeFrame(context.Background(), clientReq, []*routeBroker{candidate}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, clientReply) {
+		t.Fatalf("routeFrame reply = %q, want %q", got, clientReply)
+	}
+}
+
+func TestRouteFrameDoesNotFallThroughOnParameterUnavailableForUnknownRead(t *testing.T) {
+	primary := testRouteBroker(0x50, "can-primary")
+	fallback := testRouteBroker(0x50, "serial-fallback")
+
+	reqFrame := testMeComFrame(0x50, 1, "?VRC35001")
+	nackReply := deviceBridgeNACK(0x50, 1, 0x03)
+
+	go func() {
+		req := <-primary.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("primary request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: nackReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, nackReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (primary NACK passed through)", got, nackReply)
+	}
+}
+
+func TestRouteFrameDoesNotFallThroughOnUnsupportedDebugFlashMetadata(t *testing.T) {
+	primary := testRouteBroker(0x50, "can-primary")
+	fallback := testRouteBroker(0x50, "serial-fallback")
+
+	reqFrame := testMeComFrame(0x50, 1, "?VMC35001")
+	nackReply := deviceBridgeNACK(0x50, 1, 0x05)
+
+	go func() {
+		req := <-primary.requests
+		if !bytes.Equal(req.frame, reqFrame) {
+			req.result <- response{err: fmt.Errorf("primary request frame = %q, want %q", string(req.frame), string(reqFrame))}
+			return
+		}
+		req.result <- response{frame: nackReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, nackReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (primary NACK passed through)", got, nackReply)
+	}
+	select {
+	case req := <-fallback.requests:
+		t.Fatalf("fallback unexpectedly received request %q", string(req.frame))
+	default:
+	}
+}
+
+// TestRouteFrameDoesNotFallThroughOnOtherNACKCodesForOrdinaryRead verifies
+// non-whitelisted NACK codes are returned directly without trying the next route.
+func TestRouteFrameDoesNotFallThroughOnOtherNACKCodes(t *testing.T) {
+	primary := testRouteBroker(0x50, "serial-primary")
+	fallback := testRouteBroker(0x50, "can-fallback")
+
+	reqFrame := testMeComFrame(0x50, 1, "?VR006801")
+	// NACK 0x05 = unknown parameter — a real device error, not a transport gap.
+	nackReply := []byte("!500001-050000\r")
+
+	go func() {
+		req := <-primary.requests
+		req.result <- response{frame: nackReply}
+	}()
+
+	got, err := routeFrame(context.Background(), reqFrame, []*routeBroker{primary, fallback}, time.Second, false, nil, "test")
+	if err != nil {
+		t.Fatalf("routeFrame returned error: %v", err)
+	}
+	if !bytes.Equal(got, nackReply) {
+		t.Fatalf("routeFrame reply = %q, want %q (primary NACK passed through)", got, nackReply)
+	}
 }

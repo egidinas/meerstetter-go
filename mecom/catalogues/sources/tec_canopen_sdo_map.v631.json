@@ -928,7 +928,7 @@
       "source_evidence": [
         "catalogues/sources/canopen_eds.v631.json#objects.2202",
         "catalogues/sources/pdf_extracted_metadata.json#tec.1102",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata ID 1102 failure"
+        "public-safe CoSo oracle metadata ID 1102 compatibility failure"
       ]
     },
     {
@@ -2951,7 +2951,7 @@
         "catalogues/sources/canopen_eds.v631.json#objects.3200",
         "catalogues/sources/pdf_extracted_metadata.json#tec.6200",
         "catalogues/sources/tec_tooltips.v631.json#parameters.6200",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata ID 6200 failure"
+        "public-safe CoSo oracle metadata ID 6200 compatibility failure"
       ]
     },
     {
@@ -4094,7 +4094,7 @@
         "catalogues/sources/canopen_eds.v631.json#objects.4320",
         "catalogues/sources/pdf_extracted_metadata.json#tec.53020",
         "catalogues/sources/tec_tooltips.v631.json#parameters.53020",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata ID 53020 failure"
+        "public-safe CoSo oracle metadata ID 53020 compatibility failure"
       ]
     },
     {
@@ -4984,7 +4984,7 @@
     {
       "command": "?VM",
       "status": "synthesized_metadata",
-      "bridge_behavior": "Returns metadata with MeParType, flags, instance count, element count, bounds, and a zero actual value from the runtime parameter catalogue.",
+      "bridge_behavior": "Returns metadata with MeParType, flags, instance count, element count, bounds, and a type-default actual value from the runtime parameter catalogue. Parameters marked with cache_behavior metadata_live_actual expose the bridge cache/live value as the metadata actual.",
       "source_evidence": [
         "MeCom Protocol Specification 5117F#3.2.3",
         "mecomserver/device_bridge.go#deviceBridgeMetadata"
@@ -5077,13 +5077,11 @@
     {
       "name": "coso",
       "source_evidence": [
-        "live CoSo trace 2026-05-20 ?VX compatibility batches",
-        "C:\\Users\\jmeyer\\Downloads\\TEC Software v6.31\\CoSo\\trace.txt",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata/bulk compatibility failures",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata ID 53020 failure",
-        "live CoSo trace 2026-05-21 CL25PRD332 metadata compatibility failures",
-        "live CoSo healthy serial trace 2026-05-22 ?VR/?VM ID 101 startup parity",
-        "C:\\Users\\sha_OCC_Testing\\OneDrive - Mynaric AG\\Desktop\\TEC Software v6.31\\CoSo\\Trace.txt"
+        "public-safe CoSo oracle ?VX compatibility batches",
+        "public-safe CoSo oracle metadata/bulk compatibility failures",
+        "public-safe CoSo oracle metadata ID 53020 compatibility failure",
+        "public-safe CoSo oracle metadata compatibility failures",
+        "public-safe CoSo oracle healthy serial ?VR/?VM ID 101 startup parity"
       ],
       "parameters": [
         {"mecom_id": 100, "max_instance": 1},
@@ -5132,7 +5130,7 @@
         {"mecom_id": 2035, "max_instance": 1, "translation": "unsupported"},
         {"mecom_id": 2036, "max_instance": 1, "translation": "unsupported"},
         {"mecom_id": 2038, "max_instance": 1, "translation": "unsupported"},
-        {"mecom_id": 2040, "max_instance": 1},
+        {"mecom_id": 2040, "max_instance": 1, "cache_behavior": "metadata_live_actual"},
         {"mecom_id": 3000, "max_instance": 1},
         {"mecom_id": 3002, "max_instance": 1},
         {"mecom_id": 3003, "max_instance": 1},
@@ -5373,6 +5371,94 @@
       ]
     },
     {
+      "mecom_id": 2150,
+      "name": "Communication / CANopen NVC / RPDO Communication Config",
+      "value_type": "byte",
+      "access": "ro",
+      "instances": {"mode": "fixed", "fixed": 1},
+      "trigger": "metadata_big_data",
+      "runtime": {
+        "kind": "canopen_pdo_config_bytes",
+        "canopen_index_base": "0x1400",
+        "max_elements": 80,
+        "metadata_flags": 3
+      },
+      "bridge_behavior": "Reads the RPDO communication configuration from CANopen PDO communication objects as BYTE big-data for CoSo metadata and ?VB paths. The bridge exposes this read-only because manual PDO writes are unsafe and not implemented.",
+      "source_evidence": [
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.2150",
+        "catalogues/sources/tec_default_config_5216o.v631.json#parameters.2150",
+        "live serial metadata probe 2026-05-22 ?VM086601 returned 0403010000005000FF00",
+        "live CANopen SDO probe 2026-05-22 0x1400:01 returned 4B020000 and 0x1400:02 returned FE",
+        "mecomserver/device_bridge.go#deviceBridgeCANopenPDOConfigBytes"
+      ]
+    },
+    {
+      "mecom_id": 2151,
+      "name": "Communication / CANopen NVC / RPDO Mapping Config",
+      "value_type": "byte",
+      "access": "ro",
+      "instances": {"mode": "fixed", "fixed": 1},
+      "trigger": "metadata_big_data",
+      "runtime": {
+        "kind": "canopen_pdo_config_bytes",
+        "canopen_index_base": "0x1600",
+        "max_elements": 144,
+        "metadata_flags": 3
+      },
+      "bridge_behavior": "Reads the RPDO mapping configuration from CANopen PDO mapping objects as BYTE big-data for CoSo metadata and ?VB paths. The bridge exposes this read-only because manual PDO writes are unsafe and not implemented.",
+      "source_evidence": [
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.2151",
+        "catalogues/sources/tec_default_config_5216o.v631.json#parameters.2151",
+        "live serial metadata probe 2026-05-22 ?VM086701 returned 0403010000009000FF00",
+        "live CANopen SDO probe 2026-05-22 0x1600:00 returned 00",
+        "mecomserver/device_bridge.go#deviceBridgeCANopenPDOConfigBytes"
+      ]
+    },
+    {
+      "mecom_id": 2152,
+      "name": "Communication / CANopen NVC / TPDO Communication Config",
+      "value_type": "byte",
+      "access": "ro",
+      "instances": {"mode": "fixed", "fixed": 1},
+      "trigger": "metadata_big_data",
+      "runtime": {
+        "kind": "canopen_pdo_config_bytes",
+        "canopen_index_base": "0x1800",
+        "max_elements": 144,
+        "metadata_flags": 3
+      },
+      "bridge_behavior": "Reads the TPDO communication configuration from CANopen PDO communication objects as BYTE big-data for CoSo metadata and ?VB paths. The bridge exposes this read-only because manual PDO writes are unsafe and not implemented.",
+      "source_evidence": [
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.2152",
+        "catalogues/sources/tec_default_config_5216o.v631.json#parameters.2152",
+        "live serial metadata probe 2026-05-22 ?VM086801 returned 0403010000009000FF00",
+        "live CANopen SDO probe 2026-05-22 0x1800:01 returned CB010000 and 0x1800:02 returned FE",
+        "mecomserver/device_bridge.go#deviceBridgeCANopenPDOConfigBytes"
+      ]
+    },
+    {
+      "mecom_id": 2153,
+      "name": "Communication / CANopen NVC / TPDO Mapping Config",
+      "value_type": "byte",
+      "access": "ro",
+      "instances": {"mode": "fixed", "fixed": 1},
+      "trigger": "metadata_big_data",
+      "runtime": {
+        "kind": "canopen_pdo_config_bytes",
+        "canopen_index_base": "0x1A00",
+        "max_elements": 144,
+        "metadata_flags": 3
+      },
+      "bridge_behavior": "Reads the TPDO mapping configuration from CANopen PDO mapping objects as BYTE big-data for CoSo metadata and ?VB paths. The bridge exposes this read-only because manual PDO writes are unsafe and not implemented.",
+      "source_evidence": [
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.2153",
+        "catalogues/sources/tec_default_config_5216o.v631.json#parameters.2153",
+        "live serial metadata probe 2026-05-22 ?VM086901 returned 0403010000009000FF00",
+        "live CANopen SDO probe 2026-05-22 0x1A00:00 returned 00",
+        "mecomserver/device_bridge.go#deviceBridgeCANopenPDOConfigBytes"
+      ]
+    },
+    {
       "mecom_id": 52200,
       "name": "Object External Temperature",
       "value_type": "float32",
@@ -5382,10 +5468,10 @@
       "runtime": {
         "kind": "virtual_parameter"
       },
-      "bridge_behavior": "Stores and returns a CoSo compatibility value inside the router for object-external-temperature state that has no TEC v6.31 CANopen numeric SDO object; the default read is NaN until CoSo writes or refreshes the value.",
+      "bridge_behavior": "Prefers a native MeCom serial/TCP read for object-external-temperature and caches the observed actual per controller. CAN-backed routes return the cached value, locally written compatibility value, or documented NaN default when no live value is available.",
       "source_evidence": [
         "catalogues/sources/pdf_extracted_metadata.json#parameters.52200",
-        "live CoSo trace 2026-05-21 CL25ENG132 metadata ID 52200 failure",
+        "public-safe CoSo oracle metadata ID 52200 compatibility failure",
         "mecomserver/device_bridge.go#deviceBridgeTransformVirtualParameter"
       ]
     },
@@ -5399,7 +5485,7 @@
       "runtime": {
         "kind": "virtual_parameter"
       },
-      "bridge_behavior": "Stores and returns CoSo sink-fixed-temperature values inside the router for the CAN-backed route. The TEC v6.31 CANopen EDS has no numeric SDO object for this MeCom parameter, but CoSo expects metadata/read/write compatibility for four sink channels.",
+      "bridge_behavior": "Prefers a native MeCom serial/TCP read for sink-fixed-temperature and caches the observed actual per controller. CAN-backed routes return the cached value, locally written compatibility value, or documented 25 C default when no live value is available.",
       "source_evidence": [
         "catalogues/sources/pdf_extracted_metadata.json#parameters.52201",
         "catalogues/sources/tec_default_config_5216o.v631.json#parameters.52201",
@@ -5465,6 +5551,16 @@
       "reason": "CoSo probes this system/query parameter, but the TEC CANopen EDS does not expose a numeric SDO equivalent; keep it out of direct SDO routing.",
       "source_evidence": [
         "catalogues/sources/canopen_eds.v631.json"
+      ]
+    },
+    {
+      "id": 50000,
+      "reason": "Available LDD metadata identifies MeParID 50000 as Debug / FlashTest / Erase Par Sector, and TEC v6.31 CANopen evidence has no SDO mapping for it; keep it unsupported instead of fabricating scalar metadata or values.",
+      "bridge_behavior": "nack_bulk_read",
+      "source_evidence": [
+        "catalogues/sources/ldd_1137_ui_metadata.v150.json#parameters.50000",
+        "catalogues/sources/ldd_1137_metadata_index.v150.json#parameters.50000",
+        "live CoSo serial-vs-CAN oracle 2026-05-22 ?VMC35001 returned +05 on direct serial"
       ]
     },
     {

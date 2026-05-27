@@ -68,6 +68,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runMetadata(args[1:], stdout, stderr)
 	case "raw":
 		return runRaw(args[1:], stdout, stderr)
+	case "oracle":
+		return runOracle(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "coso-puppet: unknown command %q\n", args[0])
 		usage(stderr)
@@ -80,6 +82,7 @@ func usage(w io.Writer) {
 	fmt.Fprintln(w, "  coso-puppet trace -file Trace.txt [-all] [-events]")
 	fmt.Fprintln(w, "  coso-puppet metadata -endpoint host:port -address N -id N [-instance N]")
 	fmt.Fprintln(w, "  coso-puppet raw -endpoint host:port -address N -payload '?VM041501'")
+	fmt.Fprintln(w, "  coso-puppet oracle -file coso_tec_v631_oracle.json [-requests]")
 }
 
 func runTrace(args []string, stdout, stderr io.Writer) int {

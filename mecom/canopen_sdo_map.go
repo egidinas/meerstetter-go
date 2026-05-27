@@ -56,27 +56,32 @@ type CANopenSDOObject struct {
 
 // CANopenSDOMap represents a parsed MeCom to CANopen SDO mappings catalog.
 type CANopenSDOMap struct {
-	byMeComID            map[int]CANopenSDOMapping
-	bridgeTransform      map[int]BridgeTransform
-	unsupported          map[int]string
-	compatibilityProfile map[string]map[int]CANopenCompatibilityParameter
+	byMeComID                 map[int]CANopenSDOMapping
+	bridgeTransform           map[int]BridgeTransform
+	unsupported               map[int]string
+	unsupportedBridgeBehavior map[int]string
+	compatibilityProfile      map[string]map[int]CANopenCompatibilityParameter
 }
 
 // BridgeTransform describes a CAN-backed MeCom compatibility behavior that is
 // intentionally not a direct SDO lookup.
 type BridgeTransform struct {
-	MeComID       int
-	Name          string
-	Type          DataType
-	Trigger       string
-	Kind          string
-	SourceMeComID int
-	Scale         float64
-	Int32Mask     uint32
-	Int32Value    int32
-	Writable      bool
-	MinInstance   int
-	MaxInstance   int
+	MeComID          int
+	Name             string
+	Type             DataType
+	Trigger          string
+	Kind             string
+	SourceMeComID    int
+	Scale            float64
+	Int32Mask        uint32
+	Int32Value       int32
+	MaxElements      int
+	CANopenIndexBase uint16
+	MetadataFlags    byte
+	HasMetadataFlags bool
+	Writable         bool
+	MinInstance      int
+	MaxInstance      int
 }
 
 type canopenBridgeTransformSource struct {
@@ -87,11 +92,14 @@ type canopenBridgeTransformSource struct {
 	Instances canopenInstanceSource `json:"instances"`
 	Trigger   string                `json:"trigger"`
 	Runtime   struct {
-		Kind          string  `json:"kind"`
-		SourceMeComID int     `json:"source_mecom_id"`
-		Scale         float64 `json:"scale"`
-		Int32Mask     string  `json:"int32_mask"`
-		Int32Value    int32   `json:"int32_value"`
+		Kind             string  `json:"kind"`
+		SourceMeComID    int     `json:"source_mecom_id"`
+		Scale            float64 `json:"scale"`
+		Int32Mask        string  `json:"int32_mask"`
+		Int32Value       int32   `json:"int32_value"`
+		MaxElements      int     `json:"max_elements"`
+		CANopenIndexBase string  `json:"canopen_index_base"`
+		MetadataFlags    *int    `json:"metadata_flags"`
 	} `json:"runtime"`
 	SourceEvidence []string `json:"source_evidence"`
 }
@@ -99,6 +107,7 @@ type canopenBridgeTransformSource struct {
 type canopenUnsupportedSource struct {
 	ID             any      `json:"id"`
 	Reason         string   `json:"reason"`
+	BridgeBehavior string   `json:"bridge_behavior"`
 	SourceEvidence []string `json:"source_evidence"`
 }
 
@@ -109,28 +118,44 @@ type canopenCompatibilityProfileSource struct {
 }
 
 type canopenCompatibilityProfileParameterSource struct {
-	MeComID     int      `json:"mecom_id"`
-	MaxInstance int      `json:"max_instance"`
-	Translation string   `json:"translation"`
-	ValueType   DataType `json:"value_type"`
-	Access      string   `json:"access"`
+	MeComID       int      `json:"mecom_id"`
+	MaxInstance   int      `json:"max_instance"`
+	Translation   string   `json:"translation"`
+	ValueType     DataType `json:"value_type"`
+	Access        string   `json:"access"`
+	CacheBehavior string   `json:"cache_behavior"`
 }
 
 // CANopenCompatibilityParameter records one external client parameter surface
 // entry observed in a compatibility trace/profile.
 type CANopenCompatibilityParameter struct {
-	MeComID     int
-	MaxInstance int
-	Type        DataType
-	Writable    bool
-	Supported   bool
-	Translation string
+	MeComID       int
+	MaxInstance   int
+	Type          DataType
+	Writable      bool
+	Supported     bool
+	Translation   string
+	CacheBehavior string
 }
 
 const (
 	canopenCompatibilityTranslationDirectMapping   = "direct_mapping"
 	canopenCompatibilityTranslationBridgeTransform = "bridge_transform"
 	canopenCompatibilityTranslationUnsupported     = "unsupported"
+
+	// CANopenUnsupportedBridgeBehaviorNACKBulkRead marks unsupported IDs whose
+	// bulk reads must fail instead of being compatibility-filled with zero.
+	CANopenUnsupportedBridgeBehaviorNACKBulkRead = "nack_bulk_read"
+
+	// CANopenUnsupportedBridgeBehaviorSerialFallbackRead marks unsupported IDs
+	// that cannot be represented by the CANopen scalar bridge but may be read
+	// truthfully by a serial fallback route.
+	CANopenUnsupportedBridgeBehaviorSerialFallbackRead = "serial_fallback_read"
+
+	// CANopenCompatibilityCacheBehaviorMetadataLiveActual marks parameters whose
+	// synthesized ?VM actual value should come from the bridge's live/cache value
+	// instead of the type default.
+	CANopenCompatibilityCacheBehaviorMetadataLiveActual = "metadata_live_actual"
 )
 
 // CANopenSDOMapping stores parsed details for an individual MeCom ID mapping.
@@ -165,10 +190,11 @@ func LoadCANopenSDOMap(raw []byte) (CANopenSDOMap, error) {
 		return CANopenSDOMap{}, fmt.Errorf("unexpected CANopen SDO map schema %q", source.SchemaVersion)
 	}
 	out := CANopenSDOMap{
-		byMeComID:            make(map[int]CANopenSDOMapping, len(source.Mappings)),
-		bridgeTransform:      make(map[int]BridgeTransform, len(source.BridgeTransforms)),
-		unsupported:          make(map[int]string, len(source.Unsupported)),
-		compatibilityProfile: make(map[string]map[int]CANopenCompatibilityParameter, len(source.CompatibilityProfiles)),
+		byMeComID:                 make(map[int]CANopenSDOMapping, len(source.Mappings)),
+		bridgeTransform:           make(map[int]BridgeTransform, len(source.BridgeTransforms)),
+		unsupported:               make(map[int]string, len(source.Unsupported)),
+		unsupportedBridgeBehavior: make(map[int]string),
+		compatibilityProfile:      make(map[string]map[int]CANopenCompatibilityParameter, len(source.CompatibilityProfiles)),
 	}
 	for _, entry := range source.Mappings {
 		if entry.MeComID <= 0 {
@@ -217,6 +243,14 @@ func LoadCANopenSDOMap(raw []byte) (CANopenSDOMap, error) {
 			return CANopenSDOMap{}, fmt.Errorf("unsupported MeCom ID %d has no source evidence", id)
 		}
 		out.unsupported[id] = entry.Reason
+		behavior := strings.ToLower(strings.TrimSpace(entry.BridgeBehavior))
+		switch behavior {
+		case "":
+		case CANopenUnsupportedBridgeBehaviorNACKBulkRead, CANopenUnsupportedBridgeBehaviorSerialFallbackRead:
+			out.unsupportedBridgeBehavior[id] = behavior
+		default:
+			return CANopenSDOMap{}, fmt.Errorf("unsupported MeCom ID %d has unknown bridge behavior %q", id, entry.BridgeBehavior)
+		}
 	}
 	for _, profile := range source.CompatibilityProfiles {
 		name := strings.ToLower(strings.TrimSpace(profile.Name))
@@ -289,6 +323,17 @@ func (m CANopenSDOMap) resolveCANopenCompatibilityProfileParameter(profileName s
 	if access := strings.ToLower(strings.TrimSpace(param.Access)); access != "" {
 		resolved.Writable = strings.Contains(access, "w")
 	}
+	cacheBehavior := strings.ToLower(strings.TrimSpace(param.CacheBehavior))
+	switch cacheBehavior {
+	case "":
+	case CANopenCompatibilityCacheBehaviorMetadataLiveActual:
+		if !resolved.Supported {
+			return CANopenCompatibilityParameter{}, fmt.Errorf("compatibility profile %q MeCom ID %d cache behavior %q requires a supported parameter", profileName, param.MeComID, cacheBehavior)
+		}
+		resolved.CacheBehavior = cacheBehavior
+	default:
+		return CANopenCompatibilityParameter{}, fmt.Errorf("compatibility profile %q MeCom ID %d has unknown cache behavior %q", profileName, param.MeComID, param.CacheBehavior)
+	}
 	return resolved, nil
 }
 
@@ -347,8 +392,12 @@ func canopenSDOMapDataType(valueType DataType, dataTypeCode string) (DataType, e
 		return DataTypeFloat32, nil
 	case DataTypeLatin1:
 		return DataTypeLatin1, nil
+	case DataTypeByte:
+		return DataTypeByte, nil
 	}
 	switch strings.ToLower(strings.TrimSpace(dataTypeCode)) {
+	case "0x0002":
+		return DataTypeByte, nil
 	case "0x0004":
 		return DataTypeInt32, nil
 	case "0x0008":
@@ -385,6 +434,13 @@ func buildCANopenBridgeTransform(entry canopenBridgeTransformSource) (BridgeTran
 		MinInstance:   minInstance,
 		MaxInstance:   maxInstance,
 	}
+	if entry.Runtime.MetadataFlags != nil {
+		if *entry.Runtime.MetadataFlags < 0 || *entry.Runtime.MetadataFlags > 0xff {
+			return BridgeTransform{}, fmt.Errorf("invalid metadata_flags %d", *entry.Runtime.MetadataFlags)
+		}
+		transform.MetadataFlags = byte(*entry.Runtime.MetadataFlags)
+		transform.HasMetadataFlags = true
+	}
 	switch transform.Kind {
 	case "synthesize_float32_from_int32":
 		if transform.Type != DataTypeFloat32 {
@@ -409,6 +465,19 @@ func buildCANopenBridgeTransform(entry canopenBridgeTransformSource) (BridgeTran
 		if transform.Type != DataTypeLatin1 {
 			return BridgeTransform{}, fmt.Errorf("latin1 transform has type %q", transform.Type)
 		}
+	case "canopen_pdo_config_bytes":
+		if transform.Type != DataTypeByte {
+			return BridgeTransform{}, fmt.Errorf("CANopen PDO config transform has type %q", transform.Type)
+		}
+		if entry.Runtime.MaxElements <= 0 {
+			return BridgeTransform{}, fmt.Errorf("missing max_elements")
+		}
+		indexBase, err := parseCANopenMapNumber(entry.Runtime.CANopenIndexBase, 16)
+		if err != nil {
+			return BridgeTransform{}, fmt.Errorf("parse canopen_index_base %q: %w", entry.Runtime.CANopenIndexBase, err)
+		}
+		transform.MaxElements = entry.Runtime.MaxElements
+		transform.CANopenIndexBase = uint16(indexBase)
 	case "constant_int32":
 		if transform.Type != DataTypeInt32 {
 			return BridgeTransform{}, fmt.Errorf("constant int transform has type %q", transform.Type)
@@ -564,6 +633,16 @@ func (m CANopenSDOMap) UnsupportedParameterIDs() map[int]string {
 	return out
 }
 
+// UnsupportedParameterBridgeBehavior returns bridge-specific behavior hints for
+// unsupported numeric MeCom IDs documented in the SDO catalog.
+func (m CANopenSDOMap) UnsupportedParameterBridgeBehavior() map[int]string {
+	out := make(map[int]string, len(m.unsupportedBridgeBehavior))
+	for id, behavior := range m.unsupportedBridgeBehavior {
+		out[id] = behavior
+	}
+	return out
+}
+
 // CompatibilityParameterTypes returns router-visible parameter data types from
 // direct SDO mappings plus documented compatibility transforms.
 func (m CANopenSDOMap) CompatibilityParameterTypes() map[int]DataType {
@@ -597,6 +676,17 @@ func (m CANopenSDOMap) CompatibilityParameterMaxInstances() map[int]int {
 		out[id] = transform.MaxInstance
 		transformIDs[id] = struct{}{}
 	}
+	for _, params := range m.compatibilityProfile {
+		for id, param := range params {
+			if !param.Supported || param.MaxInstance <= 0 {
+				continue
+			}
+			if current, ok := out[id]; ok && current > 0 && current < param.MaxInstance {
+				continue
+			}
+			out[id] = param.MaxInstance
+		}
+	}
 	for id := range m.unsupported {
 		if _, ok := transformIDs[id]; ok {
 			continue
@@ -620,6 +710,21 @@ func (m CANopenSDOMap) CompatibilityParameterWritability() map[int]bool {
 			continue
 		}
 		delete(out, id)
+	}
+	return out
+}
+
+// CompatibilityParameterCacheBehaviors returns optional cache/live behavior
+// hints for router-visible compatibility parameters.
+func (m CANopenSDOMap) CompatibilityParameterCacheBehaviors() map[int]string {
+	out := map[int]string{}
+	for _, params := range m.compatibilityProfile {
+		for id, param := range params {
+			if !param.Supported || param.CacheBehavior == "" {
+				continue
+			}
+			out[id] = param.CacheBehavior
+		}
 	}
 	return out
 }
@@ -725,6 +830,12 @@ func CANopenUnsupportedParameterIDs() map[int]string {
 	return defaultCANopenSDOMap.UnsupportedParameterIDs()
 }
 
+// CANopenUnsupportedParameterBridgeBehavior returns bridge-specific behavior
+// hints for unsupported numeric MeCom IDs in the embedded TEC CANopen source map.
+func CANopenUnsupportedParameterBridgeBehavior() map[int]string {
+	return defaultCANopenSDOMap.UnsupportedParameterBridgeBehavior()
+}
+
 // CANopenCompatibilityParameterTypes returns router-visible parameter types
 // from direct mappings plus documented bridge transforms.
 func CANopenCompatibilityParameterTypes() map[int]DataType {
@@ -741,6 +852,12 @@ func CANopenCompatibilityParameterMaxInstances() map[int]int {
 // from direct mappings plus documented bridge transforms.
 func CANopenCompatibilityParameterWritability() map[int]bool {
 	return defaultCANopenSDOMap.CompatibilityParameterWritability()
+}
+
+// CANopenCompatibilityParameterCacheBehaviors returns optional cache/live
+// behavior hints for router-visible compatibility parameters.
+func CANopenCompatibilityParameterCacheBehaviors() map[int]string {
+	return defaultCANopenSDOMap.CompatibilityParameterCacheBehaviors()
 }
 
 // CANopenCoSoCompatibilityParameters returns the CoSo compatibility profile

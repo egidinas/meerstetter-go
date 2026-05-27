@@ -432,9 +432,17 @@ func TestCANopenCompatibilityMetadataMergesMappingsAndTransforms(t *testing.T) {
 		t.Fatal("compatibility types unexpectedly include unsupported diagnostics parameter 65100")
 	}
 
+	mappedMaxInstances := CANopenMappedParameterMaxInstances()
+	if got := mappedMaxInstances[2040]; got != 255 {
+		t.Fatalf("mapped max instances for direct SDO 2040 = %d, want raw CANopen cap 255", got)
+	}
+
 	maxInstances := CANopenCompatibilityParameterMaxInstances()
-	if got := maxInstances[1045]; got != 2 {
-		t.Fatalf("compatibility max instances for direct mapping 1045 = %d, want 2", got)
+	if got := maxInstances[1045]; got != 1 {
+		t.Fatalf("compatibility max instances for profile-capped direct mapping 1045 = %d, want 1", got)
+	}
+	if got := maxInstances[2040]; got != 1 {
+		t.Fatalf("compatibility max instances for profile-capped operating mode 2040 = %d, want 1", got)
 	}
 	if got := maxInstances[1200]; got != 4 {
 		t.Fatalf("compatibility max instances for transform 1200 = %d, want 4", got)
@@ -452,6 +460,53 @@ func TestCANopenCompatibilityMetadataMergesMappingsAndTransforms(t *testing.T) {
 	}
 	if writable[1200] {
 		t.Fatal("compatibility writability for read-only transform 1200 = true, want false")
+	}
+
+	cacheBehaviors := CANopenCompatibilityParameterCacheBehaviors()
+	if got := cacheBehaviors[2040]; got != CANopenCompatibilityCacheBehaviorMetadataLiveActual {
+		t.Fatalf("compatibility cache behavior for operating mode 2040 = %q, want %q", got, CANopenCompatibilityCacheBehaviorMetadataLiveActual)
+	}
+	if got := cacheBehaviors[50000]; got != "" {
+		t.Fatalf("compatibility cache behavior for unsupported ID 50000 = %q, want empty", got)
+	}
+
+	unsupported := CANopenUnsupportedParameterIDs()
+	if _, ok := unsupported[50000]; !ok {
+		t.Fatal("unsupported parameter catalogue missing debug/flash MeParID 50000")
+	}
+	unsupportedBehaviors := CANopenUnsupportedParameterBridgeBehavior()
+	for _, tc := range []struct {
+		id       int
+		base     uint16
+		elements int
+	}{
+		{id: 2150, base: 0x1400, elements: 80},
+		{id: 2151, base: 0x1600, elements: 144},
+		{id: 2152, base: 0x1800, elements: 144},
+		{id: 2153, base: 0x1A00, elements: 144},
+	} {
+		if _, ok := unsupported[tc.id]; ok {
+			t.Fatalf("CANopen NVC byte/PDO config MeParID %d is still marked unsupported", tc.id)
+		}
+		if got := types[tc.id]; got != DataTypeByte {
+			t.Fatalf("compatibility type for CANopen NVC byte/PDO config MeParID %d = %q, want byte", tc.id, got)
+		}
+		if got := maxInstances[tc.id]; got != 1 {
+			t.Fatalf("compatibility max instances for CANopen NVC byte/PDO config MeParID %d = %d, want 1", tc.id, got)
+		}
+		if writable[tc.id] {
+			t.Fatalf("compatibility writability for CANopen NVC byte/PDO config MeParID %d = true, want false", tc.id)
+		}
+		transform, ok := CANopenBridgeTransform(tc.id)
+		if !ok {
+			t.Fatalf("missing bridge transform for CANopen NVC byte/PDO config MeParID %d", tc.id)
+		}
+		if transform.Kind != "canopen_pdo_config_bytes" || transform.Type != DataTypeByte || transform.MaxElements != tc.elements || transform.CANopenIndexBase != tc.base || transform.Writable || !transform.HasMetadataFlags || transform.MetadataFlags != 0x03 {
+			t.Fatalf("bridge transform for CANopen NVC byte/PDO config MeParID %d = %+v, want BYTE base 0x%04X max %d read-only with metadata flags 0x03", tc.id, transform, tc.base, tc.elements)
+		}
+	}
+	if got := unsupportedBehaviors[50000]; got != CANopenUnsupportedBridgeBehaviorNACKBulkRead {
+		t.Fatalf("unsupported bridge behavior for debug/flash MeParID 50000 = %q, want %q", got, CANopenUnsupportedBridgeBehaviorNACKBulkRead)
 	}
 }
 

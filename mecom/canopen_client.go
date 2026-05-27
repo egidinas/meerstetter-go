@@ -230,6 +230,56 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 	}
 }
 
+// ReadSDORaw reads one expedited CANopen SDO object and returns the raw little
+// endian payload bytes from the upload response.
+func (c *CANopenClient) ReadSDORaw(ctx context.Context, index uint16, subIndex byte) ([]byte, error) {
+	req, err := canopen.SDOUploadRequest(c.node, index, subIndex)
+	if err != nil {
+		return nil, err
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if err := c.rw.Send(req); err != nil {
+		return nil, err
+	}
+	deadline := time.Now().Add(c.timeout)
+	if ctxDeadline, ok := ctx.Deadline(); ok && ctxDeadline.Before(deadline) {
+		deadline = ctxDeadline
+	}
+	for {
+		wait := time.Until(deadline)
+		if wait <= 0 {
+			return nil, fmt.Errorf("%w: read 0x%04X:%02X", ErrTimeout, index, subIndex)
+		}
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		frame, err := c.rw.Recv(wait)
+		if err != nil {
+			return nil, err
+		}
+		if frame.ID != 0x580+uint32(c.node) {
+			continue
+		}
+		resp, err := canopen.ParseSDOUploadResponse(frame)
+		if err != nil {
+			var abort canopen.SDOAbortError
+			if errors.As(err, &abort) {
+				if abort.Index == index && abort.SubIndex == subIndex {
+					return nil, err
+				}
+			}
+			continue
+		}
+		if resp.Index != index || resp.SubIndex != subIndex {
+			continue
+		}
+		return append([]byte(nil), resp.Data...), nil
+	}
+}
+
 func (c *CANopenClient) canopenSDOObjectForMeCom(ctx context.Context, paramID, instance int) (CANopenSDOObject, bool) {
 	if ctx != nil {
 		if m, ok := SDOMapFromContext(ctx); ok {

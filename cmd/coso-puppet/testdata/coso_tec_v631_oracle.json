@@ -1,0 +1,284 @@
+{
+  "schema_version": "coso_connection_oracle.v1",
+  "id": "meerstetter.tec.coso.v631.connection",
+  "source_policy": "Derived public-safe behavior summary from private full-fidelity CoSo/Core evidence. Do not store proprietary binaries, copied decompiled source, raw traces, hostnames, local paths, serial numbers, credentials, or manufacturer-gate material in this fixture.",
+  "device": {
+    "family": "TEC",
+    "definition": "meerstetter.tec.v631",
+    "identity_string": "8065-TEC SW G01",
+    "firmware_min": "6.30",
+    "firmware_max": "6.39"
+  },
+  "transport": {
+    "single_flight": true,
+    "timeout_retries": 3,
+    "broadcast_address": 255,
+    "sequence_address_match_required": true,
+    "server_error_prefix": "+",
+    "ack_control": "!",
+    "request_control": "#",
+    "frame_terminator": "CR"
+  },
+  "server_errors": [
+    {
+      "code": 2,
+      "name": "device_busy",
+      "action": "retry_bounded"
+    },
+    {
+      "code": 5,
+      "name": "parameter_unavailable",
+      "action": "metadata_mark_unavailable_continue"
+    }
+  ],
+  "phases": [
+    {
+      "name": "identity_gate",
+      "order": 10,
+      "required": true,
+      "description": "CoSo accepts only the expected TEC identity before loading parameters.",
+      "commands": [
+        {
+          "command": "?IF",
+          "direction": "query",
+          "request": {
+            "payload": "?IF"
+          },
+          "response": {
+            "fields": ["identity_string"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "firmware_gate",
+      "order": 20,
+      "required": true,
+      "description": "CoSo tries the firmware-version command first and falls back to scalar parameters when it is unavailable.",
+      "commands": [
+        {
+          "command": "?VI",
+          "direction": "query",
+          "optional": true,
+          "failure_action": "fallback"
+        },
+        {
+          "command": "?VR",
+          "direction": "query",
+          "fallback_for": "?VI",
+          "parameter_id": 112,
+          "instance": 1,
+          "value_type": "float32",
+          "request": {
+            "payload": "?VR007001"
+          }
+        },
+        {
+          "command": "?VR",
+          "direction": "query",
+          "fallback_for": "?VI",
+          "parameter_id": 113,
+          "instance": 1,
+          "value_type": "int32",
+          "request": {
+            "payload": "?VR007101"
+          }
+        }
+      ]
+    },
+    {
+      "name": "metadata_load",
+      "order": 30,
+      "required": true,
+      "description": "CoSo reads metadata for all UI parameters before considering the parameter controls initialized.",
+      "commands": [
+        {
+          "command": "?VM",
+          "direction": "query",
+          "foreach": "basic_parameter",
+          "request_fields": ["parameter_id:uint16", "instance:uint8"],
+          "response_fields": ["mepar_type:uint8", "flags:uint8", "max_instances:uint8", "max_elements:uint32", "bounds", "actual_default_or_live"],
+          "unavailable_error_code": 5,
+          "unavailable_action": "mark_parameter_unavailable_continue",
+          "sample_parameters": [
+            {
+              "parameter_id": 2040,
+              "instance": 1,
+              "value_type": "int32",
+              "cache_behavior": "metadata_live_actual",
+              "request": {
+                "payload": "?VM07F801"
+              }
+            },
+            {
+              "parameter_id": 50000,
+              "instance": 1,
+              "support": "unsupported",
+              "writable": false,
+              "request": {
+                "payload": "?VMC35001"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "big_data_initial_read",
+      "order": 40,
+      "required": false,
+      "description": "CoSo reads LATIN1 and BYTE parameter values through big-data chunks after metadata identifies the type.",
+      "commands": [
+        {
+          "command": "?VB",
+          "direction": "query",
+          "request_fields": ["parameter_id:uint16", "instance:uint8", "offset:uint32", "requested_elements:uint16"],
+          "response_fields": ["element_count:uint16", "continuation:uint8", "data"],
+          "sample_parameters": [
+            {
+              "parameter_id": 120,
+              "instance": 1,
+              "value_type": "latin1",
+              "request": {
+                "payload": "?VB00780100000000FFFF"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "value_refresh",
+      "order": 50,
+      "required": true,
+      "description": "CoSo refreshes numeric values with ordered bulk reads and uses big-data reads for LATIN1/BYTE values.",
+      "commands": [
+        {
+          "command": "?VX",
+          "direction": "query",
+          "foreach": "numeric_parameter_batch",
+          "request_fields": ["count:uint8", "repeated(parameter_id:uint16,instance:uint8)"],
+          "response_fields": ["concatenated_values_in_request_order"],
+          "preserve_request_order": true,
+          "sample_parameters": [
+            {
+              "parameter_id": 2040,
+              "instance": 1,
+              "value_type": "int32",
+              "request": {
+                "payload": "?VX0107F801"
+              }
+            }
+          ]
+        },
+        {
+          "command": "?VB",
+          "direction": "query",
+          "foreach": "latin1_or_byte_parameter"
+        }
+      ]
+    },
+    {
+      "name": "status_poll",
+      "order": 60,
+      "required": true,
+      "update_interval_ms": 300,
+      "description": "CoSo runs a separate status-display loop that bulk-reads status and error-number values as INT32, then reads error detail only when the status equals the configured error state.",
+      "commands": [
+        {
+          "command": "?VX",
+          "direction": "query",
+          "foreach": "status_display_batch",
+          "value_type": "int32",
+          "preserve_request_order": true
+        },
+        {
+          "command": "?VR",
+          "direction": "query",
+          "optional": true,
+          "when": "status_is_error",
+          "value_type": "int32"
+        },
+        {
+          "command": "?VB",
+          "direction": "query",
+          "optional": true,
+          "when": "status_is_error_text",
+          "value_type": "latin1"
+        }
+      ]
+    },
+    {
+      "name": "crtv_stream_setup",
+      "order": 70,
+      "required": false,
+      "description": "CoSo initializes the CRTV/ring-stream path after connection and may configure capture items for selected live parameters.",
+      "commands": [
+        {
+          "command": "?RS0000",
+          "direction": "query",
+          "role": "ring_pointer"
+        },
+        {
+          "command": "?RS0001",
+          "direction": "query",
+          "role": "ring_chunk"
+        },
+        {
+          "command": "?RS0002",
+          "direction": "query",
+          "role": "capture_config"
+        },
+        {
+          "command": "?RS0003",
+          "direction": "query",
+          "role": "trigger_sync"
+        }
+      ],
+      "default_capture_parameters": [
+        {"parameter_id": 1000, "instance": 1},
+        {"parameter_id": 1001, "instance": 1},
+        {"parameter_id": 1020, "instance": 1},
+        {"parameter_id": 1021, "instance": 1},
+        {"parameter_id": 1032, "instance": 1}
+      ]
+    },
+    {
+      "name": "write_config",
+      "order": 80,
+      "required": false,
+      "description": "CoSo writes changed parameters with metadata-driven scalar or big-data commands; extended scalar writes are compatibility-only and must not make unknown parameters writable.",
+      "commands": [
+        {
+          "command": "VS",
+          "direction": "set",
+          "when": "metadata_write_ok_and_scalar",
+          "request_fields": ["parameter_id:uint16", "instance:uint8", "encoded_scalar"]
+        },
+        {
+          "command": "VB",
+          "direction": "set",
+          "when": "metadata_write_ok_and_big_data",
+          "request_fields": ["parameter_id:uint16", "instance:uint8", "offset:uint32", "element_count:uint16", "data"]
+        },
+        {
+          "command": "MS",
+          "direction": "set",
+          "compatibility_only": true,
+          "when": "ui_requests_extended_scalar_write",
+          "request_fields": ["parameter_id:uint16", "instance:uint8", "encoded_scalar"],
+          "safety_policy": "Do not grant writability unless the canonical catalogue marks the parameter writable."
+        },
+        {
+          "command": "SP",
+          "direction": "set",
+          "when": "persist_non_ram_only_change"
+        }
+      ]
+    }
+  ],
+  "public_safety": {
+    "forbidden_tokens": ["C:\\\\", "/home/", "Trace.txt", "CL25", "OneDrive", "Downloads", "serial_number", "password", "custom_lock"],
+    "allowed_evidence_kinds": ["protocol_command", "parameter_id", "value_type", "phase_order", "error_policy", "cache_policy"]
+  }
+}

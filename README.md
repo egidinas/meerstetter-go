@@ -162,6 +162,32 @@ example, MeCom ID `120` is latin1 metadata/big-data rather than a 32-bit SDO
 value, and CRTVStream `?RS0000` is a ring-buffer command; CANopen direct
 transports only claim ring readout after an implementation is proven.
 
+`cmd/coso-puppet/testdata/coso_tec_v631_oracle.json` is the public-safe CoSo
+connection oracle used for reverse-engineering parity tests. It records the
+connection phase order, command families, bounded error policy, metadata/cache
+expectations, and smoke-test request payloads without storing private traces,
+hostnames, local paths, serial numbers, credentials, proprietary binaries, or
+decompiled source.
+
+For a deployable compatibility bridge, run `mecomvseriald` with data-driven
+routes and an explicit cache directory:
+
+```sh
+MECOM_DEVICE_CACHE_DIR=./state/mecom-device-cache \
+go run ./cmd/mecomvseriald \
+  -listen 0.0.0.0:50075 \
+  -default-address 75 \
+  -route 75=serial:/dev/serial/by-id/usb-FTDI_TEC75-if00-port0@57600 \
+  -route 75=can:can0/75
+```
+
+The bridge prefers truthful native MeCom serial/TCP reads for startup metadata,
+uses CANopen SDO reads where the map provides a real object, and only falls
+back to per-device cache or documented compatibility defaults for values the
+active transport cannot supply. See
+[`docs/coso_compatibility_bridge.md`](docs/coso_compatibility_bridge.md) before
+adding new shim behavior.
+
 ---
 
 ## Quick start
