@@ -346,6 +346,23 @@ func TestBuildRingReadFrameReferenceVector(t *testing.T) {
 	}
 }
 
+func TestClientReadRingChunkClampsToControllerLimit(t *testing.T) {
+	rw := &scriptedReadWriter{read: bytes.NewBuffer(responseFrame("!000001000000"))}
+	client := NewClient(rw, ClientConfig{})
+
+	resp, err := client.ReadRingChunk(context.Background(), 0x00000180, 0xFFFF)
+	if err != nil {
+		t.Fatalf("ReadRingChunk failed: %v", err)
+	}
+	if resp.BytesAdded != 0 || resp.Status != RingStatusAllDataRead {
+		t.Fatalf("response = %#v", resp)
+	}
+	want := string(BuildRingReadFrame(0x00, 0x0001, 0x00000180, MaxRingReadMaxBytes))
+	if got := rw.written.String(); got != want {
+		t.Fatalf("written frame = %q, want clamped frame %q", got, want)
+	}
+}
+
 func TestParseRingPointerResponse(t *testing.T) {
 	got, err := ParseRingPointerResponse(responseFrame("!00853200000180"))
 	if err != nil {

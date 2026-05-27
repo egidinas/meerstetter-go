@@ -734,6 +734,7 @@ func (c *Client) ReadRingPointer(ctx context.Context) (uint32, error) {
 }
 
 func (c *Client) ReadRingChunk(ctx context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
+	maxBytes = clampRingReadMaxBytes(maxBytes)
 	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
 		return BuildRingReadFrame(int(c.address), seq, start, maxBytes), nil
 	})

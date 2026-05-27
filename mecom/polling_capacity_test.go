@@ -16,16 +16,16 @@ func TestDefaultTECPollingCapacityCountsFourControllerCatalogue(t *testing.T) {
 	if got, want := estimate.TotalBackground, 16; got != want {
 		t.Fatalf("total background = %d, want %d", got, want)
 	}
-	if got, want := estimate.RingCaptureSlotsTotal, 64; got != want {
+	if got, want := estimate.RingCaptureSlotsTotal, 16; got != want {
 		t.Fatalf("ring capture slots = %d, want %d", got, want)
 	}
-	if got, want := estimate.HighPriorityOverflow, 112; got != want {
+	if got, want := estimate.HighPriorityOverflow, 160; got != want {
 		t.Fatalf("high-priority overflow = %d, want %d", got, want)
 	}
-	if got, want := estimate.RoundRobinQueueTotal, 128; got != want {
+	if got, want := estimate.RoundRobinQueueTotal, 176; got != want {
 		t.Fatalf("round-robin queue total = %d, want %d", got, want)
 	}
-	if got, want := estimate.RoundRobinCycleSeconds, 2.0; math.Abs(got-want) > 0.0001 {
+	if got, want := estimate.RoundRobinCycleSeconds, 2.75; math.Abs(got-want) > 0.0001 {
 		t.Fatalf("round-robin cycle = %.4f, want %.4f", got, want)
 	}
 	if estimate.CanKeepAllHighPriorityInRing {
@@ -56,6 +56,7 @@ func TestTECPollingCapacityCanModelReducedPrioritySet(t *testing.T) {
 	input := DefaultTECPollingCapacityInput(4, 2)
 	input.HighPriorityPerInstance = 4
 	input.BackgroundPerInstance = 5
+	input.RingCaptureLimit = RingCaptureLimit
 
 	estimate := EstimateTECPollingCapacity(input)
 

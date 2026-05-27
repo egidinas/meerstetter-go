@@ -43,8 +43,27 @@ tile data explicit.
 - Smoothed and decimated to 1 Hz.
 - Intended for the long-view chart and wall tiles.
 - Should remain bounded and stable for rendering, not become a raw sample dump.
+- Raw ring samples should enter the graph history through the normal tile
+  pyramid so long ranges use decimated levels instead of re-reading the raw
+  stream.
 
-## 3. Lazy catalogue queue is lower priority
+## 3. Controller ring operating envelope
+
+CRTVStream is a bounded controller resource, not an unlimited high-rate bus.
+
+- The device ring is a 4096-byte circular buffer.
+- `?RS0001` reads are capped at 279 bytes per request in the gateway client.
+- The protocol can configure 16 capture slots, but the gateway default is four
+  slots per controller so shared serial or TCP routes do not fall behind the
+  device ring.
+- Ring capture uses the same lazy `?VX` queue as fallback. Values that do not
+  fit into the bounded ring set, and values on transports without ring support,
+  stay real controller reads via the round-robin queue.
+- A route that reports no ring capability must move ring candidates into the
+  background queue rather than reporting a priority lane that cannot actually
+  deliver samples.
+
+## 4. Lazy catalogue queue is lower priority
 
 Catalogue and dictionary expansion should stay lower priority than hot readout.
 
@@ -56,7 +75,7 @@ Catalogue and dictionary expansion should stay lower priority than hot readout.
 - Age indicators should be visible so the operator can tell whether a lazy item
   is still warming up or already current.
 
-## 4. Optional boost mode is negotiated, not promised
+## 5. Optional boost mode is negotiated, not promised
 
 Optional boost mode is a capability-negotiated dual-route scheduling policy.
 It is not a blanket UI guarantee.
@@ -67,19 +86,20 @@ It is not a blanket UI guarantee.
   behavior unless the backend has negotiated it.
 - This is a runtime capability decision, not a static design assumption.
 
-## 5. Route policy summary
+## 6. Route policy summary
 
 | Route / path | Priority lane | Hot buffer | 1 Hz tiles | Notes |
 |--------------|---------------|------------|------------|-------|
-| Serial MeCom | Yes, when ring is supported | Yes | Yes | Current ring-readout support exists. |
+| Serial MeCom | Yes, when ring is supported | Yes | Yes | Bounded ring capture plus lazy `?VX` fallback. |
 | CANopen direct | No, unless implemented | Yes | Yes | No ring claim without proof. |
 | Kvaser direct CAN | No, unless implemented | Yes | Yes | No ring claim without proof. |
 
-## 6. Non-goals
+## 7. Non-goals
 
 - Do not describe ring access as a universal transport feature.
+- Do not configure all 16 CRTVStream slots by default on shared production
+  routes.
 - Do not present boost mode as a UI promise independent of capability
   negotiation.
 - Do not mix lazy catalogue fetches with the hot full-resolution read path.
 - Do not conflate long-term tiles with the short hot investigation buffer.
-

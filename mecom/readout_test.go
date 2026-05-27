@@ -14,7 +14,7 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	})
 	client := &fakeReadoutClient{
 		pointer:    0x20,
-		bulkValues: []float64{1},
+		bulkValues: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 1, math.NaN(), math.NaN()},
 	}
 
 	first := readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(10, 0))
@@ -22,16 +22,16 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	if len(client.configured) != 1 {
 		t.Fatalf("configured calls = %d, want 1", len(client.configured))
 	}
-	if got, want := len(client.configured[0]), 11; got != want {
-		t.Fatalf("ring capture slots = %d, want high-priority slots %d", got, want)
+	if got, want := len(client.configured[0]), DefaultRingCaptureLimit; got != want {
+		t.Fatalf("ring capture slots = %d, want default bounded slots %d", got, want)
 	}
 	for _, p := range client.configured[0] {
 		if p.Name == "temperature_stable" {
 			t.Fatalf("background parameter was configured into ring capture: %#v", p)
 		}
 	}
-	if len(client.bulkParams) != 1 || len(client.bulkParams[0]) != 1 || client.bulkParams[0][0].Name != "temperature_stable" {
-		t.Fatalf("bulk params = %#v, want only temperature_stable background read", client.bulkParams)
+	if len(client.bulkParams) != 1 || len(client.bulkParams[0]) != 8 {
+		t.Fatalf("bulk params = %#v, want bounded high-priority overflow plus background read", client.bulkParams)
 	}
 	if value := readoutValueBySensor(first.Values, "mecom.tec_01.temperature_stable"); value == nil || value.Value != 1 {
 		t.Fatalf("first poll values missing background temperature_stable: %#v", first.Values)
@@ -53,15 +53,20 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	if client.lastRingStart != 0x20 {
 		t.Fatalf("ring read start = %#x, want configured pointer %#x", client.lastRingStart, 0x20)
 	}
+	if client.lastRingMaxBytes != MaxRingReadMaxBytes {
+		t.Fatalf("ring read max bytes = %d, want controller limit %d", client.lastRingMaxBytes, MaxRingReadMaxBytes)
+	}
 	if value := readoutValueBySensor(second.Values, "mecom.tec_01.object_temp_c"); value == nil || math.Abs(value.Value-12) > 0.0001 {
 		t.Fatalf("second poll values missing reduced ring object_temp_c=12: %#v", second.Values)
 	}
 }
 
-func TestReadoutWidensRingReadWindowUnderBacklog(t *testing.T) {
+func TestReadoutCapsRingReadWindowAtControllerLimit(t *testing.T) {
 	readout := NewReadout(ReadoutConfig{
-		Parameters: DefaultTECReadoutParameters(1),
-		BulkChunk:  8,
+		Parameters:              DefaultTECReadoutParameters(1),
+		BulkChunk:               8,
+		DefaultRingReadMaxBytes: 256,
+		MaxRingReadMaxBytes:     4096,
 	})
 	client := &fakeReadoutClient{
 		pointer:    0x40,
@@ -70,15 +75,15 @@ func TestReadoutWidensRingReadWindowUnderBacklog(t *testing.T) {
 
 	_ = readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(10, 0))
 	client.ringResponse = RingReadResponse{
-		BytesAdded: DefaultRingReadMaxBytes,
+		BytesAdded: 256,
 		Status:     RingStatusHasMoreData,
 		Data:       []byte{0x88, 0x00, 0x34, 0x12, 0x00, 0x00, 0x00, 0x40, 0x41, 0x88, 0x10},
 	}
 
 	_ = readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(11, 0))
 
-	if readout.RingReadMaxBytes() != DefaultRingReadMaxBytes*2 {
-		t.Fatalf("ring max bytes = %d, want widened %d", readout.RingReadMaxBytes(), DefaultRingReadMaxBytes*2)
+	if readout.RingReadMaxBytes() != MaxRingReadMaxBytes {
+		t.Fatalf("ring max bytes = %d, want capped controller limit %d", readout.RingReadMaxBytes(), MaxRingReadMaxBytes)
 	}
 }
 
@@ -116,7 +121,7 @@ func TestReadoutSkipsRingForUnsupportedTransport(t *testing.T) {
 	if got, want := len(batch.BackgroundValues), 8; got != want {
 		t.Fatalf("background values = %d, want duplicated high-priority fallback chunk %d", got, want)
 	}
-	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.object_temp_c"); value == nil || value.Value != 2 {
+	if value := readoutValueBySensor(batch.Values, "mecom.tec_01.object_temp_c"); value == nil || value.Value != 1 {
 		t.Fatalf("missing first fallback value from background queue: %#v", batch.Values)
 	}
 }
@@ -216,14 +221,15 @@ func TestReadoutDoesNotInferPeltierThermalValuesForPowerSupplyMode(t *testing.T)
 }
 
 type fakeReadoutClient struct {
-	configured    [][]RingCaptureParameter
-	ringSupported *bool
-	pointer       uint32
-	ringResponse  RingReadResponse
-	ringReads     int
-	lastRingStart uint32
-	bulkParams    [][]Parameter
-	bulkValues    []float64
+	configured       [][]RingCaptureParameter
+	ringSupported    *bool
+	pointer          uint32
+	ringResponse     RingReadResponse
+	ringReads        int
+	lastRingStart    uint32
+	lastRingMaxBytes uint16
+	bulkParams       [][]Parameter
+	bulkValues       []float64
 }
 
 func (f *fakeReadoutClient) SupportsRingReadout() bool {
@@ -269,9 +275,10 @@ func (f *fakeReadoutClient) ReadRingPointer(context.Context) (uint32, error) {
 	return f.pointer, nil
 }
 
-func (f *fakeReadoutClient) ReadRingChunk(_ context.Context, start uint32, _ uint16) (RingReadResponse, error) {
+func (f *fakeReadoutClient) ReadRingChunk(_ context.Context, start uint32, maxBytes uint16) (RingReadResponse, error) {
 	f.ringReads++
 	f.lastRingStart = start
+	f.lastRingMaxBytes = maxBytes
 	return f.ringResponse, nil
 }
 

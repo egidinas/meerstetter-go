@@ -160,7 +160,10 @@ such as firmware float ID `112`, random-startup ID `115`, and User Notes ID
 non-SDO paths from CoSo logs are recorded in the `unsupported` section. For
 example, MeCom ID `120` is latin1 metadata/big-data rather than a 32-bit SDO
 value, and CRTVStream `?RS0000` is a ring-buffer command; CANopen direct
-transports only claim ring readout after an implementation is proven.
+transports only claim ring readout after an implementation is proven. Serial
+CRTVStream readout is bounded to the controller's ring envelope: four default
+capture slots, 279 bytes per `?RS0001` read, and `?VX` round-robin fallback for
+overflow or non-ring routes.
 
 `cmd/coso-puppet/testdata/coso_tec_v631_oracle.json` is the public-safe CoSo
 connection oracle used for reverse-engineering parity tests. It records the

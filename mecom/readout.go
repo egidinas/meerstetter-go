@@ -9,10 +9,12 @@ import (
 
 const (
 	RingCaptureLimit           = 16
+	DefaultRingCaptureLimit    = 4
 	DefaultRingCaptureID       = 1
 	DefaultRingInhibitTime10us = 1000
-	DefaultRingReadMaxBytes    = 4096
-	MaxRingReadMaxBytes        = 16384
+	RingBufferSizeBytes        = 4096
+	MaxRingReadMaxBytes        = 279
+	DefaultRingReadMaxBytes    = MaxRingReadMaxBytes
 )
 
 const (
@@ -135,7 +137,10 @@ func NewReadout(cfg ReadoutConfig) *Readout {
 		bulkChunk = 8
 	}
 	captureLimit := cfg.RingCaptureLimit
-	if captureLimit <= 0 || captureLimit > RingCaptureLimit {
+	if captureLimit <= 0 {
+		captureLimit = DefaultRingCaptureLimit
+	}
+	if captureLimit > RingCaptureLimit {
 		captureLimit = RingCaptureLimit
 	}
 	captureID := cfg.RingCaptureID
@@ -150,10 +155,12 @@ func NewReadout(cfg ReadoutConfig) *Readout {
 	if ringMinBytes == 0 {
 		ringMinBytes = DefaultRingReadMaxBytes
 	}
+	ringMinBytes = clampRingReadMaxBytes(ringMinBytes)
 	ringMaxLimit := cfg.MaxRingReadMaxBytes
 	if ringMaxLimit == 0 {
 		ringMaxLimit = MaxRingReadMaxBytes
 	}
+	ringMaxLimit = clampRingReadMaxBytes(ringMaxLimit)
 	if ringMaxLimit < ringMinBytes {
 		ringMaxLimit = ringMinBytes
 	}
@@ -198,6 +205,13 @@ func NewReadout(cfg ReadoutConfig) *Readout {
 	return r
 }
 
+func clampRingReadMaxBytes(maxBytes uint16) uint16 {
+	if maxBytes == 0 || maxBytes > MaxRingReadMaxBytes {
+		return MaxRingReadMaxBytes
+	}
+	return maxBytes
+}
+
 func (r *Readout) EnqueueFront(spec ReadoutParameter) {
 	if spec.Sensor == "" {
 		spec.Sensor = spec.Parameter.Name
@@ -234,6 +248,7 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 		return
 	}
 	if !supportsRingReadout(client) {
+		r.moveRingCaptureToBackground()
 		return
 	}
 	reqCtx, cancel := context.WithTimeout(ctx, r.requestTimeout)
@@ -310,6 +325,31 @@ func (r *Readout) pollRing(ctx context.Context, client ReadClient, observedAt ti
 func supportsRingReadout(client ReadClient) bool {
 	capable, ok := client.(RingReadoutCapability)
 	return !ok || capable.SupportsRingReadout()
+}
+
+func (r *Readout) moveRingCaptureToBackground() {
+	if len(r.ringItems) == 0 {
+		r.ringConfig = nil
+		r.ringConfigured = false
+		r.ringTail = nil
+		return
+	}
+	if r.background == nil {
+		r.background = NewPollQueue(nil)
+	}
+	for _, item := range r.ringItems {
+		spec := item.spec
+		if spec.Sensor == "" {
+			spec.Sensor = spec.Parameter.Name
+		}
+		r.backgroundItems[ParameterKey(spec.Parameter)] = spec
+		r.background.Enqueue(spec.Parameter)
+		r.background.EnqueueFront(spec.Parameter)
+	}
+	r.ringItems = nil
+	r.ringConfig = nil
+	r.ringConfigured = false
+	r.ringTail = nil
 }
 
 func (r *Readout) tuneRingReadWindow(resp RingReadResponse) {

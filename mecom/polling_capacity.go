@@ -89,7 +89,7 @@ func DefaultTECPollingCapacityInput(controllers, instancesPerController int) Pol
 		InstancesPerController:      instancesPerController,
 		HighPriorityPerInstance:     high / instancesPerController,
 		BackgroundPerInstance:       background / instancesPerController,
-		RingCaptureLimit:            RingCaptureLimit,
+		RingCaptureLimit:            DefaultRingCaptureLimit,
 		RingReadPeriod:              DefaultRingReadPeriod,
 		BulkChunk:                   8,
 		BulkPollHz:                  DefaultBackgroundBulkPollHz,
@@ -189,7 +189,10 @@ func normalizePollingCapacityInput(input PollingCapacityInput) PollingCapacityIn
 			input.BackgroundPerInstance = background / input.InstancesPerController
 		}
 	}
-	if input.RingCaptureLimit <= 0 || input.RingCaptureLimit > RingCaptureLimit {
+	if input.RingCaptureLimit <= 0 {
+		input.RingCaptureLimit = DefaultRingCaptureLimit
+	}
+	if input.RingCaptureLimit > RingCaptureLimit {
 		input.RingCaptureLimit = RingCaptureLimit
 	}
 	if input.RingReadPeriod <= 0 {

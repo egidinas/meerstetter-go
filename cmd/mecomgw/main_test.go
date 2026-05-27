@@ -2261,14 +2261,14 @@ func TestPowerControlSamplingRequiresExplicitDeviceOptIn(t *testing.T) {
 
 func TestGatewayRingCaptureUsesBalancedHighPriorityDataset(t *testing.T) {
 	capture := gatewayRingCaptureParameters(2)
-	if len(capture) > mecom.RingCaptureLimit {
-		t.Fatalf("ring capture len = %d, want <= %d", len(capture), mecom.RingCaptureLimit)
+	if len(capture) != gatewayRingCaptureLimit {
+		t.Fatalf("ring capture len = %d, want bounded default %d", len(capture), gatewayRingCaptureLimit)
 	}
-	wantIDs := []int{1000, 1001, 3000, 1020, 1021, 1022}
+	wantIDs := []int{1000, 1001}
 	seen := make(map[string]mecom.RingCaptureParameter, len(capture))
 	for _, p := range capture {
-		if p.InhibitTime10us != 0 {
-			t.Fatalf("ring capture %d:%d inhibit = %d, want full-rate 0", p.ID, p.Instance, p.InhibitTime10us)
+		if p.InhibitTime10us != mecom.DefaultRingInhibitTime10us {
+			t.Fatalf("ring capture %d:%d inhibit = %d, want default %d", p.ID, p.Instance, p.InhibitTime10us, mecom.DefaultRingInhibitTime10us)
 		}
 		if p.Type == "" {
 			t.Fatalf("ring capture %d:%d has empty data type", p.ID, p.Instance)
@@ -2284,21 +2284,27 @@ func TestGatewayRingCaptureUsesBalancedHighPriorityDataset(t *testing.T) {
 	}
 
 	lazy := gatewayLazyReadParameters(2)
+	lazySeen := make(map[string]mecom.Parameter, len(lazy))
 	for _, p := range lazy {
-		if _, duplicate := seen[gatewayCatalogueKey(p.ID, p.Instance)]; duplicate {
-			t.Fatalf("lazy read duplicates ring capture parameter %d:%d", p.ID, p.Instance)
+		lazySeen[gatewayCatalogueKey(p.ID, p.Instance)] = p
+	}
+	for _, ringParam := range capture {
+		if _, ok := lazySeen[gatewayCatalogueKey(ringParam.ID, ringParam.Instance)]; !ok {
+			t.Fatalf("lazy read missing ring fallback parameter %d:%d", ringParam.ID, ringParam.Instance)
 		}
 	}
 	assertLazyContains := func(id, instance int) {
 		t.Helper()
-		for _, p := range lazy {
-			if p.ID == id && p.Instance == instance {
-				return
-			}
+		if _, ok := lazySeen[gatewayCatalogueKey(id, instance)]; ok {
+			return
 		}
 		t.Fatalf("lazy read missing overflow/background parameter %d:%d", id, instance)
 	}
 	assertLazyContains(52200, 1)
+	assertLazyContains(3000, 2)
+	assertLazyContains(1020, 1)
+	assertLazyContains(1021, 2)
+	assertLazyContains(1022, 1)
 	assertLazyContains(40000, 2)
 }
 

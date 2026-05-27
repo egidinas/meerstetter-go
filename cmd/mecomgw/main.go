@@ -38,6 +38,16 @@ import (
 	tmtc "github.com/egidinas/signalforge/contracts"
 )
 
+const (
+	gatewayLazyPollInterval = time.Second
+	gatewayLazyPollChunk    = 8
+	gatewayLazyPollTimeout  = 1500 * time.Millisecond
+	gatewayRingSampleBuffer = 8192
+	gatewayRingCaptureLimit = mecom.DefaultRingCaptureLimit
+)
+
+var gatewayRingCaptureParamIDs = []int{1000, 1001, 3000, 1020, 1021, 1022}
+
 func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "HTTP listen address")
 	configPath := flag.String("config", "", "JSON config file with devices")
@@ -72,6 +82,7 @@ func main() {
 
 	go srv.derivationWorker(ctx)
 	go srv.powerControlWorker(ctx)
+	go srv.lazyPollWorker(ctx)
 
 	httpSrv := &http.Server{
 		Addr:              *listen,
@@ -332,21 +343,22 @@ type powerControlSample struct {
 }
 
 type deviceBinding struct {
-	cfg          DeviceConfig
-	index        int
-	mu           sync.Mutex
-	client       mecom.DeviceClient
-	commander    *mecom.Commander
-	lastErr      error
-	proxy        *mecom.ProxyServer
-	ring         *mecom.RingReader
-	powerHistory map[int][]powerControlSample
-	samplesChan  chan mecom.RingSample
-	ringStop     chan struct{}
-	latestV      map[int]float64
-	latestI      map[int]float64
-	latestVTime  map[int]time.Time
-	latestITime  map[int]time.Time
+	cfg           DeviceConfig
+	index         int
+	mu            sync.Mutex
+	client        mecom.DeviceClient
+	commander     *mecom.Commander
+	lastErr       error
+	proxy         *mecom.ProxyServer
+	ring          *mecom.RingReader
+	lazyPollQueue *mecom.PollQueue
+	powerHistory  map[int][]powerControlSample
+	samplesChan   chan mecom.RingSample
+	ringStop      chan struct{}
+	latestV       map[int]float64
+	latestI       map[int]float64
+	latestVTime   map[int]time.Time
+	latestITime   map[int]time.Time
 }
 
 type deviceBindingSnapshot struct {
@@ -383,13 +395,14 @@ func newServer(cfg Config, defaultTTL time.Duration, logger *log.Logger) *server
 			dc.ChannelCount = channelCount
 		}
 		s.devices[dc.ID] = &deviceBinding{
-			cfg:          dc,
-			index:        len(s.devices),
-			powerHistory: make(map[int][]powerControlSample),
-			latestV:      make(map[int]float64),
-			latestI:      make(map[int]float64),
-			latestVTime:  make(map[int]time.Time),
-			latestITime:  make(map[int]time.Time),
+			cfg:           dc,
+			index:         len(s.devices),
+			lazyPollQueue: mecom.NewPollQueue(gatewayLazyReadParameters(dc.ChannelCount)),
+			powerHistory:  make(map[int][]powerControlSample),
+			latestV:       make(map[int]float64),
+			latestI:       make(map[int]float64),
+			latestVTime:   make(map[int]time.Time),
+			latestITime:   make(map[int]time.Time),
 		}
 	}
 	return s
@@ -490,20 +503,13 @@ func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 		}
 	}
 
-	// Start RingReader if not already started
-	if b.ring == nil && b.cfg.PowerControlEnabled {
+	// Start RingReader if not already started. Ring samples feed the same
+	// SignalForge graph-tile history path that live reads and imports use.
+	if b.ring == nil {
 		if mac, ok := client.(mecom.MeComASCIIClient); ok {
 			mc := mac.MeComClient()
-			var criticalParams []mecom.RingCaptureParameter
-			for ch := 1; ch <= b.cfg.ChannelCount; ch++ {
-				criticalParams = append(criticalParams, mecom.RingCaptureParameter{
-					Parameter: mecom.Parameter{ID: 1021, Instance: ch, Type: mecom.DataTypeFloat32},
-				})
-				criticalParams = append(criticalParams, mecom.RingCaptureParameter{
-					Parameter: mecom.Parameter{ID: 1020, Instance: ch, Type: mecom.DataTypeFloat32},
-				})
-			}
-			b.samplesChan = make(chan mecom.RingSample, 1000)
+			criticalParams := gatewayRingCaptureParameters(b.cfg.ChannelCount)
+			b.samplesChan = make(chan mecom.RingSample, gatewayRingSampleBuffer)
 			b.ringStop = make(chan struct{})
 			b.ring = mecom.NewRingReader(mc, criticalParams, b.samplesChan)
 			if errRing := b.ring.Start(context.Background()); errRing != nil {
@@ -513,7 +519,7 @@ func (s *server) bind(id string) (deviceBindingSnapshot, error) {
 				close(b.ringStop)
 				b.ringStop = nil
 			} else {
-				s.logger.Printf("device %q: started RingReader for oversampling", b.cfg.ID)
+				s.logger.Printf("device %q: started RingReader for %d high-rate graph slots", b.cfg.ID, len(criticalParams))
 				go s.runDeviceRingReceiver(b.cfg.ID, b, b.samplesChan, b.ringStop)
 			}
 		}
@@ -550,13 +556,19 @@ func (s *server) runDeviceRingReceiver(deviceID string, bound *deviceBinding, ch
 			p := bound.ring.Config[sample.ConfigIndex].Parameter
 			inst := p.Instance
 			val := sample.Value
+			at := sample.At
+			if at.IsZero() {
+				at = time.Now().UTC()
+			} else {
+				at = at.UTC()
+			}
 
 			if p.ID == 1021 {
 				bound.latestV[inst] = val
-				bound.latestVTime[inst] = time.Now()
+				bound.latestVTime[inst] = at
 			} else if p.ID == 1020 {
 				bound.latestI[inst] = val
-				bound.latestITime[inst] = time.Now()
+				bound.latestITime[inst] = at
 			}
 
 			tThreshold := 100 * time.Millisecond
@@ -581,6 +593,7 @@ func (s *server) runDeviceRingReceiver(deviceID string, bound *deviceBinding, ch
 				}
 			}
 			bound.mu.Unlock()
+			s.recordGraphSample(deviceID, p.ID, inst, val, gatewayQualityOK, at)
 		}
 	}
 }
@@ -659,6 +672,110 @@ func parseCSV(raw string) []string {
 		}
 	}
 	return out
+}
+
+func gatewayRingCaptureParameters(channels int) []mecom.RingCaptureParameter {
+	if channels <= 0 {
+		channels = 4
+	}
+	capacity := channels * len(gatewayRingCaptureParamIDs)
+	if capacity > gatewayRingCaptureLimit {
+		capacity = gatewayRingCaptureLimit
+	}
+	out := make([]mecom.RingCaptureParameter, 0, capacity)
+	for _, id := range gatewayRingCaptureParamIDs {
+		def, ok := gatewayParameterByID(id)
+		if !ok {
+			continue
+		}
+		for instance := 1; instance <= channels && len(out) < gatewayRingCaptureLimit; instance++ {
+			param := def
+			param.Instance = instance
+			out = append(out, mecom.RingCaptureParameter{
+				Parameter:       param,
+				InhibitTime10us: mecom.DefaultRingInhibitTime10us,
+			})
+		}
+	}
+	return out
+}
+
+func gatewayLazyReadParameters(channels int) []mecom.Parameter {
+	if channels <= 0 {
+		channels = 4
+	}
+	seen := make(map[string]struct{})
+	out := make([]mecom.Parameter, 0)
+	for _, readoutParam := range mecom.DefaultTECReadoutParameters(channels) {
+		param := readoutParam.Parameter
+		key := gatewayCatalogueKey(param.ID, param.Instance)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, param)
+	}
+	return out
+}
+
+func gatewayRingCaptureParameterSet(params []mecom.RingCaptureParameter) map[string]struct{} {
+	out := make(map[string]struct{}, len(params))
+	for _, param := range params {
+		out[gatewayCatalogueKey(param.ID, param.Instance)] = struct{}{}
+	}
+	return out
+}
+
+func (s *server) lazyPollWorker(ctx context.Context) {
+	ticker := time.NewTicker(gatewayLazyPollInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.pollLazyReadoutOnce(ctx)
+		}
+	}
+}
+
+func (s *server) pollLazyReadoutOnce(ctx context.Context) {
+	deviceIDs := make([]string, 0, len(s.devices))
+	for id := range s.devices {
+		deviceIDs = append(deviceIDs, id)
+	}
+	sort.Strings(deviceIDs)
+	for _, deviceID := range deviceIDs {
+		if ctx.Err() != nil {
+			return
+		}
+		snap, err := s.bind(deviceID)
+		if err != nil || snap.client == nil || snap.binding == nil || snap.binding.lazyPollQueue == nil {
+			continue
+		}
+		params := snap.binding.lazyPollQueue.NextChunk(gatewayLazyPollChunk)
+		if len(params) == 0 {
+			continue
+		}
+		pollCtx, cancel := context.WithTimeout(ctx, gatewayLazyPollTimeout)
+		values, readErr := snap.client.ReadBulk(pollCtx, params)
+		cancel()
+		observedAt := time.Now().UTC()
+		snap.binding.lazyPollQueue.RecordBulk(params, values, observedAt, readErr)
+		if readErr != nil {
+			s.logger.Printf("device %q: lazy readout failed: %v", deviceID, readErr)
+			if shouldResetDeviceBinding(readErr) {
+				s.resetDeviceBinding(deviceID, snap.client, readErr)
+			}
+			continue
+		}
+		for i, param := range params {
+			if i >= len(values) || !isFiniteFloat(values[i]) {
+				continue
+			}
+			s.recordGraphSample(deviceID, param.ID, param.Instance, values[i], gatewayQualityOK, observedAt)
+		}
+	}
 }
 
 func (s *server) powerControlWorker(ctx context.Context) {
