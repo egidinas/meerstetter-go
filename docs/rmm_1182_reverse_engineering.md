@@ -12,7 +12,7 @@ keeps runtime claims separate from catalogue evidence.
 | `Doku/RMM-1182 Preliminary.docx` | User manual for RMM-1182 firmware `v1.00`, release date `2 June 2026`; confirms temperature/value-conversion/logging feature families and references a separate communications protocol document. |
 | `Doku/RMM-1182 Connectors.docx` | Connector and jumper pinout; confirms X1/X2 carry supply plus RS485/CAN, with CANH on pin 3 and CANL on pin 4. |
 | `Software/appsettings.json` | .NET trace configuration for the RMM configuration software; no protocol map beyond MeCom tracing namespaces. |
-| `Software/RMM-1182-Configuration-Software.exe` | Supplementary string evidence only; confirms .NET 8 UI, `MeSoft.CoSoG2.RMM1182`, export/import XML config, CANopen node/bit-rate UI, and named RMM windows/parameters. |
+| `Software/RMM-1182-Configuration-Software.exe` | Embedded assembly and UI-resource evidence; confirms .NET 8 UI, `MeSoft.CoSoG2.RMM1182`, the bundled MeSoft MeCom command set, export/import XML config, CANopen node/bit-rate UI, and named RMM windows/parameters. |
 
 The source ZIP also says the dedicated `RMM-1182 Communications Protocol`
 document exists, but it is not included. Until that document or live captures
@@ -38,6 +38,45 @@ RMM-1182 slave using port's CANopen library.
 
 The normalized catalogue seed lives at
 `mecom/catalogues/sources/rmm_1182_canopen_eds.v100.json`.
+
+## Controller Software MeCom Command Inventory
+
+The Windows controller software bundles MeSoft MeCom libraries inside the
+single-file executable. Extracting the embedded `.NET` assemblies and inspecting
+`MeSoft.MeCom.Core` method constants proves the following MeCom command tokens:
+
+| Token | Methods | Meaning |
+|---|---|---|
+| `RS` | `ResetDevice` | Reset target device. |
+| `SP` | `TriggerParameterSaveToFlash` | Save parameters to flash. |
+| `SA` | `SetDeviceAddress` | Program a MeCom device address; exact field order still needs deeper IL or capture validation. |
+| `?BI` | `GetBranchId`, `GetBranchIdSeSo` | Read branch ID. |
+| `?VI` | `GetFirmwareVersionInfo` | Read firmware/version information. |
+| `?VR` | `GetINT32Value`, `GetFloatValue`, `GetDoubleValue`, `GetINT64Value`, `GetValue` | Read one parameter value by parameter ID and instance. |
+| `VS` | `SetINT32Value`, `SetINT64Value`, `SetFloatValue`, `SetDoubleValue`, `SetValue` | Write one parameter value by parameter ID and instance. The generic path references `AddFloat32`, `AddInt32`, `AddDouble64` and `AddInt64` encoders. |
+| `?VL` | `GetLimits` | Read parameter limits. |
+| `?VM` | `GetMetaData` | Read parameter metadata. |
+| `?VX` | `BulkParReadCom` | Bulk-read multiple parameter ID/instance tuples. |
+| `?MB` | `DownloadMeBlob` | Download or poll MeBlob transfer data; the method contains two `?MB` uses, a 16-character target length, a 30000 ms busy timeout and analyzing/success/error statuses. |
+| `?BC` | `SendCommand` | Generic bootloader/custom command forwarding; exact RMM use is not proven. |
+
+No additional RMM-specific wire command token was found in the controller
+application during this pass. The application appears to use the standard
+MeSoft MeCom command set through `MeSoft.MeCom.Core`, `MeSoft.MeCom.GeneralApi`,
+`MeSoft.MeCom.PhyWrapper` and `MeSoft.CoSoG2.SeSoTCP`.
+
+The bundled SeSoTCP layer exposes wrappers named `Get Parameter`, `Get
+Parameter by ID`, `Set Parameter`, `Set Parameter by ID`, `Process Custom
+Command`, `Reset Device`, flash readiness polling and a `CRTVStream` helper.
+Those are wrapper/API labels, not separate RMM wire tokens.
+
+The structured evidence file is
+`mecom/catalogues/sources/rmm_1182_controller_software_mecom.v101.json`.
+It keeps proven command tokens separate from WPF/BAML UI labels. The UI
+resources confirm RMM parameter families for system telemetry, communication,
+board heater, high- and low-resolution measurement, value conversion, IO, fan,
+advanced settings and ME settings, but the numeric `MeParID` bindings were not
+decoded from BAML in this pass.
 
 ## Object Dictionary Shape
 

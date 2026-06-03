@@ -1,0 +1,433 @@
+{
+  "schema_version": "mecom_rmm_1182_controller_software_mecom.v1",
+  "source": {
+    "zip_path": "docs/OneDrive_1_03-06-2026.zip",
+    "software_path": "Software/RMM-1182-Configuration-Software.exe",
+    "product": "RMM-1182-Configuration-Software",
+    "version": "1.0.1.44",
+    "namespace": "MeSoft.CoSoG2.RMM1182",
+    "binary_type": ".NET 8 single-file WPF application, PE32+ x86-64",
+    "embedded_assemblies": [
+      {
+        "name": "RMM-1182-Configuration-Software",
+        "evidence": "bundled application assembly"
+      },
+      {
+        "name": "MeSoft.MeCom.Core",
+        "version": "3.4.2.264",
+        "evidence": "command-token constants extracted from method IL"
+      },
+      {
+        "name": "MeSoft.MeCom.GeneralApi",
+        "version": "3.4.2.264",
+        "evidence": "generic MeCom API dependency"
+      },
+      {
+        "name": "MeSoft.MeCom.PhyWrapper",
+        "version": "3.4.2.264",
+        "evidence": "physical transport wrapper dependency"
+      },
+      {
+        "name": "MeSoft.CoSoG2.SeSoTCP",
+        "version": "2.29.2.158",
+        "evidence": "SeSoTCP command handler strings and metadata"
+      }
+    ],
+    "extraction_notes": [
+      "Command tokens were extracted from the embedded MeSoft.MeCom.Core assembly IL/user strings.",
+      "RMM-specific WPF BAML resources were used only for screen and parameter-label evidence.",
+      "Numeric MeParID bindings from BAML were not decoded in this pass."
+    ]
+  },
+  "mecom_command_tokens": [
+    {
+      "token": "RS",
+      "methods": [
+        "ResetDevice"
+      ],
+      "operation": "Reset target device",
+      "direction": "host_to_device",
+      "payload_evidence": "No parameter ID observed in the command-token method; exact envelope is handled by MeSoft.MeCom.Core.",
+      "confidence": "high"
+    },
+    {
+      "token": "SP",
+      "methods": [
+        "TriggerParameterSaveToFlash"
+      ],
+      "operation": "Trigger parameter save to flash",
+      "direction": "host_to_device",
+      "payload_evidence": "Generic save command emitted by MeCom General API wrapper.",
+      "confidence": "high"
+    },
+    {
+      "token": "SA",
+      "methods": [
+        "SetDeviceAddress"
+      ],
+      "operation": "Set MeCom device address",
+      "direction": "host_to_device",
+      "payload_evidence": "Method name proves address programming command. Exact field layout not decoded in this pass.",
+      "confidence": "medium"
+    },
+    {
+      "token": "?BI",
+      "methods": [
+        "GetBranchId",
+        "GetBranchIdSeSo"
+      ],
+      "operation": "Read branch ID",
+      "direction": "request_response",
+      "payload_evidence": "Also present in older SeSo branch-ID path using percent-envelope prefix.",
+      "confidence": "high"
+    },
+    {
+      "token": "?VI",
+      "methods": [
+        "GetFirmwareVersionInfo"
+      ],
+      "operation": "Read firmware version information",
+      "direction": "request_response",
+      "payload_evidence": "Generic firmware/version request command.",
+      "confidence": "high"
+    },
+    {
+      "token": "?VR",
+      "methods": [
+        "GetINT32Value",
+        "GetFloatValue",
+        "GetDoubleValue",
+        "GetINT64Value",
+        "GetValue"
+      ],
+      "operation": "Read parameter value",
+      "direction": "request_response",
+      "payload_evidence": "Used by typed and generic read helpers with parameter ID and instance arguments.",
+      "confidence": "high"
+    },
+    {
+      "token": "VS",
+      "methods": [
+        "SetINT32Value",
+        "SetINT64Value",
+        "SetFloatValue",
+        "SetDoubleValue",
+        "SetValue"
+      ],
+      "operation": "Write parameter value",
+      "direction": "host_to_device",
+      "payload_evidence": "Generic SetValue path references AddFloat32, AddInt32, AddDouble64 and AddInt64 encoders.",
+      "confidence": "high"
+    },
+    {
+      "token": "?VL",
+      "methods": [
+        "GetLimits"
+      ],
+      "operation": "Read parameter limits",
+      "direction": "request_response",
+      "payload_evidence": "Generic limit request for a parameter ID/instance.",
+      "confidence": "high"
+    },
+    {
+      "token": "?VM",
+      "methods": [
+        "GetMetaData"
+      ],
+      "operation": "Read parameter metadata",
+      "direction": "request_response",
+      "payload_evidence": "Generic metadata request for a parameter ID/instance.",
+      "confidence": "high"
+    },
+    {
+      "token": "?VX",
+      "methods": [
+        "BulkParReadCom"
+      ],
+      "operation": "Bulk parameter read",
+      "direction": "request_response",
+      "payload_evidence": "Bulk read command over multiple parameter ID/instance tuples.",
+      "confidence": "high"
+    },
+    {
+      "token": "?MB",
+      "methods": [
+        "DownloadMeBlob"
+      ],
+      "operation": "Download MeBlob data or poll MeBlob transfer status",
+      "direction": "request_response",
+      "payload_evidence": "Method contains two ?MB command uses, target length 16, busy timeout 30000 ms, and status strings for analyzing, successful and error.",
+      "confidence": "high"
+    },
+    {
+      "token": "?BC",
+      "methods": [
+        "SendCommand"
+      ],
+      "operation": "Send bootloader/custom command",
+      "direction": "request_response",
+      "payload_evidence": "Method name and token identify generic bootloader command forwarding; exact RMM use not proven.",
+      "confidence": "medium"
+    }
+  ],
+  "seso_tcp_command_handlers": [
+    {
+      "handler": "CmdGetParameter",
+      "labels": [
+        "Get Parameter",
+        "Get Parameter by ID"
+      ],
+      "meaning": "SeSoTCP wrapper for MeCom parameter reads."
+    },
+    {
+      "handler": "CmdSetParameter",
+      "labels": [
+        "Set Parameter",
+        "Set Parameter by ID"
+      ],
+      "meaning": "SeSoTCP wrapper for MeCom parameter writes."
+    },
+    {
+      "handler": "CmdReset",
+      "labels": [
+        "Reset Device"
+      ],
+      "meaning": "SeSoTCP wrapper for device reset."
+    },
+    {
+      "handler": "CmdIsFlashReady",
+      "labels": [],
+      "meaning": "SeSoTCP wrapper for flash readiness polling."
+    },
+    {
+      "handler": "ProcessCustomCommand",
+      "labels": [
+        "Process Custom Command"
+      ],
+      "meaning": "SeSoTCP custom-command forwarding path."
+    },
+    {
+      "handler": "CRTVStreamTest",
+      "labels": [
+        "CRTVStream"
+      ],
+      "meaning": "SeSoTCP stream/test helper present in bundled library; RMM-specific use not proven."
+    }
+  ],
+  "rmm_ui_parameter_groups": [
+    {
+      "screen": "System",
+      "labels": [
+        "Device Type",
+        "Firmware Version",
+        "Driver Input Voltage",
+        "Internal 5V",
+        "Internal 3.3V",
+        "Board Heater Voltage",
+        "Device Temperature",
+        "Junction Temperature 1",
+        "Junction Temperature 2",
+        "Error Number",
+        "Error Instance",
+        "Error Parameter"
+      ]
+    },
+    {
+      "screen": "Communication",
+      "labels": [
+        "Device Address",
+        "Watchdog Timeout",
+        "CANopen Interface",
+        "Node ID",
+        "Bit Rate",
+        "CAN1 Enable",
+        "CAN1 Auto Operational",
+        "CANopen NVC COB ID SYNC",
+        "Inhibit Time Emergency",
+        "Producer Heartbeat Time",
+        "RPDO Communication Config",
+        "RPDO Mapping Config",
+        "TPDO Communication Config",
+        "TPDO Mapping Config"
+      ]
+    },
+    {
+      "screen": "Board Heater",
+      "labels": [
+        "Board Temperature",
+        "Heater Voltage",
+        "Heater Temperature Stable",
+        "Target Temperature",
+        "Stable Indicator Max Temperature Deviation",
+        "Stable Indicator Time",
+        "Maximum Power",
+        "Buck Converter Switching Frequency"
+      ]
+    },
+    {
+      "screen": "High-resolution measurement inputs",
+      "labels": [
+        "PGA Gain",
+        "PGA Bypass",
+        "Current Source",
+        "Current 2 Out",
+        "Measurement Type",
+        "Sampling Frequency",
+        "Reference Series Resistor",
+        "Reference Parallel Resistor",
+        "Calibration Offset",
+        "Calibration Gain",
+        "ADC Self Check Periodic Check",
+        "ADC Self Check IRs Error Enable",
+        "AVDD",
+        "IRs",
+        "VRef",
+        "Highest Voltage",
+        "Lowest Voltage",
+        "Highest Resistance",
+        "Lowest Resistance",
+        "Raw Value",
+        "Voltage",
+        "Resistance",
+        "Differential Voltage"
+      ]
+    },
+    {
+      "screen": "Low-resolution measurement inputs",
+      "labels": [
+        "PGA Gain",
+        "Measurement Type",
+        "Reference Series Resistor",
+        "Sampling Frequency",
+        "Calibration Offset",
+        "Calibration Gain",
+        "Internal Offset",
+        "Internal Gain",
+        "Highest Voltage",
+        "Lowest Voltage",
+        "Highest Resistance",
+        "Lowest Resistance",
+        "Raw ADC Value",
+        "Resistance",
+        "Voltage"
+      ]
+    },
+    {
+      "screen": "Value conversion",
+      "labels": [
+        "NTC High Temperature",
+        "NTC High Resistance",
+        "NTC Middle Temperature",
+        "NTC Middle Resistance",
+        "NTC Lower Temperature",
+        "NTC Lower Resistance",
+        "Beta Temperature",
+        "Beta Resistance",
+        "Beta B",
+        "Junction Compensation Source",
+        "Result",
+        "Result Type",
+        "Conversion Type"
+      ]
+    },
+    {
+      "screen": "IO",
+      "labels": [
+        "GPIO1",
+        "GPIO2",
+        "GPIO3",
+        "GPIO4",
+        "GPIO5",
+        "GPIO6",
+        "GPIO7",
+        "GPIO8",
+        "Function",
+        "Channel",
+        "Level Assignment",
+        "Hardware Configuration",
+        "Read Input States",
+        "Ready Status",
+        "Run Status",
+        "Temperature Stable",
+        "Temperature Ramping",
+        "Fan PWM",
+        "Fan Tacho",
+        "Fan Stop",
+        "Pump Enable",
+        "Address Bit +1",
+        "Address Bit +2",
+        "Address Bit +4",
+        "Target Temperature Select",
+        "LDD/TEC Enable Edge"
+      ]
+    },
+    {
+      "screen": "Fan",
+      "labels": [
+        "Fan Control Enable",
+        "PWM Frequency",
+        "Target Temperature",
+        "Temperature Controller Kp",
+        "Temperature Controller Ti",
+        "Temperature Controller Td",
+        "Speed Controller 0%",
+        "Speed Controller 100%",
+        "Minimum Start Speed",
+        "Minimum Stop Speed",
+        "Speed Controller Kp",
+        "Speed Controller Ti",
+        "Speed Controller Td",
+        "Bypassing Speed Controller",
+        "Surveillance",
+        "Relative Fan Power",
+        "Nominal Speed",
+        "Actual Speed",
+        "PWM Level"
+      ]
+    },
+    {
+      "screen": "Advanced settings",
+      "labels": [
+        "Error State Auto Reset Delay",
+        "Delay Until Reset"
+      ]
+    },
+    {
+      "screen": "ME settings",
+      "labels": [
+        "Device Type",
+        "GPIO Test Error Enable",
+        "Comm Test Error Enable",
+        "MeParFlashV2 Write Cycles",
+        "Board NTC Resistance",
+        "Junction NTC Resistance 1",
+        "Junction NTC Resistance 2"
+      ]
+    }
+  ],
+  "error_and_status_strings": [
+    "Command not available",
+    "Device is busy",
+    "Parameter is not available",
+    "Parameter is ready only",
+    "Parameter Value is out of range",
+    "Parameter Instance is not available",
+    "Parameter general failure",
+    "Reset Device failed",
+    "Trigger Parameter Save To Flash failed",
+    "Get Identification String failed",
+    "Speed Change failed",
+    "Bulk Parameter read failed"
+  ],
+  "interpretation": {
+    "proven": "The controller software uses the standard MeSoft MeCom command set listed in mecom_command_tokens and exposes RMM screens through WPF resources.",
+    "not_proven": "No additional RMM-only wire command token was found in the controller application strings/IL in this pass.",
+    "relationship_to_eds": "The prior RMM EDS import remains the authoritative CANopen object dictionary. This file adds MeCom command verbs and UI parameter-family evidence from the controller software."
+  },
+  "open_items": [
+    "Decode WPF BAML attribute values or capture live traffic to map UI controls to numeric MeParID values.",
+    "Decode exact payload field ordering for SA and ?MB if address-programming or MeBlob interoperability is required.",
+    "Compare XML configuration export fields against EDS indexes and MeCom metadata responses.",
+    "Validate whether the application sends MeCom over RS485, CAN tunnel, SeSoTCP, or a mix for each workflow by capture on real hardware."
+  ]
+}
