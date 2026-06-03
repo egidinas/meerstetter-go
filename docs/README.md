@@ -22,6 +22,7 @@ If you want to evaluate the gateway or wire your own UI on top of it:
 | [`gateway/readout_scheduling.md`](gateway/readout_scheduling.md) | Which routes support ring/CRTVStream readout vs. polled readout — read before implementing a display refresh loop |
 | [`gateway/UI_GRAPH_WALL_CONTRACT.md`](gateway/UI_GRAPH_WALL_CONTRACT.md) | Graph wall tile contracts and the SSE streaming shape used by the graph tile endpoints |
 | [`coso_compatibility_bridge.md`](coso_compatibility_bridge.md) | How the CoSo compatibility bridge maps MeCom requests onto CANopen, native serial/TCP fallback, and per-device cache state |
+| [`rmm_1182_reverse_engineering.md`](rmm_1182_reverse_engineering.md) | First RMM-1182 CANopen/software documentation import and reverse-engineering notes |
 | [`lut_tmtc_automation.md`](lut_tmtc_automation.md) | `mecomautomation` package — how LUT preload telecommands are generated |
 | [`tmtc_signalforge_boundary.md`](tmtc_signalforge_boundary.md) | Where `meerstetter-go` ends and the SignalForge ecosystem begins; the only import boundary between them |
 | [`SYNERGY.md`](SYNERGY.md) | Apache Arrow IPC data standard and schema used for high-performance telemetry export |

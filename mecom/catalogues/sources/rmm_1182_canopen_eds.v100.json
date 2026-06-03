@@ -1,0 +1,6397 @@
+{
+  "schema_version": "mecom_rmm_1182_canopen_eds.v1",
+  "source": "docs/OneDrive_1_03-06-2026.zip#CanOpen.eds",
+  "definition": {
+    "definition_ref": "meerstetter.rmm_1182.v100",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "rmm",
+    "variant": "rmm_1182",
+    "version": "v100"
+  },
+  "file_info": {
+    "FileName": "CanOpen.eds",
+    "FileVersion": "1",
+    "FileRevision": "0",
+    "EDSVersion": "4.0",
+    "Description": "RMM-1182 using port's CANopen library",
+    "CreationTime": "02:55PM",
+    "CreationDate": "09-15-2025",
+    "CreatedBy": "marc",
+    "ModificationTime": "14:40",
+    "ModificationDate": "06.05.2026",
+    "ModifiedBy": "Hannes.Stauffer"
+  },
+  "device_info": {
+    "VendorName": "Meerstetter Engineering GmbH",
+    "VendorNumber": "0x547",
+    "ProductName": "RMM-1182",
+    "ProductNumber": "0x49E",
+    "RevisionNumber": "0x0",
+    "OrderCode": "RMM-1182",
+    "BaudRate_10": "1",
+    "BaudRate_20": "1",
+    "BaudRate_50": "1",
+    "BaudRate_125": "1",
+    "BaudRate_250": "1",
+    "BaudRate_500": "1",
+    "BaudRate_800": "1",
+    "BaudRate_1000": "1",
+    "DynamicChannelsSupported": "0",
+    "GroupMessaging": "0",
+    "LSS_Supported": "0",
+    "Granularity": "32",
+    "SimpleBootUpSlave": "1",
+    "SimpleBootUpMaster": "0",
+    "NrOfRXPDO": "16",
+    "NrOfTXPDO": "16"
+  },
+  "object_counts": {
+    "total_objects": 154,
+    "manufacturer_objects": 80,
+    "subentries": 521
+  },
+  "objects": {
+    "1000": {
+      "index": "1000",
+      "subobjects": {},
+      "parameter_name": "Device Type",
+      "object_type": "0x07",
+      "access_type": "ro",
+      "data_type": "0x0007",
+      "pdo_mapping": "0",
+      "default_value": "0x00000000"
+    },
+    "1001": {
+      "index": "1001",
+      "subobjects": {},
+      "parameter_name": "Error Register",
+      "object_type": "0x07",
+      "access_type": "ro",
+      "data_type": "0x0005",
+      "pdo_mapping": "0",
+      "default_value": ""
+    },
+    "1003": {
+      "index": "1003",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of Errors",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "6": {
+          "subindex": "6",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "7": {
+          "subindex": "7",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "8": {
+          "subindex": "8",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "9": {
+          "subindex": "9",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "10": {
+          "subindex": "10",
+          "parameter_name": "Standard Error Field",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Pre-defined Error Field",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1005": {
+      "index": "1005",
+      "subobjects": {},
+      "parameter_name": "COB-ID SYNC",
+      "object_type": "0x07",
+      "access_type": "rw",
+      "data_type": "0x0007",
+      "pdo_mapping": "0",
+      "default_value": "0x00000080"
+    },
+    "1010": {
+      "index": "1010",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x01",
+          "low_limit": "0x00",
+          "high_limit": "0x7F"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Save all Parameters",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Store Parameter Field",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1011": {
+      "index": "1011",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x01"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Restore all Default Parameters",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "",
+          "object_flags": "0x00000001"
+        }
+      },
+      "parameter_name": "Restore Default Parameters",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1014": {
+      "index": "1014",
+      "subobjects": {},
+      "parameter_name": "COB-ID EMCY",
+      "object_type": "0x07",
+      "access_type": "ro",
+      "data_type": "0x0007",
+      "pdo_mapping": "0",
+      "default_value": "$NODEID+0x00000080"
+    },
+    "1015": {
+      "index": "1015",
+      "subobjects": {},
+      "parameter_name": "Inhibit Time Emergency",
+      "object_type": "0x07",
+      "access_type": "rw",
+      "data_type": "0x0006",
+      "pdo_mapping": "0",
+      "default_value": "0x0000"
+    },
+    "1017": {
+      "index": "1017",
+      "subobjects": {},
+      "parameter_name": "Producer Heartbeat Time",
+      "object_type": "0x07",
+      "access_type": "rw",
+      "data_type": "0x0006",
+      "pdo_mapping": "0",
+      "default_value": "0x0000"
+    },
+    "1018": {
+      "index": "1018",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "number of entries",
+          "access_type": "ro",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x04",
+          "low_limit": "0x01",
+          "high_limit": "0x04"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Vendor Id",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000547"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Product Code",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x0000049E"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Revision number",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Serial number",
+          "access_type": "ro",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Identity Object",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1400": {
+      "index": "1400",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000200",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 1",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1401": {
+      "index": "1401",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000300",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 2",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1402": {
+      "index": "1402",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000400",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 3",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1403": {
+      "index": "1403",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000500",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 4",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1404": {
+      "index": "1404",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 5",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1405": {
+      "index": "1405",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 6",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1406": {
+      "index": "1406",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 7",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1407": {
+      "index": "1407",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 8",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1408": {
+      "index": "1408",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 9",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1409": {
+      "index": "1409",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 10",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140A": {
+      "index": "140A",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 11",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140B": {
+      "index": "140B",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 12",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140C": {
+      "index": "140C",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 13",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140D": {
+      "index": "140D",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 14",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140E": {
+      "index": "140E",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 15",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "140F": {
+      "index": "140F",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x02",
+          "low_limit": "0x02",
+          "high_limit": "0x05"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000550",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        }
+      },
+      "parameter_name": "Receive PDO Communication Parameter 16",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1600": {
+      "index": "1600",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 1",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1601": {
+      "index": "1601",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 2",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1602": {
+      "index": "1602",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 3",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1603": {
+      "index": "1603",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 4",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1604": {
+      "index": "1604",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 5",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1605": {
+      "index": "1605",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 6",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1606": {
+      "index": "1606",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 7",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1607": {
+      "index": "1607",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 8",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1608": {
+      "index": "1608",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 9",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1609": {
+      "index": "1609",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 10",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160A": {
+      "index": "160A",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 11",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160B": {
+      "index": "160B",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 12",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160C": {
+      "index": "160C",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 13",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160D": {
+      "index": "160D",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 14",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160E": {
+      "index": "160E",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 15",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "160F": {
+      "index": "160F",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Receive PDO Mapping Parameter 16",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1800": {
+      "index": "1800",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000180",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 1",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1801": {
+      "index": "1801",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000280",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 2",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1802": {
+      "index": "1802",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000380",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 3",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1803": {
+      "index": "1803",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "$NODEID+0x00000480",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 4",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1804": {
+      "index": "1804",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 5",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1805": {
+      "index": "1805",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 6",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1806": {
+      "index": "1806",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 7",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1807": {
+      "index": "1807",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 8",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1808": {
+      "index": "1808",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 9",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1809": {
+      "index": "1809",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 10",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180A": {
+      "index": "180A",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 11",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180B": {
+      "index": "180B",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 12",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180C": {
+      "index": "180C",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 13",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180D": {
+      "index": "180D",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 14",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180E": {
+      "index": "180E",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 15",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "180F": {
+      "index": "180F",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x05",
+          "low_limit": "0x02",
+          "high_limit": "0x06"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "COB-ID",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x80000530",
+          "low_limit": "0x00000080",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Transmission Type",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0xFE",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Inhibit Time",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Compatibility Entry",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "5": {
+          "subindex": "5",
+          "parameter_name": "Event Timer",
+          "access_type": "rw",
+          "data_type": "0x0006",
+          "pdo_mapping": "0",
+          "default_value": "0x0000",
+          "low_limit": "0x0000",
+          "high_limit": "0xFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Communication Parameter 16",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A00": {
+      "index": "1A00",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 1",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A01": {
+      "index": "1A01",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 2",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A02": {
+      "index": "1A02",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 3",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A03": {
+      "index": "1A03",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 4",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A04": {
+      "index": "1A04",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 5",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A05": {
+      "index": "1A05",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 6",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A06": {
+      "index": "1A06",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 7",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A07": {
+      "index": "1A07",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 8",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A08": {
+      "index": "1A08",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 9",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A09": {
+      "index": "1A09",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 10",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0A": {
+      "index": "1A0A",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 11",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0B": {
+      "index": "1A0B",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 12",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0C": {
+      "index": "1A0C",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 13",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0D": {
+      "index": "1A0D",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 14",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0E": {
+      "index": "1A0E",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 15",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "1A0F": {
+      "index": "1A0F",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Number of mapped objects",
+          "access_type": "rw",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "0x00",
+          "low_limit": "0x00",
+          "high_limit": "0xFF"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Mapping Entry 1",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Mapping Entry 2",
+          "access_type": "rw",
+          "data_type": "0x0007",
+          "pdo_mapping": "0",
+          "default_value": "0x00000000",
+          "low_limit": "0x00000000",
+          "high_limit": "0xFFFFFFFF"
+        }
+      },
+      "parameter_name": "Transmit PDO Mapping Parameter 16",
+      "object_type": "0x09",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2160": {
+      "index": "2160",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "System: Driver Input Voltage [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2161": {
+      "index": "2161",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "System: 5V Internal Supply [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2162": {
+      "index": "2162",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "System: 3.3V Internal Supply [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2165": {
+      "index": "2165",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "System: Device Temperature [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2166": {
+      "index": "2166",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "System: Junction Temperature [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2180": {
+      "index": "2180",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Operating time [s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2181": {
+      "index": "2181",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Operating time running [s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2182": {
+      "index": "2182",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Total Output Energy [Wh]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2183": {
+      "index": "2183",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Total Output Current [Ah]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A00": {
+      "index": "2A00",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Enable",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A01": {
+      "index": "2A01",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Target Temperature",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A02": {
+      "index": "2A02",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Max Power",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A03": {
+      "index": "2A03",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Heater Voltage [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A04": {
+      "index": "2A04",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Temperature Controller: Stability Indicator: Stable Signal",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A05": {
+      "index": "2A05",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Temperature Controller: Stability Indicator: Deviation [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A06": {
+      "index": "2A06",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Temperature Controller: Stability Indicator: Time [s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A07": {
+      "index": "2A07",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Temperature Controller: Stability Indicator: Max Time [s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "2A10": {
+      "index": "2A10",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Board Heater: Switching Frequency [Hz]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3000": {
+      "index": "3000",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Raw ADC Value",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3001": {
+      "index": "3001",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3002": {
+      "index": "3002",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Voltage [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3100": {
+      "index": "3100",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: Measurement Type (R or U)",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3101": {
+      "index": "3101",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: ADC Rs [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3102": {
+      "index": "3102",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: ADC Rp [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3103": {
+      "index": "3103",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: PGA Bypass",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3104": {
+      "index": "3104",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: Current Source 2 Out",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3110": {
+      "index": "3110",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: PGA Gain",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3111": {
+      "index": "3111",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: Current Source",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3112": {
+      "index": "3112",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Configuration: Sampling Frequency",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3120": {
+      "index": "3120",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Calibration: Offset",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3121": {
+      "index": "3121",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Calibration: Gain",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3200": {
+      "index": "3200",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Surveillance: Temp Limit Errors",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3201": {
+      "index": "3201",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Surveillance: Lower Threshold [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3202": {
+      "index": "3202",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Surveillance: Upper Threshold [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3203": {
+      "index": "3203",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Surveillance: Max Temp Change [°C/s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3240": {
+      "index": "3240",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Monitor: Lowest Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3241": {
+      "index": "3241",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Monitor: Highest Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3242": {
+      "index": "3242",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Monitor: Lowest Voltage [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3243": {
+      "index": "3243",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: Monitor: Highest Voltage [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3330": {
+      "index": "3330",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Periodic Check [s]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3331": {
+      "index": "3331",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Trigger Self Check",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3332": {
+      "index": "3332",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Throw Error on IRs fail",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3353": {
+      "index": "3353",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Results: AVDD Voltage [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3354": {
+      "index": "3354",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Results: IRs [uA]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3355": {
+      "index": "3355",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "High Resolution Measurement: ADC Self Check: Results: VRef [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3500": {
+      "index": "3500",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Raw ADC Value",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3501": {
+      "index": "3501",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3502": {
+      "index": "3502",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Voltage [V]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3605": {
+      "index": "3605",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Configuration: Measurement Type (R or U)",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3606": {
+      "index": "3606",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0008",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Configuration: ADC Rv [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3610": {
+      "index": "3610",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Configuration: PGA Gain",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3612": {
+      "index": "3612",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rw",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Configuration: Sampling Frequency",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3620": {
+      "index": "3620",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: ADC Calibration: Offset",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3621": {
+      "index": "3621",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: ADC Calibration: Gain",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3740": {
+      "index": "3740",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Monitor: Lowest Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3741": {
+      "index": "3741",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Monitor: Highest Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3742": {
+      "index": "3742",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Monitor: Lowest Voltage [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "3743": {
+      "index": "3743",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "2"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Low Resolution Measurement: Monitor: Highest Voltage [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4000": {
+      "index": "4000",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rwr",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rwr",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rwr",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rwr",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Result",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4001": {
+      "index": "4001",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Surveilled Result",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4002": {
+      "index": "4002",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Result Flags",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4003": {
+      "index": "4003",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Channel Result Flags",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4011": {
+      "index": "4011",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Result Type [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4012": {
+      "index": "4012",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Conversion Type",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4013": {
+      "index": "4013",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Temperature Offset [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4014": {
+      "index": "4014",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Temperature Gain [°C/°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4020": {
+      "index": "4020",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Lower Point: Temp [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4021": {
+      "index": "4021",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Lower Point: Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4022": {
+      "index": "4022",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Middle Point: Temp [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4023": {
+      "index": "4023",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Middle Point: Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4024": {
+      "index": "4024",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Upper Point: Temp [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4025": {
+      "index": "4025",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Upper Point: Resistance [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4026": {
+      "index": "4026",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Temperature [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4027": {
+      "index": "4027",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Resistance  [Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4028": {
+      "index": "4028",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: NTC Characteristics: Beta[Ohm]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4030": {
+      "index": "4030",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0004",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Thermocouple Junction Temperature Compensation Temperature Source",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4031": {
+      "index": "4031",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "rww",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Thermocouple Junction Temperature Compensatiuon fixed Temperature",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4044": {
+      "index": "4044",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Result at lowest ADC [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4045": {
+      "index": "4045",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "4"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "2": {
+          "subindex": "2",
+          "parameter_name": "Instance 2 (CH2)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "3": {
+          "subindex": "3",
+          "parameter_name": "Instance 3 (CH3)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        },
+        "4": {
+          "subindex": "4",
+          "parameter_name": "Instance 4 (CH4)",
+          "access_type": "ro",
+          "data_type": "0x0008",
+          "pdo_mapping": "1",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Value Conversion: Result at highest ADC [°C]",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    },
+    "4300": {
+      "index": "4300",
+      "subobjects": {
+        "0": {
+          "subindex": "0",
+          "parameter_name": "Highest sub-index supported",
+          "access_type": "const",
+          "data_type": "0x0005",
+          "pdo_mapping": "0",
+          "default_value": "1"
+        },
+        "1": {
+          "subindex": "1",
+          "parameter_name": "Instance 1 (CH1)",
+          "access_type": "ro",
+          "data_type": "0x0004",
+          "pdo_mapping": "0",
+          "default_value": ""
+        }
+      },
+      "parameter_name": "Feature Key Status",
+      "object_type": "0x08",
+      "access_type": "",
+      "data_type": "",
+      "pdo_mapping": "",
+      "default_value": ""
+    }
+  }
+}

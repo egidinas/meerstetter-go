@@ -128,7 +128,9 @@ The raw source files from which the catalogue is compiled live in
 `mecom/catalogues/sources/`. TEC sources are harvested from a Meerstetter CoSo
 installation with `scripts/harvest_coso_catalogue_sources.py`. LDD-130x sources
 are harvested/exported with `scripts/harvest_ldd_catalogue_sources.py` and
-`scripts/export_ldd_web_catalogue.py`.
+`scripts/export_ldd_web_catalogue.py`. The RMM-1182 CANopen EDS import is
+recorded in `mecom/catalogues/sources/rmm_1182_canopen_eds.v100.json` from the
+uploaded documentation ZIP.
 
 The currently represented Meerstetter definitions are:
 
@@ -139,6 +141,7 @@ The currently represented Meerstetter definitions are:
 | `meerstetter.ldd_130x.v221` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
 | `meerstetter.ldd_1321.v130` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
 | `meerstetter.ldd.v233` | Reverse-engineered catalogue/UI metadata; advanced metadata only until reviewed for active controls |
+| `meerstetter.rmm_1182.v100` | Reverse-engineered CANopen EDS catalogue and preliminary documentation notes; catalogue-only until the RMM communications protocol or live captures are reviewed for active controls |
 | `meerstetter.daq.v1` | Family/variant scaffolds for future catalogues |
 
 The CAN-backed CoSo compatibility bridge has one explicit crosswalk for

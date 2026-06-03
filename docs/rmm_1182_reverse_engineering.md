@@ -1,0 +1,148 @@
+# RMM-1182 Reverse-Engineering Notes
+
+Status: first source-grounded import from `docs/OneDrive_1_03-06-2026.zip`.
+This note records what the uploaded RMM software/documentation proves today and
+keeps runtime claims separate from catalogue evidence.
+
+## Imported Sources
+
+| Source | Evidence captured |
+|---|---|
+| `CanOpen.eds` | CANopen object dictionary for `RMM-1182`, product number `0x49E`, vendor number `0x547`, EDS revision modified `06.05.2026`. |
+| `Doku/RMM-1182 Preliminary.docx` | User manual for RMM-1182 firmware `v1.00`, release date `2 June 2026`; confirms temperature/value-conversion/logging feature families and references a separate communications protocol document. |
+| `Doku/RMM-1182 Connectors.docx` | Connector and jumper pinout; confirms X1/X2 carry supply plus RS485/CAN, with CANH on pin 3 and CANL on pin 4. |
+| `Software/appsettings.json` | .NET trace configuration for the RMM configuration software; no protocol map beyond MeCom tracing namespaces. |
+| `Software/RMM-1182-Configuration-Software.exe` | Supplementary string evidence only; confirms .NET 8 UI, `MeSoft.CoSoG2.RMM1182`, export/import XML config, CANopen node/bit-rate UI, and named RMM windows/parameters. |
+
+The source ZIP also says the dedicated `RMM-1182 Communications Protocol`
+document exists, but it is not included. Until that document or live captures
+are available, the CANopen EDS is the authoritative machine-readable RMM
+protocol source in this repo.
+
+## CANopen Identity
+
+The RMM-1182 EDS was created with port GmbH CANopen tooling and describes an
+RMM-1182 slave using port's CANopen library.
+
+| Field | Value |
+|---|---|
+| Vendor | Meerstetter Engineering GmbH |
+| Vendor number | `0x547` |
+| Product | `RMM-1182` |
+| Product number | `0x49E` |
+| Order code | `RMM-1182` |
+| Supported bit rates | 10, 20, 50, 125, 250, 500, 800, 1000 kbit/s |
+| LSS | Not supported |
+| Boot role | Simple boot-up slave |
+| PDO capacity | 16 RPDO and 16 TPDO |
+
+The normalized catalogue seed lives at
+`mecom/catalogues/sources/rmm_1182_canopen_eds.v100.json`.
+
+## Object Dictionary Shape
+
+The imported EDS contains:
+
+| Count | Meaning |
+|---:|---|
+| 154 | Total CANopen objects |
+| 80 | Manufacturer-specific objects (`0x2000` and above) |
+| 521 | Total subentries |
+
+RMM manufacturer objects are mostly array/record style objects with instance
+subindices. The common pattern is:
+
+| Shape | Meaning |
+|---|---|
+| `sub0` | Highest supported subindex, data type `0x0005`, access `const` |
+| `sub1..n` | Channel or instance values |
+| `0x0008` | Float32 values, used heavily for measurement and conversion values |
+| `0x0004` | Signed integer/configuration values |
+| `PDOMapping=1` | Most values can be mapped to PDOs, including many writable configuration entries marked `rww` |
+
+Observed manufacturer subentry access distribution:
+
+| Access | Count | Interpretation |
+|---|---:|---|
+| `rww` | 86 | Readable/writable configuration entries, likely persistent or write-through depending on firmware semantics. |
+| `ro` | 47 | Read-only telemetry/status values. |
+| `rw` | 44 | Read/write entries. |
+| `rwr` | 4 | Read/write result-like entries; keep as EDS access until live behavior is proven. |
+
+## Manufacturer Object Groups
+
+| Range | Group | Notes |
+|---|---|---|
+| `0x2160..0x2183` | System telemetry | Driver input voltage, internal supplies, device/junction temperature, operating time and total output counters. |
+| `0x2A00..0x2A10` | Board heater | Enable, target temperature, max power, heater voltage, stability indicator and switching frequency. |
+| `0x3000..0x3355` | High-resolution measurement | Raw ADC, resistance, voltage, measurement configuration, calibration, surveillance, monitor limits and ADC self-check results. |
+| `0x3500..0x3743` | Low-resolution measurement | Raw ADC, resistance, voltage, measurement configuration, calibration and monitor limits. |
+| `0x4000..0x4045` | Value conversion | Converted result, flags, result/conversion type, NTC characteristic points, beta model, thermocouple compensation and ADC range conversion endpoints. |
+| `0x4300` | Feature key status | Read-only integer feature/license state. |
+
+Channel counts from the EDS:
+
+| Example object | Subindices | Meaning |
+|---|---:|---|
+| `0x3000` high-resolution raw ADC | 2 | HR measurement channels 1 and 2. |
+| `0x3500` low-resolution raw ADC | 2 | LR measurement channels 1 and 2. |
+| `0x4000` value-conversion result | 4 | Four converted result channels. |
+| `0x2160` driver input voltage | 1 | Device-level telemetry instance. |
+
+## Hardware and Connector Facts
+
+From `RMM-1182 Connectors.docx`:
+
+| Connector | Pins | Function |
+|---|---|---|
+| X1/X2 | Pin 1 `Vin`, pin 2 `GND`, pin 3 `RS485 A / CANH`, pin 4 `RS485 B / CANL` | Supply and communications; X1 and X2 are connected in parallel. |
+| X5 | HR measurement inputs | Two high-resolution measurement channels with IA/IB/UA/UB pins. |
+| X6 | LR measurement inputs | Two low-resolution measurement channels. |
+| X7 | Power/GPIO | 5 V, 3.3 V, GND, GPIO1-9 with UART/I2C/SPI/ADC alternate functions. |
+| X3 | Jumper | Supply/GND selection; hardware 1.10 and newer ties X1/X2 GND through a 0 ohm resistor unless R2 is removed. |
+
+The connector document names GPIO1 through GPIO9. The preliminary manual table
+of contents refers to `GPIO1 - GPIO10 Control Signals`, so GPIO10 still needs
+confirmation from the communications protocol document, the full datasheet, or
+hardware inspection.
+
+## Configuration Software Clues
+
+The Windows configuration software string table confirms UI support for:
+
+- CANopen node ID and bit-rate settings.
+- CAN1 enable/disable and CAN1 auto-operational.
+- Non-volatile CANopen configuration for SYNC COB-ID, emergency inhibit time,
+  producer heartbeat, and PDO communication/mapping config.
+- MeCom device addressing, including broadcast address `0` and silent broadcast
+  `255`.
+- XML configuration export/import.
+- RMM windows for system, communication, high/low-resolution measurement,
+  value conversion, board heater, IO, fan, graph/log and settings.
+
+These are UI strings, not a complete protocol map. Use them to name hypotheses,
+not to assert runtime behavior that the EDS or live captures do not prove.
+
+## Integration Implications
+
+- Add RMM as a catalogue-only family for now: `meerstetter.rmm_1182.v100`.
+- CANopen discovery can identify RMM-1182 via product number `0x49E`.
+- SDO reads/writes can be generated from the EDS object dictionary, but do not
+  map them onto MeCom parameter IDs until the missing RMM communications
+  protocol document or CoSo/RMM captures establish that crosswalk.
+- Treat `rww`, `rw`, and `rwr` exactly as EDS access classes until live writes
+  prove persistence, side effects and save/restore semantics.
+- PDO support is broad enough to support a telemetry wall later, but the default
+  PDO layout and desired remapping sequence still need live confirmation.
+
+## Open Reverse-Engineering Tasks
+
+1. Obtain `RMM-1182 Communications Protocol` and harvest MeCom parameter IDs,
+   command families, write semantics and error tables.
+2. Export an XML configuration from the RMM software and compare field names
+   against EDS indexes.
+3. Capture startup traffic from the RMM configuration software over CAN/RS485
+   and classify SDO/PDO/MeCom command order.
+4. Probe a physical RMM-1182 with bounded SDO reads for identity, heartbeat,
+   system telemetry and measurement result objects.
+5. Confirm whether GPIO10 is real, hidden, or a manual typo.
