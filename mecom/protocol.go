@@ -121,6 +121,28 @@ func BuildSingleGetFrame(addr int, seq uint16, paramID, instance int) []byte {
 	return appendCRC(addr, seq, body)
 }
 
+// BuildBranchIDFrame constructs a ?BI frame for reading the branch identifier.
+func BuildBranchIDFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "?BI")
+}
+
+// BuildFirmwareVersionFrame constructs a ?VI frame for reading firmware version info.
+func BuildFirmwareVersionFrame(addr int, seq uint16) []byte {
+	return appendCRC(addr, seq, "?VI")
+}
+
+// BuildParameterLimitsFrame constructs a ?VL frame for reading parameter limits.
+func BuildParameterLimitsFrame(addr int, seq uint16, paramID, instance int) []byte {
+	body := fmt.Sprintf("?VL%04X%02X", paramID, instance)
+	return appendCRC(addr, seq, body)
+}
+
+// BuildParameterMetadataFrame constructs a ?VM frame for reading parameter metadata.
+func BuildParameterMetadataFrame(addr int, seq uint16, paramID, instance int) []byte {
+	body := fmt.Sprintf("?VM%04X%02X", paramID, instance)
+	return appendCRC(addr, seq, body)
+}
+
 // BuildBulkGetFrame constructs a ?VX frame for reading multiple parameters.
 func BuildBulkGetFrame(addr int, seq uint16, params []Parameter) []byte {
 	var body strings.Builder

@@ -262,6 +262,14 @@ type lddUIMetadataSource struct {
 	} `json:"ui_strings"`
 }
 
+type rmmControllerMeComSource struct {
+	SchemaVersion      string `json:"schema_version"`
+	MeComCommandTokens []struct {
+		Token      string `json:"token"`
+		Confidence string `json:"confidence"`
+	} `json:"mecom_command_tokens"`
+}
+
 func TestTECCatalogueSourceJSONFiles(t *testing.T) {
 	var defaults tecDefaultConfigSource
 	readCatalogueSourceJSON(t, "catalogues/sources/tec_default_config_5216o.v631.json", &defaults)
@@ -365,6 +373,30 @@ func TestTECCatalogueSourceJSONFiles(t *testing.T) {
 	requireHiddenCandidate(t, index, 40000, "advanced")
 	requireHiddenCandidate(t, index, 53010, "license")
 	requireHiddenCandidate(t, index, 6320, "advanced")
+}
+
+func TestRMMControllerSoftwareCommandSourceMatchesLibraryInventory(t *testing.T) {
+	var source rmmControllerMeComSource
+	readCatalogueSourceJSON(t, "catalogues/sources/rmm_1182_controller_software_mecom.v101.json", &source)
+	if source.SchemaVersion != "mecom_rmm_1182_controller_software_mecom.v1" {
+		t.Fatalf("RMM controller command schema = %q", source.SchemaVersion)
+	}
+	if got, want := len(source.MeComCommandTokens), len(DefaultCommandInventory()); got != want {
+		t.Fatalf("RMM command source count = %d, library count = %d", got, want)
+	}
+
+	for _, entry := range source.MeComCommandTokens {
+		definition, ok := CommandDefinitionByToken(entry.Token)
+		if !ok {
+			t.Fatalf("RMM command source token %q missing from library inventory", entry.Token)
+		}
+		if string(definition.Confidence) != entry.Confidence {
+			t.Fatalf("RMM command %s confidence = %q, want %q", entry.Token, definition.Confidence, entry.Confidence)
+		}
+		if definition.Source != CommandSourceRMM1182ControllerSoftware {
+			t.Fatalf("RMM command %s source = %q, want controller software", entry.Token, definition.Source)
+		}
+	}
 }
 
 func TestLDD130xCatalogueSourceJSONFiles(t *testing.T) {

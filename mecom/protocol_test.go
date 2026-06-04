@@ -65,6 +65,38 @@ func TestBuildResetFrameReferenceVector(t *testing.T) {
 	}
 }
 
+func TestBuildBranchIDFrameReferenceVector(t *testing.T) {
+	got := string(BuildBranchIDFrame(0x00, 0x0003))
+	const want = "#000003?BIAC11\r"
+	if got != want {
+		t.Fatalf("frame = %q, want %q", got, want)
+	}
+}
+
+func TestBuildFirmwareVersionFrameReferenceVector(t *testing.T) {
+	got := string(BuildFirmwareVersionFrame(0x00, 0x0004))
+	const want = "#000004?VI328B\r"
+	if got != want {
+		t.Fatalf("frame = %q, want %q", got, want)
+	}
+}
+
+func TestBuildParameterLimitsFrameReferenceVector(t *testing.T) {
+	got := string(BuildParameterLimitsFrame(0x50, 0x0005, 1000, 1))
+	const want = "#500005?VL03E80119C5\r"
+	if got != want {
+		t.Fatalf("frame = %q, want %q", got, want)
+	}
+}
+
+func TestBuildParameterMetadataFrameReferenceVector(t *testing.T) {
+	got := string(BuildParameterMetadataFrame(0x50, 0x0006, 1000, 1))
+	const want = "#500006?VM03E801106B\r"
+	if got != want {
+		t.Fatalf("frame = %q, want %q", got, want)
+	}
+}
+
 func TestBuildSetBigDataStringFrameFormat(t *testing.T) {
 	frame, err := BuildSetBigDataStringFrame(0x00, 0x0003, 120, 1, 0, "SN76 note", true)
 	if err != nil {
