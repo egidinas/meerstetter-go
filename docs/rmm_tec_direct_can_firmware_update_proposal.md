@@ -1,12 +1,14 @@
-# Meerstetter CANopen-MVP fuer verteilte Mess- und Regelsignale
+# Featurevorschlag: Meerstetter CANopen-MVP fuer verteilte Mess- und Regelsignale
 
 Datum: 2026-06-08
 
-Ziel: Ein Meerstetter-Geraet soll einen typisierten Mess- oder Fuehrungswert direkt ueber CAN/CANopen anbieten koennen, und ein anderes Meerstetter-Geraet soll diesen Wert persistent abonnieren und, falls sicher freigegeben, fuer eine Regelungsfunktion verwenden koennen. Die erste konkrete Anwendung ist: RMM-1182 HR1 Pt100 Temperatur als Objekttemperatur-Regelsensor fuer einen TEC-1089. Die Regelstrecke darf nicht von einer Server-Software, USB-Verbindung oder einem Host-Polling-Loop abhaengen.
+Positionierung: Dieser Vorschlag ist Beta-Tester-Feedback aus einer realen RMM-/TEC-Integration. Er beschreibt keine Sonderloesung fuer ein einzelnes Labor, sondern einen kleinen, wiederverwendbaren CANopen-Baustein, mit dem Meerstetter-Geraete Mess- und Fuehrungssignale direkt untereinander austauschen koennen.
+
+Ziel: Ein Meerstetter-Geraet bietet einen typisierten Mess- oder Fuehrungswert direkt ueber CAN/CANopen an. Ein anderes Meerstetter-Geraet abonniert diesen Wert persistent und kann ihn, falls sicher freigegeben, fuer Diagnose oder Regelung verwenden. Die erste konkrete Anwendung ist: RMM-1182 HR1 Pt100 Temperatur als Objekttemperatur-Regelsensor fuer einen TEC-1089. Die Regelstrecke darf nicht von Server-Software, USB-Verbindung oder Host-Polling-Loop abhaengen.
 
 ## Kurzfassung
 
-Wir bitten Meerstetter um eine moeglichst kleine, wiederverwendbare CANopen-Erweiterung:
+Wir schlagen Meerstetter eine kleine, wiederverwendbare CANopen-Erweiterung vor:
 
 1. Ein Producer-Geraet publiziert einen ausgewaehlten, typisierten Wert zyklisch als dokumentiertes TPDO.
 2. Ein Consumer-Geraet kann dieses TPDO als sichtbares importiertes Signal abonnieren.
@@ -15,9 +17,28 @@ Wir bitten Meerstetter um eine moeglichst kleine, wiederverwendbare CANopen-Erwe
 5. Das Consumer-Geraet ueberwacht Alter, Guete, NMT-/Heartbeat-Zustand und Empfangsfrist. Bei Timeout, ungueltigem Wert oder Sensordefekt geht eine gebundene Regelquelle in einen sicheren Fehlerzustand, statt den letzten gueltigen Wert endlos weiterzuverwenden.
 6. Konfiguration, Import und Binding muessen persistent sein und nach Power-Cycle ohne Host weiterlaufen.
 
-Standard-CANopen-Objekte sollten bevorzugt werden, wo immer die Firmware sie sinnvoll unterstuetzt: TPDO/RPDO-Kommunikation und Mapping, NMT Operational, Heartbeat, EMCY, SDO fuer Konfiguration und PDO fuer Live-Daten.
+Standard-CANopen-Objekte sollten bevorzugt werden, wo immer die Firmware sie sinnvoll unterstuetzt: TPDO/RPDO-Kommunikation und Mapping, NMT Operational, Heartbeat, EMCY, SDO fuer Konfiguration und PDO fuer Live-Daten. Damit bleibt die Funktion technisch nachvollziehbar, diagnosefaehig und kompatibel mit bestehenden CANopen-Werkzeugen.
 
-Der MVP bleibt bewusst klein: Producer-TPDO, Consumer-Import, optionales Control-Binding, Liveness/Guete, Persistenz. Die Laboranwendung RMM-1182 -> TEC-1089 ist der erste Validierungsfall, nicht die einzige gewuenschte Produktform.
+Der MVP bleibt bewusst klein: Producer-TPDO, Consumer-Import, optionales Control-Binding, Liveness/Guete, Persistenz. Die Laboranwendung RMM-1182 -> TEC-1089 ist der erste Validierungsfall, nicht die einzige Produktform.
+
+## Konkreter Beta-Test-Use-Case
+
+Die geplante Anlage kombiniert voraussichtlich sechs RMM und vier TEC auf einem lokalen CAN-Netz:
+
+- vier RMM als Temperaturmessstellen in der Thermalkammer;
+- zwei RMM als Spannungs-/Current-Shunt-Readout;
+- vier TEC als regelnde Consumer.
+
+Nicht jede RMM-/TEC-Beziehung ist fest verdrahtet. Ein TEC-Kanal soll flexibel ein geeignetes RMM-Temperatursignal als Objekttemperatur abonnieren koennen; andere TECs koennen andere RMMs nutzen oder denselben Messwert nur diagnostisch sehen. Dasselbe Muster kann spaeter auch fuer Fuehrungswerte gelten, z. B. wenn mehrere TEC-Kanaele einem gemeinsamen Zieltemperaturwert folgen.
+
+Der praktische Bedarf ist deshalb eine reproduzierbare CAN-Node-ID- und Signal-Subscription-Konfiguration:
+
+- jedes lokale Netzwerk hat eindeutige Node IDs fuer alle RMM und TEC;
+- ein Setup kann mehrfach kopiert werden, solange die Node-ID-Basis oder das Mapping eindeutig bleibt;
+- die peer-to-peer Topologie ist eine Konfiguration, keine Firmware-Sonderverdrahtung;
+- CoSo/XML oder ein Meerstetter-Tool kann die Node IDs, Published Signals, Subscriptions und Control-Bindings exportieren, importieren und plausibilisieren.
+
+Das verbessert unsere konkrete Anlage, verallgemeinert aber auch den RMM-Produktnutzen: Das RMM wird nicht nur ein Messgeraet fuer Host-Software, sondern eine native Meerstetter-Signalquelle fuer andere Meerstetter-Geraete.
 
 ## Generisches Modell
 
@@ -81,7 +102,7 @@ Ein Consumer-Geraet soll ein fremdes TPDO als importiertes Signal abonnieren und
 - Abonniertes TPDO: COB-ID und Profil-/Mapping-Version, im Testfall `0x1B8`.
 - Importiertes Signal: Wert, Alter, Guete, Quelle, Receive Counter.
 - Optionales Control-Binding: z. B. TEC-Objekttemperaturquelle fuer Kanal 1.
-- Implementierungswunsch: interne Quellenwahl fuer `local sensor` / `host external object temperature` / `CANopen remote object temperature`; wenn moeglich Wiederverwendung des bestehenden externen Objekttemperaturpfads fuer Filter, Limits und Fehlerreaktion.
+- Implementierungsvorschlag: interne Quellenwahl fuer `local sensor` / `host external object temperature` / `CANopen remote object temperature`; wenn moeglich Wiederverwendung des bestehenden externen Objekttemperaturpfads fuer Filter, Limits und Fehlerreaktion.
 - Fehlerreaktion: Output disable oder definierter sicherer Hold-State. Automatischer Fallback auf lokalen Sensor nur explizit und mit bumpless transfer/ramp limit, nicht als Default.
 - Persistenz: Import, Frist, Gueteauswertung, Quellenwahl und Kanalbindung muessen Power-Cycle ueberleben.
 
@@ -98,7 +119,7 @@ Das ist ein Gate fuer jede Regelanwendung:
 
 ### Wire Contract
 
-Bitte kein implizites oder hostseitig geratenes Format. Meerstetter sollte eine eindeutige PDO-Definition dokumentieren:
+Die PDO-Definition sollte eindeutig sein, nicht implizit oder hostseitig geraten:
 
 | Feld | Empfehlung |
 | --- | --- |
@@ -129,12 +150,13 @@ Mehr zyklische Frames sind hier kein Problem an sich. Der Vorteil ist eine klare
 3. Ein Consumer importiert dieses TPDO als read-only Signal und zeigt Wert, Alter, Guete und Quelle ueber normale Diagnose/MeCom an.
 4. Ein regelndes Consumer-Geraet kann das importierte Signal explizit an eine Regelquelle binden.
 5. Im ersten Test publiziert RMM SN7 HR1 Pt100 Temperatur auf TPDO `0x1B8`; TEC SN75 importiert dieses Signal als Objekttemperaturquelle fuer einen Kanal.
-6. Die Kanal-Regelsensor-Auswahl zeigt die importierte Quelle eindeutig und persistent.
-7. Nach Power-Cycle aller Geraete funktioniert die Verbindung ohne Host-Polling.
-8. Stoppt das Producer-TPDO, faellt der Heartbeat aus, wird der Sensor abgezogen oder meldet der Producer ungueltige Guete, geht eine gebundene Regelquelle innerhalb der konfigurierten Frist in den sicheren Fehlerzustand.
-9. CoSo/XML oder ein Meerstetter-Tool kann diese Konfiguration reproduzierbar exportieren und wiederherstellen.
+6. Das gleiche Prinzip laesst sich auf ein Netzwerk mit sechs RMM und vier TEC anwenden, ohne andere Firmwarepfade pro Geraetekombination.
+7. Die Kanal-Regelsensor-Auswahl zeigt die importierte Quelle eindeutig und persistent.
+8. Nach Power-Cycle aller Geraete funktioniert die Verbindung ohne Host-Polling.
+9. Stoppt das Producer-TPDO, faellt der Heartbeat aus, wird der Sensor abgezogen oder meldet der Producer ungueltige Guete, geht eine gebundene Regelquelle innerhalb der konfigurierten Frist in den sicheren Fehlerzustand.
+10. CoSo/XML oder ein Meerstetter-Tool kann diese Konfiguration reproduzierbar exportieren und wiederherstellen.
 
-## Fragen an Meerstetter
+## Zu klaerende Punkte mit Meerstetter
 
 1. Unterstuetzt die aktuelle Meerstetter-Firmware echte, persistent konfigurierbare CiA-301 PDO-Prozessdaten zwischen Geraeten, oder ist CAN in Teilen nur MeCom-over-CAN?
 2. Welche Objekte sollen als generische `Published Signals` fuer Messwert und Guete verwendet werden? Fuer RMM-1182 HR1 Pt100 sind Kandidaten aus der EDS konvertierte/surveillierte Resultate und Result-Flags.
@@ -152,7 +174,7 @@ Mehr zyklische Frames sind hier kein Problem an sich. Der Vorteil ist eine klare
 
 ## Produktfeedback
 
-Fuer den MVP sollte Meerstetter nicht zuerst ein grosses Framework bauen. Der kleinste nuetzliche Produktbaustein ist:
+Aus Beta-Tester-Sicht ist der staerkste Produktschritt nicht ein grosses Framework, sondern ein klarer CANopen-MVP:
 
 - Published measurement TPDO.
 - Subscribed remote signal.
@@ -161,7 +183,7 @@ Fuer den MVP sollte Meerstetter nicht zuerst ein grosses Framework bauen. Der kl
 - Strikte Liveness-/Gueteauswertung.
 - Diagnose ueber MeCom/CoSo.
 
-Das reicht fuer den konkreten Nutzen: ein Messgeraet wird zur echten externen Signalquelle fuer ein regelndes Geraet, ohne Server im Regelkreis.
+Das reicht fuer den konkreten Nutzen: ein Messgeraet wird zur echten externen Signalquelle fuer ein regelndes Geraet, ohne Server im Regelkreis. Gleichzeitig entsteht ein generisches Integrationsmuster fuer mehrere RMM, TEC und spaeter andere Meerstetter-Geraete in wiederholbaren Anlagen.
 
 ## Spekulativer Ausbau: Meerstetter Shared Signals
 
@@ -176,7 +198,7 @@ Wenn der MVP funktioniert, koennte daraus ein konsistentes Meerstetter-Oekosyste
 7. RS485/USB/UART/Ethernet-to-Serial bleiben prima fuer Commissioning, Diagnose und Sichtbarkeit. Fuer Regelwerte waeren sie nur geeignet, wenn Meerstetter einen eigenen Scheduler/Router mit gebundener Latenz, Zeitstempel, Guete und Timeout-Semantik definiert.
 8. I2C/SPI am RMM sollten fuer diesen Zweck als lokale/periphere Schnittstellen behandelt werden, ausser Meerstetter definiert spaeter ein spezifisches Bridge-Profil.
 
-Der Kundennutzen waere ein klarer, flottenweiter Workflow: ein Tool scannt Geraete, zeigt angebotene Signale, der Nutzer waehlt ein Signal aus, bindet es an eine TEC-Funktion, speichert die Konfiguration, und danach laufen die Geraete direkt miteinander.
+Der Kundennutzen waere ein klarer, flottenweiter Workflow: ein Tool scannt Geraete, zeigt angebotene Signale, der Nutzer waehlt ein Signal aus, bindet es optional an eine TEC-Funktion, speichert die Konfiguration, und danach laufen die Geraete direkt miteinander. Mehrere Kopien einer Anlage koennen dasselbe Signalkonzept nutzen, auch wenn Node IDs oder konkrete RMM-/TEC-Paare pro Aufbau abweichen.
 
 ## Lokale Evidenz
 
@@ -195,13 +217,15 @@ Du bist Claude Opus 4.8. Bitte begutachte die lokale Markdown-Datei:
 /home/svc_pmg_testbed_b/meerstetter-go/docs/rmm_tec_direct_can_firmware_update_proposal.md
 
 Review-Ziel:
-Pruefe kritisch, ob der vorgeschlagene generische CANopen-MVP fuer Meerstetter Published Signals, Signal Subscriptions und optionale Control Source Bindings wirklich minimal, sicher und implementierbar ist.
+Pruefe kritisch, ob der vorgeschlagene generische CANopen-MVP fuer Meerstetter Published Signals, Signal Subscriptions und optionale Control Source Bindings wirklich minimal, sicher, implementierbar und als Beta-Tester-Featurevorschlag neutral genug formuliert ist.
 
 Kontext:
 - Ein Meerstetter Producer-Geraet soll einen typisierten Mess- oder Fuehrungswert per CANopen-TPDO publizieren.
 - Ein Meerstetter Consumer-Geraet soll dieses Signal persistent importieren und read-only diagnostisch sichtbar machen.
 - Ein regelndes Consumer-Geraet, im ersten Test TEC SN75, soll ein geeignetes importiertes Signal explizit als Regelquelle binden koennen.
 - Der konkrete erste Validierungsfall ist RMM SN7 mit Pt100 an HR1 -> TEC SN75 als Objekttemperatur-Regelsensor.
+- Die geplante Anlage generalisiert das auf voraussichtlich sechs RMM und vier TEC: vier RMM als Temperaturmessstellen in der Thermalkammer, zwei RMM als Current-Shunt-Readout, vier TEC als flexible Consumer.
+- Node IDs und peer-to-peer Signalbeziehungen sollen reproduzierbar konfigurierbar sein, damit mehrere Kopien einer Anlage mit angepasstem Mapping moeglich sind.
 - Es soll kein Host-Polling-Loop und keine Server-Software im Regelkreis noetig sein.
 - Standard-CANopen-Objekte sollen bevorzugt werden: SDO fuer Konfiguration, PDO fuer Live-Werte, NMT/Heartbeat/EMCY fuer Zustand und Fehler.
 - Die aktuelle Labor-Evidenz zeigt eindeutige Node IDs, SDO-Antworten aller sieben Geraete bei 1 Mbit/s, RMM-SN7-Pt100-Werte per SDO, aber noch kein SN7-TPDO und keine aktive Standard-Heartbeat-Ueberwachung.
@@ -215,7 +239,7 @@ Bitte liefere:
 5. Safety-Review fuer einen importierten Regelsensor: Timeout, Guete, Stale Value, Fallback, PID-Stabilitaet.
 6. Ob die vorgeschlagene CAN-Chattiness 10/20/50 Hz sinnvoll ist und welche Default-Werte besser waeren.
 7. Welche Fragen an Meerstetter fehlen oder gekuerzt werden sollten.
-8. Eine kurze, bessere vendor-facing Anfrage, falls die aktuelle Kurzfassung noch zu breit ist.
+8. Eine kurze, bessere vendor-facing Featurevorschlag-Formulierung, falls die aktuelle Kurzfassung noch zu breit ist.
 
 Bitte nicht die ganze Datei neu schreiben. Priorisiere technische Kritik und konkrete Verbesserungen.
 ```
