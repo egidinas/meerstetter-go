@@ -1,4 +1,4 @@
-# Featurevorschlag: Meerstetter CANopen-MVP für verteilte Mess- und Regelsignale
+# Featurevorschlag: Meerstetter CANopen-Minimalversion für verteilte Mess- und Regelsignale
 
 Datum: 2026-06-08
 
@@ -8,18 +8,18 @@ Ziel: Ein Meerstetter-Gerät bietet einen typisierten Mess- oder Führungswert d
 
 ## Kurzfassung
 
-Wir schlagen Meerstetter eine kleine, wiederverwendbare CANopen-Erweiterung vor:
+Wir schlagen Meerstetter eine kleine, wiederverwendbare CANopen-Erweiterung vor. Die wichtigsten CANopen-Begriffe sind beim ersten Auftreten ausgeschrieben: `TPDO` steht für `Transmit Process Data Object` bzw. Sende-Prozessdatenobjekt, `RPDO` für `Receive Process Data Object` bzw. Empfangs-Prozessdatenobjekt, `NMT` für `Network Management`, `EMCY` für `Emergency Message`, `SDO` für `Service Data Object` und `PDO` für `Process Data Object`.
 
-1. Ein Producer-Gerät publiziert einen ausgewählten, typisierten Wert zyklisch als dokumentiertes TPDO.
+1. Ein Producer-Gerät publiziert einen ausgewählten, typisierten Wert zyklisch als dokumentiertes Sende-Prozessdatenobjekt (TPDO).
 2. Ein Consumer-Gerät kann dieses TPDO als sichtbares importiertes Signal abonnieren.
 3. Ein regelndes Consumer-Gerät kann ein geeignetes importiertes Signal explizit als Regelquelle binden, z. B. als TEC-Objekttemperatur oder später als Zielwertquelle.
 4. Für TEC-Objekttemperatur führt der TEC den importierten Wert idealerweise intern durch den bereits validierten Pfad für externe/Software-Objekttemperatur, aber mit expliziter Quellenwahl. Ein Host-geschriebener MeCom-Wert und ein CAN-sourcierter Wert dürfen nicht unkontrolliert denselben Slot beschreiben.
 5. Das Consumer-Gerät überwacht Alter, Güte, NMT-/Heartbeat-Zustand und Empfangsfrist. Bei Timeout, ungültigem Wert oder Sensordefekt geht eine gebundene Regelquelle in einen sicheren Fehlerzustand, statt den letzten gültigen Wert endlos weiterzuverwenden.
 6. Konfiguration, Import und Binding müssen persistent sein und nach Power-Cycle ohne Host weiterlaufen.
 
-Standard-CANopen-Objekte sollten bevorzugt werden, wo immer die Firmware sie sinnvoll unterstützt: TPDO/RPDO-Kommunikation und Mapping, NMT Operational, Heartbeat, EMCY, SDO für Konfiguration und PDO für Live-Daten. Damit bleibt die Funktion technisch nachvollziehbar, diagnosefähig und kompatibel mit bestehenden CANopen-Werkzeugen.
+Standard-CANopen-Objekte sollten bevorzugt werden, wo immer die Firmware sie sinnvoll unterstützt: Kommunikation und Mapping für Transmit Process Data Objects (TPDO) und Receive Process Data Objects (RPDO), Network Management (NMT) im Operational-Zustand, Heartbeat als zyklische Knoten-Lebensmeldung, Emergency Message (EMCY), Service Data Objects (SDO) für Konfiguration und Process Data Objects (PDO) für Live-Daten. Damit bleibt die Funktion technisch nachvollziehbar, diagnosefähig und kompatibel mit bestehenden CANopen-Werkzeugen.
 
-Der MVP bleibt bewusst klein: Producer-TPDO, Consumer-Import, optionales Control-Binding, Liveness/Güte, Persistenz. Die Laboranwendung RMM-1182 -> TEC-1089 ist der erste Validierungsfall, nicht die einzige Produktform.
+Die Minimalversion bleibt bewusst klein: Producer-TPDO, Consumer-Import, optionales Control-Binding, Liveness/Güte, Persistenz. Die Laboranwendung RMM-1182 -> TEC-1089 ist der erste Validierungsfall, nicht die einzige Produktform.
 
 ## Konkreter Beta-Test-Use-Case
 
@@ -63,7 +63,7 @@ Die Funktion sollte als drei getrennte Ebenen formuliert werden:
 2. `Signal Subscription`: Ein anderes Gerät importiert diesen Wert read-only und zeigt Wert, Alter, Güte und Quelle diagnostisch an.
 3. `Control Source Binding`: Ein regelndes Gerät bindet ein geeignetes importiertes Signal explizit an eine Regelungsfunktion. Beobachten und Regeln bleiben getrennt.
 
-Für den CANopen-MVP muss nicht das ganze Ökosystem umgesetzt werden. Es reicht, diese Rollen sauber zu benennen, damit die erste Firmwarefunktion nicht als Einzelfall "RMM schreibt TEC-Slot" endet.
+Für die CANopen-Minimalversion muss nicht das ganze Ökosystem umgesetzt werden. Es reicht, diese Rollen sauber zu benennen, damit die erste Firmwarefunktion nicht als Einzelfall "RMM schreibt TEC-Slot" endet.
 
 ## Aktuell verifizierte Fakten
 
@@ -76,7 +76,7 @@ Diese Punkte wurden lokal per CoSo-/EDS-Reverse-Engineering und read-only CANope
 | CANopen SDO | Alle sieben Geräte antworten auf CANopen SDO Identity/Error-Register Reads. Das ist nicht nur ein MeCom-over-CAN-Tunnel. |
 | Produkt-IDs | RMM-1182 meldet Produkt `0x049E`; TEC-1089 meldet Produkt `0x0441`. |
 | Fehlerregister | `0x1001:00 = 0x00` auf allen sieben Nodes. Das heißt nur: kein gesetztes CANopen-Error-Register-Bit. Es beweist nicht Operational-State, Heartbeat, PDO-Mapping oder Regelfähigkeit. |
-| TPDO/RPDO-Objekte | Standardnahe PDO-Kommunikations- und Mapping-Objekte sind per SDO lesbar. |
+| Prozessdatenobjekte | Standardnahe Kommunikations- und Mapping-Objekte für Process Data Objects (PDO) sind per Service Data Object (SDO) lesbar. |
 | TPDO1 Default COB-ID | `0x180 + node_id` ist sichtbar: SN6 sendet aktuell auf `0x1B7`; SN7 wäre entsprechend `0x1B8`. |
 | TPDO1 Mapping | Nur SN6 ist aktuell als TPDO-Publisher konfiguriert: SN6 `0x1A00:00 = 1`, Mapping `0x4000:01`, `32 bit`. SN7 und SN8 haben `0x1A00:00 = 0` und publizieren deshalb trotz eindeutiger Node IDs noch keinen Messwert. |
 | SN7 Pt100-Wert | SN7 liefert über SDO einen plausiblen Pt100/Temperaturwert: HR1 Widerstand ca. `109.6 Ohm`, konvertierter Wert ca. `24.7 degC`. |
@@ -97,7 +97,7 @@ Nicht bestätigt ist bisher:
 - ob ein regelndes Consumer-Gerät für importierte Signale eine Empfangsfrist, Heartbeat-/NMT-Überwachung und sicheren Fehlerzustand unterstützt;
 - welche Status-/Güteobjekte für RMM-Messwerte und später andere Published Signals von Meerstetter bevorzugt werden.
 
-## CANopen-MVP
+## CANopen-Minimalversion
 
 ### Producer-Seite
 
@@ -108,7 +108,7 @@ Ein Producer-Gerät soll für einen konfigurierten lokalen Wert ein zyklisches T
 - Signal-Identität: stabiler Name, Einheit, Skalierung, Kanalindex und Mapping-Version, damit ein Consumer nicht nur auf eine rohe COB-ID vertraut.
 - TPDO COB-ID: bevorzugt Standard `0x180 + node_id`; im Testfall SN7 `0x1B8`.
 - Payload: dokumentierter Temperaturwert plus Güte/Status.
-- Zyklus: `10 Hz` als MVP-Default, passend zum Firmware-Default für Temperaturwerte. `1 Hz` eignet sich eher für Diagnose oder sehr langsame Regelstrecken; `90 Hz` ist die sinnvolle High-Rate-Option, falls Meerstetter sie für TEC-Regelung, Filterung und Rauschverhalten empfiehlt.
+- Zyklus: `10 Hz` als Default der Minimalversion, passend zum Firmware-Default für Temperaturwerte. `1 Hz` eignet sich eher für Diagnose oder sehr langsame Regelstrecken; `90 Hz` ist die sinnvolle High-Rate-Option, falls Meerstetter sie für TEC-Regelung, Filterung und Rauschverhalten empfiehlt.
 - Zwingend: ein Event Timer oder eine synchrone PDO-Strategie. Reines Change-of-Value ohne zyklisches Lebenszeichen ist für einen Regelsensor ungeeignet.
 - Fehler: Sensor-open/short/out-of-range/conversion fault müssen als Status und/oder EMCY sichtbar sein.
 - Persistenz: Quelle, Mapping, COB-ID, Timer, Heartbeat und Enable-State müssen Power-Cycle überleben.
@@ -155,7 +155,7 @@ Für Classic CAN ist ein kleines PDO ausreichend. Beispiel: 4 Byte Wert + 2 Byte
 
 Die aktuelle Buslast ist sehr niedrig. Für Regelsensoren ist etwas mehr deterministischer Traffic sinnvoller als zu wenig:
 
-- `10 Hz` TPDO mit Event Timer als MVP-Default, weil dies bereits der Temperatur-Firmware-Default ist.
+- `10 Hz` TPDO mit Event Timer als Default der Minimalversion, weil dies bereits der Temperatur-Firmware-Default ist.
 - `1 Hz` nur für Diagnose oder sehr langsame thermische Strecken, nicht als Standard für einen TEC-Regelsensor.
 - `90 Hz` ist bei wenigen Signalen und `1 Mbit/s` voraussichtlich busseitig unkritisch, sollte aber nur mit passender TEC-Filterung, Latenzbetrachtung und Rauschbewertung als High-Rate-Regeloption verwendet werden.
 - Heartbeat z. B. `500 ms` bis `1000 ms`; Sensor-Max-Age separat und kürzer oder gleich der gewünschten Fehlerreaktionszeit.
@@ -176,7 +176,7 @@ Der lokale CAN-Teil ist in Bezug auf Busparameter und Node IDs bereits in einem 
 
 Der nächste lokale Schritt ist nicht eine weitere Node-ID-Korrektur, sondern die reproduzierbare Producer-Konfiguration pro RMM-Messkanal: lokaler Eingang -> konvertierter Wert -> TPDO-Mapping -> zyklische Aussendung -> Persistenz. Diese Sequenz sollte über CoSo/USB oder einen von Meerstetter bestätigten CANopen-SDO-Schreibpfad erfolgen. Erst danach ist SN7 HR1 als Published Signal `chamber_temp_01` auf `0x1B8` ein sauberer Kandidat für den TEC-Import.
 
-## Akzeptanztest für den MVP
+## Akzeptanztest für die Minimalversion
 
 1. Alle beteiligten Nodes laufen bei `1 Mbit/s` mit eindeutigen Node IDs.
 2. Die Node IDs liegen in einem lokalen, endlichen Profil, z. B. 32er-Blöcke pro Gerätetyp, und die Geräteidentität aus `0x1018` passt zum gespeicherten Profil.
@@ -208,7 +208,7 @@ Der nächste lokale Schritt ist nicht eine weitere Node-ID-Korrektur, sondern di
 
 ## Produktfeedback
 
-Aus Beta-Tester-Sicht ist der stärkste Produktschritt nicht ein großes Framework, sondern ein klarer CANopen-MVP:
+Aus Beta-Tester-Sicht ist der stärkste Produktschritt nicht ein großes Framework, sondern eine klare CANopen-Minimalversion:
 
 - Published measurement TPDO.
 - Subscribed remote signal.
@@ -221,7 +221,7 @@ Das reicht für den konkreten Nutzen: ein Messgerät wird zur echten externen Si
 
 ## Spekulativer Ausbau: Meerstetter Shared Signals
 
-Wenn der MVP funktioniert, könnte daraus ein konsistentes Meerstetter-Ökosystemprimitive werden:
+Wenn die Minimalversion funktioniert, könnte daraus ein konsistentes Meerstetter-Ökosystemprimitive werden:
 
 1. Jedes MeCom-Gerät kann typisierte `Published Signals` anbieten: Temperatur, Spannung, Strom, Zieltemperatur, Kontrollwert, Status.
 2. Andere Geräte können solche Signale als `Signal Subscriptions` importieren.
