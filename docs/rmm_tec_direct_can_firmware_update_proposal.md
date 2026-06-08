@@ -84,6 +84,8 @@ Diese Punkte wurden lokal per CoSo-/EDS-Reverse-Engineering und read-only CANope
 | Aktueller Live-Traffic | Nur SN6 publiziert aktuell sichtbar zyklisch/eventgetrieben auf `0x1B7`. SN7/SN8 publizieren noch kein sichtbares TPDO. |
 | Heartbeat aktuell | `0x1017` ist vorhanden, aber aktuell `0`; im passiven Capture waren keine `0x700 + node_id` Heartbeats sichtbar. |
 | Heartbeat-Consumer/NMT-Startup | `0x1016` und `0x1F80` waren auf der aktuellen Firmware per Standard-SDO nicht verfügbar. Falls Meerstetter äquivalente Herstellerobjekte nutzt, brauchen wir die Dokumentation. |
+| Rote LED | Das regelmäßige rote Blinken mit ca. `1 Hz` wurde von Meerstetter als Kennzeichen der aktuell nicht veröffentlichten Firmwareversion bestätigt. In neuer Firmware soll rot blinkend zusätzlich einen Warnzustand anzeigen, z. B. Messwert außerhalb des zulässigen Bereichs; optional gibt es dafür einen Dark Mode. |
+| Digitale lokale Sensor-Interfaces | Meerstetter hat bestätigt, dass UART (Universal Asynchronous Receiver/Transmitter), SPI (Serial Peripheral Interface) und I2C (Inter-Integrated Circuit) hardwareseitig möglich sind; die Softwareunterstützung fehlt aktuell noch. |
 | Buslast | Aktuell ca. 10 Frames/s und praktisch `0%` Buslast bei `1 Mbit/s`. Mehr zyklischer Prozessdatenverkehr wäre technisch gut vertretbar. |
 
 Nicht bestätigt ist bisher:
@@ -203,7 +205,7 @@ Der nächste lokale Schritt ist nicht eine weitere Node-ID-Korrektur, sondern di
 9. Wie wird die PDO-/Import-/Kanalbindung persistent gespeichert: CANopen `0x1010`, Meerstetter Flash/CoSo/XML oder ein gemischtes Modell?
 10. Wie behandelt die TEC-Regelung einen externen Sensor mit `1 Hz`, `10 Hz` oder `90 Hz` Update-Rate? Gibt es Filterung, Resampling, Interpolation oder relevante D-Anteil-Dämpfung, und welche Rate empfiehlt Meerstetter als Control-Default?
 11. Welche sichere Fehlerreaktion empfiehlt Meerstetter bei Timeout, ungültiger Güte, out-of-range oder Sensordefekt?
-12. Was bedeutet das ca. 1-Hz rote Blinken an den RMMs, wenn `0x1001:00 = 0x00` ist?
+12. Wie wird der neue Warnzustand maschinenlesbar über CANopen/MeCom abgebildet, damit LED-Zustand, Messwertgüte und Published-Signal-Güte konsistent sind und ein Consumer Warnung, Fehler und unveröffentlichte Firmware unterscheiden kann?
 13. Kann CoSo künftig angebotene Signale anzeigen, Imports konfigurieren und Control-Bindings setzen, ohne manuelles Object-Dictionary-Editing?
 
 ## Produktfeedback
@@ -230,7 +232,7 @@ Wenn die Minimalversion funktioniert, könnte daraus ein konsistentes Meerstette
 5. Jedes Gerät kann lokale Werte plus konfigurierte Peer-Signale über seine normale MeCom-Schnittstelle read-only sichtbar machen, inklusive Alter, Güte und Quelle.
 6. CAN/CANopen bleibt der bevorzugte Live-Control-Transport, weil PDOs echte Producer/Consumer-Kommunikation ohne Host ermöglichen.
 7. RS485/USB/UART/Ethernet-to-Serial bleiben prima für Commissioning, Diagnose und Sichtbarkeit. Für Regelwerte wären sie nur geeignet, wenn Meerstetter einen eigenen Scheduler/Router mit gebundener Latenz, Zeitstempel, Güte und Timeout-Semantik definiert.
-8. I2C/SPI am RMM sollten für diesen Zweck als lokale/periphere Schnittstellen behandelt werden, außer Meerstetter definiert später ein spezifisches Bridge-Profil.
+8. UART, SPI und I2C am RMM sind als spätere lokale digitale Sensor-Interfaces interessant. Für die Minimalversion bleiben sie lokale/periphere Quellen; sobald Softwareunterstützung existiert, können ihre Werte wie andere Messwerte als Published Signals modelliert werden.
 
 Der Kundennutzen wäre ein klarer, flottenweiter Workflow: ein Tool scannt Geräte, zeigt angebotene Signale, der Nutzer wählt ein Signal aus, bindet es optional an eine TEC-Funktion, speichert die Konfiguration, und danach laufen die Geräte direkt miteinander. Mehrere Kopien einer Anlage können dasselbe Signalkonzept nutzen, auch wenn Node IDs oder konkrete RMM-/TEC-Paare pro Aufbau abweichen.
 
