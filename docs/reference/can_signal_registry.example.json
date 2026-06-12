@@ -1,73 +1,82 @@
 {
   "schema_version": 1,
-  "name": "bench-a",
-  "description": "Example CAN signal registry: one RMM feeds two TECs their external object temperature, and TEC A also hands its own object temperature to a third TEC. Bind roles to your real node IDs, or strip the node_ids to use this as a pattern.",
+  "name": "lab-bench",
+  "description": "Real lab bench topology confirmed live 2026-06-13 over Kvaser USBcan: three RMM-1182 producers (nodes 0x37/0x38/0x39) and four TEC-1166 consumers (nodes 0x4B/0x4C/0x51/0x54). COB-IDs use each RMM's default TPDO1 (0x180+node). The intended handover below is illustrative; on the live bench the TEC RPDOs and source-selects were still unconfigured, so a live diff of this file reports drift until the controllers are set up. Strip node_ids to reuse as a pattern for a copied bench.",
   "nodes": [
-    {"role": "rmm",   "node_id": 16, "family": "rmm-1182", "label": "bench A RMM"},
-    {"role": "tec-a", "node_id": 75, "family": "tec-v6.32", "label": "bench A left"},
-    {"role": "tec-b", "node_id": 76, "family": "tec-v6.32", "label": "bench A right"},
-    {"role": "tec-c", "node_id": 77, "family": "tec-v6.32", "label": "bench A aux"}
+    {"role": "rmm-1", "node_id": 55, "family": "rmm-1182", "label": "RMM 0x37"},
+    {"role": "rmm-2", "node_id": 56, "family": "rmm-1182", "label": "RMM 0x38"},
+    {"role": "rmm-3", "node_id": 57, "family": "rmm-1182", "label": "RMM 0x39"},
+    {"role": "tec-1", "node_id": 75, "family": "tec-1166-v6.32", "label": "TEC 0x4B"},
+    {"role": "tec-2", "node_id": 76, "family": "tec-1166-v6.32", "label": "TEC 0x4C"},
+    {"role": "tec-3", "node_id": 81, "family": "tec-1166-v6.32", "label": "TEC 0x51"},
+    {"role": "tec-4", "node_id": 84, "family": "tec-1166-v6.32", "label": "TEC 0x54"}
   ],
   "signals": [
     {
-      "cob_id": "0x1A1",
-      "name": "bench_a_object_temp",
-      "description": "RMM channel 2 converted temperature, consumed as external object temperature by both primary TECs.",
-      "rate_ms": 50,
+      "cob_id": "0x1B7",
+      "name": "rmm1_ch1_to_tec1_tec2",
+      "description": "RMM-1 channel-1 value-conversion result (default TPDO1, COB-ID 0x180+0x37) feeds the external object temperature of TEC-1 and TEC-2.",
+      "rate_ms": 100,
       "saved_to_flash": false,
       "producer": {
-        "role": "rmm",
-        "tpdo": 2,
+        "role": "rmm-1",
+        "tpdo": 1,
         "mapping": [
-          {"index": "0x4000", "subindex": 2, "bits": 32, "comment": "RMM ch2 value-conversion result, degC"}
+          {"index": "0x4000", "subindex": 1, "bits": 32, "comment": "value conversion result, channel 1 (confirmed live as TPDO1 default map 0x40000120)"}
         ]
       },
       "consumers": [
         {
-          "role": "tec-a",
+          "role": "tec-1",
           "rpdo": 1,
-          "mapping": [
-            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
-          ],
-          "source_selects": [
-            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
-          ]
+          "mapping": [{"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}],
+          "source_selects": [{"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}]
         },
         {
-          "role": "tec-b",
+          "role": "tec-2",
           "rpdo": 1,
-          "mapping": [
-            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
-          ],
-          "source_selects": [
-            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
-          ]
+          "mapping": [{"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}],
+          "source_selects": [{"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}]
         }
       ]
     },
     {
-      "cob_id": "0x1CB",
-      "name": "tec_a_object_to_tec_c",
-      "description": "TEC A publishes its own measured object temperature; TEC C consumes it as its external object temperature (TEC-to-TEC handover).",
+      "cob_id": "0x1B8",
+      "name": "rmm2_ch1_to_tec3",
+      "description": "RMM-2 channel-1 result (default TPDO1, COB-ID 0x180+0x38) feeds TEC-3 external object temperature.",
       "rate_ms": 100,
       "saved_to_flash": false,
       "producer": {
-        "role": "tec-a",
+        "role": "rmm-2",
         "tpdo": 1,
-        "mapping": [
-          {"index": "0x2100", "subindex": 1, "bits": 32, "comment": "TEC A object temperature, instance 1"}
-        ]
+        "mapping": [{"index": "0x4000", "subindex": 1, "bits": 32, "comment": "value conversion result, channel 1"}]
       },
       "consumers": [
         {
-          "role": "tec-c",
+          "role": "tec-3",
           "rpdo": 1,
-          "mapping": [
-            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
-          ],
-          "source_selects": [
-            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
-          ]
+          "mapping": [{"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}],
+          "source_selects": [{"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}]
+        }
+      ]
+    },
+    {
+      "cob_id": "0x1B9",
+      "name": "rmm3_ch1_to_tec4",
+      "description": "RMM-3 channel-1 result (default TPDO1, COB-ID 0x180+0x39) feeds TEC-4 external object temperature.",
+      "rate_ms": 100,
+      "saved_to_flash": false,
+      "producer": {
+        "role": "rmm-3",
+        "tpdo": 1,
+        "mapping": [{"index": "0x4000", "subindex": 1, "bits": 32, "comment": "value conversion result, channel 1"}]
+      },
+      "consumers": [
+        {
+          "role": "tec-4",
+          "rpdo": 1,
+          "mapping": [{"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}],
+          "source_selects": [{"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}]
         }
       ]
     }

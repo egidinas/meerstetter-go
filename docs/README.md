@@ -23,7 +23,8 @@ If you want to evaluate the gateway or wire your own UI on top of it:
 | [`gateway/UI_GRAPH_WALL_CONTRACT.md`](gateway/UI_GRAPH_WALL_CONTRACT.md) | Graph wall tile contracts and the SSE streaming shape used by the graph tile endpoints |
 | [`coso_compatibility_bridge.md`](coso_compatibility_bridge.md) | How the CoSo compatibility bridge maps MeCom requests onto CANopen, native serial/TCP fallback, and per-device cache state |
 | [`can_parameter_publishing_consuming_handbook.md`](can_parameter_publishing_consuming_handbook.md) | Plain-language CANopen primer, then how SDO/PDO publishing and consuming works for TEC v6.32 external-temperature RPDOs, RMM TPDO producers, and TEC-to-TEC handover — including the CAN signal registry for tracking and cloning a testbed's mappings |
-| [`rmm_1182_reverse_engineering.md`](rmm_1182_reverse_engineering.md) | First RMM-1182 CANopen/software documentation import and reverse-engineering notes |
+| [`rmm_1182_reverse_engineering.md`](rmm_1182_reverse_engineering.md) | First RMM-1182 CANopen/software documentation import and reverse-engineering notes, including the 2026-06-13 live hardware confirmation |
+| [`rmm_can_model_feedback.md`](rmm_can_model_feedback.md) | Constructive feedback for Meerstetter on the RMM-1182 CANopen model, grounded in the live bench session — PDO validity signalling, result-type enum, identity objects |
 | [`lut_tmtc_automation.md`](lut_tmtc_automation.md) | `mecomautomation` package — how LUT preload telecommands are generated |
 | [`tmtc_signalforge_boundary.md`](tmtc_signalforge_boundary.md) | Where `meerstetter-go` ends and the SignalForge ecosystem begins; the only import boundary between them |
 | [`SYNERGY.md`](SYNERGY.md) | Apache Arrow IPC data standard and schema used for high-performance telemetry export |
@@ -34,7 +35,7 @@ If you want to evaluate the gateway or wire your own UI on top of it:
 | File | What it covers |
 |---|---|
 | [`reference/tec_can_parameters_seed.go`](reference/tec_can_parameters_seed.go) | Seed fragment from TEC CAN parameter discovery. Not part of the build — the live catalogue is in `mecom` and `mecomdict`. |
-| [`reference/can_signal_registry.example.json`](reference/can_signal_registry.example.json) | Starter CAN signal registry: RMM→TEC and TEC→TEC PDO contracts. Load with `mecomgw -canmap`, or strip node IDs to use as a testbed pattern. |
+| [`reference/can_signal_registry.example.json`](reference/can_signal_registry.example.json) | Starter CAN signal registry: RMM→TEC and TEC→TEC PDO contracts. Load with `mecomgw -canmap` even without a CAN adapter, or strip node IDs to use as a testbed pattern. |
 
 ## Protocol overview
 

@@ -216,6 +216,54 @@ not to assert runtime behavior that the EDS or live captures do not prove.
 - PDO support is broad enough to support a telemetry wall later, but the default
   PDO layout and desired remapping sequence still need live confirmation.
 
+## Live Hardware Confirmation (2026-06-13)
+
+First read-only CANopen SDO/PDO session against the real bench over a Kvaser
+USBcan Light on SocketCAN `can0` at 1 Mbit/s. The bench carries seven nodes:
+**three RMM-1182** at node IDs `0x37`, `0x38`, `0x39` (product `0x49E`) and
+**four TEC-1166** at `0x4B`, `0x4C`, `0x51`, `0x54` (product `0x441`,
+firmware revision `0x00060020` = v6.32). All probes were bounded read-only SDO
+uploads plus passive capture; nothing on the bus was reconfigured.
+
+Confirmed against RMM node `0x37`:
+
+| Object | Read | Meaning |
+|---|---|---|
+| `0x1018:01` vendor | `0x547` | Matches the EDS import. |
+| `0x1018:02` product | `0x49E` | Matches the EDS import. |
+| `0x1018:03` revision | `0x00010000` | Firmware v1.00. |
+| `0x1001` error register | `0` | No active error. |
+| `0x1800:01` TPDO1 COB-ID | `0x1B7` | Default `0x180 + node`, valid/enabled. |
+| `0x1A00:00` TPDO1 count | `1` | One object mapped. |
+| `0x1A00:01` TPDO1 map | `0x40000120` | **`0x4000:01` float32 — Value Conversion Result, channel 1.** |
+| `0x1801:01` TPDO2 COB-ID | `0x2B7` | Default `0x280 + node`. |
+| `0x1A01:00` TPDO2 count | `0` | TPDO2 mapped to nothing (live but empty). |
+| `0x4000:00` channel count | `4` | Four value-conversion result channels, matching the EDS. |
+
+This **closes the open "default PDO layout still needs live confirmation"
+item**: out of the box, an RMM-1182 publishes `0x4000:01` (channel-1 value
+conversion result) as a single float32 on TPDO1 at COB-ID `0x180 + node`. The
+read-back also validates the `canmap` package decode path — its `ObserveNode`
+returns the same COB-ID, enable bit, and mapping entry as the `teccanprobe`
+capture.
+
+Data-quality caveat observed live (see the feedback note below): on this
+unconfigured bench, RMM `0x4000:01` published ~`9.88e-08` (channel 1, sensor
+noise around zero) while `0x4000:02` read `NaN`, `0x4001:01` (surveilled
+result) read `0`, and `0x3001:01` (resistance) read `NaN`. So the TPDO happily
+broadcasts a meaningless value with no in-band validity flag. The matching
+TEC-1166 consumers currently have empty RPDO1 mappings (`0x1600:00` count `0`)
+and object-temperature source selection `0x3300:01 = 0`, i.e. the handover is
+not yet wired — a clean "nothing configured" baseline.
+
+Constructive RMM CAN-model feedback distilled from this session lives in
+[`rmm_can_model_feedback.md`](rmm_can_model_feedback.md).
+
+Standard CANopen objects that **aborted** (worth noting for tooling): `0x1000`
+device type read `0x00000000` (no CiA profile advertised); `0x1008` manufacturer
+device name aborted `0x06020000` (object does not exist). The TEC-1166 also
+reports `0x1000 = 0`.
+
 ## Open Reverse-Engineering Tasks
 
 1. Obtain `RMM-1182 Communications Protocol` and harvest MeCom parameter IDs,

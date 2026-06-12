@@ -312,9 +312,11 @@ copy *from* except the devices themselves.
 
 This repository solves that with a **CAN signal registry**: a single
 version-controlled file that is the source of truth for every PDO contract on a
-bus, plus tooling that reads the live devices back and reports where they
-disagree with the file. The `canmap` Go package owns the format and the checks;
-the gateway serves it; the web UI shows it live.
+bus. The registry can be edited, validated, imported, exported, and served with
+no CAN adapter attached. When a CAN bus is available, the same tooling reads the
+live devices back and reports where they disagree with the file. The `canmap`
+Go package owns the format and the checks; the gateway serves it; the web UI
+shows either registry-only intent or live drift when requested.
 
 ### The registry, keyed by COB-ID
 
@@ -336,9 +338,10 @@ payloads over 64 bits, node-ID collisions, and references to undefined roles.
 ### Live read-back and drift
 
 Documentation that is never checked rots. Run the gateway with a registry and
-it will, on request, read back every reachable node's live PDO configuration
+`GET /api/canmap` returns the configured intent without touching hardware. Add
+`?live=1` and it will read back every reachable node's live PDO configuration
 over SDO — strictly read-only, the same bounded SDO reads `teccanprobe` uses —
-and compare it to the registry. Every signal gets a verdict:
+and compare it to the registry. Every live-checked signal gets a verdict:
 
 - **match**: the device's COB-ID, mapping, enable bit, and source selects equal
   the registry.
@@ -351,9 +354,9 @@ and compare it to the registry. Every signal gets a verdict:
 # Serve the registry and expose it at /api/canmap.
 go run ./cmd/mecomgw -config gateway.json -canmap bench_a_signals.json
 
-# Registry only:
+# Registry only; no CAN connection required:
 curl localhost:8080/api/canmap
-# Registry plus live device read-back and per-signal verdicts:
+# Registry plus live device read-back and per-signal verdicts; needs reachable CANopen nodes:
 curl 'localhost:8080/api/canmap?live=1'
 ```
 
