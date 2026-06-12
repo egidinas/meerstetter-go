@@ -88,6 +88,34 @@ func TestCANopenClientReadBulkKeepsUnsupportedSlots(t *testing.T) {
 	}
 }
 
+func TestCANopenClientReadMatchingSDOAbortIsUnknownParameter(t *testing.T) {
+	// Abort code 0x08000000 (general error) for the requested object 0x2100:01.
+	// The device actively responded, so it is reachable: this must classify as
+	// ErrUnknownParameter (a missing parameter on this device), never as a
+	// transport error that would tear down an otherwise-healthy binding.
+	abort := func() *fakeCANTransceiver {
+		return &fakeCANTransceiver{
+			replies: []canopen.Frame{
+				{ID: 0x5cb, DLC: 8, Data: [8]byte{0x80, 0x00, 0x21, 0x01, 0x00, 0x00, 0x00, 0x08}},
+			},
+		}
+	}
+	client := NewCANopenClient(abort(), ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if _, err := client.ReadFloat32(context.Background(), 1000, 1); !errors.Is(err, ErrUnknownParameter) {
+		t.Fatalf("matching SDO abort error = %v, want ErrUnknownParameter", err)
+	}
+
+	// Bulk read must absorb it as a NaN slot, not propagate a reset-worthy error.
+	bulkClient := NewCANopenClient(abort(), ClientConfig{Address: 0x4b, Timeout: time.Second})
+	values, err := bulkClient.ReadBulk(context.Background(), []Parameter{{ID: 1000, Instance: 1}})
+	if err != nil {
+		t.Fatalf("ReadBulk over an aborted object returned error: %v", err)
+	}
+	if len(values) != 1 || !math.IsNaN(values[0]) {
+		t.Fatalf("ReadBulk values = %#v, want one NaN slot", values)
+	}
+}
+
 func TestCANopenClientReadBulkReturnsTransportError(t *testing.T) {
 	sendErr := errors.New("send failed")
 	fake := &fakeCANTransceiver{sendErr: sendErr}

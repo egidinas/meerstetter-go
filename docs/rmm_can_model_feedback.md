@@ -16,11 +16,12 @@ ordered by how much it would improve real-world usability.
 - **Identity is clean and readable.** `0x1018` vendor `0x547` / product `0x49E`
   / revision matched the EDS exactly on live hardware. Product-number discovery
   (`0x49E`) is a reliable way to recognize an RMM on a mixed bus.
-- **Sensible default PDO layout.** Out of the box TPDO1 publishes
-  `0x4000:01` (channel-1 value-conversion result) as one float32 at the standard
-  `0x180 + node` COB-ID. That is exactly the object an integrator wants for
-  temperature handover, at a predictable identifier. No remapping was needed to
-  start consuming a value.
+- **Sensible default PDO layout on the confirmed node.** On RMM node `0x37`,
+  TPDO1 publishes `0x4000:01` (channel-1 value-conversion result) as one
+  float32 at the standard `0x180 + node` COB-ID. That is exactly the object an
+  integrator wants for temperature handover, at a predictable identifier. A host
+  or generic CANopen consumer could start consuming that node's value without
+  remapping; SN7/SN8 still need their TPDO1 mappings enabled or confirmed.
 - **Four parallel channels** (`0x4000:01..04`) map naturally onto a multi-sensor
   rig feeding multiple TECs.
 - **Broad PDO capacity** (16 TPDO / 16 RPDO) leaves room for richer telemetry
@@ -34,8 +35,9 @@ This is the single biggest usability gap. On the live bench an unconfigured /
 open channel published `0x4000:01 ≈ 9.88e-08` — sensor noise around zero — as a
 perfectly ordinary float32, while channel 2 published `NaN`. A consumer cannot
 distinguish "a real near-0 °C reading" from "no usable input" by looking at the
-PDO. A TEC with object-temperature source selection set to external would feed
-that garbage straight into its control loop.
+PDO. If a TEC external object-temperature source is wired to that stream, this
+kind of value could be routed into the control path unless the consumer has a
+separate validity check.
 
 Two inconsistent "no data" encodings appeared on the same device in one session
 (tiny-number on ch1, `NaN` on ch2), which makes the problem worse: there is no

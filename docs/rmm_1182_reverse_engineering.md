@@ -240,12 +240,13 @@ Confirmed against RMM node `0x37`:
 | `0x1A01:00` TPDO2 count | `0` | TPDO2 mapped to nothing (live but empty). |
 | `0x4000:00` channel count | `4` | Four value-conversion result channels, matching the EDS. |
 
-This **closes the open "default PDO layout still needs live confirmation"
-item**: out of the box, an RMM-1182 publishes `0x4000:01` (channel-1 value
-conversion result) as a single float32 on TPDO1 at COB-ID `0x180 + node`. The
-read-back also validates the `canmap` package decode path — its `ObserveNode`
-returns the same COB-ID, enable bit, and mapping entry as the `teccanprobe`
-capture.
+This closes the open default-PDO question for the observed RMM node `0x37`
+running firmware v1.00: in its observed default state, that node publishes
+`0x4000:01` (channel-1 value conversion result) as a single float32 on TPDO1 at
+COB-ID `0x180 + node`. SN7/SN8 still need their producer mapping enabled or
+confirmed before the same claim can be made for those units. The read-back also
+validates the `canmap` package decode path — its `ObserveNode` returns the same
+COB-ID, enable bit, and mapping entry as the `teccanprobe` capture.
 
 Data-quality caveat observed live (see the feedback note below): on this
 unconfigured bench, RMM `0x4000:01` published ~`9.88e-08` (channel 1, sensor
@@ -263,6 +264,40 @@ Standard CANopen objects that **aborted** (worth noting for tooling): `0x1000`
 device type read `0x00000000` (no CiA profile advertised); `0x1008` manufacturer
 device name aborted `0x06020000` (object does not exist). The TEC-1166 also
 reports `0x1000 = 0`.
+
+### Confirmed CANopen write and flash persistence (all three RMM)
+
+Building on the read-only session, the producer mapping was configured over
+CANopen on every RMM and persisted, which **closes the open "live writes prove
+persistence" task** for the variable-PDO path. On each node the standard safe
+variable-PDO sequence was applied (NMT pre-operational → disable TPDO via the
+COB-ID invalid bit → set mapping count 0 → write mapping entry `0x40000120` →
+set count 1 → re-enable → NMT operational), then parameters were stored with the
+CANopen save object `0x1010:01 = "save"`. Store capability `0x1010:01` reads
+`0x00000001` (save-on-command) and every download was acknowledged, not aborted.
+
+After configuration the three producers were:
+
+| Node | TPDO1 COB-ID | Mapping | Live value | Notes |
+|---|---|---|---|---|
+| `0x37` | `0x1B7` | `0x4000:01` | ~`0.0` at ~10 Hz | channel-1 sensor noise, no fixture |
+| `0x38` | `0x1B8` | `0x4000:01` | `23.18 °C` at ~88 Hz | real Pt100 (`0x3001:01` ≈ `109 Ω`) |
+| `0x39` | `0x1B9` | `0x4000:01` | `NaN`, silent | configured but emits nothing while ch1 is NaN |
+
+Node `0x39` is the clearest single data point for feedback item #1: with an
+event-driven TPDO (`0x1800:02 = 0xFE`) and a `NaN` channel value, the node
+transmits nothing at all, whereas `0x37` with finite noise transmits at ~10 Hz.
+So `NaN` already serves as a de-facto "no valid measurement" signal — the
+recommendation is to make that behavior explicit and consistent across channels.
+
+This session also surfaced a bug in this repository's own gateway, now fixed: a
+CANopen SDO **abort** (an active "object not available on this device" response,
+e.g. polling a TEC-only object on an RMM) was being treated like a transport
+failure and tore down the device binding, which made the live read-back
+intermittently report configured producers as absent. An abort proves the node
+is reachable, so it is now classified as `ErrUnknownParameter` (benign) and the
+binding is left intact; the live diff then reads all PDOs reliably from a cold
+start.
 
 ## Open Reverse-Engineering Tasks
 

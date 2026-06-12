@@ -211,7 +211,14 @@ func (c *CANopenClient) readNumeric(ctx context.Context, paramID, instance int) 
 			var abort canopen.SDOAbortError
 			if errors.As(err, &abort) {
 				if abort.Index == object.Index && abort.SubIndex == object.SubIndex {
-					return math.NaN(), err
+					// The device actively responded with an abort, so it is
+					// reachable: this object simply is not a usable parameter
+					// on this device (e.g. a TEC-only object polled on an RMM).
+					// Classify as ErrUnknownParameter so bulk readout yields NaN
+					// and the caller does not tear down an otherwise-healthy
+					// device binding over a missing object.
+					return math.NaN(), fmt.Errorf("%w: CANopen SDO abort 0x%08X for 0x%04X:%02X",
+						ErrUnknownParameter, abort.Code, object.Index, object.SubIndex)
 				}
 			}
 			continue
