@@ -136,6 +136,21 @@ func TestCanmapImportPatternInstantiatesForNewTestbed(t *testing.T) {
 	}
 }
 
+func TestCanmapImportRejectsBadSchemaVersion(t *testing.T) {
+	s, ts := canmapTestServer(t, true)
+	reg := s.canmap.registry
+	reg.SchemaVersion = 999 // unsupported; loadCanmap would reject on restart
+	body, _ := json.Marshal(canmapImportRequest{Registry: reg})
+	resp, err := http.Post(ts.URL+"/api/canmap/import", "application/json", bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("import: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400 for unsupported schema_version", resp.StatusCode)
+	}
+}
+
 func TestCanmapImportRejectedWithoutFilePath(t *testing.T) {
 	_, ts := canmapTestServer(t, false)
 	resp, err := http.Post(ts.URL+"/api/canmap/import", "application/json", bytes.NewReader([]byte(`{}`)))

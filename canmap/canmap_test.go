@@ -3,6 +3,7 @@ package canmap
 import (
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -51,6 +52,20 @@ func TestRegistryEncodeParseRoundTrip(t *testing.T) {
 	}
 	if back.Signals[0].COBID != 0x1A1 || back.Signals[0].Producer.Mapping[0].Raw() != 0x40000220 {
 		t.Fatalf("round trip mismatch: %+v", back.Signals[0])
+	}
+}
+
+func TestNumericHexFieldsRejectOutOfRange(t *testing.T) {
+	// A numeric (non-string) index above 16 bits must error, not wrap.
+	bad := []byte(`{"index": 70000, "subindex": 1, "bits": 32}`)
+	var m MapEntry
+	if err := json.Unmarshal(bad, &m); err == nil {
+		t.Fatalf("expected out-of-range numeric index to error, got index=0x%X", uint16(m.Index))
+	}
+	// A numeric value within range still decodes.
+	ok := []byte(`{"index": 16896, "subindex": 1, "bits": 32}`) // 16896 = 0x4200
+	if err := json.Unmarshal(ok, &m); err != nil || m.Index != 0x4200 {
+		t.Fatalf("in-range numeric index should decode: err=%v index=0x%X", err, uint16(m.Index))
 	}
 }
 

@@ -159,9 +159,14 @@ func (h *HexUint32) UnmarshalJSON(data []byte) error {
 func unmarshalHex(data []byte, bits int) (uint64, error) {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		// Tolerate plain JSON numbers for hand-written files.
+		// Tolerate plain JSON numbers for hand-written files, but hold them to
+		// the same bit width as the string path so an out-of-range index or
+		// COB-ID is rejected rather than silently wrapping on the cast.
 		var n uint64
 		if errNum := json.Unmarshal(data, &n); errNum == nil {
+			if bits < 64 && n > (uint64(1)<<bits)-1 {
+				return 0, fmt.Errorf("canmap: numeric value %d exceeds %d-bit field", n, bits)
+			}
 			return n, nil
 		}
 		return 0, err

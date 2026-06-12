@@ -104,11 +104,17 @@ func (s *server) observeRegistryNodes(r *http.Request, reg *canmap.Registry) map
 		if _, done := observed[nodeID]; done {
 			continue
 		}
-		b.mu.Lock()
-		client := b.client
-		b.mu.Unlock()
-		reader, ok := client.(canmap.SDOReader)
-		if !ok || client == nil {
+		// Open the device client if it is not already memoized, instead of
+		// only reading a client some other endpoint happened to bind. Without
+		// this, the first /api/canmap?live=1 after startup reports every node
+		// as unknown. A bind failure leaves the node unobserved, which Diff
+		// reports as unknown — the correct verdict for an unreachable node.
+		snap, err := s.bind(b.cfg.ID)
+		if err != nil {
+			continue
+		}
+		reader, ok := snap.client.(canmap.SDOReader)
+		if !ok || snap.client == nil {
 			continue
 		}
 		obs, err := canmap.ObserveNode(r.Context(), reader, nodeID, wantsByNode[nodeID])
@@ -224,6 +230,15 @@ func (s *server) handleCanmapImport(w http.ResponseWriter, r *http.Request) {
 		reg = instantiated
 	default:
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "body must carry registry or pattern"})
+		return
+	}
+	// Reject schema versions loadCanmap would refuse on the next restart, so a
+	// 200 here never persists a file that becomes unusable after a reboot.
+	// Covers both the concrete-registry and instantiated-pattern paths.
+	if reg.SchemaVersion != canmap.SchemaVersion {
+		writeJSON(w, http.StatusBadRequest, map[string]any{
+			"error": fmt.Sprintf("unsupported schema_version %d (want %d)", reg.SchemaVersion, canmap.SchemaVersion),
+		})
 		return
 	}
 	prev := s.canmap.registry
