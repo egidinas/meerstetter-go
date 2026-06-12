@@ -195,6 +195,27 @@ func TestRouteFlagsSet(t *testing.T) {
 	}
 }
 
+func TestParseDaemonTargetRejectsEmptyTransportAddresses(t *testing.T) {
+	for _, target := range []string{"tcp:", "serial:@57600", "can:"} {
+		t.Run(target, func(t *testing.T) {
+			if _, err := parseDaemonTarget(target); err == nil {
+				t.Fatalf("parseDaemonTarget(%q) returned nil error", target)
+			}
+		})
+	}
+}
+
+func TestRouteFlagsRejectsEmptyTransportAddresses(t *testing.T) {
+	for _, route := range []string{"0x4b=tcp:", "0x4b=serial:@57600", "0x4b=can:"} {
+		t.Run(route, func(t *testing.T) {
+			var routes routeFlags
+			if err := routes.Set(route); err == nil {
+				t.Fatalf("Set(%q) returned nil error", route)
+			}
+		})
+	}
+}
+
 func TestRouteFlagsAddressesDeduplicatesDuplicateTransports(t *testing.T) {
 	routes := routeFlags{
 		{Address: 0x4b, Target: "serial:COM3@57600"},

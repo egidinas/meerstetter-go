@@ -1,6 +1,9 @@
+//go:build linux
+
 package main
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/egidinas/meerstetter-go/canopen"
@@ -17,6 +20,43 @@ func TestSDOResponseMatchesProbeRequiresObjectIdentity(t *testing.T) {
 	}
 	if sdoResponseMatchesProbe(canopen.SDOUploadResponse{Index: 0x2030, SubIndex: 2}, probe) {
 		t.Fatal("mismatched SDO subindex was accepted")
+	}
+}
+
+func TestSDOParseErrorMatchesProbeUsesAbortObjectIdentity(t *testing.T) {
+	probe := sdoProbe{Index: 0x2030, SubIndex: 1}
+	if !sdoParseErrorMatchesProbe(canopen.SDOAbortError{Index: 0x2030, SubIndex: 1}, probe) {
+		t.Fatal("matching SDO abort was rejected")
+	}
+	if sdoParseErrorMatchesProbe(canopen.SDOAbortError{Index: 0x2031, SubIndex: 1}, probe) {
+		t.Fatal("mismatched SDO abort index was accepted")
+	}
+	if sdoParseErrorMatchesProbe(canopen.SDOAbortError{Index: 0x2030, SubIndex: 2}, probe) {
+		t.Fatal("mismatched SDO abort subindex was accepted")
+	}
+	if !sdoParseErrorMatchesProbe(errors.New("malformed SDO frame"), probe) {
+		t.Fatal("non-abort parse error was ignored")
+	}
+}
+
+func TestParseMeComDataType(t *testing.T) {
+	tests := map[string]mecom.DataType{
+		"float32": mecom.DataTypeFloat32,
+		"FLOAT32": mecom.DataTypeFloat32,
+		"int32":   mecom.DataTypeInt32,
+		" int32 ": mecom.DataTypeInt32,
+	}
+	for input, want := range tests {
+		got, err := parseMeComDataType(input)
+		if err != nil {
+			t.Fatalf("parseMeComDataType(%q) returned error: %v", input, err)
+		}
+		if got != want {
+			t.Fatalf("parseMeComDataType(%q) = %q, want %q", input, got, want)
+		}
+	}
+	if _, err := parseMeComDataType("latin1"); err == nil {
+		t.Fatal("parseMeComDataType(latin1) returned nil error")
 	}
 }
 

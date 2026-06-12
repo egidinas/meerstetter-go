@@ -204,8 +204,17 @@ func parseDaemonTarget(target string) (mecom.Endpoint, error) {
 	if !ok {
 		return mecom.Endpoint{}, fmt.Errorf("empty endpoint")
 	}
-	if ep.Network == "can" && strings.TrimSpace(ep.Address) == "" {
-		return mecom.Endpoint{}, fmt.Errorf("CAN endpoint requires interface/node address")
+	if strings.TrimSpace(ep.Address) == "" {
+		switch ep.Network {
+		case "can":
+			return mecom.Endpoint{}, fmt.Errorf("CAN endpoint requires interface/node address")
+		case "serial":
+			return mecom.Endpoint{}, fmt.Errorf("serial endpoint requires device address")
+		case "tcp":
+			return mecom.Endpoint{}, fmt.Errorf("TCP endpoint requires host:port address")
+		default:
+			return mecom.Endpoint{}, fmt.Errorf("%s endpoint requires address", ep.Network)
+		}
 	}
 	return ep, nil
 }

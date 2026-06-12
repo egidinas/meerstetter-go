@@ -52,6 +52,7 @@ func main() {
 	sdoArg := flag.String("sdo", defaultSDOReads, "comma-separated SDO reads index:subindex:kind[:label], kind=uint32|int32|float32|byte; empty disables SDO reads")
 	addrsArg := flag.String("mecom-addrs", "", "MeCom CAN addresses to probe, e.g. 1-16,0x23")
 	paramID := flag.Int("param", 1000, "MeCom parameter ID for read-only value probe")
+	paramKindArg := flag.String("param-kind", string(mecom.DataTypeFloat32), "MeCom parameter data type for read-only value probe, kind=float32|int32")
 	instance := flag.Int("instance", 1, "MeCom parameter instance")
 	active := flag.Bool("active", false, "send bounded read-only SDO/MeCom probes after passive listen")
 	ringPath := flag.String("ring-path", "", "optional fixed-size CAN receive ring file on durable storage")
@@ -134,6 +135,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "parse -sdo: %v\n", err)
 		os.Exit(1)
 	}
+	paramKind, err := parseMeComDataType(*paramKindArg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "parse -param-kind: %v\n", err)
+		os.Exit(1)
+	}
 	for node := range res.heartbeats {
 		if !containsID(nodes, node) {
 			nodes = append(nodes, node)
@@ -151,7 +157,7 @@ func main() {
 		var mecomSeq uint16
 		for _, addr := range addrs {
 			mecomSeq = nextMeComSequence(mecomSeq)
-			probeMeComValue(conn, addr, mecomSeq, *paramID, *instance, *timeout, &res, sink)
+			probeMeComValue(conn, addr, mecomSeq, *paramID, *instance, paramKind, *timeout, &res, sink)
 		}
 	}
 
@@ -298,6 +304,9 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 		if f.ID == 0x580+uint32(node) {
 			resp, err := canopen.ParseSDOUploadResponse(f)
 			if err != nil {
+				if !sdoParseErrorMatchesProbe(err, probe) {
+					continue
+				}
 				fmt.Printf("reply sdo node=0x%02X 0x%04X:%02X decode-error=%v %s\n", node, probe.Index, probe.SubIndex, err, formatFrame(f))
 				return
 			}
@@ -316,12 +325,12 @@ func probeCANopenSDO(conn *socketcan.Conn, node byte, probe sdoProbe, timeout ti
 	}
 }
 
-func probeMeComValue(conn *socketcan.Conn, addr byte, seq uint16, paramID, instance int, timeout time.Duration, res *result, sink frameSink) {
+func probeMeComValue(conn *socketcan.Conn, addr byte, seq uint16, paramID, instance int, paramKind mecom.DataType, timeout time.Duration, res *result, sink frameSink) {
 	payload := mecom.BuildBinarySingleGetFrame(int(addr), seq, paramID, instance)
 	var data [8]byte
 	copy(data[:], payload)
 	req := canopen.Frame{ID: 0x300 + uint32(addr), DLC: uint8(len(payload)), Data: data}
-	fmt.Printf("tx mecom addr=0x%02X param=%d/%d %s\n", addr, paramID, instance, formatFrame(req))
+	fmt.Printf("tx mecom addr=0x%02X param=%d/%d kind=%s %s\n", addr, paramID, instance, paramKind, formatFrame(req))
 	if err := conn.Send(req); err != nil {
 		fmt.Printf("tx-error mecom addr=0x%02X %v\n", addr, err)
 		return
@@ -334,16 +343,35 @@ func probeMeComValue(conn *socketcan.Conn, addr byte, seq uint16, paramID, insta
 			return
 		}
 		if f.ID == 0x400+uint32(addr) && mecomResponseMatchesRequest(f, addr, seq, mecom.BinaryCmdQueryValue) {
-			value, err := mecom.DecodeBinaryCANFrame(f, mecom.DataTypeFloat32)
+			value, err := mecom.DecodeBinaryCANFrame(f, paramKind)
 			if err != nil {
 				fmt.Printf("reply mecom addr=0x%02X decode-error=%v %s\n", addr, err, formatFrame(f))
 				return
 			}
 			res.mecomReplies[addr] = value
-			fmt.Printf("reply mecom addr=0x%02X value=%0.6g %s\n", addr, value, formatFrame(f))
+			fmt.Printf("reply mecom addr=0x%02X kind=%s value=%0.6g %s\n", addr, paramKind, value, formatFrame(f))
 			return
 		}
 	}
+}
+
+func parseMeComDataType(kind string) (mecom.DataType, error) {
+	switch strings.ToLower(strings.TrimSpace(kind)) {
+	case string(mecom.DataTypeFloat32):
+		return mecom.DataTypeFloat32, nil
+	case string(mecom.DataTypeInt32):
+		return mecom.DataTypeInt32, nil
+	default:
+		return "", fmt.Errorf("unsupported kind %q (want float32 or int32)", kind)
+	}
+}
+
+func sdoParseErrorMatchesProbe(err error, probe sdoProbe) bool {
+	var abort canopen.SDOAbortError
+	if errors.As(err, &abort) {
+		return abort.Index == probe.Index && abort.SubIndex == probe.SubIndex
+	}
+	return true
 }
 
 func sdoResponseMatchesProbe(resp canopen.SDOUploadResponse, probe sdoProbe) bool {
