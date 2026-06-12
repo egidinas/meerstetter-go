@@ -9,6 +9,76 @@ catalogue, the imported RMM-1182 EDS, and the repository tests that guard those
 imports. It does not claim that any live device was reconfigured during this
 write-up.
 
+No prior CAN or CANopen knowledge is assumed. If you already know CANopen, skip
+ahead to the Executive Summary.
+
+## CAN and CANopen in Five Minutes
+
+**CAN bus.** All devices share one pair of wires. There is no central master and
+no point-to-point addressing: every message is broadcast, and every device on
+the bus sees every message. A message (a *frame*) consists of an identifier
+(11 bits, usually written in hex like `0x1A1`) and up to eight bytes of
+payload. The identifier does not say *who sent it* or *who should receive it* —
+it only says *what kind of message this is*. Receivers decide for themselves
+which identifiers they care about.
+
+**CANopen.** A set of rules layered on top of CAN that gives those raw frames
+meaning. Its central idea is the **object dictionary**: every device contains a
+table of values, each addressed by a 16-bit *index* and an 8-bit *subindex*,
+written `0x4200:01`. Think of it as the device's complete settings-and-status
+spreadsheet: every temperature reading, setpoint, and configuration option has
+a fixed cell address. Meerstetter devices expose the same values over their
+proprietary MeCom protocol (by numeric parameter ID, e.g. `52200`) and over
+CANopen (by index, e.g. `0x4200`) — two doors into the same room.
+
+**SDO — the phone call.** A Service Data Object transfer reads or writes one
+object dictionary entry on one specific device. You ask node 5 "what is in cell
+`0x4200:01`?" and node 5 answers you, and only you. SDOs are slow but precise:
+use them for configuration and for checking state.
+
+**PDO — the radio broadcast.** A Process Data Object is a device repeatedly
+broadcasting a small set of live values (e.g. a temperature, every 50 ms) with
+no request and no reply. The producer packs values into a frame and sends it
+under an agreed identifier; any number of consumers listen for that identifier
+and unpack the bytes into their own object dictionary cells. From the
+producer's side it is called a **TPDO** (Transmit PDO); from a consumer's side
+the same frame is an **RPDO** (Receive PDO).
+
+**COB-ID.** The CAN identifier a particular PDO is sent under. This is the
+entire "addressing" of a PDO: producer and consumers simply agree on a number.
+If the producer transmits under `0x1A1` and a consumer listens on `0x1A1`, they
+are connected. If they disagree, nothing happens — silently.
+
+**PDO mapping.** The agreement about what the payload bytes *mean*: "bytes 0–3
+are a float32 going into cell `0x4200:01`". Mapping is itself stored in the
+object dictionary, so you configure it with SDO writes.
+
+**NMT state.** A simple per-device run state. In *operational*, the device
+sends and acts on PDOs. In *pre-operational*, PDOs are off but SDOs still work —
+this is the state in which mapping changes are normally allowed. A device that
+answers SDOs but was never switched to operational will sit silently and
+produce no PDOs; this is a classic gotcha.
+
+Putting it together for this repository's use case: an RMM measures a
+temperature and broadcasts it as a TPDO; one or two TECs are configured (via
+SDO) to consume that broadcast as an RPDO and store it in their
+external-temperature cell; finally each TEC is told (also via SDO) to use the
+external value in its control loop instead of its own sensor.
+
+```
+                 SDO ("phone call"): configure + verify, one-to-one
+   Host ────────────────────────────────────────────────┐
+    │                    │                               │
+    ▼                    ▼                               ▼
+ ┌──────┐  TPDO       ┌───────┐                      ┌───────┐
+ │ RMM  │ ═══════════▶│ TEC A │                      │ TEC B │
+ │      │  broadcast  └───────┘                      └───────┘
+ └──────┘  COB-ID 0x1A1   ▲                              ▲
+              ║           RPDO listens on 0x1A1          ║
+              ╚══════════════════════════════════════════╝
+                    same frame, consumed by both TECs
+```
+
 ## Executive Summary
 
 CANopen has two different jobs here:
@@ -58,6 +128,12 @@ Each mapping entry is a 32-bit value:
 (object_index << 16) | (subindex << 8) | bit_length
 ```
 
+In other words, the eight hex digits of a mapping entry read left to right as
+*index, subindex, length in bits*. Worked example: `0x42000120` splits into
+`4200` (object index `0x4200`, external object temperature), `01` (subindex 1,
+i.e. instance 1), and `20` (hex for 32 — a 32-bit value). So this single number
+says "four bytes of this PDO's payload belong to `0x4200:01`".
+
 Examples:
 
 | Object | Mapping entry | Meaning |
@@ -80,7 +156,10 @@ write the new mapping. The standard variable-PDO sequence is:
 
 1. Put the node in a state where mapping changes are allowed. For variable PDO
    mapping this is normally NMT pre-operational.
-2. Disable the target PDO by setting bit 31 in the COB-ID entry.
+2. Disable the target PDO by setting bit 31 in the COB-ID entry. (The COB-ID
+   is stored as a 32-bit value; its top bit is not part of the identifier but a
+   "this PDO is invalid" flag, so setting it switches the PDO off without
+   losing the configured identifier.)
 3. Write mapping subindex `0` to `0`.
 4. Write mapping entry subindexes `1..n`.
 5. Write mapping subindex `0` to the number of mapped objects.
@@ -126,7 +205,14 @@ TEC v6.32 exposes four RPDOs and four TPDOs:
 | TPDO3 | `0x1802` | `0x1A02` | `$NODEID + 0x380` | 2 |
 | TPDO4 | `0x1803` | `0x1A03` | `$NODEID + 0x480` | 2 |
 
-Transmission type defaults to `0xFE` in the imported metadata.
+`$NODEID` is the device's CANopen node ID, so with node ID `0x4B`, TPDO1 is
+sent under COB-ID `0x4B + 0x180 = 0x1CB` by default. These defaults exist so
+that out of the box no two nodes collide; you are free to override them, which
+is exactly what the handover patterns below do.
+
+Transmission type defaults to `0xFE` in the imported metadata, meaning the
+device decides when to send (typically event-driven or on its internal cycle)
+rather than being polled by a sync message.
 
 ## RMM-1182 Specific Model
 
