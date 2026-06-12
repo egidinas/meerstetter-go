@@ -2050,6 +2050,29 @@ export const MecomAPI = {
       throw err;
     }
   },
+  // canmap returns the CAN signal registry. Pass live=true to also fetch the
+  // gateway's read-back of actual device PDO config and the per-signal drift
+  // verdicts. Falls back to a null registry off-line rather than throwing, so
+  // the view can render an empty state instead of an error.
+  async canmap(withLive = false) {
+    ensureLivePolling();
+    try {
+      return await fetchJSON("/api/canmap" + (withLive ? "?live=1" : ""));
+    } catch (err) {
+      if (!explicitBase()) return { registry: null };
+      throw err;
+    }
+  },
+  canmapExportURL(format = "registry") {
+    return configuredBase() + "/api/canmap/export?format=" + encodeURIComponent(format);
+  },
+  async canmapImport(body) {
+    return await fetchJSON("/api/canmap/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  },
   devices() {
     ensureLivePolling();
     if (live.active && live.devices) {

@@ -58,6 +58,95 @@ paths:
                     type: array
                     items: {$ref: '#/components/schemas/CatalogueEntry'}
 
+  /api/canmap:
+    get:
+      summary: CAN signal registry, optionally with live device read-back and drift.
+      description: >
+        Returns the loaded CAN signal registry (the documented PDO contracts
+        between RMM producers and TEC consumers). With live=1 the gateway also
+        reads back each reachable registry node's PDO configuration over SDO
+        (read-only) and reports per-signal match/drift/unknown verdicts.
+      parameters:
+        - in: query
+          name: live
+          schema: {type: string, enum: ['1']}
+          required: false
+          description: When '1', include observed device state and diff status.
+      responses:
+        '200':
+          description: registry, and when requested the live observation and status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registry: {$ref: '#/components/schemas/CanmapRegistry'}
+                  is_pattern: {type: boolean}
+                  observed:
+                    type: object
+                    additionalProperties: {$ref: '#/components/schemas/CanmapObservedNode'}
+                  status:
+                    type: array
+                    items: {$ref: '#/components/schemas/CanmapSignalStatus'}
+                  observed_at: {type: string, format: date-time}
+
+  /api/canmap/export:
+    get:
+      summary: Download the registry as a concrete file or a reusable pattern.
+      description: >
+        format=registry (default) returns the concrete registry with node
+        bindings. format=pattern strips node IDs so the file can seed a copy of
+        this testbed via POST /api/canmap/import.
+      parameters:
+        - in: query
+          name: format
+          schema: {type: string, enum: [registry, pattern]}
+          required: false
+      responses:
+        '200':
+          description: registry or pattern JSON as a file download
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CanmapRegistry'}
+        '404': {description: no registry loaded}
+
+  /api/canmap/import:
+    post:
+      summary: Replace the registry from a concrete registry or a pattern + bindings.
+      description: >
+        Persists the new registry to the gateway's -canmap file. Never writes
+        to devices; afterward GET /api/canmap?live=1 shows the drift to resolve.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                registry: {$ref: '#/components/schemas/CanmapRegistry'}
+                pattern: {$ref: '#/components/schemas/CanmapRegistry'}
+                name: {type: string}
+                bindings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role: {type: string}
+                      node_id: {type: integer}
+                      label: {type: string}
+      responses:
+        '200':
+          description: registry replaced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registry: {$ref: '#/components/schemas/CanmapRegistry'}
+                  is_pattern: {type: boolean}
+        '400': {description: invalid registry, pattern, or bindings}
+        '409': {description: gateway started without a -canmap path}
+
   /api/leases:
     get:
       summary: List currently active write leases.
@@ -228,6 +317,122 @@ components:
         sensor:        {type: string}
         high_priority: {type: boolean}
         writable:      {type: boolean}
+
+    CanmapMapEntry:
+      type: object
+      description: One PDO mapping slot. index/subindex/bits address an object-dictionary cell.
+      properties:
+        index:    {type: string, example: "0x4200"}
+        subindex: {type: integer}
+        bits:     {type: integer, example: 32}
+        comment:  {type: string}
+
+    CanmapSDOWrite:
+      type: object
+      properties:
+        index:    {type: string, example: "0x3300"}
+        subindex: {type: integer}
+        value:    {type: integer}
+        comment:  {type: string}
+
+    CanmapRegistry:
+      type: object
+      description: >
+        A CAN signal registry. When every node's node_id is omitted/zero it is a
+        reusable pattern; otherwise it is concrete for one testbed.
+      properties:
+        schema_version: {type: integer}
+        name:           {type: string}
+        description:    {type: string}
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              role:    {type: string, example: "tec-a"}
+              node_id: {type: integer, description: CANopen node ID 1..127; 0/absent in a pattern}
+              family:  {type: string, example: "tec-v6.32"}
+              label:   {type: string}
+        signals:
+          type: array
+          items:
+            type: object
+            properties:
+              cob_id:      {type: string, example: "0x1A1"}
+              name:        {type: string}
+              description: {type: string}
+              rate_ms:     {type: integer}
+              saved_to_flash: {type: boolean}
+              verified:    {type: string, description: "YYYY-MM-DD of last live read-back"}
+              producer:
+                type: object
+                properties:
+                  role:    {type: string}
+                  tpdo:    {type: integer}
+                  mapping:
+                    type: array
+                    items: {$ref: '#/components/schemas/CanmapMapEntry'}
+              consumers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    role: {type: string}
+                    rpdo: {type: integer}
+                    mapping:
+                      type: array
+                      items: {$ref: '#/components/schemas/CanmapMapEntry'}
+                    source_selects:
+                      type: array
+                      items: {$ref: '#/components/schemas/CanmapSDOWrite'}
+
+    CanmapObservedPDO:
+      type: object
+      properties:
+        number:            {type: integer}
+        cob_id:            {type: string}
+        enabled:           {type: boolean, description: false when the COB-ID invalid bit is set}
+        transmission_type: {type: integer}
+        mapping:
+          type: array
+          items: {$ref: '#/components/schemas/CanmapMapEntry'}
+
+    CanmapObservedNode:
+      type: object
+      description: Live read-back of one node's PDO configuration over SDO.
+      properties:
+        node_id: {type: integer}
+        rpdos:
+          type: array
+          items: {$ref: '#/components/schemas/CanmapObservedPDO'}
+        tpdos:
+          type: array
+          items: {$ref: '#/components/schemas/CanmapObservedPDO'}
+        source_selects:
+          type: object
+          additionalProperties: {type: integer}
+        errors:
+          type: array
+          items: {type: string}
+
+    CanmapSignalStatus:
+      type: object
+      properties:
+        signal:  {type: string}
+        cob_id:  {type: string}
+        verdict: {type: string, enum: [match, drift, unknown]}
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              signal:  {type: string}
+              role:    {type: string}
+              node_id: {type: integer}
+              aspect:  {type: string, example: "rpdo cob-id"}
+              verdict: {type: string, enum: [match, drift, unknown]}
+              want:    {type: string}
+              got:     {type: string}
 
     Lease:
       type: object

@@ -36,6 +36,9 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("/api/log/import", s.handleLogImport)
 	mux.HandleFunc("/api/graph/sparklines", s.handleGraphSparklines)
 	mux.HandleFunc("/api/graph/tiles/", s.handleGraphTileRoot)
+	mux.HandleFunc("/api/canmap", s.handleCanmap)
+	mux.HandleFunc("/api/canmap/export", s.handleCanmapExport)
+	mux.HandleFunc("/api/canmap/import", s.handleCanmapImport)
 	mux.HandleFunc("/api/leases", s.handleLeasesList)
 	mux.HandleFunc("/api/devices/", s.handleDeviceRoot)
 	if s.uiDir != "" {

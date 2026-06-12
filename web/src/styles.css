@@ -4138,3 +4138,42 @@ hr.sep {
 .chart-header-extras .sf-availability-info {
   display: none;
 }
+
+/* CAN signal map view */
+.canmap-view { padding: 18px 22px; gap: 14px; }
+.canmap-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.canmap-head h2 { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.canmap-head p.muted { margin: 0; max-width: 60ch; }
+.canmap-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.canmap-actions .btn, .canmap-actions button, .canmap-actions a.btn {
+  padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border, #30363d);
+  background: var(--panel, #161b22); color: inherit; cursor: pointer; text-decoration: none; font-size: 13px;
+}
+.canmap-actions button:disabled { opacity: 0.5; cursor: default; }
+.canmap-summary { display: flex; gap: 16px; align-items: center; font-size: 13px; }
+.canmap-summary .warn { color: var(--warn, #d29922); font-weight: 600; }
+.canmap-error { color: var(--danger, #f47067); padding: 8px 0; }
+.canmap-empty { padding: 32px; text-align: center; border: 1px dashed var(--border, #30363d); border-radius: 10px; }
+.canmap-empty button { margin-top: 10px; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border, #30363d); background: var(--accent-soft); cursor: pointer; }
+.canmap-signals { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.canmap-signal { border: 1px solid var(--border, #30363d); border-radius: 10px; padding: 14px 16px; background: var(--panel, #161b22); }
+.canmap-signal-head { display: flex; justify-content: space-between; align-items: center; }
+.canmap-signal-head h3 { margin: 0; }
+.canmap-cob { font-family: var(--mono, monospace); font-size: 12px; color: var(--muted, #8b949e); }
+.canmap-verdict { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.canmap-verdict.ok { color: var(--ok, #3fb950); }
+.canmap-verdict.warn { color: var(--warn, #d29922); }
+.canmap-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.canmap-table th { text-align: left; font-weight: 600; color: var(--muted, #8b949e); padding: 4px 8px; border-bottom: 1px solid var(--border, #30363d); }
+.canmap-table td { padding: 5px 8px; vertical-align: top; }
+.canmap-row.drift { background: color-mix(in srgb, var(--warn, #d29922) 10%, transparent); }
+.canmap-row.match td:first-child { box-shadow: inset 3px 0 0 var(--ok, #3fb950); }
+.canmap-mapping { font-family: var(--mono, monospace); font-size: 12px; }
+.canmap-finding td { font-size: 12px; color: var(--muted, #8b949e); padding-top: 0; }
+.canmap-finding code, .canmap-import code { font-family: var(--mono, monospace); }
+.canmap-verified { font-size: 12px; margin-top: 8px; }
+.canmap-import { border: 1px solid var(--accent, #58a6ff); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.canmap-import textarea { width: 100%; font-family: var(--mono, monospace); font-size: 12px; }
+.canmap-bindings { display: flex; flex-direction: column; gap: 8px; }
+.canmap-bindings label { display: flex; gap: 8px; align-items: center; justify-content: space-between; max-width: 360px; }
+.canmap-bindings input { flex: 1; }

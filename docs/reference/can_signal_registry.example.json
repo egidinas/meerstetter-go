@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "name": "bench-a",
+  "description": "Example CAN signal registry: one RMM feeds two TECs their external object temperature, and TEC A also hands its own object temperature to a third TEC. Bind roles to your real node IDs, or strip the node_ids to use this as a pattern.",
+  "nodes": [
+    {"role": "rmm",   "node_id": 16, "family": "rmm-1182", "label": "bench A RMM"},
+    {"role": "tec-a", "node_id": 75, "family": "tec-v6.32", "label": "bench A left"},
+    {"role": "tec-b", "node_id": 76, "family": "tec-v6.32", "label": "bench A right"},
+    {"role": "tec-c", "node_id": 77, "family": "tec-v6.32", "label": "bench A aux"}
+  ],
+  "signals": [
+    {
+      "cob_id": "0x1A1",
+      "name": "bench_a_object_temp",
+      "description": "RMM channel 2 converted temperature, consumed as external object temperature by both primary TECs.",
+      "rate_ms": 50,
+      "saved_to_flash": false,
+      "producer": {
+        "role": "rmm",
+        "tpdo": 2,
+        "mapping": [
+          {"index": "0x4000", "subindex": 2, "bits": 32, "comment": "RMM ch2 value-conversion result, degC"}
+        ]
+      },
+      "consumers": [
+        {
+          "role": "tec-a",
+          "rpdo": 1,
+          "mapping": [
+            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
+          ],
+          "source_selects": [
+            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
+          ]
+        },
+        {
+          "role": "tec-b",
+          "rpdo": 1,
+          "mapping": [
+            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
+          ],
+          "source_selects": [
+            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
+          ]
+        }
+      ]
+    },
+    {
+      "cob_id": "0x1CB",
+      "name": "tec_a_object_to_tec_c",
+      "description": "TEC A publishes its own measured object temperature; TEC C consumes it as its external object temperature (TEC-to-TEC handover).",
+      "rate_ms": 100,
+      "saved_to_flash": false,
+      "producer": {
+        "role": "tec-a",
+        "tpdo": 1,
+        "mapping": [
+          {"index": "0x2100", "subindex": 1, "bits": 32, "comment": "TEC A object temperature, instance 1"}
+        ]
+      },
+      "consumers": [
+        {
+          "role": "tec-c",
+          "rpdo": 1,
+          "mapping": [
+            {"index": "0x4200", "subindex": 1, "bits": 32, "comment": "external object temperature, instance 1"}
+          ],
+          "source_selects": [
+            {"index": "0x3300", "subindex": 1, "value": 7, "comment": "object temp source = external"}
+          ]
+        }
+      ]
+    }
+  ]
+}

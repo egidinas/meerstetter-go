@@ -6,6 +6,7 @@ import { TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakCol
 import { seedAssignments } from "./views/assignments";
 import { FleetView, DeviceWorkspace, DeviceMini, CommandFeed, LeaseSummary } from "./views/main";
 import { SignalDictionaryView } from "./views/dict";
+import { CanMapView } from "./views/canmap";
 import { SequencerView, PIDAdvisor, ArchiveView, SettingsView } from "./views/extra";
 import { HelpView } from "./views/help";
 
@@ -61,6 +62,7 @@ function App() {
   let view = "fleet", arg = null;
   if (route.startsWith("/device/")) { view = "device"; arg = route.slice("/device/".length); }
   else if (route === "/dictionary") view = "dictionary";
+  else if (route === "/canmap") view = "canmap";
   else if (route === "/sequencer") view = "sequencer";
   else if (route === "/pid") view = "pid";
   else if (route === "/archive") view = "archive";
@@ -105,6 +107,9 @@ function App() {
             </a>
             <a className={view === "dictionary" ? "active" : ""} href="#/dictionary">
               <span className="icon">☰</span><span className="label">Signal dictionary</span>
+            </a>
+            <a className={view === "canmap" ? "active" : ""} href="#/canmap">
+              <span className="icon">⇄</span><span className="label">CAN signal map</span>
             </a>
             {devices.map((d) => (
               <DeviceMini key={d.id} device={d} onOpen={() => go(`/device/${d.id}`)} />
@@ -167,6 +172,7 @@ function App() {
           {view === "fleet"      && <FleetView onOpenDevice={(id) => go(`/device/${id}`)} />}
           {view === "device"     && <DeviceWorkspace deviceId={arg} onOpenSequencer={() => go("/sequencer")} />}
           {view === "dictionary" && <SignalDictionaryView />}
+          {view === "canmap"     && <CanMapView />}
           {view === "sequencer"  && <SequencerView />}
           {view === "pid"        && <PIDAdvisor deviceId={arg || fallbackDeviceId || "tec-76"} onDeviceChange={(id) => go(`/pid`)} />}
           {view === "archive"    && <ArchiveView />}

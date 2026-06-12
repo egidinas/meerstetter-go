@@ -55,6 +55,7 @@ func main() {
 	uiDir := flag.String("ui-dir", "", "optional static UI directory served at /ui/")
 	allowOrigin := flag.String("allow-origin", "", "comma-separated CORS origins for browser clients; use * only for isolated test gateways")
 	proxyBasePort := flag.Int("proxy-base-port", 0, "base TCP port for per-device MeCom proxies (0 = disabled)")
+	canmapPath := flag.String("canmap", "", "optional CAN signal registry JSON file; enables live mapping read-back and pattern import/export")
 	flag.Parse()
 
 	cfg, err := loadConfig(*configPath)
@@ -72,6 +73,15 @@ func main() {
 	defer cancel()
 
 	srv := newServer(cfg, *defaultLeaseTTL, logger)
+	if cm, err := loadCanmap(*canmapPath); err != nil {
+		fmt.Fprintf(os.Stderr, "mecomgw: %v\n", err)
+		os.Exit(2)
+	} else {
+		srv.canmap = cm
+		if cm.registry != nil {
+			logger.Printf("canmap registry %q loaded: %d signals", cm.registry.Name, len(cm.registry.Signals))
+		}
+	}
 	srv.uiDir = *uiDir
 	srv.allowedOrigins = parseCSV(*allowOrigin)
 	srv.proxyBasePort = *proxyBasePort
@@ -335,6 +345,7 @@ type server struct {
 	bridge              BridgeConfig
 	virtualParamsMu     sync.Mutex
 	virtualParams       map[string]float64
+	canmap              *canmapState
 }
 
 type powerControlSample struct {
