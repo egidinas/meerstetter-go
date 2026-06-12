@@ -3,6 +3,7 @@ package mecom
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -32,10 +33,13 @@ type tecCANopenEDSSource struct {
 		Name       string `json:"parameter_name"`
 		AccessType string `json:"access_type"`
 		DataType   string `json:"data_type"`
+		PDOMapping string `json:"pdo_mapping"`
 		Subobjects map[string]struct {
-			Name       string `json:"parameter_name"`
-			AccessType string `json:"access_type"`
-			DataType   string `json:"data_type"`
+			Name         string `json:"parameter_name"`
+			AccessType   string `json:"access_type"`
+			DataType     string `json:"data_type"`
+			PDOMapping   string `json:"pdo_mapping"`
+			DefaultValue string `json:"default_value"`
 		} `json:"subobjects"`
 	} `json:"objects"`
 }
@@ -63,6 +67,11 @@ type tecCANopenSDOMapSource struct {
 			Space string `json:"space"`
 			ID    any    `json:"id"`
 		} `json:"aliases"`
+		PDO struct {
+			Mappable  bool   `json:"mappable"`
+			Direction string `json:"direction"`
+			Source    string `json:"source"`
+		} `json:"pdo"`
 		SourceEvidence []string `json:"source_evidence"`
 	} `json:"mappings"`
 	ProtocolInventory []struct {
@@ -93,6 +102,31 @@ type tecCANopenSDOMapSource struct {
 	} `json:"unsupported"`
 }
 
+type tecParameterOverviewSource struct {
+	SchemaVersion string `json:"schema_version"`
+	Source        string `json:"source"`
+	Summary       struct {
+		TotalParameters        int            `json:"total_parameters"`
+		ParametersWithCANIndex int            `json:"parameters_with_can_index"`
+		FlagCounts             map[string]int `json:"flag_counts"`
+	} `json:"summary"`
+	Parameters map[string]struct {
+		MeParID         int      `json:"mepar_id"`
+		Name            string   `json:"name"`
+		DocuName        string   `json:"docu_name"`
+		Instances       int      `json:"instances"`
+		CanIndex        string   `json:"can_index"`
+		CanIndexDecimal int      `json:"can_index_decimal"`
+		ValueType       string   `json:"value_type"`
+		Access          string   `json:"access"`
+		Flags           []string `json:"flags"`
+		RPDO            bool     `json:"rpdo"`
+		TPDO            bool     `json:"tpdo"`
+		FlashSave       bool     `json:"flash_save"`
+		Description     string   `json:"description"`
+	} `json:"parameters"`
+}
+
 type tecHelpSource struct {
 	SchemaVersion string `json:"schema_version"`
 	Parameters    map[string]struct {
@@ -115,6 +149,52 @@ type tecMetadataIndexSource struct {
 		Method string `json:"method"`
 		Status string `json:"status"`
 	} `json:"sources"`
+	ReleaseNotes struct {
+		CurrentVersion                string `json:"current_version"`
+		CurrentReleaseDate            string `json:"current_release_date"`
+		CurrentServiceSoftwareVersion string `json:"current_service_software_version"`
+		CurrentFirmwareVersion        string `json:"current_firmware_version"`
+		SupportedDevices              []struct {
+			Device          string `json:"device"`
+			HardwareVersion string `json:"hardware_version"`
+		} `json:"supported_devices"`
+		Versions []struct {
+			Version        string   `json:"version"`
+			NewFeatures    []string `json:"new_features"`
+			ResolvedIssues []string `json:"resolved_issues"`
+			KnownIssues    []string `json:"known_issues"`
+		} `json:"versions"`
+		RiskNotes []struct {
+			ID             string   `json:"id"`
+			Version        string   `json:"version"`
+			Summary        string   `json:"summary"`
+			SourceEvidence []string `json:"source_evidence"`
+		} `json:"risk_notes"`
+	} `json:"release_notes"`
+	PDOModel struct {
+		ReceivePDOs []struct {
+			CommunicationObject string `json:"communication_object"`
+			MappingObject       string `json:"mapping_object"`
+			COBIDDefault        string `json:"cob_id_default"`
+			TransmissionDefault string `json:"transmission_default"`
+			MappingSlots        int    `json:"mapping_slots"`
+		} `json:"receive_pdos"`
+		TransmitPDOs []struct {
+			CommunicationObject string `json:"communication_object"`
+			MappingObject       string `json:"mapping_object"`
+			COBIDDefault        string `json:"cob_id_default"`
+			TransmissionDefault string `json:"transmission_default"`
+			MappingSlots        int    `json:"mapping_slots"`
+		} `json:"transmit_pdos"`
+		ExternalTemperatureBindings []struct {
+			MeComID              int    `json:"mecom_id"`
+			CANopenIndex         string `json:"canopen_index"`
+			Direction            string `json:"direction"`
+			SourceSelectionID    int    `json:"source_selection_id"`
+			SourceSelectionValue int    `json:"source_selection_value"`
+			RefreshPolicy        string `json:"refresh_policy"`
+		} `json:"external_temperature_bindings"`
+	} `json:"pdo_model"`
 	HiddenCandidates []struct {
 		MeParID    int    `json:"mepar_id"`
 		Group      string `json:"group"`
@@ -270,6 +350,35 @@ type rmmControllerMeComSource struct {
 	} `json:"mecom_command_tokens"`
 }
 
+type rmmLiveUSBMeComSource struct {
+	SchemaVersion string            `json:"schema_version"`
+	Definition    map[string]string `json:"definition"`
+	Transport     struct {
+		Baud         int               `json:"baud"`
+		MeComAddress int               `json:"mecom_address"`
+		Identity     map[string]string `json:"identity"`
+	} `json:"transport"`
+	MappingPolicy struct {
+		Status       string `json:"status"`
+		Summary      string `json:"summary"`
+		WireEncoding string `json:"wire_encoding"`
+		Scope        string `json:"scope"`
+	} `json:"mapping_policy"`
+	ReadOnlyParameters []struct {
+		MeParID   int    `json:"mepar_id"`
+		Instance  int    `json:"instance"`
+		Name      string `json:"name"`
+		ValueType string `json:"value_type"`
+		Unit      string `json:"unit"`
+		Status    string `json:"status"`
+	} `json:"read_only_parameters"`
+	UnsupportedHypotheses []struct {
+		MeParID  int    `json:"mepar_id"`
+		Instance int    `json:"instance"`
+		Status   string `json:"status"`
+	} `json:"unsupported_hypotheses"`
+}
+
 func TestTECCatalogueSourceJSONFiles(t *testing.T) {
 	var defaults tecDefaultConfigSource
 	readCatalogueSourceJSON(t, "catalogues/sources/tec_default_config_5216o.v631.json", &defaults)
@@ -375,6 +484,86 @@ func TestTECCatalogueSourceJSONFiles(t *testing.T) {
 	requireHiddenCandidate(t, index, 6320, "advanced")
 }
 
+func TestTECv632CatalogueSourcesExposeExternalTemperaturePDOs(t *testing.T) {
+	var defaults tecDefaultConfigSource
+	readCatalogueSourceJSON(t, "catalogues/sources/tec_default_config_5216p.v632.json", &defaults)
+	if defaults.SchemaVersion != "mecom_tec_coso_defaults.v1" {
+		t.Fatalf("v6.32 defaults schema = %q", defaults.SchemaVersion)
+	}
+	requireDefaultValue(t, defaults, "6300", "1", "HR 1", "Object Source")
+	requireDefaultValue(t, defaults, "6304", "1", "Fixed", "Sink Source")
+
+	var overview tecParameterOverviewSource
+	readCatalogueSourceJSON(t, "catalogues/sources/tec_parameter_overview.v632.json", &overview)
+	if overview.SchemaVersion != "mecom_tec_parameter_overview.v1" {
+		t.Fatalf("parameter overview schema = %q", overview.SchemaVersion)
+	}
+	if overview.Summary.TotalParameters < 300 || overview.Summary.ParametersWithCANIndex < 250 {
+		t.Fatalf("parameter overview summary = %+v, want full v6.32 parameter inventory", overview.Summary)
+	}
+	if got := overview.Summary.FlagCounts["COMCN_RPDO"]; got < 80 {
+		t.Fatalf("COMCN_RPDO flag count = %d, want v6.32 RPDO metadata", got)
+	}
+	requireParameterOverviewParam(t, overview, 52200, "0x4200", "float32", "rw", true, false, 4)
+	requireParameterOverviewParam(t, overview, 52201, "0x4201", "float32", "rw", true, false, 4)
+	requireParameterOverviewParam(t, overview, 6300, "0x3300", "int32", "rw", false, false, 4)
+	requireParameterOverviewParam(t, overview, 6304, "0x3304", "int32", "rw", false, false, 4)
+	requireParameterOverviewParam(t, overview, 1000, "0x2100", "float32", "ro", false, true, 4)
+	requireParameterOverviewParam(t, overview, 1001, "0x2101", "float32", "ro", false, true, 4)
+
+	var eds tecCANopenEDSSource
+	readCatalogueSourceJSON(t, "catalogues/sources/canopen_eds.v632.json", &eds)
+	if eds.SchemaVersion != "mecom_tec_canopen_eds.v1" {
+		t.Fatalf("v6.32 EDS schema = %q", eds.SchemaVersion)
+	}
+	requireTECEDSObjectName(t, eds, "4200", "External Object Temperature")
+	requireTECEDSObjectName(t, eds, "4201", "Fixed Sink Temperature")
+	requireTECEDSObjectName(t, eds, "3300", "Object Temperature Source Selection")
+	requireTECEDSObjectName(t, eds, "3304", "Sink Temperature Source Selection")
+	requireEDSSubobject(t, eds, "4200", "1", "Instance 1", "rww", "0x0008", "1")
+	requireEDSSubobject(t, eds, "4201", "1", "Instance 1", "rww", "0x0008", "1")
+	requireEDSSubobject(t, eds, "3300", "1", "Instance 1", "rw", "0x0004", "0")
+	requireEDSSubobject(t, eds, "3304", "1", "Instance 1", "rw", "0x0004", "0")
+	requireEDSSubobject(t, eds, "1600", "1", "Mapping Entry", "rw", "0x0007", "0")
+	requireEDSSubobject(t, eds, "1A00", "1", "Mapping Entry", "rw", "0x0007", "0")
+
+	var sdoMap tecCANopenSDOMapSource
+	readCatalogueSourceJSON(t, "catalogues/sources/tec_canopen_sdo_map.v632.json", &sdoMap)
+	if sdoMap.SchemaVersion != "mecom_tec_canopen_sdo_map.v1" {
+		t.Fatalf("v6.32 SDO map schema = %q", sdoMap.SchemaVersion)
+	}
+	requireSDOMapAlias(t, sdoMap, 52200, "0x4200", 16896, "float32", 4)
+	requireSDOMapAlias(t, sdoMap, 52201, "0x4201", 16897, "float32", 4)
+	requireSDOMapAlias(t, sdoMap, 6300, "0x3300", 13056, "int32", 4)
+	requireSDOMapAlias(t, sdoMap, 6304, "0x3304", 13060, "int32", 4)
+	requireSDOMapPDO(t, sdoMap, 52200, "receive")
+	requireSDOMapPDO(t, sdoMap, 52201, "receive")
+	requireSDOMapPDO(t, sdoMap, 1000, "transmit")
+	requireSDOMapPDO(t, sdoMap, 1001, "transmit")
+	requireNoBridgeTransform(t, sdoMap, 52200)
+	requireNoBridgeTransform(t, sdoMap, 52201)
+	requireNoUnsupportedSDOPath(t, sdoMap, 52200)
+	requireNoUnsupportedSDOPath(t, sdoMap, 52201)
+
+	var index tecMetadataIndexSource
+	readCatalogueSourceJSON(t, "catalogues/sources/tec_metadata_index.v632.json", &index)
+	if index.ReleaseNotes.CurrentVersion != "6.32" ||
+		index.ReleaseNotes.CurrentReleaseDate != "2026-06-04" ||
+		index.ReleaseNotes.CurrentFirmwareVersion != "6.32" {
+		t.Fatalf("v6.32 release metadata = %+v", index.ReleaseNotes)
+	}
+	requireTECSupportedDevice(t, index, "TEC-1091", "0.80 - 3.51")
+	requireTECSupportedDevice(t, index, "TEC-1167", "1.00 - 1.30")
+	requireExternalTemperatureBinding(t, index, 52200, "0x4200", 6300, 7, "100 ms")
+	requireExternalTemperatureBinding(t, index, 52201, "0x4201", 6304, 7, "fixed")
+	if got, want := len(index.PDOModel.ReceivePDOs), 4; got != want {
+		t.Fatalf("RPDO count = %d, want %d", got, want)
+	}
+	if got, want := len(index.PDOModel.TransmitPDOs), 4; got != want {
+		t.Fatalf("TPDO count = %d, want %d", got, want)
+	}
+}
+
 func TestRMMControllerSoftwareCommandSourceMatchesLibraryInventory(t *testing.T) {
 	var source rmmControllerMeComSource
 	readCatalogueSourceJSON(t, "catalogues/sources/rmm_1182_controller_software_mecom.v101.json", &source)
@@ -397,6 +586,36 @@ func TestRMMControllerSoftwareCommandSourceMatchesLibraryInventory(t *testing.T)
 			t.Fatalf("RMM command %s source = %q, want controller software", entry.Token, definition.Source)
 		}
 	}
+}
+
+func TestRMMLiveUSBMeComSourceMatchesHR1Pt100Preset(t *testing.T) {
+	var source rmmLiveUSBMeComSource
+	readCatalogueSourceJSON(t, "catalogues/sources/rmm_1182_live_usb_mecom.v100.json", &source)
+	if source.SchemaVersion != "mecom_rmm_1182_live_usb_mecom.v1" {
+		t.Fatalf("RMM live USB schema = %q", source.SchemaVersion)
+	}
+	requireDefinitionRef(t, source.Definition, "meerstetter.rmm_1182.v100", MeerstetterSubFamilyRMM, MeerstetterVariantRMM1182)
+	if source.Transport.Baud != RMM1182USBSerialBaud || source.Transport.MeComAddress != RMM1182USBMeComAddress {
+		t.Fatalf("RMM transport = %+v, want COM baud %d address %d", source.Transport, RMM1182USBSerialBaud, RMM1182USBMeComAddress)
+	}
+	if got := source.Transport.Identity["if"]; got != "8170-RMM-1182 SW G01" {
+		t.Fatalf("RMM identity ?IF = %q", got)
+	}
+	if source.MappingPolicy.Status != "live_proven_for_listed_reads" ||
+		!strings.Contains(source.MappingPolicy.WireEncoding, "3001") ||
+		!strings.Contains(source.MappingPolicy.Scope, "not evidence for writes") {
+		t.Fatalf("RMM mapping policy = %+v", source.MappingPolicy)
+	}
+
+	params := DefaultRMM1182HR1Pt100Parameters()
+	if len(source.ReadOnlyParameters) != len(params) {
+		t.Fatalf("RMM live parameter count = %d, preset count = %d", len(source.ReadOnlyParameters), len(params))
+	}
+	for _, param := range params {
+		requireRMMLiveUSBParameter(t, source, param)
+	}
+	requireRMMLiveUnsupportedHypothesis(t, source, 12289, RMM1182HR1Instance, "PAR_NOT_AVAILABLE")
+	requireRMMLiveUnsupportedHypothesis(t, source, 16384, RMM1182VC1Instance, "PAR_NOT_AVAILABLE")
 }
 
 func TestLDD130xCatalogueSourceJSONFiles(t *testing.T) {
@@ -529,6 +748,35 @@ func requireDefinitionRef(t *testing.T, definition map[string]string, ref, subFa
 		definition["variant"] != variant {
 		t.Fatalf("definition = %#v", definition)
 	}
+}
+
+func requireRMMLiveUSBParameter(t *testing.T, source rmmLiveUSBMeComSource, param Parameter) {
+	t.Helper()
+	for _, live := range source.ReadOnlyParameters {
+		if live.MeParID == param.ID && live.Instance == param.Instance {
+			if live.Name != param.Name || live.ValueType != string(param.Type) || live.Unit != param.Unit {
+				t.Fatalf("RMM live parameter %d:%d = %+v, want name %q type %q unit %q", param.ID, param.Instance, live, param.Name, param.Type, param.Unit)
+			}
+			if live.Status == "" {
+				t.Fatalf("RMM live parameter %d:%d has empty status", param.ID, param.Instance)
+			}
+			return
+		}
+	}
+	t.Fatalf("RMM live source missing parameter %d:%d", param.ID, param.Instance)
+}
+
+func requireRMMLiveUnsupportedHypothesis(t *testing.T, source rmmLiveUSBMeComSource, meParID, instance int, status string) {
+	t.Helper()
+	for _, hypothesis := range source.UnsupportedHypotheses {
+		if hypothesis.MeParID == meParID && hypothesis.Instance == instance {
+			if hypothesis.Status != status {
+				t.Fatalf("RMM unsupported hypothesis %d:%d status = %q, want %q", meParID, instance, hypothesis.Status, status)
+			}
+			return
+		}
+	}
+	t.Fatalf("RMM live source missing unsupported hypothesis %d:%d", meParID, instance)
 }
 
 func requireDefaultValue(t *testing.T, defaults tecDefaultConfigSource, id, inst, value, pathFragment string) {
@@ -845,6 +1093,51 @@ func requireHiddenCandidate(t *testing.T, index tecMetadataIndexSource, id int, 
 	t.Fatalf("missing hidden candidate %d with visibility %q", id, visibility)
 }
 
+func requireParameterOverviewParam(t *testing.T, overview tecParameterOverviewSource, id int, canopenIndex, valueType, access string, rpdo, tpdo bool, instances int) {
+	t.Helper()
+	param, ok := overview.Parameters[strconv.Itoa(id)]
+	if !ok {
+		t.Fatalf("parameter overview missing MeParID %d", id)
+	}
+	if param.CanIndex != canopenIndex ||
+		param.ValueType != valueType ||
+		param.Access != access ||
+		param.RPDO != rpdo ||
+		param.TPDO != tpdo ||
+		param.Instances != instances {
+		t.Fatalf("parameter overview %d = %+v, want index %s type %s access %s rpdo/tpdo %v/%v instances %d", id, param, canopenIndex, valueType, access, rpdo, tpdo, instances)
+	}
+}
+
+func requireTECEDSObjectName(t *testing.T, eds tecCANopenEDSSource, index, nameFragment string) {
+	t.Helper()
+	obj, ok := eds.Objects[index]
+	if !ok {
+		t.Fatalf("EDS missing object 0x%s", index)
+	}
+	if !strings.Contains(strings.ToLower(obj.Name), strings.ToLower(nameFragment)) {
+		t.Fatalf("EDS 0x%s name = %q, want fragment %q", index, obj.Name, nameFragment)
+	}
+}
+
+func requireEDSSubobject(t *testing.T, eds tecCANopenEDSSource, index, subindex, nameFragment, accessType, dataType, pdoMapping string) {
+	t.Helper()
+	obj, ok := eds.Objects[index]
+	if !ok {
+		t.Fatalf("EDS missing object 0x%s", index)
+	}
+	sub, ok := obj.Subobjects[subindex]
+	if !ok {
+		t.Fatalf("EDS object 0x%s missing subobject %s", index, subindex)
+	}
+	if !strings.Contains(strings.ToLower(sub.Name), strings.ToLower(nameFragment)) ||
+		sub.AccessType != accessType ||
+		sub.DataType != dataType ||
+		sub.PDOMapping != pdoMapping {
+		t.Fatalf("EDS 0x%s.%s = %+v, want name fragment %q access %s type %s pdo %s", index, subindex, sub, nameFragment, accessType, dataType, pdoMapping)
+	}
+}
+
 func requireSDOMapAlias(t *testing.T, sdoMap tecCANopenSDOMapSource, mecomID int, canopenIndex string, canopenObjectDecimal int, valueType string, maxInstances int) {
 	t.Helper()
 	for _, mapping := range sdoMap.Mappings {
@@ -871,6 +1164,23 @@ func requireSDOMapAlias(t *testing.T, sdoMap tecCANopenSDOMapSource, mecomID int
 	t.Fatalf("missing SDO mapping for MeCom %d", mecomID)
 }
 
+func requireSDOMapPDO(t *testing.T, sdoMap tecCANopenSDOMapSource, mecomID int, direction string) {
+	t.Helper()
+	for _, mapping := range sdoMap.Mappings {
+		if mapping.MeComID != mecomID {
+			continue
+		}
+		if !mapping.PDO.Mappable || mapping.PDO.Direction != direction {
+			t.Fatalf("MeCom %d PDO metadata = %+v, want mappable direction %q", mecomID, mapping.PDO, direction)
+		}
+		if len(mapping.SourceEvidence) == 0 {
+			t.Fatalf("MeCom %d missing source evidence", mecomID)
+		}
+		return
+	}
+	t.Fatalf("missing SDO mapping for MeCom %d", mecomID)
+}
+
 func requireUnsupportedSDOPath(t *testing.T, sdoMap tecCANopenSDOMapSource, id any, reasonFragment string) {
 	t.Helper()
 	for _, unsupported := range sdoMap.Unsupported {
@@ -886,6 +1196,15 @@ func requireUnsupportedSDOPath(t *testing.T, sdoMap tecCANopenSDOMapSource, id a
 		return
 	}
 	t.Fatalf("missing unsupported SDO path %v", id)
+}
+
+func requireNoUnsupportedSDOPath(t *testing.T, sdoMap tecCANopenSDOMapSource, id any) {
+	t.Helper()
+	for _, unsupported := range sdoMap.Unsupported {
+		if sameCatalogueSourceID(unsupported.ID, id) {
+			t.Fatalf("MeCom %v unexpectedly marked unsupported: %+v", id, unsupported)
+		}
+	}
 }
 
 func requireProtocolInventoryCommand(t *testing.T, sdoMap tecCANopenSDOMapSource, command, behaviorFragment string) {
@@ -929,6 +1248,43 @@ func requireBridgeTransform(t *testing.T, sdoMap tecCANopenSDOMapSource, id int,
 		return
 	}
 	t.Fatalf("missing bridge transform for MeCom ID %d", id)
+}
+
+func requireNoBridgeTransform(t *testing.T, sdoMap tecCANopenSDOMapSource, id int) {
+	t.Helper()
+	for _, entry := range sdoMap.BridgeTransforms {
+		if entry.MeComID == id {
+			t.Fatalf("MeCom ID %d unexpectedly has bridge transform: %+v", id, entry)
+		}
+	}
+}
+
+func requireTECSupportedDevice(t *testing.T, index tecMetadataIndexSource, device, hardwareVersion string) {
+	t.Helper()
+	for _, got := range index.ReleaseNotes.SupportedDevices {
+		if got.Device == device && got.HardwareVersion == hardwareVersion {
+			return
+		}
+	}
+	t.Fatalf("missing TEC release-note supported device %s hardware %s", device, hardwareVersion)
+}
+
+func requireExternalTemperatureBinding(t *testing.T, index tecMetadataIndexSource, mecomID int, canopenIndex string, sourceSelectionID, sourceSelectionValue int, refreshFragment string) {
+	t.Helper()
+	for _, binding := range index.PDOModel.ExternalTemperatureBindings {
+		if binding.MeComID != mecomID {
+			continue
+		}
+		if binding.CANopenIndex != canopenIndex ||
+			binding.Direction != "receive" ||
+			binding.SourceSelectionID != sourceSelectionID ||
+			binding.SourceSelectionValue != sourceSelectionValue ||
+			!strings.Contains(strings.ToLower(binding.RefreshPolicy), strings.ToLower(refreshFragment)) {
+			t.Fatalf("external temperature binding %d = %+v", mecomID, binding)
+		}
+		return
+	}
+	t.Fatalf("missing external temperature binding for MeCom ID %d", mecomID)
 }
 
 func sameCatalogueSourceID(got, want any) bool {

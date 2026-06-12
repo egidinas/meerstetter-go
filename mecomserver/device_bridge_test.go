@@ -1417,7 +1417,7 @@ func TestDeviceClientBridgeCoSoLooseConfigCompatibilitySurface(t *testing.T) {
 	}{
 		{payload: "?VM00CB01", want: "01010100000001800000007FFFFFFF00000000"},
 		{payload: "?VM178801", want: "03010400000100000000"},
-		{payload: "?VM17D401", want: "01010A00000001800000007FFFFFFF00000000"},
+		{payload: "?VM17D401", want: "01030A00000001800000007FFFFFFF00000000"},
 		{payload: "?VMCB2204", want: "01010400000001800000007FFFFFFF00000000"},
 	} {
 		got, err := deviceBridgePayload(ctx, fake, tc.payload)
@@ -1930,7 +1930,7 @@ func TestDeviceClientBridgeAnswersCurrentCoSoTraceParametersFromCatalogue(t *tes
 	if err != nil {
 		t.Fatalf("read metadata response for CoSo trace parameter 52200: %v", err)
 	}
-	want = deviceBridgeInfoTestFrame(0x4c, objectExternalSeq, "00030100000001FF8000007F8000007FC00000")
+	want = deviceBridgeInfoTestFrame(0x4c, objectExternalSeq, "00030400000001FF8000007F80000000000000")
 	if !bytes.Equal(buf[:n], want) {
 		t.Fatalf("metadata response for CoSo trace parameter 52200 = %q, want %q", string(buf[:n]), string(want))
 	}
@@ -1946,14 +1946,14 @@ func TestDeviceClientBridgeAnswersCurrentCoSoTraceParametersFromCatalogue(t *tes
 	if err != nil {
 		t.Fatalf("read metadata response for CoSo trace parameter 52201: %v", err)
 	}
-	want = deviceBridgeInfoTestFrame(0x4c, sinkFixedSeq, "00030400000001FF8000007F80000041C80000")
+	want = deviceBridgeInfoTestFrame(0x4c, sinkFixedSeq, "00030400000001FF8000007F80000000000000")
 	if !bytes.Equal(buf[:n], want) {
 		t.Fatalf("metadata response for CoSo trace parameter 52201 = %q, want %q", string(buf[:n]), string(want))
 	}
 	if len(fake.readFloats) != 2 ||
 		fake.readFloats[0] != (fakeParamKey{id: 52200, instance: 1}) ||
 		fake.readFloats[1] != (fakeParamKey{id: 52201, instance: 1}) {
-		t.Fatalf("metadata float reads = %v, want live virtual probes for 52200.1 and 52201.1", fake.readFloats)
+		t.Fatalf("metadata float reads = %v, want live metadata probes for 52200.1 and 52201.1", fake.readFloats)
 	}
 	if len(fake.readInts) != 0 {
 		t.Fatalf("metadata int reads = %v, want none", fake.readInts)
@@ -1964,7 +1964,7 @@ func TestDeviceClientBridgeRejectsUnknownCoSoTraceParameterTypes(t *testing.T) {
 	ctx := context.Background()
 	t.Run("metadata-fallback", func(t *testing.T) {
 		fake := &fakeDeviceClient{
-			floats: map[fakeParamKey]float64{{id: 1062, instance: 1}: 12.5},
+			floats: map[fakeParamKey]float64{{id: 65010, instance: 1}: 12.5},
 			ints:   map[fakeParamKey]int32{},
 		}
 		conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
@@ -1976,7 +1976,7 @@ func TestDeviceClientBridgeRejectsUnknownCoSoTraceParameterTypes(t *testing.T) {
 		defer conn.Close()
 
 		const seq = 0x45
-		if _, err := conn.Write(deviceBridgeTestFrame(0x4c, seq, "?VM042601")); err != nil {
+		if _, err := conn.Write(deviceBridgeTestFrame(0x4c, seq, "?VMFDF201")); err != nil {
 			t.Fatalf("write metadata frame for unknown CoSo trace parameter: %v", err)
 		}
 		if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
@@ -1993,7 +1993,7 @@ func TestDeviceClientBridgeRejectsUnknownCoSoTraceParameterTypes(t *testing.T) {
 		}
 
 		client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
-		vals, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 1062, Instance: 1, Type: mecom.DataTypeFloat32}})
+		vals, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 65010, Instance: 1, Type: mecom.DataTypeFloat32}})
 		if err != nil {
 			t.Fatalf("ReadBulk for unknown CoSo trace parameter returned unexpected error: %v", err)
 		}
@@ -2150,14 +2150,12 @@ func TestDeviceClientBridgeTranslatesWrites(t *testing.T) {
 	}
 }
 
-func TestDeviceClientBridgeVirtualParameterStoresCoSoWriteSurface(t *testing.T) {
-	deviceBridgeVirtualParameters.reset()
-
+func TestDeviceClientBridgeDirectExternalObjectTemperatureRoutesWrites(t *testing.T) {
 	ctx := context.Background()
+	key := fakeParamKey{id: 52200, instance: 1}
 	fake := &fakeDeviceClient{
-		floats:    map[fakeParamKey]float64{},
-		ints:      map[fakeParamKey]int32{},
-		floatErrs: map[fakeParamKey]error{{id: 52200, instance: 1}: mecom.ErrUnknownParameter},
+		floats: map[fakeParamKey]float64{key: 8},
+		ints:   map[fakeParamKey]int32{},
 	}
 	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
 		return fake, nil
@@ -2170,51 +2168,38 @@ func TestDeviceClientBridgeVirtualParameterStoresCoSoWriteSurface(t *testing.T) 
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
 	initial, err := client.ReadFloat32(ctx, 52200, 1)
 	if err != nil {
-		t.Fatalf("initial ReadFloat32 for virtual CoSo parameter 52200 returned error: %v", err)
+		t.Fatalf("initial ReadFloat32 for direct CoSo parameter 52200 returned error: %v", err)
 	}
-	if !math.IsNaN(initial) {
-		t.Fatalf("initial ReadFloat32 for virtual CoSo parameter 52200 = %v, want NaN", initial)
+	if initial != 8 {
+		t.Fatalf("initial ReadFloat32 for direct CoSo parameter 52200 = %v, want 8", initial)
 	}
 	initialBulk, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 52200, Instance: 1, Type: mecom.DataTypeFloat32}})
 	if err != nil {
-		t.Fatalf("initial ReadBulk for virtual CoSo parameter 52200 returned error: %v", err)
+		t.Fatalf("initial ReadBulk for direct CoSo parameter 52200 returned error: %v", err)
 	}
-	if len(initialBulk) != 1 || !math.IsNaN(initialBulk[0]) {
-		t.Fatalf("initial ReadBulk for virtual CoSo parameter 52200 = %v, want [NaN]", initialBulk)
+	if len(initialBulk) != 1 || initialBulk[0] != 8 {
+		t.Fatalf("initial ReadBulk for direct CoSo parameter 52200 = %v, want [8]", initialBulk)
 	}
 	if err := client.WriteFloat32(ctx, 52200, 1, 10); err != nil {
-		t.Fatalf("WriteFloat32 for virtual CoSo parameter 52200 returned error: %v", err)
+		t.Fatalf("WriteFloat32 for direct CoSo parameter 52200 returned error: %v", err)
 	}
-	got, err := client.ReadFloat32(ctx, 52200, 1)
-	if err != nil {
-		t.Fatalf("ReadFloat32 for virtual CoSo parameter 52200 returned error: %v", err)
+	if len(fake.floatWrites) != 1 || fake.floatWrites[0] != (fakeFloatWrite{key: key, value: 10}) {
+		t.Fatalf("floatWrites = %+v, want direct downstream write of 52200.1 = 10", fake.floatWrites)
 	}
-	if got != 10 {
-		t.Fatalf("ReadFloat32 for virtual CoSo parameter 52200 = %v, want 10", got)
+	if len(fake.readFloats) != 2 || fake.readFloats[0] != key || fake.readFloats[1] != key {
+		t.Fatalf("readFloats = %+v, want single and bulk live reads for %v", fake.readFloats, key)
 	}
-	bulk, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 52200, Instance: 1, Type: mecom.DataTypeFloat32}})
-	if err != nil {
-		t.Fatalf("ReadBulk for virtual CoSo parameter 52200 returned error: %v", err)
-	}
-	if len(bulk) != 1 || bulk[0] != 10 {
-		t.Fatalf("ReadBulk for virtual CoSo parameter 52200 = %v, want [10]", bulk)
-	}
-	if len(fake.readFloats) == 0 {
-		t.Fatalf("virtual parameter should probe downstream before using compatibility cache")
-	}
-	if len(fake.readInts) != 0 || len(fake.bulkReads) != 0 || len(fake.floatWrites) != 0 || len(fake.intWrites) != 0 {
-		t.Fatalf("virtual parameter should not write or bulk-read downstream: floatReads=%v intReads=%v bulkReads=%v floatWrites=%v intWrites=%v", fake.readFloats, fake.readInts, fake.bulkReads, fake.floatWrites, fake.intWrites)
+	if len(fake.readInts) != 0 || len(fake.bulkReads) != 0 || len(fake.intWrites) != 0 {
+		t.Fatalf("direct external temperature should route through float reads/writes only: floatReads=%v intReads=%v bulkReads=%v intWrites=%v", fake.readFloats, fake.readInts, fake.bulkReads, fake.intWrites)
 	}
 }
 
-func TestDeviceClientBridgeVirtualParameterStoresCoSoSinkFixedTemperature(t *testing.T) {
-	deviceBridgeVirtualParameters.reset()
-
+func TestDeviceClientBridgeDirectExternalSinkTemperatureRoutesWrites(t *testing.T) {
 	ctx := context.Background()
+	key := fakeParamKey{id: 52201, instance: 1}
 	fake := &fakeDeviceClient{
-		floats:    map[fakeParamKey]float64{},
-		ints:      map[fakeParamKey]int32{},
-		floatErrs: map[fakeParamKey]error{{id: 52201, instance: 1}: mecom.ErrUnknownParameter},
+		floats: map[fakeParamKey]float64{key: 25},
+		ints:   map[fakeParamKey]int32{},
 	}
 	conn, _, err := DialDeviceClient("fake-can", func(context.Context) (mecom.DeviceClient, error) {
 		return fake, nil
@@ -2227,37 +2212,33 @@ func TestDeviceClientBridgeVirtualParameterStoresCoSoSinkFixedTemperature(t *tes
 	client := mecom.NewClient(conn, mecom.ClientConfig{Address: 0x4c, Timeout: time.Second})
 	initial, err := client.ReadFloat32(ctx, 52201, 1)
 	if err != nil {
-		t.Fatalf("initial ReadFloat32 for virtual CoSo parameter 52201 returned error: %v", err)
+		t.Fatalf("initial ReadFloat32 for direct CoSo parameter 52201 returned error: %v", err)
 	}
 	if initial != 25 {
-		t.Fatalf("initial ReadFloat32 for virtual CoSo parameter 52201 = %v, want 25", initial)
+		t.Fatalf("initial ReadFloat32 for direct CoSo parameter 52201 = %v, want 25", initial)
 	}
 	initialBulk, err := client.ReadBulk(ctx, []mecom.Parameter{{ID: 52201, Instance: 1, Type: mecom.DataTypeFloat32}})
 	if err != nil {
-		t.Fatalf("initial ReadBulk for virtual CoSo parameter 52201 returned error: %v", err)
+		t.Fatalf("initial ReadBulk for direct CoSo parameter 52201 returned error: %v", err)
 	}
 	if len(initialBulk) != 1 || initialBulk[0] != 25 {
-		t.Fatalf("initial ReadBulk for virtual CoSo parameter 52201 = %v, want [25]", initialBulk)
+		t.Fatalf("initial ReadBulk for direct CoSo parameter 52201 = %v, want [25]", initialBulk)
 	}
 	if err := client.WriteFloat32(ctx, 52201, 1, 25); err != nil {
-		t.Fatalf("WriteFloat32 for virtual CoSo parameter 52201 returned error: %v", err)
+		t.Fatalf("WriteFloat32 for direct CoSo parameter 52201 returned error: %v", err)
 	}
-	got, err := client.ReadFloat32(ctx, 52201, 1)
-	if err != nil {
-		t.Fatalf("ReadFloat32 for virtual CoSo parameter 52201 returned error: %v", err)
+	if len(fake.floatWrites) != 1 || fake.floatWrites[0] != (fakeFloatWrite{key: key, value: 25}) {
+		t.Fatalf("floatWrites = %+v, want direct downstream write of 52201.1 = 25", fake.floatWrites)
 	}
-	if got != 25 {
-		t.Fatalf("ReadFloat32 for virtual CoSo parameter 52201 = %v, want 25", got)
+	if len(fake.readFloats) != 2 || fake.readFloats[0] != key || fake.readFloats[1] != key {
+		t.Fatalf("readFloats = %+v, want single and bulk live reads for %v", fake.readFloats, key)
 	}
-	if len(fake.readFloats) == 0 {
-		t.Fatalf("virtual parameter should probe downstream before using compatibility cache")
-	}
-	if len(fake.readInts) != 0 || len(fake.bulkReads) != 0 || len(fake.floatWrites) != 0 || len(fake.intWrites) != 0 {
-		t.Fatalf("virtual parameter should not write or bulk-read downstream: floatReads=%v intReads=%v bulkReads=%v floatWrites=%v intWrites=%v", fake.readFloats, fake.readInts, fake.bulkReads, fake.floatWrites, fake.intWrites)
+	if len(fake.readInts) != 0 || len(fake.bulkReads) != 0 || len(fake.intWrites) != 0 {
+		t.Fatalf("direct external temperature should route through float reads/writes only: floatReads=%v intReads=%v bulkReads=%v intWrites=%v", fake.readFloats, fake.readInts, fake.bulkReads, fake.intWrites)
 	}
 }
 
-func TestDeviceClientBridgeVirtualParameterPrefersLiveValueAndCaches(t *testing.T) {
+func TestDeviceClientBridgeDirectExternalTemperatureMetadataUsesLiveValueAndCache(t *testing.T) {
 	ctx := context.Background()
 	key := fakeParamKey{id: 52200, instance: 1}
 	fake := &fakeDeviceClient{
@@ -2268,37 +2249,37 @@ func TestDeviceClientBridgeVirtualParameterPrefersLiveValueAndCaches(t *testing.
 
 	metadata, err := deviceBridgeMetadataWithState(ctx, state, fake, "?VMCBE801")
 	if err != nil {
-		t.Fatalf("read live virtual metadata: %v", err)
+		t.Fatalf("read live direct metadata: %v", err)
 	}
 	if !strings.HasSuffix(metadata, wantHex) {
-		t.Fatalf("live virtual metadata = %q, want actual suffix %q", metadata, wantHex)
+		t.Fatalf("live direct metadata = %q, want actual suffix %q", metadata, wantHex)
 	}
 
 	fake.floats = map[fakeParamKey]float64{key: 18.25}
 	wantHex = fmt.Sprintf("%08X", math.Float32bits(float32(18.25)))
 	bulk, err := deviceBridgeBulkReadWithState(ctx, state, fake, "?VX01CBE801")
 	if err != nil {
-		t.Fatalf("bulk read live virtual parameter: %v", err)
+		t.Fatalf("bulk read live direct parameter: %v", err)
 	}
 	if bulk != wantHex {
-		t.Fatalf("live virtual bulk read = %q, want %q", bulk, wantHex)
+		t.Fatalf("live direct bulk read = %q, want %q", bulk, wantHex)
 	}
 
 	fake.floats = map[fakeParamKey]float64{}
 	fake.floatErrs = map[fakeParamKey]error{key: mecom.ErrUnknownParameter}
-	got, err := deviceBridgeSingleReadWithState(ctx, state, fake, "?VRCBE801")
+	metadata, err = deviceBridgeMetadataWithState(ctx, state, fake, "?VMCBE801")
 	if err != nil {
-		t.Fatalf("read cached virtual parameter: %v", err)
+		t.Fatalf("read cached direct metadata: %v", err)
+	}
+	if !strings.HasSuffix(metadata, wantHex) {
+		t.Fatalf("cached direct metadata = %q, want actual suffix %q", metadata, wantHex)
+	}
+	got, err := deviceBridgeBulkReadWithState(ctx, state, fake, "?VX01CBE801")
+	if err != nil {
+		t.Fatalf("bulk read cached direct parameter: %v", err)
 	}
 	if got != wantHex {
-		t.Fatalf("cached virtual parameter read = %q, want %q", got, wantHex)
-	}
-	got, err = deviceBridgeBulkReadWithState(ctx, state, fake, "?VX01CBE801")
-	if err != nil {
-		t.Fatalf("bulk read cached virtual parameter: %v", err)
-	}
-	if got != wantHex {
-		t.Fatalf("cached virtual bulk read = %q, want %q", got, wantHex)
+		t.Fatalf("cached direct bulk read = %q, want %q", got, wantHex)
 	}
 	if len(fake.readFloats) != 4 {
 		t.Fatalf("readFloats = %+v, want live probe before cached fallback", fake.readFloats)
@@ -2310,47 +2291,46 @@ func TestDeviceClientBridgeVirtualParameterPrefersLiveValueAndCaches(t *testing.
 	}
 }
 
-func TestDeviceClientBridgeVirtualParameterStateIsPerController(t *testing.T) {
-	deviceBridgeVirtualParameters.reset()
-
+func TestDeviceClientBridgeDirectExternalTemperatureCacheIsPerController(t *testing.T) {
 	ctx := context.Background()
-	fake := &fakeDeviceClient{
-		floatErrs: map[fakeParamKey]error{{id: 52201, instance: 1}: mecom.ErrUnknownParameter},
+	key := fakeParamKey{id: 52201, instance: 1}
+	fakeA := &fakeDeviceClient{
+		floats: map[fakeParamKey]float64{key: 12.5},
+	}
+	fakeB := &fakeDeviceClient{
+		floatErrs: map[fakeParamKey]error{key: mecom.ErrUnknownParameter},
 	}
 	stateA := newDeviceBridgeState("controller-a")
 	stateB := newDeviceBridgeState("controller-b")
 	valueHex := fmt.Sprintf("%08X", math.Float32bits(float32(12.5)))
-	defaultHex := fmt.Sprintf("%08X", math.Float32bits(float32(25)))
+	defaultHex := fmt.Sprintf("%08X", math.Float32bits(float32(0)))
 
-	if err := deviceBridgeWriteWithState(ctx, stateA, fake, "VSCBE901"+valueHex); err != nil {
-		t.Fatalf("write controller A virtual parameter: %v", err)
-	}
-	gotA, err := deviceBridgeSingleReadWithState(ctx, stateA, fake, "?VRCBE901")
+	gotA, err := deviceBridgeMetadataWithState(ctx, stateA, fakeA, "?VMCBE901")
 	if err != nil {
-		t.Fatalf("read controller A virtual parameter: %v", err)
+		t.Fatalf("read controller A direct metadata: %v", err)
 	}
-	if gotA != valueHex {
-		t.Fatalf("controller A virtual parameter = %q, want %q", gotA, valueHex)
+	if !strings.HasSuffix(gotA, valueHex) {
+		t.Fatalf("controller A direct metadata = %q, want suffix %q", gotA, valueHex)
 	}
-	gotB, err := deviceBridgeSingleReadWithState(ctx, stateB, fake, "?VRCBE901")
+	gotB, err := deviceBridgeMetadataWithState(ctx, stateB, fakeB, "?VMCBE901")
 	if err != nil {
-		t.Fatalf("read controller B virtual parameter: %v", err)
+		t.Fatalf("read controller B direct metadata: %v", err)
 	}
-	if gotB != defaultHex {
-		t.Fatalf("controller B virtual parameter leaked controller A value: got %q, want %q", gotB, defaultHex)
+	if !strings.HasSuffix(gotB, defaultHex) {
+		t.Fatalf("controller B direct metadata = %q, want suffix %q", gotB, defaultHex)
 	}
-	bulkB, err := deviceBridgeBulkReadWithState(ctx, stateB, fake, "?VX01CBE901")
+	bulkB, err := deviceBridgeBulkReadWithState(ctx, stateB, fakeB, "?VX01CBE901")
 	if err != nil {
-		t.Fatalf("bulk read controller B virtual parameter: %v", err)
+		t.Fatalf("bulk read controller B direct parameter: %v", err)
 	}
 	if bulkB != defaultHex {
-		t.Fatalf("controller B bulk virtual parameter leaked controller A value: got %q, want %q", bulkB, defaultHex)
+		t.Fatalf("controller B bulk direct parameter leaked controller A value: got %q, want %q", bulkB, defaultHex)
 	}
-	if len(fake.readFloats) == 0 {
-		t.Fatalf("virtual parameter should probe downstream before using compatibility cache")
+	if len(fakeA.readFloats) != 1 || fakeA.readFloats[0] != key {
+		t.Fatalf("controller A readFloats = %+v, want one live metadata probe for %v", fakeA.readFloats, key)
 	}
-	if len(fake.readInts) != 0 || len(fake.bulkReads) != 0 || len(fake.floatWrites) != 0 || len(fake.intWrites) != 0 {
-		t.Fatalf("virtual parameter should not write or bulk-read downstream: floatReads=%v intReads=%v bulkReads=%v floatWrites=%v intWrites=%v", fake.readFloats, fake.readInts, fake.bulkReads, fake.floatWrites, fake.intWrites)
+	if len(fakeB.readFloats) != 2 || fakeB.readFloats[0] != key || fakeB.readFloats[1] != key {
+		t.Fatalf("controller B readFloats = %+v, want metadata and bulk probes for %v", fakeB.readFloats, key)
 	}
 }
 

@@ -1,0 +1,482 @@
+{
+  "schema_version": "mecom_tec_metadata_index.v1",
+  "sources": [
+    {
+      "id": "tec_default_config_5216p_xml",
+      "path": "loom/tools/Dok/TEC Default Config 5216P.xml",
+      "method": "xml_default_config_parse",
+      "status": "harvested"
+    },
+    {
+      "id": "canopen_eds_v632",
+      "path": "loom/tools/Dok/CanOpen.eds",
+      "method": "eds_ini_parse",
+      "status": "harvested"
+    },
+    {
+      "id": "tec_parameter_overview_v632",
+      "path": "loom/tools/Dok/ParameterOverview.csv",
+      "method": "csv_parameter_inventory_parse",
+      "status": "harvested"
+    },
+    {
+      "id": "tec_release_notes_v632",
+      "path": "loom/tools/Dok/TEC Software Release Notes 5147AT.pdf",
+      "method": "pdf_release_note_review",
+      "status": "harvested"
+    }
+  ],
+  "hidden_candidates": [
+    {
+      "mepar_id": 202,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Input power-limit setting from advanced settings.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 203,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "Input voltage range, hardware-damage risk.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 204,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "PowerStage v3 hardware-test mode.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2050,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "UART or RS485 baudrate setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2051,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "RS485 address setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2052,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Reply delay setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2053,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Address-zero hardware-test setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2060,
+      "group": "communication",
+      "visibility": "manufacturer",
+      "note": "Connection watchdog setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2070,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen node-ID setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2071,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen bitrate setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 2072,
+      "group": "canopen",
+      "visibility": "manufacturer",
+      "note": "CANopen interface enable setting.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 217,
+      "group": "big_data",
+      "visibility": "advanced",
+      "note": "FreeRTOS statistics big-data read.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 250,
+      "group": "custom_lock",
+      "visibility": "manufacturer",
+      "note": "Custom-lock big-data read/write payload.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 40000,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Output-stage temperature diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53000,
+      "group": "license",
+      "visibility": "license",
+      "note": "Vendor feature license key.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53001,
+      "group": "license",
+      "visibility": "license",
+      "note": "Vendor feature license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53010,
+      "group": "license",
+      "visibility": "license",
+      "note": "Temperature-estimator license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53015,
+      "group": "license",
+      "visibility": "license",
+      "note": "Cascade-control license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53020,
+      "group": "license",
+      "visibility": "license",
+      "note": "Unipolar and mixed-mode license status.",
+      "safety_note": "Vendor license payload; do not expose as a routine operator write."
+    },
+    {
+      "mepar_id": 53100,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator enable.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53101,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator input source.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 53102,
+      "group": "extra_functions",
+      "visibility": "advanced",
+      "note": "Temperature estimator ambient source.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6000,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Sensor input PGA gain.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6005,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Sensor type selection.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6200,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Fan controller enable.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6300,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Object active source selection.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6310,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Error-state auto-reset delay.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6320,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Output-stage limit error delay.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 6330,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Device temperature mode.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65004,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage voltage U1A/U2A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65005,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage current I1A/I2A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65006,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage voltage U1B/U2B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65007,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Power-stage current I1B/I2B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65008,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Parallel common-load symmetry correction.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65009,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Relative PWM level diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65010,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Absolute PWM level A diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65011,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Absolute PWM level B diagnostics.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65020,
+      "group": "advanced",
+      "visibility": "advanced",
+      "note": "Flash write-cycle counter.",
+      "safety_note": "Advanced diagnostic value; hide by default and surface with provenance when needed."
+    },
+    {
+      "mepar_id": 65100,
+      "group": "manufacturer",
+      "visibility": "manufacturer",
+      "note": "PAR_DEBUG diagnostic instances.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    },
+    {
+      "mepar_id": 9000,
+      "group": "firmware",
+      "visibility": "advanced",
+      "note": "Firmware updater status text.",
+      "safety_note": "Firmware-update diagnostic value; surface read-only outside dedicated maintenance workflows."
+    },
+    {
+      "mepar_id": 9010,
+      "group": "firmware",
+      "visibility": "manufacturer",
+      "note": "Firmware update activation command.",
+      "safety_note": "Manufacturer-level setting; keep out of routine operator write controls unless separately reviewed."
+    }
+  ],
+  "safety_policy": "Hidden, manufacturer, license, firmware-update, and custom-lock entries are metadata candidates only; do not add them to active polling or write controls without a separate safety review.",
+  "manufacturer_gate_evidence": "CoSo contains manufacturer/settings gate logic; gate material is intentionally redacted from this public catalogue metadata.",
+  "release_notes": {
+    "current_version": "6.32",
+    "current_release_date": "2026-06-04",
+    "current_service_software_version": "6.32",
+    "current_firmware_version": "6.32",
+    "supported_devices": [
+      {
+        "device": "TEC-1089",
+        "hardware_version": "1.00 - 2.10"
+      },
+      {
+        "device": "TEC-1090",
+        "hardware_version": "1.00 - 1.90"
+      },
+      {
+        "device": "TEC-1091",
+        "hardware_version": "0.80 - 3.51"
+      },
+      {
+        "device": "TEC-1092",
+        "hardware_version": "1.00 - 1.10"
+      },
+      {
+        "device": "TEC-1122",
+        "hardware_version": "1.01 - 2.00"
+      },
+      {
+        "device": "TEC-1123",
+        "hardware_version": "1.01 - 2.00"
+      },
+      {
+        "device": "TEC-1161",
+        "hardware_version": "1.00 - 1.30"
+      },
+      {
+        "device": "TEC-1162",
+        "hardware_version": "1.00 - 1.30"
+      },
+      {
+        "device": "TEC-1163",
+        "hardware_version": "1.00 - 1.30"
+      },
+      {
+        "device": "TEC-1166",
+        "hardware_version": "1.00 - 1.30"
+      },
+      {
+        "device": "TEC-1167",
+        "hardware_version": "1.00 - 1.30"
+      }
+    ],
+    "versions": [
+      {
+        "version": "6.32",
+        "new_features": [
+          "External Object and Sink Temperature Values can be used as CANopen RPDO."
+        ],
+        "resolved_issues": [
+          "Baud-rate may not revert after speed change in specific cases."
+        ],
+        "known_issues": []
+      }
+    ],
+    "risk_notes": [
+      {
+        "id": "tec_v632_upgrade_floor",
+        "version": "6.32",
+        "summary": "Firmware v5.10 or newer must be installed before upgrading to v6.32.",
+        "source_evidence": [
+          "catalogues/sources/tec_metadata_index.v632.json#release_notes"
+        ]
+      },
+      {
+        "id": "tec_v632_downgrade_support",
+        "version": "6.32",
+        "summary": "Downgrades below v6.00 require Meerstetter Engineering remote support.",
+        "source_evidence": [
+          "catalogues/sources/tec_metadata_index.v632.json#release_notes"
+        ]
+      }
+    ]
+  },
+  "pdo_model": {
+    "receive_pdos": [
+      {
+        "communication_object": "0x1400",
+        "mapping_object": "0x1600",
+        "cob_id_default": "$NODEID+0x00000200",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1401",
+        "mapping_object": "0x1601",
+        "cob_id_default": "$NODEID+0x00000300",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1402",
+        "mapping_object": "0x1602",
+        "cob_id_default": "$NODEID+0x00000400",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1403",
+        "mapping_object": "0x1603",
+        "cob_id_default": "$NODEID+0x00000500",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      }
+    ],
+    "transmit_pdos": [
+      {
+        "communication_object": "0x1800",
+        "mapping_object": "0x1A00",
+        "cob_id_default": "$NODEID+0x00000180",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1801",
+        "mapping_object": "0x1A01",
+        "cob_id_default": "$NODEID+0x00000280",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1802",
+        "mapping_object": "0x1A02",
+        "cob_id_default": "$NODEID+0x00000380",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      },
+      {
+        "communication_object": "0x1803",
+        "mapping_object": "0x1A03",
+        "cob_id_default": "$NODEID+0x00000480",
+        "transmission_default": "0xFE",
+        "mapping_slots": 2
+      }
+    ],
+    "external_temperature_bindings": [
+      {
+        "mecom_id": 52200,
+        "canopen_index": "0x4200",
+        "direction": "receive",
+        "source_selection_id": 6300,
+        "source_selection_value": 7,
+        "refresh_policy": "External Object Temperature must be refreshed every 100 ms or faster; missing refresh for more than 5 s forces NaN and stops the controller."
+      },
+      {
+        "mecom_id": 52201,
+        "canopen_index": "0x4201",
+        "direction": "receive",
+        "source_selection_id": 6304,
+        "source_selection_value": 7,
+        "refresh_policy": "Fixed Sink Temperature is selected through Sink Temperature Source Selection value 7 and can be carried by RPDO in v6.32."
+      }
+    ]
+  }
+}

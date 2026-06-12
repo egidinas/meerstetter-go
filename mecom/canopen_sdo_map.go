@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//go:embed catalogues/sources/tec_canopen_sdo_map.v631.json
+//go:embed catalogues/sources/tec_canopen_sdo_map.v632.json
 var tecCANopenSDOMapJSON []byte
 
 //go:embed catalogues/sources/ldd_130x_canopen_sdo_map.v221.json

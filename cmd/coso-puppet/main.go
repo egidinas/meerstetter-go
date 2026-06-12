@@ -308,7 +308,7 @@ func sendRawRequest(endpoint string, address byte, seq uint16, payload string, t
 	if err != nil {
 		return request, rawResponse{}, err
 	}
-	resp, err := parseMeComResponse(raw)
+	resp, err := parseMeComResponse(raw, request)
 	if err != nil {
 		return request, rawResponse{}, err
 	}
@@ -322,7 +322,7 @@ func normalizeTCPEndpoint(endpoint string) string {
 	return endpoint
 }
 
-func parseMeComResponse(raw []byte) (rawResponse, error) {
+func parseMeComResponse(raw, request []byte) (rawResponse, error) {
 	frame := bytes.TrimRight(raw, "\r\n")
 	if len(frame) < 11 || frame[0] != '!' {
 		return rawResponse{}, fmt.Errorf("invalid MeCom response %q", string(frame))
@@ -333,15 +333,35 @@ func parseMeComResponse(raw []byte) (rawResponse, error) {
 		return rawResponse{}, fmt.Errorf("invalid response CRC %q: %w", string(frame[payloadEnd:]), err)
 	}
 	if want := mecom.CRC16(frame[:payloadEnd]); uint16(got) != want {
+		if isBareRequestCRCAck(frame, request) {
+			addr, seq, err := parseResponseAddressSequence(frame)
+			if err != nil {
+				return rawResponse{}, err
+			}
+			return rawResponse{
+				Raw:      string(raw),
+				Address:  addr,
+				Sequence: seq,
+				Status:   "ok",
+			}, nil
+		}
 		return rawResponse{}, fmt.Errorf("response CRC mismatch got %04X want %04X", got, want)
 	}
-	addr, err := strconv.ParseUint(string(frame[1:3]), 16, 8)
+	addr, seq, err := parseResponseAddressSequence(frame)
 	if err != nil {
-		return rawResponse{}, fmt.Errorf("invalid response address: %w", err)
+		return rawResponse{}, err
 	}
-	seq, err := strconv.ParseUint(string(frame[3:7]), 16, 16)
-	if err != nil {
-		return rawResponse{}, fmt.Errorf("invalid response sequence: %w", err)
+	if len(request) > 0 {
+		reqAddr, reqSeq, err := parseRequestAddressSequence(request)
+		if err != nil {
+			return rawResponse{}, err
+		}
+		if addr != reqAddr || seq != reqSeq {
+			return rawResponse{}, fmt.Errorf(
+				"response address/sequence mismatch got 0x%02X/%d want 0x%02X/%d",
+				addr, seq, reqAddr, reqSeq,
+			)
+		}
 	}
 	status := "data"
 	payloadStart := 7
@@ -360,11 +380,56 @@ func parseMeComResponse(raw []byte) (rawResponse, error) {
 	}
 	return rawResponse{
 		Raw:      string(raw),
-		Address:  byte(addr),
-		Sequence: uint16(seq),
+		Address:  addr,
+		Sequence: seq,
 		Status:   status,
 		Payload:  string(frame[payloadStart:payloadEnd]),
 	}, nil
+}
+
+func parseResponseAddressSequence(frame []byte) (byte, uint16, error) {
+	addr, err := strconv.ParseUint(string(frame[1:3]), 16, 8)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid response address: %w", err)
+	}
+	seq, err := strconv.ParseUint(string(frame[3:7]), 16, 16)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid response sequence: %w", err)
+	}
+	return byte(addr), uint16(seq), nil
+}
+
+func parseRequestAddressSequence(frame []byte) (byte, uint16, error) {
+	frame = bytes.TrimRight(frame, "\r\n")
+	if len(frame) < 11 || frame[0] != '#' {
+		return 0, 0, fmt.Errorf("invalid MeCom request %q", string(frame))
+	}
+	addr, err := strconv.ParseUint(string(frame[1:3]), 16, 8)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid request address: %w", err)
+	}
+	seq, err := strconv.ParseUint(string(frame[3:7]), 16, 16)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid request sequence: %w", err)
+	}
+	return byte(addr), uint16(seq), nil
+}
+
+func isBareRequestCRCAck(frame, request []byte) bool {
+	req := bytes.TrimSuffix(request, []byte{mecom.FrameTerminator})
+	if len(frame) != 11 || len(req) < 11 || req[0] != '#' {
+		return false
+	}
+	if !bytes.Equal(frame[1:7], req[1:7]) {
+		return false
+	}
+	reqPayloadEnd := len(req) - 4
+	reqCRC, err := strconv.ParseUint(string(req[reqPayloadEnd:]), 16, 16)
+	if err != nil || mecom.CRC16(req[:reqPayloadEnd]) != uint16(reqCRC) {
+		return false
+	}
+	respCRC, err := strconv.ParseUint(string(frame[7:]), 16, 16)
+	return err == nil && uint16(respCRC) == uint16(reqCRC)
 }
 
 func printRawReport(w io.Writer, request []byte, resp rawResponse) {

@@ -38,8 +38,10 @@ const (
 	MeerstetterSubFamilyTEC     = "tec"
 	MeerstetterSubFamilyLDD     = "ldd"
 	MeerstetterSubFamilyDAQ     = "daq"
+	MeerstetterSubFamilyRMM     = "rmm"
 	MeerstetterVariantLDD130x   = "ldd_130x"
 	MeerstetterVariantLDD1321   = "ldd_1321"
+	MeerstetterVariantRMM1182   = "rmm_1182"
 
 	mecomReadoutPriorityHigh       = "high"
 	mecomReadoutPriorityBackground = "background"
@@ -87,12 +89,12 @@ type MeComCatalogueDefinition struct {
 
 func DefaultTECCatalogueDefinition() MeComCatalogueDefinition {
 	return MeComCatalogueDefinition{
-		DefinitionID:      "meerstetter.tec.v631",
+		DefinitionID:      "meerstetter.tec.v632",
 		System:            MeComDefinitionSystem,
 		Family:            MeerstetterDefinitionFamily,
 		SubFamily:         MeerstetterSubFamilyTEC,
 		Variant:           MeerstetterSubFamilyTEC,
-		Version:           "v631",
+		Version:           "v632",
 		SourceFamily:      graphsem.SourceFamily(DefaultMeComTECCatalogueSourceID),
 		DefaultSourceID:   DefaultMeComTECCatalogueSourceID,
 		DisplayName:       "MeCom TEC controller bank",
@@ -143,6 +145,21 @@ func DefaultDAQCatalogueDefinition() MeComCatalogueDefinition {
 	}
 }
 
+func DefaultRMM1182CatalogueDefinition() MeComCatalogueDefinition {
+	return MeComCatalogueDefinition{
+		DefinitionID:    "meerstetter.rmm_1182.v100",
+		System:          MeComDefinitionSystem,
+		Family:          MeerstetterDefinitionFamily,
+		SubFamily:       MeerstetterSubFamilyRMM,
+		Variant:         MeerstetterVariantRMM1182,
+		Version:         "v100",
+		SourceFamily:    graphsem.SourceFamily("mecom_rmm_1182"),
+		DefaultSourceID: "mecom_rmm_1182",
+		DisplayName:     "MeCom RMM-1182 measurement module",
+		TracePrefix:     "mecom.rmm_1182",
+	}
+}
+
 func ResolveMeComCatalogueDefinition(system, family, subFamily string) (MeComCatalogueDefinition, bool) {
 	system = normalizeDefinitionToken(system)
 	family = normalizeDefinitionToken(family)
@@ -177,6 +194,8 @@ func ResolveMeComCatalogueDefinition(system, family, subFamily string) (MeComCat
 		return definition, true
 	case MeerstetterSubFamilyDAQ:
 		return DefaultDAQCatalogueDefinition(), true
+	case MeerstetterSubFamilyRMM, "rmm_1182", "rmm1182":
+		return DefaultRMM1182CatalogueDefinition(), true
 	default:
 		return MeComCatalogueDefinition{}, false
 	}

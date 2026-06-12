@@ -1,0 +1,142 @@
+{
+  "schema_version": "mecom_rmm_1182_live_usb_mecom.v1",
+  "source": "live_probe:odyssey-8140-via-brume2:COM5@57600",
+  "probed_at": "2026-06-04",
+  "definition": {
+    "definition_ref": "meerstetter.rmm_1182.v100",
+    "system": "mecom",
+    "family": "meerstetter",
+    "sub_family": "rmm",
+    "variant": "rmm_1182",
+    "version": "v100"
+  },
+  "transport": {
+    "kind": "usb_serial_mecom",
+    "endpoint": "COM5",
+    "baud": 57600,
+    "mecom_address": 0,
+    "identity": {
+      "if": "8170-RMM-1182 SW G01",
+      "vi": "00640004",
+      "bi": "00000000"
+    }
+  },
+  "mapping_policy": {
+    "status": "live_proven_for_listed_reads",
+    "summary": "RMM USB MeCom accepted decimal EDS object labels as MeParID values for the listed ?VM/?VR reads.",
+    "wire_encoding": "MeCom frames still encode the decimal MeParID as a 16-bit hexadecimal field; MeParID 3001 is sent as 0BB9.",
+    "scope": "Read-only USB serial metadata/value reads on one RMM-1182 at address 0; not evidence for writes, persistence, all objects, or CANopen SDO routing."
+  },
+  "read_only_parameters": [
+    {
+      "mepar_id": 3000,
+      "instance": 1,
+      "name": "RMM-1182 HR1 raw ADC",
+      "value_type": "float32",
+      "unit": "count",
+      "eds_index": "0x3000",
+      "live_sample": "750793.0",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 3001,
+      "instance": 1,
+      "name": "RMM-1182 HR1 resistance",
+      "value_type": "float32",
+      "unit": "Ohm",
+      "eds_index": "0x3001",
+      "live_sample": "109.340462",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 3002,
+      "instance": 1,
+      "name": "RMM-1182 HR1 voltage",
+      "value_type": "float32",
+      "unit": "V",
+      "eds_index": "0x3002",
+      "live_sample": "NaN",
+      "status": "not_applicable_in_current_mode"
+    },
+    {
+      "mepar_id": 3100,
+      "instance": 1,
+      "name": "RMM-1182 HR1 measurement type",
+      "value_type": "int32",
+      "unit": "",
+      "eds_index": "0x3100",
+      "live_sample": "0",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 3101,
+      "instance": 1,
+      "name": "RMM-1182 HR1 ADC Rs",
+      "value_type": "float32",
+      "unit": "Ohm",
+      "eds_index": "0x3101",
+      "live_sample": "39000",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 4000,
+      "instance": 1,
+      "name": "RMM-1182 VC1 result",
+      "value_type": "float32",
+      "unit": "C",
+      "eds_index": "0x4000",
+      "live_sample": "23.808823",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 4001,
+      "instance": 1,
+      "name": "RMM-1182 VC1 surveilled result",
+      "value_type": "float32",
+      "unit": "",
+      "eds_index": "0x4001",
+      "live_sample": "0",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 4011,
+      "instance": 1,
+      "name": "RMM-1182 VC1 result type",
+      "value_type": "int32",
+      "unit": "",
+      "eds_index": "0x4011",
+      "live_sample": "0",
+      "status": "ok"
+    },
+    {
+      "mepar_id": 4012,
+      "instance": 1,
+      "name": "RMM-1182 VC1 conversion type",
+      "value_type": "int32",
+      "unit": "",
+      "eds_index": "0x4012",
+      "live_sample": "2",
+      "status": "ok"
+    }
+  ],
+  "unsupported_hypotheses": [
+    {
+      "mepar_id": 12288,
+      "instance": 1,
+      "name": "0x3000 interpreted as decimal MeParID",
+      "status": "PAR_NOT_AVAILABLE"
+    },
+    {
+      "mepar_id": 12289,
+      "instance": 1,
+      "name": "0x3001 interpreted as decimal MeParID",
+      "status": "PAR_NOT_AVAILABLE"
+    },
+    {
+      "mepar_id": 16384,
+      "instance": 1,
+      "name": "0x4000 interpreted as decimal MeParID",
+      "status": "PAR_NOT_AVAILABLE"
+    }
+  ]
+}

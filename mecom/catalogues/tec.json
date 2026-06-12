@@ -18,10 +18,17 @@
       "group": "Thermal",
       "subgroup": "Object",
       "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.1000",
+        "catalogues/sources/canopen_eds.v632.json#objects.2100"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_tpdo"],
       "counterparts": {
         "setpoint": [3000],
         "stable": [1200],
-        "cascade_target": [53123]
+        "cascade_target": [53123],
+        "object_external_input": [52200],
+        "object_source_selection": [6300]
       }
     },
     {
@@ -40,7 +47,16 @@
       "priority_component": "celsius",
       "group": "Thermal",
       "subgroup": "Sink",
-      "applicable_modes": ["temp", "supply"]
+      "applicable_modes": ["temp", "supply"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.1001",
+        "catalogues/sources/canopen_eds.v632.json#objects.2101"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_tpdo"],
+      "counterparts": {
+        "fixed_sink_input": [52201],
+        "sink_source_selection": [6304]
+      }
     },
     {
       "id": 52200,
@@ -56,15 +72,60 @@
       "readout_priority": "high",
       "preferred_readout": "mecom_crtvstream_ring_buffer",
       "priority_component": "celsius",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_float32",
+      "dangerous": true,
       "aliases": ["external_object_temp_c"],
       "group": "Thermal",
       "subgroup": "Cascade",
       "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.52200",
+        "catalogues/sources/canopen_eds.v632.json#objects.4200",
+        "catalogues/sources/tec_metadata_index.v632.json#pdo_model.external_temperature_bindings.52200"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_rpdo"],
       "counterparts": {
         "setpoint": [53123],
         "enable": [53120],
         "selection": [53121],
-        "sync": [53122]
+        "sync": [53122],
+        "source_selection": [6300],
+        "measured": [1000]
+      }
+    },
+    {
+      "id": 52201,
+      "sid": "fixed_sink_temp_c",
+      "raw_name": "FixedSinkTemp",
+      "display": "fixed sink temperature",
+      "unit": "degC",
+      "type": "float32",
+      "category": "thermal",
+      "role": "monitor",
+      "semantic_role": "fixed_sink_temperature",
+      "source_parameter_name": "Fixed Sink Temperature",
+      "readout_priority": "high",
+      "preferred_readout": "mecom_crtvstream_ring_buffer",
+      "priority_component": "celsius",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_float32",
+      "dangerous": true,
+      "default_value": "25",
+      "group": "Thermal",
+      "subgroup": "Sink",
+      "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.52201",
+        "catalogues/sources/canopen_eds.v632.json#objects.4201",
+        "catalogues/sources/tec_metadata_index.v632.json#pdo_model.external_temperature_bindings.52201"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_rpdo"],
+      "counterparts": {
+        "source_selection": [6304],
+        "measured": [1001]
       }
     },
     {
@@ -531,6 +592,145 @@
         "1": "TEC closed-loop",
         "2": "Power supply constant voltage",
         "3": "Power supply constant current"
+      }
+    },
+    {
+      "id": 52200,
+      "sid": "external_object_temp_c",
+      "raw_name": "ExternalObjectTemp",
+      "display": "external object temperature",
+      "unit": "degC",
+      "type": "float32",
+      "category": "control",
+      "role": "control",
+      "semantic_role": "external_object_temperature_input",
+      "source_parameter_name": "External Object Temperature",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_float32",
+      "dangerous": true,
+      "group": "Control",
+      "subgroup": "Temperature source",
+      "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.52200",
+        "catalogues/sources/canopen_eds.v632.json#objects.4200",
+        "catalogues/sources/tec_metadata_index.v632.json#pdo_model.external_temperature_bindings.52200"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_rpdo"],
+      "counterparts": {
+        "source_selection": [6300],
+        "measured": [1000]
+      }
+    },
+    {
+      "id": 52201,
+      "sid": "fixed_sink_temp_c",
+      "raw_name": "FixedSinkTemp",
+      "display": "fixed sink temperature",
+      "unit": "degC",
+      "type": "float32",
+      "category": "control",
+      "role": "control",
+      "semantic_role": "fixed_sink_temperature_input",
+      "source_parameter_name": "Fixed Sink Temperature",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_float32",
+      "dangerous": true,
+      "default_value": "25",
+      "group": "Control",
+      "subgroup": "Temperature source",
+      "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.52201",
+        "catalogues/sources/canopen_eds.v632.json#objects.4201",
+        "catalogues/sources/tec_metadata_index.v632.json#pdo_model.external_temperature_bindings.52201"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo", "canopen_rpdo"],
+      "counterparts": {
+        "source_selection": [6304],
+        "measured": [1001]
+      }
+    },
+    {
+      "id": 6300,
+      "sid": "object_temperature_source_selection",
+      "raw_name": "ObjectTemperatureSourceSelection",
+      "display": "object temperature source selection",
+      "type": "int32",
+      "category": "control",
+      "role": "control",
+      "semantic_role": "object_temperature_source_selection",
+      "source_parameter_name": "Object Temperature Source Selection",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_int32",
+      "dangerous": true,
+      "default_value": "HR 1",
+      "group": "Control",
+      "subgroup": "Temperature source",
+      "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.6300",
+        "catalogues/sources/canopen_eds.v632.json#objects.3300",
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.6300"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo"],
+      "counterparts": {
+        "external_value": [52200],
+        "measured": [1000]
+      },
+      "enum": {
+        "0": "HR 1",
+        "1": "HR 2",
+        "2": "LR 1",
+        "3": "LR 2",
+        "4": "LR 3",
+        "5": "LR 4",
+        "6": "Device",
+        "7": "External (From ID 52200)",
+        "8": "Estimator 1",
+        "9": "Estimator 2"
+      }
+    },
+    {
+      "id": 6304,
+      "sid": "sink_temperature_source_selection",
+      "raw_name": "SinkTemperatureSourceSelection",
+      "display": "sink temperature source selection",
+      "type": "int32",
+      "category": "control",
+      "role": "control",
+      "semantic_role": "sink_temperature_source_selection",
+      "source_parameter_name": "Sink Temperature Source Selection",
+      "writable": true,
+      "access": "read_write",
+      "command": "write_int32",
+      "dangerous": true,
+      "default_value": "Fixed",
+      "group": "Control",
+      "subgroup": "Temperature source",
+      "applicable_modes": ["temp"],
+      "source_evidence": [
+        "catalogues/sources/tec_parameter_overview.v632.json#parameters.6304",
+        "catalogues/sources/canopen_eds.v632.json#objects.3304",
+        "catalogues/sources/pdf_extracted_metadata.json#parameters.6304"
+      ],
+      "transport_support": ["mecom_serial", "mecom_can", "canopen_sdo"],
+      "counterparts": {
+        "fixed_value": [52201],
+        "measured": [1001]
+      },
+      "enum": {
+        "0": "HR 1",
+        "1": "HR 2",
+        "2": "LR 1",
+        "3": "LR 2",
+        "4": "LR 3",
+        "5": "LR 4",
+        "6": "Device",
+        "7": "Fixed (From ID 52201)"
       }
     },
     {

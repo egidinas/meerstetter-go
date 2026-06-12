@@ -1,0 +1,6480 @@
+{
+  "schema_version": "mecom_tec_parameter_overview.v1",
+  "source": "ParameterOverview.csv",
+  "summary": {
+    "total_parameters": 339,
+    "parameters_with_can_index": 291,
+    "flag_counts": {
+      "COMCN_RPDO": 86,
+      "COMCN_TPDO": 57,
+      "COMME_READ": 10,
+      "COMME_RW": 17,
+      "COM_STD_READ": 106,
+      "COM_STD_RW": 185,
+      "PARSAVE_FLASH": 201,
+      "PARVALT_BYTE": 4,
+      "PARVALT_FLOAT": 204,
+      "PARVALT_INT": 123,
+      "PARVALT_LATIN1": 8,
+      "PAR_BIG_READ_SUBSCRIPTION": 1,
+      "PAR_BIG_WRITE_SUBSCRIPTION": 5,
+      "PAR_CHANGED_SUBSCRIPTION": 23
+    }
+  },
+  "parameters": {
+    "209": {
+      "mepar_id": 209,
+      "name": "PAR_LrAdcIn_FILTER_RESET",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_LrAdcIn_FILTER_RESET"
+    },
+    "210": {
+      "mepar_id": 210,
+      "name": "PAR_HWTEST_STATE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HWTEST_STATE"
+    },
+    "211": {
+      "mepar_id": 211,
+      "name": "PAR_HWTEST_GPIO_ERR_EN",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HWTEST_GPIO_ERR_EN"
+    },
+    "212": {
+      "mepar_id": 212,
+      "name": "PAR_HWTEST_COMM_ERR_EN",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HWTEST_COMM_ERR_EN"
+    },
+    "213": {
+      "mepar_id": 213,
+      "name": "PAR_IGNORE_BRANCH_ID",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_IGNORE_BRANCH_ID"
+    },
+    "214": {
+      "mepar_id": 214,
+      "name": "PAR_IGNORE_FEATURE_FIRMW_LIM",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_IGNORE_FEATURE_FIRMW_LIM"
+    },
+    "1073": {
+      "mepar_id": 1073,
+      "name": "PAR_PWRSTAGE_ILIMIT_FINAL",
+      "docu_name": "Output Stage: Final Current Limitation [A]",
+      "instances": 4,
+      "can_index": "0x2173",
+      "can_index_decimal": 8563,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Output Stage: Final Current Limitation [A]"
+    },
+    "101": {
+      "mepar_id": 101,
+      "name": "PAR_VER_HW_VERSION",
+      "docu_name": "System: Hardware Version",
+      "instances": 1,
+      "can_index": "0x2001",
+      "can_index_decimal": 8193,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "System: Hardware Version"
+    },
+    "100": {
+      "mepar_id": 100,
+      "name": "PAR_DEVICE_TYPE",
+      "docu_name": "System: Device Type",
+      "instances": 1,
+      "can_index": "0x2000",
+      "can_index_decimal": 8192,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "System: Device Type"
+    },
+    "102": {
+      "mepar_id": 102,
+      "name": "PAR_VER_HW_SERNR",
+      "docu_name": "System: Serial Number",
+      "instances": 1,
+      "can_index": "0x2002",
+      "can_index_decimal": 8194,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "System: Serial Number"
+    },
+    "103": {
+      "mepar_id": 103,
+      "name": "PAR_UC_VERSION",
+      "docu_name": "System: Firmware Version INT",
+      "instances": 1,
+      "can_index": "0x2003",
+      "can_index_decimal": 8195,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "System: Firmware Version INT"
+    },
+    "112": {
+      "mepar_id": 112,
+      "name": "PAR_UC_VERSION_FLOAT",
+      "docu_name": "System: Firmware Version FLOAT",
+      "instances": 1,
+      "can_index": "0x200C",
+      "can_index_decimal": 8204,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "System: Firmware Version FLOAT"
+    },
+    "104": {
+      "mepar_id": 104,
+      "name": "PAR_SYSTEM_STATUS",
+      "docu_name": "System: System Status",
+      "instances": 1,
+      "can_index": "0x2004",
+      "can_index_decimal": 8196,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: System Status"
+    },
+    "105": {
+      "mepar_id": 105,
+      "name": "PAR_ERROR_NUMBER",
+      "docu_name": "System: Error Number",
+      "instances": 1,
+      "can_index": "0x2005",
+      "can_index_decimal": 8197,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Error Number"
+    },
+    "106": {
+      "mepar_id": 106,
+      "name": "PAR_ERROR_INSTANCE",
+      "docu_name": "System: Error Instance",
+      "instances": 1,
+      "can_index": "0x2006",
+      "can_index_decimal": 8198,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Error Instance"
+    },
+    "107": {
+      "mepar_id": 107,
+      "name": "PAR_ERROR_PARAMETER",
+      "docu_name": "System: Error Parameter",
+      "instances": 1,
+      "can_index": "0x2007",
+      "can_index_decimal": 8199,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Error Parameter"
+    },
+    "110": {
+      "mepar_id": 110,
+      "name": "PAR_ERROR_TEXT",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "ro",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_ERROR_TEXT"
+    },
+    "109": {
+      "mepar_id": 109,
+      "name": "PAR_FLASH_STATUS",
+      "docu_name": "System: Flash Status",
+      "instances": 1,
+      "can_index": "0x2009",
+      "can_index_decimal": 8201,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Flash Status"
+    },
+    "111": {
+      "mepar_id": 111,
+      "name": "PAR_RESET_DEVICE",
+      "docu_name": "System: Device Reset Command",
+      "instances": 1,
+      "can_index": "0x200B",
+      "can_index_decimal": 8203,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "System: Device Reset Command"
+    },
+    "200": {
+      "mepar_id": 200,
+      "name": "PAR_HW_TEST_MODE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_HW_TEST_MODE"
+    },
+    "201": {
+      "mepar_id": 201,
+      "name": "PAR_OUT_CURRENT_MAX",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_OUT_CURRENT_MAX"
+    },
+    "202": {
+      "mepar_id": 202,
+      "name": "PAR_INPUT_POWER_LIMIT",
+      "docu_name": "Misc: Input Protection: Max Input Power Limit [W]",
+      "instances": 1,
+      "can_index": "0x2066",
+      "can_index_decimal": 8294,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Misc: Input Protection: Max Input Power Limit [W]"
+    },
+    "203": {
+      "mepar_id": 203,
+      "name": "PAR_IN_VOLT_RANGE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_IN_VOLT_RANGE"
+    },
+    "204": {
+      "mepar_id": 204,
+      "name": "PAR_POWERSTAGE_V3_MODE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_POWERSTAGE_V3_MODE"
+    },
+    "206": {
+      "mepar_id": 206,
+      "name": "PAR_NORM_LAST_FW_V",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_NORM_LAST_FW_V"
+    },
+    "800": {
+      "mepar_id": 800,
+      "name": "PAR_RACK_OUTPUT_CH",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_RACK_OUTPUT_CH"
+    },
+    "1000": {
+      "mepar_id": 1000,
+      "name": "PAR_OBJ_TEMPERATURE",
+      "docu_name": "Object Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x2100",
+      "can_index_decimal": 8448,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Object Temperature [°C]"
+    },
+    "1001": {
+      "mepar_id": 1001,
+      "name": "PAR_SINK_TEMPERATURE",
+      "docu_name": "Sink Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x2101",
+      "can_index_decimal": 8449,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Sink Temperature [°C]"
+    },
+    "1011": {
+      "mepar_id": 1011,
+      "name": "PAR_TEMP_NOM_RAMP_NOM",
+      "docu_name": "Temperature Controller: Nominal: Temperature Ramp [°C]",
+      "instances": 4,
+      "can_index": "0x2111",
+      "can_index_decimal": 8465,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Nominal: Temperature Ramp [°C]"
+    },
+    "1012": {
+      "mepar_id": 1012,
+      "name": "PAR_PELT_NORM_INOM",
+      "docu_name": "Temperature Controller: Thermal Power Model Current [A]",
+      "instances": 4,
+      "can_index": "0x2112",
+      "can_index_decimal": 8466,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Thermal Power Model Current [A]"
+    },
+    "1013": {
+      "mepar_id": 1013,
+      "name": "PAR_PELT_NORM_UNOM",
+      "docu_name": "Temperature Controller: Thermal Power Model Voltage [V]",
+      "instances": 4,
+      "can_index": "0x2113",
+      "can_index_decimal": 8467,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Thermal Power Model Voltage [V]"
+    },
+    "1020": {
+      "mepar_id": 1020,
+      "name": "PAR_TEC_Act_I_AVG",
+      "docu_name": "Output Stage: Actual Current [A]",
+      "instances": 4,
+      "can_index": "0x2120",
+      "can_index_decimal": 8480,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Output Stage: Actual Current [A]"
+    },
+    "1021": {
+      "mepar_id": 1021,
+      "name": "PAR_TEC_Act_U_AVG",
+      "docu_name": "Output Stage: Actual Voltage [V]",
+      "instances": 4,
+      "can_index": "0x2121",
+      "can_index_decimal": 8481,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Output Stage: Actual Voltage [V]"
+    },
+    "1022": {
+      "mepar_id": 1022,
+      "name": "PAR_TEC_Act_P_AVG",
+      "docu_name": "Output Stage: Actual Power [W]",
+      "instances": 4,
+      "can_index": "0x2122",
+      "can_index_decimal": 8482,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Output Stage: Actual Power [W]"
+    },
+    "1030": {
+      "mepar_id": 1030,
+      "name": "PAR_PID_LIM_N",
+      "docu_name": "Temperature Controller: Thermal Model: Lower Limitation [%]",
+      "instances": 4,
+      "can_index": "0x2130",
+      "can_index_decimal": 8496,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Thermal Model: Lower Limitation [%]"
+    },
+    "1031": {
+      "mepar_id": 1031,
+      "name": "PAR_PID_LIM_P",
+      "docu_name": "Temperature Controller: Thermal Model: Upper Limitation [%]",
+      "instances": 4,
+      "can_index": "0x2131",
+      "can_index_decimal": 8497,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Thermal Model: Upper Limitation [%]"
+    },
+    "1033": {
+      "mepar_id": 1033,
+      "name": "PAR_PID_LIM_NULL",
+      "docu_name": "Temperature Controller: Thermal Model: 0A Limit [%]",
+      "instances": 4,
+      "can_index": "0x2133",
+      "can_index_decimal": 8499,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Thermal Model: 0A Limit [%]"
+    },
+    "1032": {
+      "mepar_id": 1032,
+      "name": "PAR_TEMP_CTRL_VAR",
+      "docu_name": "Temperature Controller: PID: Control Variable [%]",
+      "instances": 4,
+      "can_index": "0x2132",
+      "can_index_decimal": 8498,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: PID: Control Variable [%]"
+    },
+    "1040": {
+      "mepar_id": 1040,
+      "name": "PAR_HrAdcIn_ADC",
+      "docu_name": "HR Measurement: Raw ADC Value",
+      "instances": 2,
+      "can_index": "0x2140",
+      "can_index_decimal": 8512,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: Raw ADC Value"
+    },
+    "1041": {
+      "mepar_id": 1041,
+      "name": "PAR_LrAdcIn_ADC",
+      "docu_name": "LR Measurement: Sensor Raw ADC Value",
+      "instances": 4,
+      "can_index": "0x2141",
+      "can_index_decimal": 8513,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "LR Measurement: Sensor Raw ADC Value"
+    },
+    "1042": {
+      "mepar_id": 1042,
+      "name": "PAR_HrAdcIn_R",
+      "docu_name": "HR Measurement: Sensor Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2142",
+      "can_index_decimal": 8514,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: Sensor Resistance [Ohm]"
+    },
+    "1043": {
+      "mepar_id": 1043,
+      "name": "PAR_LrAdcIn_R",
+      "docu_name": "LR Measurement: Sensor Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2143",
+      "can_index_decimal": 8515,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "LR Measurement: Sensor Resistance [Ohm]"
+    },
+    "1044": {
+      "mepar_id": 1044,
+      "name": "PAR_LrTempIn_T",
+      "docu_name": "LR Measurement: Measured Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x2144",
+      "can_index_decimal": 8516,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "LR Measurement: Measured Temperature [°C]"
+    },
+    "1045": {
+      "mepar_id": 1045,
+      "name": "PAR_HrTempIn_T",
+      "docu_name": "HR Measurement: Measured Temperature [°C]",
+      "instances": 2,
+      "can_index": "0x2145",
+      "can_index_decimal": 8517,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: Measured Temperature [°C]"
+    },
+    "1046": {
+      "mepar_id": 1046,
+      "name": "PAR_HrAdcIn_U",
+      "docu_name": "HR Measurement: Sensor Differential Voltage [V]",
+      "instances": 2,
+      "can_index": "0x2146",
+      "can_index_decimal": 8518,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: Sensor Differential Voltage [V]"
+    },
+    "1051": {
+      "mepar_id": 1051,
+      "name": "PAR_UC_BUILD",
+      "docu_name": "System: Firmware Build Number",
+      "instances": 1,
+      "can_index": "0x2151",
+      "can_index_decimal": 8529,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "System: Firmware Build Number"
+    },
+    "1054": {
+      "mepar_id": 1054,
+      "name": "PAR_MIN_FW_VERSION",
+      "docu_name": "System: Min Version for Firmware Downgrade",
+      "instances": 1,
+      "can_index": "0x2154",
+      "can_index_decimal": 8532,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "System: Min Version for Firmware Downgrade"
+    },
+    "1060": {
+      "mepar_id": 1060,
+      "name": "PAR_MPWR",
+      "docu_name": "System: Supplies: Driver Input Voltage [V]",
+      "instances": 1,
+      "can_index": "0x2160",
+      "can_index_decimal": 8544,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Driver Input Voltage [V]"
+    },
+    "1061": {
+      "mepar_id": 1061,
+      "name": "PAR_M_MEDVOLT",
+      "docu_name": "System: Supplies: Medium Internal Supply [V]",
+      "instances": 1,
+      "can_index": "0x2161",
+      "can_index_decimal": 8545,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Medium Internal Supply [V]"
+    },
+    "1062": {
+      "mepar_id": 1062,
+      "name": "PAR_M33V",
+      "docu_name": "System: Supplies: 3.3V Internal Supply [V]",
+      "instances": 1,
+      "can_index": "0x2162",
+      "can_index_decimal": 8546,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: 3.3V Internal Supply [V]"
+    },
+    "1064": {
+      "mepar_id": 1064,
+      "name": "PAR_CALC_INPUT_CURRENT",
+      "docu_name": "System: Supplies: Input Protection: Calculated Input Current [A]",
+      "instances": 1,
+      "can_index": "0x2164",
+      "can_index_decimal": 8548,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Input Protection: Calculated Input Current [A]"
+    },
+    "1065": {
+      "mepar_id": 1065,
+      "name": "PAR_UNIQUE_ID",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "ro",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_UNIQUE_ID"
+    },
+    "1063": {
+      "mepar_id": 1063,
+      "name": "PAR_DEVICE_TEMPERATURE",
+      "docu_name": "System: Device Temperature Management: Device Temperature [°C]",
+      "instances": 1,
+      "can_index": "0x2163",
+      "can_index_decimal": 8547,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Device Temperature Management: Device Temperature [°C]"
+    },
+    "1100": {
+      "mepar_id": 1100,
+      "name": "PAR_FAN_REL_POWER",
+      "docu_name": "Fan: Monitor: Relative Power [%]",
+      "instances": 2,
+      "can_index": "0x2200",
+      "can_index_decimal": 8704,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Fan: Monitor: Relative Power [%]"
+    },
+    "1101": {
+      "mepar_id": 1101,
+      "name": "PAR_FAN_NOM_SPEED",
+      "docu_name": "Fan: Monitor: Nominal Fan Speed [rpm]",
+      "instances": 2,
+      "can_index": "0x2201",
+      "can_index_decimal": 8705,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Fan: Monitor: Nominal Fan Speed [rpm]"
+    },
+    "1102": {
+      "mepar_id": 1102,
+      "name": "PAR_FAN_ACT_SPEED",
+      "docu_name": "Fan: Monitor: Actual Fan Speed [rpm]",
+      "instances": 2,
+      "can_index": "0x2202",
+      "can_index_decimal": 8706,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Fan: Monitor: Actual Fan Speed [rpm]"
+    },
+    "1103": {
+      "mepar_id": 1103,
+      "name": "PAR_FAN_PWM_LEVEL",
+      "docu_name": "Fan: Monitor: PWM Level [%]",
+      "instances": 2,
+      "can_index": "0x2203",
+      "can_index_decimal": 8707,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Fan: Monitor: PWM Level [%]"
+    },
+    "1110": {
+      "mepar_id": 1110,
+      "name": "PAR_DEV_TEMPM_TLIMIT",
+      "docu_name": "System: Device Temperature Management: Max Device Temperature [°C]",
+      "instances": 1,
+      "can_index": "0x2210",
+      "can_index_decimal": 8720,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Device Temperature Management: Max Device Temperature [°C]"
+    },
+    "1111": {
+      "mepar_id": 1111,
+      "name": "PAR_DEV_TEMPM_ILIMIT",
+      "docu_name": "System: Device Temperature Management: Max Output Current [A]",
+      "instances": 1,
+      "can_index": "0x2211",
+      "can_index_decimal": 8721,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Device Temperature Management: Max Output Current [A]"
+    },
+    "1071": {
+      "mepar_id": 1071,
+      "name": "PAR_INPROT_ACTUAL_LIMIT",
+      "docu_name": "System: Supplies: Input Protection: Actual Output Limit [A]",
+      "instances": 1,
+      "can_index": "0x2171",
+      "can_index_decimal": 8561,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Input Protection: Actual Output Limit [A]"
+    },
+    "1072": {
+      "mepar_id": 1072,
+      "name": "PAR_INPROT_DEVICE_MAXIN",
+      "docu_name": "System: Supplies: Input Protection: Device Limitation [A]",
+      "instances": 1,
+      "can_index": "0x2172",
+      "can_index_decimal": 8562,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Input Protection: Device Limitation [A]"
+    },
+    "1066": {
+      "mepar_id": 1066,
+      "name": "PAR_CALC_OUTPUT_POWER",
+      "docu_name": "System: Supplies: Input Protection: Total Output Power [W]",
+      "instances": 1,
+      "can_index": "0x2166",
+      "can_index_decimal": 8550,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Supplies: Input Protection: Total Output Power [W]"
+    },
+    "1200": {
+      "mepar_id": 1200,
+      "name": "PAR_STABILITY_IND_OK",
+      "docu_name": "Temperature Controller: Stability Indicator: Stable Signal",
+      "instances": 4,
+      "can_index": "0x2300",
+      "can_index_decimal": 8960,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: Stability Indicator: Stable Signal"
+    },
+    "2000": {
+      "mepar_id": 2000,
+      "name": "PAR_TEC_SUPPLY_SOURCE",
+      "docu_name": "Temperature Controller: Output Stage Input Selection",
+      "instances": 4,
+      "can_index": "0x2400",
+      "can_index_decimal": 9216,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Output Stage Input Selection"
+    },
+    "2010": {
+      "mepar_id": 2010,
+      "name": "PAR_TEC_OUTPUT_EN",
+      "docu_name": "Temperature Controller: Output Enable",
+      "instances": 4,
+      "can_index": "0x2410",
+      "can_index_decimal": 9232,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Output Enable"
+    },
+    "2020": {
+      "mepar_id": 2020,
+      "name": "PAR_TEC_Set_I",
+      "docu_name": "Output Stage: Fixed Set Current [A]",
+      "instances": 4,
+      "can_index": "0x2420",
+      "can_index_decimal": 9248,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Fixed Set Current [A]"
+    },
+    "2021": {
+      "mepar_id": 2021,
+      "name": "PAR_TEC_Set_U",
+      "docu_name": "Output Stage: Fixed Set Voltage [V]",
+      "instances": 4,
+      "can_index": "0x2421",
+      "can_index_decimal": 9249,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Fixed Set Voltage [V]"
+    },
+    "2030": {
+      "mepar_id": 2030,
+      "name": "PAR_TEC_LIMIT_I",
+      "docu_name": "Output Stage: Current Limitation [A]",
+      "instances": 4,
+      "can_index": "0x2430",
+      "can_index_decimal": 9264,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Current Limitation [A]"
+    },
+    "2031": {
+      "mepar_id": 2031,
+      "name": "PAR_TEC_LIMIT_U",
+      "docu_name": "Output Stage: Voltage Limitation [V]",
+      "instances": 4,
+      "can_index": "0x2431",
+      "can_index_decimal": 9265,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Voltage Limitation [V]"
+    },
+    "2032": {
+      "mepar_id": 2032,
+      "name": "PAR_TEC_ERRORLIMIT_I",
+      "docu_name": "Output Stage: Current Error Threshold [A]",
+      "instances": 4,
+      "can_index": "0x2432",
+      "can_index_decimal": 9266,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Current Error Threshold [A]"
+    },
+    "2033": {
+      "mepar_id": 2033,
+      "name": "PAR_TEC_ERRORLIMIT_U",
+      "docu_name": "Output Stage: Voltage Error Threshold [V]",
+      "instances": 4,
+      "can_index": "0x2433",
+      "can_index_decimal": 9267,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Voltage Error Threshold [V]"
+    },
+    "2040": {
+      "mepar_id": 2040,
+      "name": "PAR_GENERAL_MODE",
+      "docu_name": "General Operating Mode",
+      "instances": 1,
+      "can_index": "0x2440",
+      "can_index_decimal": 9280,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "General Operating Mode"
+    },
+    "2050": {
+      "mepar_id": 2050,
+      "name": "PAR_UART_BAUDRATE",
+      "docu_name": "Communication: Base Baud Rate",
+      "instances": 3,
+      "can_index": "0x2450",
+      "can_index_decimal": 9296,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Communication: Base Baud Rate"
+    },
+    "2051": {
+      "mepar_id": 2051,
+      "name": "PAR_DEVICE_ADDRESS",
+      "docu_name": "Communication: Device Address",
+      "instances": 1,
+      "can_index": "0x2451",
+      "can_index_decimal": 9297,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Communication: Device Address"
+    },
+    "2053": {
+      "mepar_id": 2053,
+      "name": "PAR_DEVICE_ADDRESS_Zero",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_READ",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_DEVICE_ADDRESS_Zero"
+    },
+    "2052": {
+      "mepar_id": 2052,
+      "name": "PAR_UART_DELAY",
+      "docu_name": "Communication: Response Delay [us]",
+      "instances": 3,
+      "can_index": "0x2452",
+      "can_index_decimal": 9298,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Communication: Response Delay [us]"
+    },
+    "2060": {
+      "mepar_id": 2060,
+      "name": "PAR_CONNECT_WATCH_DOG",
+      "docu_name": "Communication: Watchodg Timeout [s]",
+      "instances": 1,
+      "can_index": "0x2460",
+      "can_index_decimal": 9312,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Communication: Watchodg Timeout [s]"
+    },
+    "2070": {
+      "mepar_id": 2070,
+      "name": "PAR_CANOPEN_NODEID",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_NODEID"
+    },
+    "2071": {
+      "mepar_id": 2071,
+      "name": "PAR_CANOPEN_BITRATE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_BITRATE"
+    },
+    "2072": {
+      "mepar_id": 2072,
+      "name": "PAR_CANOPEN_CAN1EN",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_CAN1EN"
+    },
+    "2080": {
+      "mepar_id": 2080,
+      "name": "PAR_CANOPEN_AUTO_OPERATIONAL",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_AUTO_OPERATIONAL"
+    },
+    "3000": {
+      "mepar_id": 3000,
+      "name": "PAR_TEMP_REGUL_NOM",
+      "docu_name": "Temperature Controller: Nominal: Target Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x2600",
+      "can_index_decimal": 9728,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Nominal: Target Temperature [°C]"
+    },
+    "3002": {
+      "mepar_id": 3002,
+      "name": "PAR_TEMP_NOM_RAMP_T",
+      "docu_name": "Temperature Controller: Nominal: Proximity Width [°C]",
+      "instances": 4,
+      "can_index": "0x2602",
+      "can_index_decimal": 9730,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Nominal: Proximity Width [°C]"
+    },
+    "3003": {
+      "mepar_id": 3003,
+      "name": "PAR_TEMP_NOM_RAMP_SPEED",
+      "docu_name": "Temperature Controller: Nominal: Coarse Temp Ramp [°C/s]",
+      "instances": 4,
+      "can_index": "0x2603",
+      "can_index_decimal": 9731,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Nominal: Coarse Temp Ramp [°C/s]"
+    },
+    "3010": {
+      "mepar_id": 3010,
+      "name": "PAR_TEMP_REGUL_KP",
+      "docu_name": "Temperature Controller: PID: Kp [%/°C]",
+      "instances": 4,
+      "can_index": "0x2610",
+      "can_index_decimal": 9744,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: PID: Kp [%/°C]"
+    },
+    "3011": {
+      "mepar_id": 3011,
+      "name": "PAR_TEMP_REGUL_TI",
+      "docu_name": "Temperature Controller: PID: Ti [s]",
+      "instances": 4,
+      "can_index": "0x2611",
+      "can_index_decimal": 9745,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: PID: Ti [s]"
+    },
+    "3012": {
+      "mepar_id": 3012,
+      "name": "PAR_TEMP_REGUL_TD",
+      "docu_name": "Temperature Controller: PID: Td [s]",
+      "instances": 4,
+      "can_index": "0x2612",
+      "can_index_decimal": 9746,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: PID: Td [s]"
+    },
+    "3013": {
+      "mepar_id": 3013,
+      "name": "PAR_TEMP_REGUL_D_PT1",
+      "docu_name": "Temperature Controller: PID: D Part Damping PT1",
+      "instances": 4,
+      "can_index": "0x2613",
+      "can_index_decimal": 9747,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: PID: D Part Damping PT1"
+    },
+    "3014": {
+      "mepar_id": 3014,
+      "name": "PAR_TEMP_REGUL_JUMP_ADD",
+      "docu_name": "Temperature Controller: PID: Feedforward disturbance compensation [%]",
+      "instances": 4,
+      "can_index": "0x2614",
+      "can_index_decimal": 9748,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Temperature Controller: PID: Feedforward disturbance compensation [%]"
+    },
+    "1034": {
+      "mepar_id": 1034,
+      "name": "PAR_TEMP_REGUL_OUT_P",
+      "docu_name": "Temperature Controller: PID: P Part Output [%]",
+      "instances": 4,
+      "can_index": "0x2134",
+      "can_index_decimal": 8500,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: PID: P Part Output [%]"
+    },
+    "1035": {
+      "mepar_id": 1035,
+      "name": "PAR_TEMP_REGUL_OUT_I",
+      "docu_name": "Temperature Controller: PID: I Part Output [%]",
+      "instances": 4,
+      "can_index": "0x2135",
+      "can_index_decimal": 8501,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: PID: I Part Output [%]"
+    },
+    "1036": {
+      "mepar_id": 1036,
+      "name": "PAR_TEMP_REGUL_OUT_D",
+      "docu_name": "Temperature Controller: PID: D Part Output [%]",
+      "instances": 4,
+      "can_index": "0x2136",
+      "can_index_decimal": 8502,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Temperature Controller: PID: D Part Output [%]"
+    },
+    "3020": {
+      "mepar_id": 3020,
+      "name": "PAR_MODELIZATION_MODE",
+      "docu_name": "Temperature Controller: Thermal Model: Thermal Model Selection",
+      "instances": 4,
+      "can_index": "0x2620",
+      "can_index_decimal": 9760,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Thermal Model Selection"
+    },
+    "3030": {
+      "mepar_id": 3030,
+      "name": "PAR_PELT_MAXI",
+      "docu_name": "Temperature Controller: Thermal Model: Peltier Characteristics: Imax [A]",
+      "instances": 4,
+      "can_index": "0x2630",
+      "can_index_decimal": 9776,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Peltier Characteristics: Imax [A]"
+    },
+    "3033": {
+      "mepar_id": 3033,
+      "name": "PAR_PELT_MAXDT",
+      "docu_name": "Temperature Controller: Thermal Model: Peltier Characteristics: dTmax [°C]",
+      "instances": 4,
+      "can_index": "0x2633",
+      "can_index_decimal": 9779,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Peltier Characteristics: dTmax [°C]"
+    },
+    "3034": {
+      "mepar_id": 3034,
+      "name": "PAR_PELT_POLARITY",
+      "docu_name": "Temperature Controller: Thermal Model: Peltier Characteristics: Cooling Polarity",
+      "instances": 4,
+      "can_index": "0x2634",
+      "can_index_decimal": 9780,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Peltier Characteristics: Cooling Polarity"
+    },
+    "3040": {
+      "mepar_id": 3040,
+      "name": "PAR_RESISTOR_RESISTANCE",
+      "docu_name": "Temperature Controller: Thermal Model: Resistor Characteristics: Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2640",
+      "can_index_decimal": 9792,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Resistor Characteristics: Resistance [Ohm]"
+    },
+    "3041": {
+      "mepar_id": 3041,
+      "name": "PAR_RESISTOR_MAXI",
+      "docu_name": "Temperature Controller: Thermal Model: Resistor Characteristics: Maximum Current [A]",
+      "instances": 4,
+      "can_index": "0x2641",
+      "can_index_decimal": 9793,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Resistor Characteristics: Maximum Current [A]"
+    },
+    "3045": {
+      "mepar_id": 3045,
+      "name": "PAR_MODUFAN_OnUThreshold",
+      "docu_name": "Temperature Controller: Thermal Model: Fan Characteristics: Turn ON Voltage Threshold [V]",
+      "instances": 4,
+      "can_index": "0x2645",
+      "can_index_decimal": 9797,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Fan Characteristics: Turn ON Voltage Threshold [V]"
+    },
+    "3046": {
+      "mepar_id": 3046,
+      "name": "PAR_MODUFAN_OffUThreshold",
+      "docu_name": "Temperature Controller: Thermal Model: Fan Characteristics: Turn OFF Voltage Threshold [V]",
+      "instances": 4,
+      "can_index": "0x2646",
+      "can_index_decimal": 9798,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Thermal Model: Fan Characteristics: Turn OFF Voltage Threshold [V]"
+    },
+    "3050": {
+      "mepar_id": 3050,
+      "name": "PAR_COOLHEAT_ONLY_LOWT",
+      "docu_name": "Temperature Controller: Peltier, Heat Only - Cool Only: Lower Boundary [°C]",
+      "instances": 4,
+      "can_index": "0x2650",
+      "can_index_decimal": 9808,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Peltier, Heat Only - Cool Only: Lower Boundary [°C]"
+    },
+    "3051": {
+      "mepar_id": 3051,
+      "name": "PAR_COOLHEAT_ONLY_HIGHT",
+      "docu_name": "Temperature Controller: Peltier, Heat Only - Cool Only: Upper Boundary [°C]",
+      "instances": 4,
+      "can_index": "0x2651",
+      "can_index_decimal": 9809,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Peltier, Heat Only - Cool Only: Upper Boundary [°C]"
+    },
+    "4001": {
+      "mepar_id": 4001,
+      "name": "PAR_HrTempIn_TAdjA0",
+      "docu_name": "HR Measurement: Conversion: Calibration: Offset [°C]",
+      "instances": 2,
+      "can_index": "0x2801",
+      "can_index_decimal": 10241,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Calibration: Offset [°C]"
+    },
+    "4002": {
+      "mepar_id": 4002,
+      "name": "PAR_HrTempIn_TAdjA1",
+      "docu_name": "HR Measurement: Conversion: Calibration: Gain [°C/°C]",
+      "instances": 2,
+      "can_index": "0x2802",
+      "can_index_decimal": 10242,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Calibration: Gain [°C/°C]"
+    },
+    "4010": {
+      "mepar_id": 4010,
+      "name": "PAR_HrTempIn_UnderTh",
+      "docu_name": "HR Measurement: Surveillance: Lower Threshold [°C]",
+      "instances": 2,
+      "can_index": "0x2810",
+      "can_index_decimal": 10256,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Surveillance: Lower Threshold [°C]"
+    },
+    "4011": {
+      "mepar_id": 4011,
+      "name": "PAR_HrTempIn_OverTh",
+      "docu_name": "HR Measurement: Surveillance: Upper Threshold [°C]",
+      "instances": 2,
+      "can_index": "0x2811",
+      "can_index_decimal": 10257,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Surveillance: Upper Threshold [°C]"
+    },
+    "4012": {
+      "mepar_id": 4012,
+      "name": "PAR_HrTempIn_MaxRamp",
+      "docu_name": "HR Measurement: Surveillance: Max Temp Change [°C/s]",
+      "instances": 2,
+      "can_index": "0x2812",
+      "can_index_decimal": 10258,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Surveillance: Max Temp Change [°C/s]"
+    },
+    "4020": {
+      "mepar_id": 4020,
+      "name": "PAR_HrTempIn_NTC_T1",
+      "docu_name": "HR Measurement: Conversion: NTC: Lower Point: Temp [°C]",
+      "instances": 2,
+      "can_index": "0x2820",
+      "can_index_decimal": 10272,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Lower Point: Temp [°C]"
+    },
+    "4021": {
+      "mepar_id": 4021,
+      "name": "PAR_HrTempIn_NTC_R1",
+      "docu_name": "HR Measurement: Conversion: NTC: Lower Point: Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2821",
+      "can_index_decimal": 10273,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Lower Point: Resistance [Ohm]"
+    },
+    "4022": {
+      "mepar_id": 4022,
+      "name": "PAR_HrTempIn_NTC_T2",
+      "docu_name": "HR Measurement: Conversion: NTC: Middle Point: Temp [°C]",
+      "instances": 2,
+      "can_index": "0x2822",
+      "can_index_decimal": 10274,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Middle Point: Temp [°C]"
+    },
+    "4023": {
+      "mepar_id": 4023,
+      "name": "PAR_HrTempIn_NTC_R2",
+      "docu_name": "HR Measurement: Conversion: NTC: Middle Point: Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2823",
+      "can_index_decimal": 10275,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Middle Point: Resistance [Ohm]"
+    },
+    "4024": {
+      "mepar_id": 4024,
+      "name": "PAR_HrTempIn_NTC_T3",
+      "docu_name": "HR Measurement: Conversion: NTC: Upper Point: Temp [°C]",
+      "instances": 2,
+      "can_index": "0x2824",
+      "can_index_decimal": 10276,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Upper Point: Temp [°C]"
+    },
+    "4025": {
+      "mepar_id": 4025,
+      "name": "PAR_HrTempIn_NTC_R3",
+      "docu_name": "HR Measurement: Conversion: NTC: Upper Point: Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2825",
+      "can_index_decimal": 10277,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: NTC: Upper Point: Resistance [Ohm]"
+    },
+    "4030": {
+      "mepar_id": 4030,
+      "name": "PAR_HrAdcIn_MLim_MinR",
+      "docu_name": "HR Measurement: Measurement Limits: Lowest Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2830",
+      "can_index_decimal": 10288,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Lowest Resistance [Ohm]"
+    },
+    "4031": {
+      "mepar_id": 4031,
+      "name": "PAR_HrAdcIn_MLim_MaxR",
+      "docu_name": "HR Measurement: Measurement Limits: Highest Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x2831",
+      "can_index_decimal": 10289,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Highest Resistance [Ohm]"
+    },
+    "4032": {
+      "mepar_id": 4032,
+      "name": "PAR_HrTempIn_MLim_MinT",
+      "docu_name": "HR Measurement: Measurement Limits: Temperature at min ADC [°C]",
+      "instances": 2,
+      "can_index": "0x2832",
+      "can_index_decimal": 10290,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Temperature at min ADC [°C]"
+    },
+    "4033": {
+      "mepar_id": 4033,
+      "name": "PAR_HrTempIn_MLim_MaxT",
+      "docu_name": "HR Measurement: Measurement Limits: Temperature at max ADC [°C]",
+      "instances": 2,
+      "can_index": "0x2833",
+      "can_index_decimal": 10291,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Temperature at max ADC [°C]"
+    },
+    "4034": {
+      "mepar_id": 4034,
+      "name": "PAR_HrTempIn_TypeInfo",
+      "docu_name": "HR Measurement: Detected Sensor Type",
+      "instances": 2,
+      "can_index": "0x2834",
+      "can_index_decimal": 10292,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Detected Sensor Type"
+    },
+    "4035": {
+      "mepar_id": 4035,
+      "name": "PAR_HrAdcIn_MLim_MaxU",
+      "docu_name": "HR Measurement: Measurement Limits: Highest Voltage [V]",
+      "instances": 2,
+      "can_index": "0x2835",
+      "can_index_decimal": 10293,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Highest Voltage [V]"
+    },
+    "4036": {
+      "mepar_id": 4036,
+      "name": "PAR_HrAdcIn_MLim_MinU",
+      "docu_name": "HR Measurement: Measurement Limits: Lowest Voltage [V]",
+      "instances": 2,
+      "can_index": "0x2836",
+      "can_index_decimal": 10294,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: Measurement Limits: Lowest Voltage [V]"
+    },
+    "4040": {
+      "mepar_id": 4040,
+      "name": "PAR_STABILITY_IND_TEMP",
+      "docu_name": "Temperature Controller: Stability Indicator: Deviation [°C]",
+      "instances": 4,
+      "can_index": "0x2840",
+      "can_index_decimal": 10304,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Stability Indicator: Deviation [°C]"
+    },
+    "4041": {
+      "mepar_id": 4041,
+      "name": "PAR_STABILITY_IND_TIME",
+      "docu_name": "Temperature Controller: Stability Indicator: Time [s]",
+      "instances": 4,
+      "can_index": "0x2841",
+      "can_index_decimal": 10305,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Stability Indicator: Time [s]"
+    },
+    "4042": {
+      "mepar_id": 4042,
+      "name": "PAR_STABILITY_IND_MAXT",
+      "docu_name": "Temperature Controller: Stability Indicator: Max Time [s]",
+      "instances": 4,
+      "can_index": "0x2842",
+      "can_index_decimal": 10306,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Stability Indicator: Max Time [s]"
+    },
+    "5001": {
+      "mepar_id": 5001,
+      "name": "PAR_LrTempIn_TAdjA0",
+      "docu_name": "LR Measurement: Conversion: Calibration: Offset [°C]",
+      "instances": 4,
+      "can_index": "0x2A01",
+      "can_index_decimal": 10753,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: Calibration: Offset [°C]"
+    },
+    "5002": {
+      "mepar_id": 5002,
+      "name": "PAR_LrTempIn_TAdjA1",
+      "docu_name": "LR Measurement: Conversion: Calibration: Gain [°C/°C]",
+      "instances": 4,
+      "can_index": "0x2A02",
+      "can_index_decimal": 10754,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: Calibration: Gain [°C/°C]"
+    },
+    "5013": {
+      "mepar_id": 5013,
+      "name": "PAR_LrTempIn_Surveillance",
+      "docu_name": "LR Measurement: Surveillance: Temp Limit Errors",
+      "instances": 4,
+      "can_index": "0x2A13",
+      "can_index_decimal": 10771,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Surveillance: Temp Limit Errors"
+    },
+    "5010": {
+      "mepar_id": 5010,
+      "name": "PAR_LrTempIn_UnderTh",
+      "docu_name": "LR Measurement: Surveillance: Lower Threshold [°C]",
+      "instances": 4,
+      "can_index": "0x2A10",
+      "can_index_decimal": 10768,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Surveillance: Lower Threshold [°C]"
+    },
+    "5011": {
+      "mepar_id": 5011,
+      "name": "PAR_LrTempIn_OverTh",
+      "docu_name": "LR Measurement: Surveillance: Upper Threshold [°C]",
+      "instances": 4,
+      "can_index": "0x2A11",
+      "can_index_decimal": 10769,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Surveillance: Upper Threshold [°C]"
+    },
+    "5012": {
+      "mepar_id": 5012,
+      "name": "PAR_LrTempIn_MaxRamp",
+      "docu_name": "LR Measurement: Surveillance: Max Temp Change [°C/s]",
+      "instances": 4,
+      "can_index": "0x2A12",
+      "can_index_decimal": 10770,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Surveillance: Max Temp Change [°C/s]"
+    },
+    "5005": {
+      "mepar_id": 5005,
+      "name": "PAR_LrTempIn_PT1FilterFact",
+      "docu_name": "LR Measurement: Conversion: Filter: PT1 Factor []",
+      "instances": 4,
+      "can_index": "0x2A05",
+      "can_index_decimal": 10757,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: Filter: PT1 Factor []"
+    },
+    "5020": {
+      "mepar_id": 5020,
+      "name": "PAR_LrTempIn_NTC_T1",
+      "docu_name": "LR Measurement: Conversion: NTC: Lower Point: Temp [°C]",
+      "instances": 4,
+      "can_index": "0x2A20",
+      "can_index_decimal": 10784,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Lower Point: Temp [°C]"
+    },
+    "5021": {
+      "mepar_id": 5021,
+      "name": "PAR_LrTempIn_NTC_R1",
+      "docu_name": "LR Measurement: Conversion: NTC: Lower Point: Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2A21",
+      "can_index_decimal": 10785,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Lower Point: Resistance [Ohm]"
+    },
+    "5022": {
+      "mepar_id": 5022,
+      "name": "PAR_LrTempIn_NTC_T2",
+      "docu_name": "LR Measurement: Conversion: NTC: Middle Point: Temp [°C]",
+      "instances": 4,
+      "can_index": "0x2A22",
+      "can_index_decimal": 10786,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Middle Point: Temp [°C]"
+    },
+    "5023": {
+      "mepar_id": 5023,
+      "name": "PAR_LrTempIn_NTC_R2",
+      "docu_name": "LR Measurement: Conversion: NTC: Middle Point: Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2A23",
+      "can_index_decimal": 10787,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Middle Point: Resistance [Ohm]"
+    },
+    "5024": {
+      "mepar_id": 5024,
+      "name": "PAR_LrTempIn_NTC_T3",
+      "docu_name": "LR Measurement: Conversion: NTC: Upper Point: Temp [°C]",
+      "instances": 4,
+      "can_index": "0x2A24",
+      "can_index_decimal": 10788,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Upper Point: Temp [°C]"
+    },
+    "5025": {
+      "mepar_id": 5025,
+      "name": "PAR_LrTempIn_NTC_R3",
+      "docu_name": "LR Measurement: Conversion: NTC: Upper Point: Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2A25",
+      "can_index_decimal": 10789,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Conversion: NTC: Upper Point: Resistance [Ohm]"
+    },
+    "5040": {
+      "mepar_id": 5040,
+      "name": "PAR_LrAdcIn_MLim_MinR",
+      "docu_name": "LR Measurement: Measurement Limits: Lowest Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2A40",
+      "can_index_decimal": 10816,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "LR Measurement: Measurement Limits: Lowest Resistance [Ohm]"
+    },
+    "5041": {
+      "mepar_id": 5041,
+      "name": "PAR_LrAdcIn_MLim_MaxR",
+      "docu_name": "LR Measurement: Measurement Limits: Highest Resistance [Ohm]",
+      "instances": 4,
+      "can_index": "0x2A41",
+      "can_index_decimal": 10817,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "LR Measurement: Measurement Limits: Highest Resistance [Ohm]"
+    },
+    "5042": {
+      "mepar_id": 5042,
+      "name": "PAR_LrTempIn_MLim_MinT",
+      "docu_name": "LR Measurement: Measurement Limits: Temperature at min ADC [°C]",
+      "instances": 4,
+      "can_index": "0x2A42",
+      "can_index_decimal": 10818,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "LR Measurement: Measurement Limits: Temperature at min ADC [°C]"
+    },
+    "5043": {
+      "mepar_id": 5043,
+      "name": "PAR_LrTempIn_MLim_MaxT",
+      "docu_name": "LR Measurement: Measurement Limits: Temperature at max ADC [°C]",
+      "instances": 4,
+      "can_index": "0x2A43",
+      "can_index_decimal": 10819,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "LR Measurement: Measurement Limits: Temperature at max ADC [°C]"
+    },
+    "6000": {
+      "mepar_id": 6000,
+      "name": "PAR_HrAdcIn_PGA",
+      "docu_name": "HR Measurement: Configuration: PGA Gain",
+      "instances": 2,
+      "can_index": "0x2C00",
+      "can_index_decimal": 11264,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: PGA Gain"
+    },
+    "6001": {
+      "mepar_id": 6001,
+      "name": "PAR_HrAdcIn_IMAG",
+      "docu_name": "HR Measurement: Configuration: Current Source",
+      "instances": 2,
+      "can_index": "0x2C01",
+      "can_index_decimal": 11265,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: Current Source"
+    },
+    "6002": {
+      "mepar_id": 6002,
+      "name": "PAR_HrAdcIn_Rv",
+      "docu_name": "HR Measurement: Configuration: ADC Rs [Ohm]",
+      "instances": 2,
+      "can_index": "0x2C02",
+      "can_index_decimal": 11266,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: ADC Rs [Ohm]"
+    },
+    "6003": {
+      "mepar_id": 6003,
+      "name": "PAR_HrAdcIn_AdcAdj_A0",
+      "docu_name": "HR Measurement: ADC Calibration: Offset",
+      "instances": 2,
+      "can_index": "0x2C03",
+      "can_index_decimal": 11267,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: ADC Calibration: Offset"
+    },
+    "6004": {
+      "mepar_id": 6004,
+      "name": "PAR_HrAdcIn_AdcAdj_A1",
+      "docu_name": "HR Measurement: ADC Calibration: Gain",
+      "instances": 2,
+      "can_index": "0x2C04",
+      "can_index_decimal": 11268,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: ADC Calibration: Gain"
+    },
+    "6005": {
+      "mepar_id": 6005,
+      "name": "PAR_HrTempIn_SensorType",
+      "docu_name": "HR Measurement: Conversion: Conversion Type",
+      "instances": 2,
+      "can_index": "0x2C05",
+      "can_index_decimal": 11269,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Conversion Type"
+    },
+    "6006": {
+      "mepar_id": 6006,
+      "name": "PAR_HrAdcIn_Rp",
+      "docu_name": "HR Measurement: Configuration: ADC Rp [Ohm]",
+      "instances": 2,
+      "can_index": "0x2C06",
+      "can_index_decimal": 11270,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: ADC Rp [Ohm]"
+    },
+    "6007": {
+      "mepar_id": 6007,
+      "name": "PAR_HrAdcIn_PgaBypass",
+      "docu_name": "HR Measurement: Configuration: PGA Bypass",
+      "instances": 2,
+      "can_index": "0x2C07",
+      "can_index_decimal": 11271,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: PGA Bypass"
+    },
+    "6008": {
+      "mepar_id": 6008,
+      "name": "PAR_HrAdcIn_IOut2",
+      "docu_name": "HR Measurement: Configuration: Current Source 2 Out",
+      "instances": 2,
+      "can_index": "0x2C08",
+      "can_index_decimal": 11272,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: Current Source 2 Out"
+    },
+    "6009": {
+      "mepar_id": 6009,
+      "name": "PAR_HrTempIn_InterType",
+      "docu_name": "HR Measurement: Conversion: Measurement Type (R or U)",
+      "instances": 2,
+      "can_index": "0x2C09",
+      "can_index_decimal": 11273,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Measurement Type (R or U)"
+    },
+    "6060": {
+      "mepar_id": 6060,
+      "name": "PAR_HrAdcIn_TimeBase",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HrAdcIn_TimeBase"
+    },
+    "6010": {
+      "mepar_id": 6010,
+      "name": "PAR_LrAdcIn_Rv",
+      "docu_name": "LR Measurement: ADC: Configuration: Rv [Ohm]",
+      "instances": 4,
+      "can_index": "0x2C10",
+      "can_index_decimal": 11280,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: ADC: Configuration: Rv [Ohm]"
+    },
+    "6015": {
+      "mepar_id": 6015,
+      "name": "PAR_LrAdcIn_Rp",
+      "docu_name": "LR Measurement: Configuration: ADC Rp [Ohm]",
+      "instances": 4,
+      "can_index": "0x2C15",
+      "can_index_decimal": 11285,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Configuration: ADC Rp [Ohm]"
+    },
+    "6011": {
+      "mepar_id": 6011,
+      "name": "PAR_LrAdcIn_AdcAdj_A0",
+      "docu_name": "LR Measurement: ADC: Calibration: Offset",
+      "instances": 4,
+      "can_index": "0x2C11",
+      "can_index_decimal": 11281,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: ADC: Calibration: Offset"
+    },
+    "6012": {
+      "mepar_id": 6012,
+      "name": "PAR_LrAdcIn_AdcAdj_A1",
+      "docu_name": "LR Measurement: ADC: Calibration: Gain",
+      "instances": 4,
+      "can_index": "0x2C12",
+      "can_index_decimal": 11282,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: ADC: Calibration: Gain"
+    },
+    "6014": {
+      "mepar_id": 6014,
+      "name": "PAR_LrAdcIn_Surveillance",
+      "docu_name": "LR Measurement: Surveillance: ADC Limit Errors",
+      "instances": 4,
+      "can_index": "0x2C14",
+      "can_index_decimal": 11284,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: Surveillance: ADC Limit Errors"
+    },
+    "6013": {
+      "mepar_id": 6013,
+      "name": "PAR_LrAdcIn_Vps",
+      "docu_name": "LR Measurement: ADC: Configuration: Vps [V]",
+      "instances": 4,
+      "can_index": "0x2C13",
+      "can_index_decimal": 11283,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "LR Measurement: ADC: Configuration: Vps [V]"
+    },
+    "6020": {
+      "mepar_id": 6020,
+      "name": "PAR_DISP_TYPE",
+      "docu_name": "Display: Type",
+      "instances": 1,
+      "can_index": "0x3020",
+      "can_index_decimal": 12320,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Display: Type"
+    },
+    "6021": {
+      "mepar_id": 6021,
+      "name": "PAR_DISP_REINIT",
+      "docu_name": "Display: Auto Re-Init [s]",
+      "instances": 1,
+      "can_index": "0x3021",
+      "can_index_decimal": 12321,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Display: Auto Re-Init [s]"
+    },
+    "6023": {
+      "mepar_id": 6023,
+      "name": "PAR_DISP_ALT_MODE",
+      "docu_name": "Display: Alternative Mode",
+      "instances": 4,
+      "can_index": "0x3023",
+      "can_index_decimal": 12323,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Display: Alternative Mode"
+    },
+    "6024": {
+      "mepar_id": 6024,
+      "name": "PAR_DISP_ARG_STRING",
+      "docu_name": "",
+      "instances": 4,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "rw",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_DISP_ARG_STRING"
+    },
+    "6025": {
+      "mepar_id": 6025,
+      "name": "PAR_DISP_ALT_ARG_STRING",
+      "docu_name": "",
+      "instances": 4,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "rw",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_DISP_ALT_ARG_STRING"
+    },
+    "6026": {
+      "mepar_id": 6026,
+      "name": "PAR_DISP_START_ARG_STRING",
+      "docu_name": "",
+      "instances": 4,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "rw",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_DISP_START_ARG_STRING"
+    },
+    "6050": {
+      "mepar_id": 6050,
+      "name": "PAR_HrAdcIn_SELFT_Period",
+      "docu_name": "HR Measurement: ADC Self Check: Periodic Check [s]",
+      "instances": 2,
+      "can_index": "0x2E50",
+      "can_index_decimal": 11856,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: ADC Self Check: Periodic Check [s]"
+    },
+    "6051": {
+      "mepar_id": 6051,
+      "name": "PAR_HrAdcIn_SELFT_Trigger",
+      "docu_name": "HR Measurement: ADC Self Check: Trigger Self Check",
+      "instances": 2,
+      "can_index": "0x2E51",
+      "can_index_decimal": 11857,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "HR Measurement: ADC Self Check: Trigger Self Check"
+    },
+    "6052": {
+      "mepar_id": 6052,
+      "name": "PAR_HrAdcIn_SELFT_AutoErr",
+      "docu_name": "HR Measurement: ADC Self Check: Throw Error on IRs fail",
+      "instances": 2,
+      "can_index": "0x2E52",
+      "can_index_decimal": 11858,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: ADC Self Check: Throw Error on IRs fail"
+    },
+    "6053": {
+      "mepar_id": 6053,
+      "name": "PAR_HrAdcIn_SELFT_AVDD",
+      "docu_name": "HR Measurement: ADC Self Check: Results: AVDD Voltage [V]",
+      "instances": 2,
+      "can_index": "0x2E53",
+      "can_index_decimal": 11859,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: ADC Self Check: Results: AVDD Voltage [V]"
+    },
+    "6054": {
+      "mepar_id": 6054,
+      "name": "PAR_HrAdcIn_SELFT_IRs",
+      "docu_name": "HR Measurement: ADC Self Check: Results: IRs [uA]",
+      "instances": 2,
+      "can_index": "0x2E54",
+      "can_index_decimal": 11860,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: ADC Self Check: Results: IRs [uA]"
+    },
+    "6055": {
+      "mepar_id": 6055,
+      "name": "PAR_HrAdcIn_SELFT_VRef",
+      "docu_name": "HR Measurement: ADC Self Check: Results: VRef [V]",
+      "instances": 2,
+      "can_index": "0x2E55",
+      "can_index_decimal": 11861,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "HR Measurement: ADC Self Check: Results: VRef [V]"
+    },
+    "6056": {
+      "mepar_id": 6056,
+      "name": "PAR_HrAdcIn_SELFT_VUB",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HrAdcIn_SELFT_VUB"
+    },
+    "6057": {
+      "mepar_id": 6057,
+      "name": "PAR_HrAdcIn_SELFT_VUA",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HrAdcIn_SELFT_VUA"
+    },
+    "6058": {
+      "mepar_id": 6058,
+      "name": "PAR_HrAdcIn_SELFT_VIA",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_HrAdcIn_SELFT_VIA"
+    },
+    "6100": {
+      "mepar_id": 6100,
+      "name": "PAR_GPIO_FUNC",
+      "docu_name": "GPIO: General: Function",
+      "instances": 10,
+      "can_index": "0x3100",
+      "can_index_decimal": 12544,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: General: Function"
+    },
+    "6101": {
+      "mepar_id": 6101,
+      "name": "PAR_GPIO_LOGIC",
+      "docu_name": "GPIO: General: Level Assignment",
+      "instances": 10,
+      "can_index": "0x3101",
+      "can_index_decimal": 12545,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: General: Level Assignment"
+    },
+    "6102": {
+      "mepar_id": 6102,
+      "name": "PAR_GPIO_HWCONF",
+      "docu_name": "GPIO: General: Hardware Configuration",
+      "instances": 10,
+      "can_index": "0x3102",
+      "can_index_decimal": 12546,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: General: Hardware Configuration"
+    },
+    "6103": {
+      "mepar_id": 6103,
+      "name": "PAR_GPIO_CHANNEL",
+      "docu_name": "GPIO: General: Channel",
+      "instances": 10,
+      "can_index": "0x3103",
+      "can_index_decimal": 12547,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: General: Channel"
+    },
+    "6110": {
+      "mepar_id": 6110,
+      "name": "PAR_TT_UPDOWN_MIN",
+      "docu_name": "GPIO: Detail: Change Target Temperature Buttons: Lower Limit [°C]",
+      "instances": 4,
+      "can_index": "0x3110",
+      "can_index_decimal": 12560,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Change Target Temperature Buttons: Lower Limit [°C]"
+    },
+    "6111": {
+      "mepar_id": 6111,
+      "name": "PAR_TT_UPDOWN_MAX",
+      "docu_name": "GPIO: Detail: Change Target Temperature Buttons: Upper Limit [°C]",
+      "instances": 4,
+      "can_index": "0x3111",
+      "can_index_decimal": 12561,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Change Target Temperature Buttons: Upper Limit [°C]"
+    },
+    "6112": {
+      "mepar_id": 6112,
+      "name": "PAR_TT_UPDOWN_STEP",
+      "docu_name": "GPIO: Detail: Change Target Temperature Buttons: Step Size [°C]",
+      "instances": 4,
+      "can_index": "0x3112",
+      "can_index_decimal": 12562,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Change Target Temperature Buttons: Step Size [°C]"
+    },
+    "6120": {
+      "mepar_id": 6120,
+      "name": "PAR_PUMP_TEMP_SRC",
+      "docu_name": "GPIO: Detail: Pump Control: Actual Temperature Source",
+      "instances": 2,
+      "can_index": "0x3120",
+      "can_index_decimal": 12576,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Pump Control: Actual Temperature Source"
+    },
+    "6121": {
+      "mepar_id": 6121,
+      "name": "PAR_PUMP_ON_THRESHOLD",
+      "docu_name": "GPIO: Detail: Pump Control: ON Threshold [°C]",
+      "instances": 2,
+      "can_index": "0x3121",
+      "can_index_decimal": 12577,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Pump Control: ON Threshold [°C]"
+    },
+    "6122": {
+      "mepar_id": 6122,
+      "name": "PAR_PUMP_OFF_THRESHOLD",
+      "docu_name": "GPIO: Detail: Pump Control: OFF Threshold [°C]",
+      "instances": 2,
+      "can_index": "0x3122",
+      "can_index_decimal": 12578,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Pump Control: OFF Threshold [°C]"
+    },
+    "6133": {
+      "mepar_id": 6133,
+      "name": "PAR_ALT_TARGET_TEMP0",
+      "docu_name": "GPIO: Detail: Alternative Target Temperature 0 [°C]",
+      "instances": 4,
+      "can_index": "0x3133",
+      "can_index_decimal": 12595,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Alternative Target Temperature 0 [°C]"
+    },
+    "6130": {
+      "mepar_id": 6130,
+      "name": "PAR_ALT_TARGET_TEMP1",
+      "docu_name": "GPIO: Detail: Alternative Target Temperature 1 [°C]",
+      "instances": 4,
+      "can_index": "0x3130",
+      "can_index_decimal": 12592,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Alternative Target Temperature 1 [°C]"
+    },
+    "6131": {
+      "mepar_id": 6131,
+      "name": "PAR_ALT_TARGET_TEMP2",
+      "docu_name": "GPIO: Detail: Alternative Target Temperature 2 [°C]",
+      "instances": 4,
+      "can_index": "0x3131",
+      "can_index_decimal": 12593,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Alternative Target Temperature 2 [°C]"
+    },
+    "6132": {
+      "mepar_id": 6132,
+      "name": "PAR_ALT_TARGET_TEMP3",
+      "docu_name": "GPIO: Detail: Alternative Target Temperature 3 [°C]",
+      "instances": 4,
+      "can_index": "0x3132",
+      "can_index_decimal": 12594,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Alternative Target Temperature 3 [°C]"
+    },
+    "6141": {
+      "mepar_id": 6141,
+      "name": "PAR_SURV_ON_THRESHOLD",
+      "docu_name": "GPIO: Detail: Output Current Surveillance: ON Threshold [A]",
+      "instances": 4,
+      "can_index": "0x3141",
+      "can_index_decimal": 12609,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Output Current Surveillance: ON Threshold [A]"
+    },
+    "6142": {
+      "mepar_id": 6142,
+      "name": "PAR_SURV_OFF_THRESHOLD",
+      "docu_name": "GPIO: Detail: Output Current Surveillance: OFF Threshold [A]",
+      "instances": 4,
+      "can_index": "0x3142",
+      "can_index_decimal": 12610,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Output Current Surveillance: OFF Threshold [A]"
+    },
+    "6143": {
+      "mepar_id": 6143,
+      "name": "PAR_SURV_USEABSVALUE",
+      "docu_name": "GPIO: Detail: Output Current Surveillance: Sign Convention",
+      "instances": 4,
+      "can_index": "0x3143",
+      "can_index_decimal": 12611,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "GPIO: Detail: Output Current Surveillance: Sign Convention"
+    },
+    "6200": {
+      "mepar_id": 6200,
+      "name": "PAR_FAN_ENABLE",
+      "docu_name": "Fan: General: Enable",
+      "instances": 2,
+      "can_index": "0x3200",
+      "can_index_decimal": 12800,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: General: Enable"
+    },
+    "6201": {
+      "mepar_id": 6201,
+      "name": "PAR_FAN_MODE",
+      "docu_name": "Fan: General: Mode",
+      "instances": 2,
+      "can_index": "0x3201",
+      "can_index_decimal": 12801,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: General: Mode"
+    },
+    "6210": {
+      "mepar_id": 6210,
+      "name": "PAR_FAN_HEATSINK_SRC",
+      "docu_name": "Fan: Temp Controller: Heatsink Temperture Source",
+      "instances": 2,
+      "can_index": "0x3210",
+      "can_index_decimal": 12816,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Controller: Heatsink Temperture Source"
+    },
+    "6240": {
+      "mepar_id": 6240,
+      "name": "PAR_FAN_AMBIENT_SRC",
+      "docu_name": "Fan: Temp Controller: Ambient Temperture Source",
+      "instances": 2,
+      "can_index": "0x3240",
+      "can_index_decimal": 12864,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Controller: Ambient Temperture Source"
+    },
+    "6241": {
+      "mepar_id": 6241,
+      "name": "PAR_FAN_AMBIENT_FIX",
+      "docu_name": "Fan: Temp Controller: Ambient Temperature fixed value [°C]",
+      "instances": 2,
+      "can_index": "0x3241",
+      "can_index_decimal": 12865,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Controller: Ambient Temperature fixed value [°C]"
+    },
+    "6211": {
+      "mepar_id": 6211,
+      "name": "PAR_FAN_TEMPR1_TARGET",
+      "docu_name": "Fan: Temp Cooler: Target Temperature [°C]",
+      "instances": 2,
+      "can_index": "0x3211",
+      "can_index_decimal": 12817,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Cooler: Target Temperature [°C]"
+    },
+    "6212": {
+      "mepar_id": 6212,
+      "name": "PAR_FAN_TEMPR1_KP",
+      "docu_name": "Fan: Temp Cooler: PID: Kp [%/°C]",
+      "instances": 2,
+      "can_index": "0x3212",
+      "can_index_decimal": 12818,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Cooler: PID: Kp [%/°C]"
+    },
+    "6213": {
+      "mepar_id": 6213,
+      "name": "PAR_FAN_TEMPR1_TI",
+      "docu_name": "Fan: Temp Cooler: PID: Ti [s]",
+      "instances": 2,
+      "can_index": "0x3213",
+      "can_index_decimal": 12819,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Cooler: PID: Ti [s]"
+    },
+    "6214": {
+      "mepar_id": 6214,
+      "name": "PAR_FAN_TEMPR1_TD",
+      "docu_name": "Fan: Temp Cooler: PID: Td [s]",
+      "instances": 2,
+      "can_index": "0x3214",
+      "can_index_decimal": 12820,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Cooler: PID: Td [s]"
+    },
+    "6242": {
+      "mepar_id": 6242,
+      "name": "PAR_FAN_TEMPR2_KP",
+      "docu_name": "Fan: Temp Conditioner: Kp [%/°C]",
+      "instances": 2,
+      "can_index": "0x3242",
+      "can_index_decimal": 12866,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Conditioner: Kp [%/°C]"
+    },
+    "6243": {
+      "mepar_id": 6243,
+      "name": "PAR_FAN_TEMPR2_LinkedTempCtrl",
+      "docu_name": "Fan: Temp Conditioner: Linked Temperature Controller",
+      "instances": 2,
+      "can_index": "0x3243",
+      "can_index_decimal": 12867,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Temp Conditioner: Linked Temperature Controller"
+    },
+    "6220": {
+      "mepar_id": 6220,
+      "name": "PAR_FAN_SPEED_MIN",
+      "docu_name": "Fan: Speed Controller: 0% Speed [rpm]",
+      "instances": 2,
+      "can_index": "0x3220",
+      "can_index_decimal": 12832,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: 0% Speed [rpm]"
+    },
+    "6221": {
+      "mepar_id": 6221,
+      "name": "PAR_FAN_SPEED_MAX",
+      "docu_name": "Fan: Speed Controller: 100% Speed [rpm]",
+      "instances": 2,
+      "can_index": "0x3221",
+      "can_index_decimal": 12833,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: 100% Speed [rpm]"
+    },
+    "6222": {
+      "mepar_id": 6222,
+      "name": "PAR_FAN_SPEED_KP",
+      "docu_name": "Fan: Speed Controller: PID: Kp [%/rpm]",
+      "instances": 2,
+      "can_index": "0x3222",
+      "can_index_decimal": 12834,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: PID: Kp [%/rpm]"
+    },
+    "6223": {
+      "mepar_id": 6223,
+      "name": "PAR_FAN_SPEED_TI",
+      "docu_name": "Fan: Speed Controller: PID: Ti [s]",
+      "instances": 2,
+      "can_index": "0x3223",
+      "can_index_decimal": 12835,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: PID: Ti [s]"
+    },
+    "6224": {
+      "mepar_id": 6224,
+      "name": "PAR_FAN_SPEED_TD",
+      "docu_name": "Fan: Speed Controller: PID: Td [s]",
+      "instances": 2,
+      "can_index": "0x3224",
+      "can_index_decimal": 12836,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: PID: Td [s]"
+    },
+    "6225": {
+      "mepar_id": 6225,
+      "name": "PAR_FAN_SPEED_BYPASS",
+      "docu_name": "Fan: Speed Controller: Bypassing Speed Controller",
+      "instances": 2,
+      "can_index": "0x3225",
+      "can_index_decimal": 12837,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: Bypassing Speed Controller"
+    },
+    "6226": {
+      "mepar_id": 6226,
+      "name": "PAR_FAN_ERROR_DISABLE",
+      "docu_name": "Fan: Speed Controller: Surveillance",
+      "instances": 2,
+      "can_index": "0x3226",
+      "can_index_decimal": 12838,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: Surveillance"
+    },
+    "6227": {
+      "mepar_id": 6227,
+      "name": "PAR_FAN_SPEED_START",
+      "docu_name": "Fan: Speed Controller: Min Spped Start [rpm]",
+      "instances": 2,
+      "can_index": "0x3227",
+      "can_index_decimal": 12839,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: Min Spped Start [rpm]"
+    },
+    "6228": {
+      "mepar_id": 6228,
+      "name": "PAR_FAN_SPEED_STOP",
+      "docu_name": "Fan: Speed Controller: Min Speed Stop [rpm]",
+      "instances": 2,
+      "can_index": "0x3228",
+      "can_index_decimal": 12840,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: Min Speed Stop [rpm]"
+    },
+    "6230": {
+      "mepar_id": 6230,
+      "name": "PAR_FAN_SPEED_FPWM",
+      "docu_name": "Fan: General: PWM Frequency",
+      "instances": 1,
+      "can_index": "0x3230",
+      "can_index_decimal": 12848,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: General: PWM Frequency"
+    },
+    "6229": {
+      "mepar_id": 6229,
+      "name": "PAR_FAN_SPEED_FIXED_PWM",
+      "docu_name": "Fan: Speed Controller: Fixed PWM Level [%]",
+      "instances": 2,
+      "can_index": "0x3229",
+      "can_index_decimal": 12841,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fan: Speed Controller: Fixed PWM Level [%]"
+    },
+    "6305": {
+      "mepar_id": 6305,
+      "name": "PAR_TARGET_SOURCE",
+      "docu_name": "Target Temperature Source Selection",
+      "instances": 4,
+      "can_index": "0x3305",
+      "can_index_decimal": 13061,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Target Temperature Source Selection"
+    },
+    "6300": {
+      "mepar_id": 6300,
+      "name": "PAR_OBJECT_ACT_SOURCE",
+      "docu_name": "Object Temperature Source Selection",
+      "instances": 4,
+      "can_index": "0x3300",
+      "can_index_decimal": 13056,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Object Temperature Source Selection"
+    },
+    "6304": {
+      "mepar_id": 6304,
+      "name": "PAR_SINK_ACT_SOURCE",
+      "docu_name": "Sink Temperature Source Selection",
+      "instances": 4,
+      "can_index": "0x3304",
+      "can_index_decimal": 13060,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Sink Temperature Source Selection"
+    },
+    "6301": {
+      "mepar_id": 6301,
+      "name": "PAR_HrAdcIn_MeasFreq",
+      "docu_name": "HR Measurement: Configuration: Sampling Frequency",
+      "instances": 2,
+      "can_index": "0x3301",
+      "can_index_decimal": 13057,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Configuration: Sampling Frequency"
+    },
+    "6302": {
+      "mepar_id": 6302,
+      "name": "PAR_HrAdcIn_Surveillance",
+      "docu_name": "HR Measurement: Surveillance: ADC Limit Errors",
+      "instances": 2,
+      "can_index": "0x3302",
+      "can_index_decimal": 13058,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Surveillance: ADC Limit Errors"
+    },
+    "6303": {
+      "mepar_id": 6303,
+      "name": "PAR_HrTempIn_Surveillance",
+      "docu_name": "HR Measurement: Surveillance: Temp Limit Errors",
+      "instances": 2,
+      "can_index": "0x3303",
+      "can_index_decimal": 13059,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Surveillance: Temp Limit Errors"
+    },
+    "6310": {
+      "mepar_id": 6310,
+      "name": "PAR_AUTORESET_TIME",
+      "docu_name": "Misc: Error State Auto Reset Delay: Delay until Reset [s]",
+      "instances": 1,
+      "can_index": "0x3310",
+      "can_index_decimal": 13072,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Misc: Error State Auto Reset Delay: Delay until Reset [s]"
+    },
+    "6320": {
+      "mepar_id": 6320,
+      "name": "PAR_SUPPLY_LIM_ERR_TIME",
+      "docu_name": "Output Stage: Controller Limit: Error Delay [ms]",
+      "instances": 4,
+      "can_index": "0x3320",
+      "can_index_decimal": 13088,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Output Stage: Controller Limit: Error Delay [ms]"
+    },
+    "1090": {
+      "mepar_id": 1090,
+      "name": "PAR_SUPPLY_SUM_CURRENT",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_SUPPLY_SUM_CURRENT"
+    },
+    "6330": {
+      "mepar_id": 6330,
+      "name": "PAR_DEV_TEMPM_MODE",
+      "docu_name": "Misc: Device Temperature Mode (Output Stage)",
+      "instances": 1,
+      "can_index": "0x3330",
+      "can_index_decimal": 13104,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Misc: Device Temperature Mode (Output Stage)"
+    },
+    "6400": {
+      "mepar_id": 6400,
+      "name": "PAR_HrTempIn_UT_RefT",
+      "docu_name": "HR Measurement: Conversion: Voltage to Temp: Ref Temp [°C]",
+      "instances": 2,
+      "can_index": "0x2E00",
+      "can_index_decimal": 11776,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Voltage to Temp: Ref Temp [°C]"
+    },
+    "6401": {
+      "mepar_id": 6401,
+      "name": "PAR_HrTempIn_UT_RefU",
+      "docu_name": "HR Measurement: Conversion: Voltage to Temp: Ref Voltage [V]",
+      "instances": 2,
+      "can_index": "0x2E01",
+      "can_index_decimal": 11777,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Voltage to Temp: Ref Voltage [V]"
+    },
+    "6402": {
+      "mepar_id": 6402,
+      "name": "PAR_HrTempIn_UT_Slope",
+      "docu_name": "HR Measurement: Conversion: Voltage to Temp: Temp Slope [V/°C]",
+      "instances": 2,
+      "can_index": "0x2E02",
+      "can_index_decimal": 11778,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "HR Measurement: Conversion: Voltage to Temp: Temp Slope [V/°C]"
+    },
+    "40000": {
+      "mepar_id": 40000,
+      "name": "PAR_T_PWR_STG",
+      "docu_name": "",
+      "instances": 4,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_T_PWR_STG"
+    },
+    "3004": {
+      "mepar_id": 3004,
+      "name": "PAR_SIN_RAMPMODE",
+      "docu_name": "Temperature Controller: Nominal: Ramp Start Point",
+      "instances": 4,
+      "can_index": "0x2604",
+      "can_index_decimal": 9732,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Temperature Controller: Nominal: Ramp Start Point"
+    },
+    "51000": {
+      "mepar_id": 51000,
+      "name": "PAR_ATUNE_CMD_START",
+      "docu_name": "Auto Tuning: Start CMD",
+      "instances": 4,
+      "can_index": "0x2B00",
+      "can_index_decimal": 11008,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Start CMD"
+    },
+    "51001": {
+      "mepar_id": 51001,
+      "name": "PAR_ATUNE_CMD_CANCEL",
+      "docu_name": "Auto Tuning: Cancel Cmd",
+      "instances": 4,
+      "can_index": "0x2B01",
+      "can_index_decimal": 11009,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Cancel Cmd"
+    },
+    "51002": {
+      "mepar_id": 51002,
+      "name": "PAR_ATUNE_MODEL_SPEED",
+      "docu_name": "Auto Tuning: Thermal Model Speed",
+      "instances": 4,
+      "can_index": "0x2B02",
+      "can_index_decimal": 11010,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Thermal Model Speed"
+    },
+    "51010": {
+      "mepar_id": 51010,
+      "name": "PAR_ATUNE_RES_2A",
+      "docu_name": "Auto Tuning: Raw Values: 2a",
+      "instances": 4,
+      "can_index": "0x2B10",
+      "can_index_decimal": 11024,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Raw Values: 2a"
+    },
+    "51011": {
+      "mepar_id": 51011,
+      "name": "PAR_ATUNE_RES_2D",
+      "docu_name": "Auto Tuning: Raw Values: 2d",
+      "instances": 4,
+      "can_index": "0x2B11",
+      "can_index_decimal": 11025,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Raw Values: 2d"
+    },
+    "51012": {
+      "mepar_id": 51012,
+      "name": "PAR_ATUNE_RES_KU",
+      "docu_name": "Auto Tuning: Raw Values: Ku",
+      "instances": 4,
+      "can_index": "0x2B12",
+      "can_index_decimal": 11026,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Raw Values: Ku"
+    },
+    "51013": {
+      "mepar_id": 51013,
+      "name": "PAR_ATUNE_RES_TU",
+      "docu_name": "Auto Tuning: Raw Values: Tu",
+      "instances": 4,
+      "can_index": "0x2B13",
+      "can_index_decimal": 11027,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Raw Values: Tu"
+    },
+    "51014": {
+      "mepar_id": 51014,
+      "name": "PAR_ATUNE_RES_KP",
+      "docu_name": "Auto Tuning: Fast PID Results: Kp [%/°C]",
+      "instances": 4,
+      "can_index": "0x2B14",
+      "can_index_decimal": 11028,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Fast PID Results: Kp [%/°C]"
+    },
+    "51015": {
+      "mepar_id": 51015,
+      "name": "PAR_ATUNE_RES_TI",
+      "docu_name": "Auto Tuning: Fast PID Results: Ti [s]",
+      "instances": 4,
+      "can_index": "0x2B15",
+      "can_index_decimal": 11029,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Fast PID Results: Ti [s]"
+    },
+    "51016": {
+      "mepar_id": 51016,
+      "name": "PAR_ATUNE_RES_TD",
+      "docu_name": "Auto Tuning: Fast PID Results: Td [s]",
+      "instances": 4,
+      "can_index": "0x2B16",
+      "can_index_decimal": 11030,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Fast PID Results: Td [s]"
+    },
+    "51017": {
+      "mepar_id": 51017,
+      "name": "PAR_ATUNE_RES_TRAMPS",
+      "docu_name": "Auto Tuning: Ramp Result: Coarse Temp Ramp [°C/s]",
+      "instances": 4,
+      "can_index": "0x2B17",
+      "can_index_decimal": 11031,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Ramp Result: Coarse Temp Ramp [°C/s]"
+    },
+    "51018": {
+      "mepar_id": 51018,
+      "name": "PAR_ATUNE_RES_PROXW",
+      "docu_name": "Auto Tuning: Ramp Result: Proximity Width [°C]",
+      "instances": 4,
+      "can_index": "0x2B18",
+      "can_index_decimal": 11032,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Ramp Result: Proximity Width [°C]"
+    },
+    "51020": {
+      "mepar_id": 51020,
+      "name": "PAR_ATUNE_STATUS",
+      "docu_name": "Auto Tuning: Status",
+      "instances": 4,
+      "can_index": "0x2B20",
+      "can_index_decimal": 11040,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Status"
+    },
+    "51021": {
+      "mepar_id": 51021,
+      "name": "PAR_ATUNE_PROGRESS",
+      "docu_name": "Auto Tuning: Progress [%]",
+      "instances": 4,
+      "can_index": "0x2B21",
+      "can_index_decimal": 11041,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Progress [%]"
+    },
+    "51022": {
+      "mepar_id": 51022,
+      "name": "PAR_ATUNE_RES_SLOW_KP",
+      "docu_name": "Auto Tuning: Slow PI Results: Kp [%/°C]",
+      "instances": 4,
+      "can_index": "0x2B22",
+      "can_index_decimal": 11042,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Slow PI Results: Kp [%/°C]"
+    },
+    "51023": {
+      "mepar_id": 51023,
+      "name": "PAR_ATUNE_RES_SLOW_TI",
+      "docu_name": "Auto Tuning: Slow PI Results: Ti [s]",
+      "instances": 4,
+      "can_index": "0x2B23",
+      "can_index_decimal": 11043,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: Slow PI Results: Ti [s]"
+    },
+    "51024": {
+      "mepar_id": 51024,
+      "name": "PAR_ATUNE_RES_D_PT1",
+      "docu_name": "Auto Tuning: D Part Damping PT1",
+      "instances": 4,
+      "can_index": "0x2B24",
+      "can_index_decimal": 11044,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Auto Tuning: D Part Damping PT1"
+    },
+    "52000": {
+      "mepar_id": 52000,
+      "name": "PAR_LUT_CMD_START",
+      "docu_name": "Lookup Table: Start CMD",
+      "instances": 4,
+      "can_index": "0x2F00",
+      "can_index_decimal": 12032,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Lookup Table: Start CMD"
+    },
+    "52001": {
+      "mepar_id": 52001,
+      "name": "PAR_LUT_CMD_CANCEL",
+      "docu_name": "Lookup Table: Cancel CMD",
+      "instances": 4,
+      "can_index": "0x2F01",
+      "can_index_decimal": 12033,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Lookup Table: Cancel CMD"
+    },
+    "52010": {
+      "mepar_id": 52010,
+      "name": "PAR_LUT_TABLE_ID_SEL",
+      "docu_name": "Lookup Table: Table ID to execute",
+      "instances": 4,
+      "can_index": "0x2F10",
+      "can_index_decimal": 12048,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Lookup Table: Table ID to execute"
+    },
+    "52002": {
+      "mepar_id": 52002,
+      "name": "PAR_LUT_STATUS",
+      "docu_name": "Lookup Table: Status Monitor",
+      "instances": 4,
+      "can_index": "0x2F02",
+      "can_index_decimal": 12034,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Lookup Table: Status Monitor"
+    },
+    "52003": {
+      "mepar_id": 52003,
+      "name": "PAR_LUT_CURRENT_LINE",
+      "docu_name": "Lookup Table: Current Executing Line Monitor",
+      "instances": 4,
+      "can_index": "0x2F03",
+      "can_index_decimal": 12035,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Lookup Table: Current Executing Line Monitor"
+    },
+    "52012": {
+      "mepar_id": 52012,
+      "name": "PAR_LUT_REP_NROF",
+      "docu_name": "Lookup Table: Nr of Executions of the Repetition Field",
+      "instances": 4,
+      "can_index": "0x2F12",
+      "can_index_decimal": 12050,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Lookup Table: Nr of Executions of the Repetition Field"
+    },
+    "52013": {
+      "mepar_id": 52013,
+      "name": "PAR_LUT_REDIRECT",
+      "docu_name": "Lookup Table: Redirect to Cascade Temperature Control",
+      "instances": 2,
+      "can_index": "0x2F13",
+      "can_index_decimal": 12051,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Lookup Table: Redirect to Cascade Temperature Control"
+    },
+    "52014": {
+      "mepar_id": 52014,
+      "name": "PAR_LUT_AUTOSTART",
+      "docu_name": "Lookup Table: Auto start",
+      "instances": 4,
+      "can_index": "0x2F14",
+      "can_index_decimal": 12052,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Lookup Table: Auto start"
+    },
+    "52100": {
+      "mepar_id": 52100,
+      "name": "PAR_SCTRL_ENABLE",
+      "docu_name": "GPIO: Signal Control: Enable Function",
+      "instances": 1,
+      "can_index": "0x4100",
+      "can_index_decimal": 16640,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "GPIO: Signal Control: Enable Function"
+    },
+    "52101": {
+      "mepar_id": 52101,
+      "name": "PAR_SCTRL_PUSHPULL",
+      "docu_name": "GPIO: Signal Control: Set Output to Push-Pull",
+      "instances": 1,
+      "can_index": "0x4101",
+      "can_index_decimal": 16641,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "GPIO: Signal Control: Set Output to Push-Pull"
+    },
+    "52102": {
+      "mepar_id": 52102,
+      "name": "PAR_SCTRL_SETVAL",
+      "docu_name": "GPIO: Signal Control: Set Output States",
+      "instances": 1,
+      "can_index": "0x4102",
+      "can_index_decimal": 16642,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "GPIO: Signal Control: Set Output States"
+    },
+    "52103": {
+      "mepar_id": 52103,
+      "name": "PAR_SCTRL_READVAL",
+      "docu_name": "GPIO: Signal Control: Read Input States",
+      "instances": 1,
+      "can_index": "0x4103",
+      "can_index_decimal": 16643,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "GPIO: Signal Control: Read Input States"
+    },
+    "52200": {
+      "mepar_id": 52200,
+      "name": "PAR_EXT_OBJECT_TEMP",
+      "docu_name": "External Object Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x4200",
+      "can_index_decimal": 16896,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "External Object Temperature [°C]"
+    },
+    "52201": {
+      "mepar_id": 52201,
+      "name": "PAR_EXT_SINK_TEMP",
+      "docu_name": "Fixed Sink Temperature [°C]",
+      "instances": 4,
+      "can_index": "0x4201",
+      "can_index_decimal": 16897,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Fixed Sink Temperature [°C]"
+    },
+    "65004": {
+      "mepar_id": 65004,
+      "name": "PAR_DEBUG_UxA",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_UxA"
+    },
+    "65005": {
+      "mepar_id": 65005,
+      "name": "PAR_DEBUG_IxA",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_IxA"
+    },
+    "65006": {
+      "mepar_id": 65006,
+      "name": "PAR_DEBUG_UxB",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_UxB"
+    },
+    "65007": {
+      "mepar_id": 65007,
+      "name": "PAR_DEBUG_IxB",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_IxB"
+    },
+    "65008": {
+      "mepar_id": 65008,
+      "name": "PAR_DEBUG_TEC_SYM",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_TEC_SYM"
+    },
+    "65009": {
+      "mepar_id": 65009,
+      "name": "PAR_DEBUG_REL_PWM_LEV",
+      "docu_name": "",
+      "instances": 4,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_REL_PWM_LEV"
+    },
+    "65010": {
+      "mepar_id": 65010,
+      "name": "PAR_DEBUG_ABS_PWM_LA",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_ABS_PWM_LA"
+    },
+    "65011": {
+      "mepar_id": 65011,
+      "name": "PAR_DEBUG_ABS_PWM_LB",
+      "docu_name": "",
+      "instances": 2,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_FLOAT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG_ABS_PWM_LB"
+    },
+    "2100": {
+      "mepar_id": 2100,
+      "name": "PAR_CANOPEN_COB_ID_SYNC",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_COB_ID_SYNC"
+    },
+    "2101": {
+      "mepar_id": 2101,
+      "name": "PAR_CANOPEN_INHIBIT_TIME_EME",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_INHIBIT_TIME_EME"
+    },
+    "2102": {
+      "mepar_id": 2102,
+      "name": "PAR_CANOPEN_PROD_HEARTBEAT_T",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COMME_RW",
+        "PAR_CHANGED_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_PROD_HEARTBEAT_T"
+    },
+    "2150": {
+      "mepar_id": 2150,
+      "name": "PAR_CANOPEN_PROD_COM_PAR",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "byte",
+      "access": "rw",
+      "flags": [
+        "PARVALT_BYTE",
+        "COMME_RW",
+        "PAR_BIG_WRITE_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_PROD_COM_PAR"
+    },
+    "2151": {
+      "mepar_id": 2151,
+      "name": "PAR_CANOPEN_PROD_MAP_PAR",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "byte",
+      "access": "rw",
+      "flags": [
+        "PARVALT_BYTE",
+        "COMME_RW",
+        "PAR_BIG_WRITE_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_PROD_MAP_PAR"
+    },
+    "2152": {
+      "mepar_id": 2152,
+      "name": "PAR_CANOPEN_TROD_COM_PAR",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "byte",
+      "access": "rw",
+      "flags": [
+        "PARVALT_BYTE",
+        "COMME_RW",
+        "PAR_BIG_WRITE_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_TROD_COM_PAR"
+    },
+    "2153": {
+      "mepar_id": 2153,
+      "name": "PAR_CANOPEN_TROD_MAP_PAR",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "byte",
+      "access": "rw",
+      "flags": [
+        "PARVALT_BYTE",
+        "COMME_RW",
+        "PAR_BIG_WRITE_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_CANOPEN_TROD_MAP_PAR"
+    },
+    "217": {
+      "mepar_id": 217,
+      "name": "PAR_FREERTOS_STATISTICS",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "ro",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_READ",
+        "PAR_BIG_READ_SUBSCRIPTION"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_FREERTOS_STATISTICS"
+    },
+    "120": {
+      "mepar_id": 120,
+      "name": "PAR_USER_NOTE_FIELD",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "rw",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_RW",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_USER_NOTE_FIELD"
+    },
+    "65020": {
+      "mepar_id": 65020,
+      "name": "PAR_MEPARFLASHV2_WRITECYCLES",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "int32",
+      "access": "metadata",
+      "flags": [
+        "PARVALT_INT"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_MEPARFLASHV2_WRITECYCLES"
+    },
+    "115": {
+      "mepar_id": 115,
+      "name": "PAR_COM_RANDOM_VALUE",
+      "docu_name": "System: Random Startup Value",
+      "instances": 1,
+      "can_index": "0x200F",
+      "can_index_decimal": 8207,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "System: Random Startup Value"
+    },
+    "1080": {
+      "mepar_id": 1080,
+      "name": "PAR_CTR_OPERATING_T",
+      "docu_name": "Operating time [s]",
+      "instances": 1,
+      "can_index": "0x2180",
+      "can_index_decimal": 8576,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Operating time [s]"
+    },
+    "1081": {
+      "mepar_id": 1081,
+      "name": "PAR_CTR_OPERATING_T_RUN",
+      "docu_name": "Operating time running [s]",
+      "instances": 1,
+      "can_index": "0x2181",
+      "can_index_decimal": 8577,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Operating time running [s]"
+    },
+    "1082": {
+      "mepar_id": 1082,
+      "name": "PAR_CTR_OPERATING_T_RUN_CH",
+      "docu_name": "Operating time running CH [s]",
+      "instances": 4,
+      "can_index": "0x2182",
+      "can_index_decimal": 8578,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Operating time running CH [s]"
+    },
+    "1083": {
+      "mepar_id": 1083,
+      "name": "PAR_CTR_EOUT_WATT_HOURS",
+      "docu_name": "Total Output Energy [Wh]",
+      "instances": 1,
+      "can_index": "0x2183",
+      "can_index_decimal": 8579,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Total Output Energy [Wh]"
+    },
+    "53000": {
+      "mepar_id": 53000,
+      "name": "PAR_FKU_STORE",
+      "docu_name": "",
+      "instances": 1,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "latin1",
+      "access": "rw",
+      "flags": [
+        "PARVALT_LATIN1",
+        "COMME_RW",
+        "PAR_BIG_WRITE_SUBSCRIPTION",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "PAR_FKU_STORE"
+    },
+    "53001": {
+      "mepar_id": 53001,
+      "name": "PAR_FKU_STATUS",
+      "docu_name": "Feature Key Status",
+      "instances": 1,
+      "can_index": "0x4300",
+      "can_index_decimal": 17152,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Status"
+    },
+    "53010": {
+      "mepar_id": 53010,
+      "name": "PAR_FKU_Estimator_Status",
+      "docu_name": "Feature Key Unlock: Estimator Status",
+      "instances": 1,
+      "can_index": "0x4310",
+      "can_index_decimal": 17168,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Estimator Status"
+    },
+    "53011": {
+      "mepar_id": 53011,
+      "name": "PAR_FKU_Estimator_TrialFrom",
+      "docu_name": "Feature Key Unlock: Estimator Trial From",
+      "instances": 1,
+      "can_index": "0x4311",
+      "can_index_decimal": 17169,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Estimator Trial From"
+    },
+    "53012": {
+      "mepar_id": 53012,
+      "name": "PAR_FKU_Estimator_TrialTo",
+      "docu_name": "Feature Key Unlock: Estimator Trial To",
+      "instances": 1,
+      "can_index": "0x4312",
+      "can_index_decimal": 17170,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Estimator Trial To"
+    },
+    "53015": {
+      "mepar_id": 53015,
+      "name": "PAR_FKU_Cascade_Status",
+      "docu_name": "Feature Key Unlock: Cascade Status",
+      "instances": 1,
+      "can_index": "0x4315",
+      "can_index_decimal": 17173,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Cascade Status"
+    },
+    "53016": {
+      "mepar_id": 53016,
+      "name": "PAR_FKU_Cascade_TrialFrom",
+      "docu_name": "Feature Key Unlock: Cascade Trial From",
+      "instances": 1,
+      "can_index": "0x4316",
+      "can_index_decimal": 17174,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Cascade Trial From"
+    },
+    "53017": {
+      "mepar_id": 53017,
+      "name": "PAR_FKU_Cascade_TrialTo",
+      "docu_name": "Feature Key Unlock: Cascade Trial To",
+      "instances": 1,
+      "can_index": "0x4317",
+      "can_index_decimal": 17175,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Cascade Trial To"
+    },
+    "53020": {
+      "mepar_id": 53020,
+      "name": "PAR_FKU_Unipolar_Status",
+      "docu_name": "Feature Key Unlock: Unipolar Status",
+      "instances": 1,
+      "can_index": "0x4320",
+      "can_index_decimal": 17184,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Unipolar Status"
+    },
+    "53021": {
+      "mepar_id": 53021,
+      "name": "PAR_FKU_Unipolar_TrialFrom",
+      "docu_name": "Feature Key Unlock: Unipolar Trial From",
+      "instances": 1,
+      "can_index": "0x4321",
+      "can_index_decimal": 17185,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Unipolar Trial From"
+    },
+    "53022": {
+      "mepar_id": 53022,
+      "name": "PAR_FKU_Unipolar_TrialTo",
+      "docu_name": "Feature Key Unlock: Unipolar Trial To",
+      "instances": 1,
+      "can_index": "0x4322",
+      "can_index_decimal": 17186,
+      "value_type": "int32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_READ"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "Feature Key Unlock: Unipolar Trial To"
+    },
+    "53100": {
+      "mepar_id": 53100,
+      "name": "PAR_FEAT_EST_Enable",
+      "docu_name": "Extra Func: Object Temp Estimator: Enable",
+      "instances": 2,
+      "can_index": "0x4400",
+      "can_index_decimal": 17408,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: Enable"
+    },
+    "53101": {
+      "mepar_id": 53101,
+      "name": "PAR_FEAT_EST_InputTempSel",
+      "docu_name": "Extra Func: Object Temp Estimator: Model Input Temperature Selection",
+      "instances": 2,
+      "can_index": "0x4401",
+      "can_index_decimal": 17409,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: Model Input Temperature Selection"
+    },
+    "53102": {
+      "mepar_id": 53102,
+      "name": "PAR_FEAT_EST_InputAmbientSel",
+      "docu_name": "Extra Func: Object Temp Estimator: Model Ambient Temperature Selection",
+      "instances": 2,
+      "can_index": "0x4402",
+      "can_index_decimal": 17410,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: Model Ambient Temperature Selection"
+    },
+    "53103": {
+      "mepar_id": 53103,
+      "name": "PAR_FEAT_EST_InputAmbientFix",
+      "docu_name": "Extra Func: Object Temp Estimator: Model Ambient Temperature Fixed [°C]",
+      "instances": 2,
+      "can_index": "0x4403",
+      "can_index_decimal": 17411,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: Model Ambient Temperature Fixed [°C]"
+    },
+    "53104": {
+      "mepar_id": 53104,
+      "name": "PAR_FEAT_EST_TimeConstantDamping",
+      "docu_name": "Extra Func: Object Temp Estimator: TimeConstant Damping [s]",
+      "instances": 2,
+      "can_index": "0x4404",
+      "can_index_decimal": 17412,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: TimeConstant Damping [s]"
+    },
+    "53105": {
+      "mepar_id": 53105,
+      "name": "PAR_FEAT_EST_HeatLossFactor",
+      "docu_name": "Extra Func: Object Temp Estimator: Heat Loss Factor",
+      "instances": 2,
+      "can_index": "0x4405",
+      "can_index_decimal": 17413,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Object Temp Estimator: Heat Loss Factor"
+    },
+    "53106": {
+      "mepar_id": 53106,
+      "name": "PAR_FEAT_EST_MonitorInput",
+      "docu_name": "Extra Func: Object Temp Estimator: Monitor Input [°C]",
+      "instances": 2,
+      "can_index": "0x4406",
+      "can_index_decimal": 17414,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Object Temp Estimator: Monitor Input [°C]"
+    },
+    "53107": {
+      "mepar_id": 53107,
+      "name": "PAR_FEAT_EST_MonitorOutput",
+      "docu_name": "Extra Func: Object Temp Estimator: Monitor Output [°C]",
+      "instances": 2,
+      "can_index": "0x4407",
+      "can_index_decimal": 17415,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Object Temp Estimator: Monitor Output [°C]"
+    },
+    "53120": {
+      "mepar_id": 53120,
+      "name": "PAR_FEAT_CASC_Enable",
+      "docu_name": "Extra Func: Cascade Temp: Enable",
+      "instances": 2,
+      "can_index": "0x4420",
+      "can_index_decimal": 17440,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Enable"
+    },
+    "53121": {
+      "mepar_id": 53121,
+      "name": "PAR_FEAT_CASC_CurrTempSel",
+      "docu_name": "Extra Func: Cascade Temp: Current Temperature Selection",
+      "instances": 2,
+      "can_index": "0x4421",
+      "can_index_decimal": 17441,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Current Temperature Selection"
+    },
+    "53122": {
+      "mepar_id": 53122,
+      "name": "PAR_FEAT_CASC_SyncRunWith",
+      "docu_name": "Extra Func: Cascade Temp: Sync Run with",
+      "instances": 2,
+      "can_index": "0x4422",
+      "can_index_decimal": 17442,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Sync Run with"
+    },
+    "53123": {
+      "mepar_id": 53123,
+      "name": "PAR_FEAT_CASC_NT_TargetTemp",
+      "docu_name": "Extra Func: Cascade Temp: Nom Temp: Target Temperature [°C]",
+      "instances": 2,
+      "can_index": "0x4423",
+      "can_index_decimal": 17443,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Nom Temp: Target Temperature [°C]"
+    },
+    "53124": {
+      "mepar_id": 53124,
+      "name": "PAR_FEAT_CASC_NT_CoarseTempRamp",
+      "docu_name": "Extra Func: Cascade Temp: Nom Temp: Coarse Temp Ramp [°C/s]",
+      "instances": 2,
+      "can_index": "0x4424",
+      "can_index_decimal": 17444,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Nom Temp: Coarse Temp Ramp [°C/s]"
+    },
+    "53125": {
+      "mepar_id": 53125,
+      "name": "PAR_FEAT_CASC_NT_ProximityWidth",
+      "docu_name": "Extra Func: Cascade Temp: Nom Temp: Proximity Width [°C]",
+      "instances": 2,
+      "can_index": "0x4425",
+      "can_index_decimal": 17445,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Nom Temp: Proximity Width [°C]"
+    },
+    "53126": {
+      "mepar_id": 53126,
+      "name": "PAR_FEAT_CASC_NT_RampStartPoint",
+      "docu_name": "Extra Func: Cascade Temp: Nom Temp: Ramp Start Point",
+      "instances": 2,
+      "can_index": "0x4426",
+      "can_index_decimal": 17446,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Nom Temp: Ramp Start Point"
+    },
+    "53128": {
+      "mepar_id": 53128,
+      "name": "PAR_FEAT_CASC_PID_KP",
+      "docu_name": "Extra Func: Cascade Temp: PID: Kp [°C/°C]",
+      "instances": 2,
+      "can_index": "0x4428",
+      "can_index_decimal": 17448,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: PID: Kp [°C/°C]"
+    },
+    "53129": {
+      "mepar_id": 53129,
+      "name": "PAR_FEAT_CASC_PID_TI",
+      "docu_name": "Extra Func: Cascade Temp: PID: Ti [s]",
+      "instances": 2,
+      "can_index": "0x4429",
+      "can_index_decimal": 17449,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: PID: Ti [s]"
+    },
+    "53130": {
+      "mepar_id": 53130,
+      "name": "PAR_FEAT_CASC_PID_TD",
+      "docu_name": "Extra Func: Cascade Temp: PID: Td [s]",
+      "instances": 2,
+      "can_index": "0x4430",
+      "can_index_decimal": 17456,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: PID: Td [s]"
+    },
+    "53131": {
+      "mepar_id": 53131,
+      "name": "PAR_FEAT_CASC_PID_D_PT1",
+      "docu_name": "Extra Func: Cascade Temp: PID: D Part Damping PT1",
+      "instances": 2,
+      "can_index": "0x4431",
+      "can_index_decimal": 17457,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: PID: D Part Damping PT1"
+    },
+    "53132": {
+      "mepar_id": 53132,
+      "name": "PAR_FEAT_CASC_OUTL_IFreezeTrigBy",
+      "docu_name": "Extra Func: Cascade Temp: Out Limit: Out Limit: I Freeze triggered by",
+      "instances": 2,
+      "can_index": "0x4432",
+      "can_index_decimal": 17458,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Out Limit: Out Limit: I Freeze triggered by"
+    },
+    "53133": {
+      "mepar_id": 53133,
+      "name": "PAR_FEAT_CASC_OUTL_PidUpperLim",
+      "docu_name": "Extra Func: Cascade Temp: Out Limit: PID Upper Limit [°C]",
+      "instances": 2,
+      "can_index": "0x4433",
+      "can_index_decimal": 17459,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Out Limit: PID Upper Limit [°C]"
+    },
+    "53134": {
+      "mepar_id": 53134,
+      "name": "PAR_FEAT_CASC_OUTL_PidLowerLim",
+      "docu_name": "Extra Func: Cascade Temp: Out Limit: PID Lower Limit [°C]",
+      "instances": 2,
+      "can_index": "0x4434",
+      "can_index_decimal": 17460,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Out Limit: PID Lower Limit [°C]"
+    },
+    "53135": {
+      "mepar_id": 53135,
+      "name": "PAR_FEAT_CASC_OUTL_RangeAroundTT",
+      "docu_name": "Extra Func: Cascade Temp: Out Limit: Range around Target Temp [°C]",
+      "instances": 2,
+      "can_index": "0x4435",
+      "can_index_decimal": 17461,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Cascade Temp: Out Limit: Range around Target Temp [°C]"
+    },
+    "53136": {
+      "mepar_id": 53136,
+      "name": "PAR_FEAT_CASC_OUT_CurrTemp",
+      "docu_name": "Extra Func: Cascade Temp: Out: Current Temperature [°C]",
+      "instances": 2,
+      "can_index": "0x4436",
+      "can_index_decimal": 17462,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Cascade Temp: Out: Current Temperature [°C]"
+    },
+    "53137": {
+      "mepar_id": 53137,
+      "name": "PAR_FEAT_CASC_OUT_NomTempRamp",
+      "docu_name": "Extra Func: Cascade Temp: Out: Nominal Temp Ramp [°C]",
+      "instances": 2,
+      "can_index": "0x4437",
+      "can_index_decimal": 17463,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Cascade Temp: Out: Nominal Temp Ramp [°C]"
+    },
+    "53138": {
+      "mepar_id": 53138,
+      "name": "PAR_FEAT_CASC_OUT_PidUpperLimit",
+      "docu_name": "Extra Func: Cascade Temp: Out: PID Upper Limit [°C]",
+      "instances": 2,
+      "can_index": "0x4438",
+      "can_index_decimal": 17464,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Cascade Temp: Out: PID Upper Limit [°C]"
+    },
+    "53139": {
+      "mepar_id": 53139,
+      "name": "PAR_FEAT_CASC_OUT_PidLowerLimit",
+      "docu_name": "Extra Func: Cascade Temp: Out: PID Lower Limit [°C]",
+      "instances": 2,
+      "can_index": "0x4439",
+      "can_index_decimal": 17465,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Cascade Temp: Out: PID Lower Limit [°C]"
+    },
+    "53140": {
+      "mepar_id": 53140,
+      "name": "PAR_FEAT_CASC_OUT_Output",
+      "docu_name": "Extra Func: Cascade Temp: Out: Output [°C]",
+      "instances": 2,
+      "can_index": "0x4440",
+      "can_index_decimal": 17472,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: Cascade Temp: Out: Output [°C]"
+    },
+    "53150": {
+      "mepar_id": 53150,
+      "name": "PAR_FEAT_ACR_Enable",
+      "docu_name": "Extra Func: AC Resistance Measurement: Enable",
+      "instances": 2,
+      "can_index": "0x4450",
+      "can_index_decimal": 17488,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Enable"
+    },
+    "53151": {
+      "mepar_id": 53151,
+      "name": "PAR_FEAT_ACR_Mode",
+      "docu_name": "Extra Func: AC Resistance Measurement: Mode",
+      "instances": 2,
+      "can_index": "0x4451",
+      "can_index_decimal": 17489,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Mode"
+    },
+    "53152": {
+      "mepar_id": 53152,
+      "name": "PAR_FEAT_ACR_CAL_ResGain",
+      "docu_name": "Extra Func: AC Resistance Measurement: Calibration: Gain",
+      "instances": 2,
+      "can_index": "0x4452",
+      "can_index_decimal": 17490,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Calibration: Gain"
+    },
+    "53153": {
+      "mepar_id": 53153,
+      "name": "PAR_FEAT_ACR_CAL_ResOffset",
+      "docu_name": "Extra Func: AC Resistance Measurement: Calibration: Offset [Ohm]",
+      "instances": 2,
+      "can_index": "0x4453",
+      "can_index_decimal": 17491,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Calibration: Offset [Ohm]"
+    },
+    "53154": {
+      "mepar_id": 53154,
+      "name": "PAR_FEAT_ACR_Resistance",
+      "docu_name": "Extra Func: AC Resistance Measurement: Resistance [Ohm]",
+      "instances": 2,
+      "can_index": "0x4454",
+      "can_index_decimal": 17492,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: AC Resistance Measurement: Resistance [Ohm]"
+    },
+    "53155": {
+      "mepar_id": 53155,
+      "name": "PAR_FEAT_ACR_Current",
+      "docu_name": "Extra Func: AC Resistance Measurement: ActCurrent [A]",
+      "instances": 2,
+      "can_index": "0x4455",
+      "can_index_decimal": 17493,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: AC Resistance Measurement: ActCurrent [A]"
+    },
+    "53156": {
+      "mepar_id": 53156,
+      "name": "PAR_FEAT_ACR_Voltage",
+      "docu_name": "Extra Func: AC Resistance Measurement: ActVoltage [V]",
+      "instances": 2,
+      "can_index": "0x4456",
+      "can_index_decimal": 17494,
+      "value_type": "float32",
+      "access": "ro",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_READ",
+        "COMCN_TPDO"
+      ],
+      "rpdo": false,
+      "tpdo": true,
+      "flash_save": false,
+      "description": "Extra Func: AC Resistance Measurement: ActVoltage [V]"
+    },
+    "53157": {
+      "mepar_id": 53157,
+      "name": "PAR_FEAT_ACR_SetVoltage",
+      "docu_name": "Extra Func: AC Resistance Measurement: SetVoltage [V]",
+      "instances": 2,
+      "can_index": "0x4457",
+      "can_index_decimal": 17495,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: SetVoltage [V]"
+    },
+    "53158": {
+      "mepar_id": 53158,
+      "name": "PAR_FEAT_ACR_SetCurrent",
+      "docu_name": "Extra Func: AC Resistance Measurement: SetCurrent [A]",
+      "instances": 2,
+      "can_index": "0x4458",
+      "can_index_decimal": 17496,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: SetCurrent [A]"
+    },
+    "53159": {
+      "mepar_id": 53159,
+      "name": "PAR_FEAT_ACR_Period",
+      "docu_name": "Extra Func: AC Resistance Measurement: MeasurmementInterval [s]",
+      "instances": 2,
+      "can_index": "0x4459",
+      "can_index_decimal": 17497,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: MeasurmementInterval [s]"
+    },
+    "53160": {
+      "mepar_id": 53160,
+      "name": "PAR_FEAT_ACR_Surveillance",
+      "docu_name": "Extra Func: AC Resistance Measurement: Surveillance: Mode",
+      "instances": 2,
+      "can_index": "0x4460",
+      "can_index_decimal": 17504,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Surveillance: Mode"
+    },
+    "53161": {
+      "mepar_id": 53161,
+      "name": "PAR_FEAT_ACR_RUpperLimit",
+      "docu_name": "Extra Func: AC Resistance Measurement: Surveillance: Upper Limit [Ohm]",
+      "instances": 2,
+      "can_index": "0x4461",
+      "can_index_decimal": 17505,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Surveillance: Upper Limit [Ohm]"
+    },
+    "53162": {
+      "mepar_id": 53162,
+      "name": "PAR_FEAT_ACR_RLowerLimit",
+      "docu_name": "Extra Func: AC Resistance Measurement: Surveillance: Lower Limit [Ohm]",
+      "instances": 2,
+      "can_index": "0x4462",
+      "can_index_decimal": 17506,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: Surveillance: Lower Limit [Ohm]"
+    },
+    "53164": {
+      "mepar_id": 53164,
+      "name": "PAR_FEAT_ACR_RampLength",
+      "docu_name": "Extra Func: AC Resistance Measurement: RampLength [s]",
+      "instances": 2,
+      "can_index": "0x4464",
+      "can_index_decimal": 17508,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: AC Resistance Measurement: RampLength [s]"
+    },
+    "53180": {
+      "mepar_id": 53180,
+      "name": "PAR_FEAT_TEMPCOMP_ENABLE",
+      "docu_name": "Extra Func: Temperature Comparator: Enable",
+      "instances": 2,
+      "can_index": "0x4480",
+      "can_index_decimal": 17536,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Temperature Comparator: Enable"
+    },
+    "53181": {
+      "mepar_id": 53181,
+      "name": "PAR_FEAT_TEMPCOMP_PrimSel",
+      "docu_name": "Extra Func: Temperature Comparator: Primary Temperature Selection",
+      "instances": 2,
+      "can_index": "0x4481",
+      "can_index_decimal": 17537,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Temperature Comparator: Primary Temperature Selection"
+    },
+    "53182": {
+      "mepar_id": 53182,
+      "name": "PAR_FEAT_TEMPCOMP_SecoSel",
+      "docu_name": "Extra Func: Temperature Comparator: Secondary Temperature Selection",
+      "instances": 2,
+      "can_index": "0x4482",
+      "can_index_decimal": 17538,
+      "value_type": "int32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_INT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Temperature Comparator: Secondary Temperature Selection"
+    },
+    "53183": {
+      "mepar_id": 53183,
+      "name": "PAR_FEAT_TEMPCOMP_MaxDiff",
+      "docu_name": "Extra Func: Temperature Comparator: Max Temperature Difference [°C]",
+      "instances": 2,
+      "can_index": "0x4483",
+      "can_index_decimal": 17539,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Temperature Comparator: Max Temperature Difference [°C]"
+    },
+    "53184": {
+      "mepar_id": 53184,
+      "name": "PAR_FEAT_TEMPCOMP_ErrorDelay",
+      "docu_name": "Extra Func: Temperature Comparator: Error Delay [s]",
+      "instances": 2,
+      "can_index": "0x4484",
+      "can_index_decimal": 17540,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COM_STD_RW",
+        "COMCN_RPDO",
+        "PARSAVE_FLASH"
+      ],
+      "rpdo": true,
+      "tpdo": false,
+      "flash_save": true,
+      "description": "Extra Func: Temperature Comparator: Error Delay [s]"
+    },
+    "65100": {
+      "mepar_id": 65100,
+      "name": "PAR_DEBUG",
+      "docu_name": "",
+      "instances": 5,
+      "can_index": "0x0",
+      "can_index_decimal": 0,
+      "value_type": "float32",
+      "access": "rw",
+      "flags": [
+        "PARVALT_FLOAT",
+        "COMME_RW"
+      ],
+      "rpdo": false,
+      "tpdo": false,
+      "flash_save": false,
+      "description": "PAR_DEBUG"
+    }
+  }
+}

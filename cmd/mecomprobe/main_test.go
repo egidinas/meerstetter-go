@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/egidinas/meerstetter-go/mecom"
 )
 
 func TestScanDialFailureRecordsEveryInstance(t *testing.T) {
@@ -65,6 +67,37 @@ func TestDataTypeForFormatRejectsUnsupportedRegistryFormats(t *testing.T) {
 	}
 	if _, ok := dataTypeForFormat("INT32"); !ok {
 		t.Fatalf("INT32 format rejected")
+	}
+}
+
+func TestPresetParameterDefsIncludesRMMHR1Pt100(t *testing.T) {
+	params, err := presetParameterDefs("RMM_1182_HR1_PT100")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := len(params), 9; got != want {
+		t.Fatalf("RMM preset parameter count = %d, want %d", got, want)
+	}
+	if params[0].ID != 3000 || params[0].Format != "FLOAT32" {
+		t.Fatalf("first RMM preset parameter = %#v", params[0])
+	}
+	if params[len(params)-1].ID != 4012 || params[len(params)-1].Format != "INT32" {
+		t.Fatalf("last RMM preset parameter = %#v", params[len(params)-1])
+	}
+}
+
+func TestPresetParameterDefsRejectsUnknownPreset(t *testing.T) {
+	if _, err := presetParameterDefs("unknown"); err == nil || !strings.Contains(err.Error(), "unknown preset") {
+		t.Fatalf("unknown preset err = %v, want unknown preset", err)
+	}
+}
+
+func TestParameterDefsFromMeComParametersRejectsUnsupportedTypesAndInstances(t *testing.T) {
+	if _, err := parameterDefsFromMeComParameters([]mecom.Parameter{{ID: 1, Instance: 1, Type: mecom.DataTypeLatin1}}); err == nil || !strings.Contains(err.Error(), "unsupported data type") {
+		t.Fatalf("unsupported type err = %v", err)
+	}
+	if _, err := parameterDefsFromMeComParameters([]mecom.Parameter{{ID: 1, Instance: 2, Type: mecom.DataTypeFloat32}}); err == nil || !strings.Contains(err.Error(), "instance 2") {
+		t.Fatalf("unsupported instance err = %v", err)
 	}
 }
 

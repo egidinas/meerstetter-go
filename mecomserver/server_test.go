@@ -567,9 +567,7 @@ func TestServeRouterDoesNotReplayWriteToDuplicateRoute(t *testing.T) {
 	}
 }
 
-func TestServeRouterHandlesVirtualWritesLocallyAndRoutesVirtualReads(t *testing.T) {
-	deviceBridgeVirtualParameters.reset()
-
+func TestServeRouterRoutesDirectExternalTemperatureWritesAndReads(t *testing.T) {
 	primaryClient, primaryServer := net.Pipe()
 	defer primaryClient.Close()
 	defer primaryServer.Close()
@@ -592,6 +590,10 @@ func TestServeRouterHandlesVirtualWritesLocallyAndRoutesVirtualReads(t *testing.
 			}
 			if req.payload == "?VRCBE801" {
 				_, _ = primaryServer.Write(deviceBridgeInfoTestFrame(req.address, req.seq, "41480000"))
+				continue
+			}
+			if req.payload == "VSCBE80141200000" {
+				_, _ = primaryServer.Write(deviceBridgeOK(req.address, req.seq, ""))
 				continue
 			}
 			_, _ = primaryServer.Write(deviceBridgeNACK(req.address, req.seq, 0x03))
@@ -634,37 +636,41 @@ func TestServeRouterHandlesVirtualWritesLocallyAndRoutesVirtualReads(t *testing.
 
 	writeReq := deviceBridgeTestFrame(0, 1, "VSCBE80141200000")
 	if _, err := client.Write(writeReq); err != nil {
-		t.Fatalf("write virtual parameter: %v", err)
+		t.Fatalf("write direct external temperature: %v", err)
 	}
 	if reply := readFrame(t, client); !bytes.Equal(reply, deviceBridgeOK(0, 1, "")) {
-		t.Fatalf("virtual write reply = %q, want router-local OK", reply)
+		t.Fatalf("direct external temperature write reply = %q, want downstream OK", reply)
 	}
 	select {
 	case got := <-primarySeen:
-		t.Fatalf("virtual write reached primary route: %q", got)
+		want := deviceBridgeTestFrame(0x50, 1, "VSCBE80141200000")
+		if !bytes.Equal(got, want) {
+			t.Fatalf("direct external temperature write reached primary route as %q, want %q", got, want)
+		}
 	case got := <-fallbackSeen:
-		t.Fatalf("virtual write reached fallback route: %q", got)
-	case <-time.After(50 * time.Millisecond):
+		t.Fatalf("direct external temperature write reached fallback route: %q", got)
+	case <-time.After(time.Second):
+		t.Fatalf("direct external temperature write did not reach primary route")
 	}
 
 	readReq := deviceBridgeTestFrame(0, 2, "?VRCBE801")
 	if _, err := client.Write(readReq); err != nil {
-		t.Fatalf("read virtual parameter: %v", err)
+		t.Fatalf("read direct external temperature: %v", err)
 	}
 	if reply := readFrame(t, client); !bytes.Equal(reply, deviceBridgeInfoTestFrame(0, 2, "41480000")) {
-		t.Fatalf("virtual read reply = %q, want downstream live value", reply)
+		t.Fatalf("direct external temperature read reply = %q, want downstream live value", reply)
 	}
 
 	select {
 	case got := <-primarySeen:
 		want := deviceBridgeTestFrame(0x50, 2, "?VRCBE801")
 		if !bytes.Equal(got, want) {
-			t.Fatalf("virtual read reached primary route as %q, want %q", got, want)
+			t.Fatalf("direct external temperature read reached primary route as %q, want %q", got, want)
 		}
 	case got := <-fallbackSeen:
-		t.Fatalf("virtual read reached fallback route: %q", got)
+		t.Fatalf("direct external temperature read reached fallback route: %q", got)
 	case <-time.After(time.Second):
-		t.Fatalf("virtual read did not reach primary route")
+		t.Fatalf("direct external temperature read did not reach primary route")
 	}
 }
 
@@ -919,13 +925,13 @@ func TestRouteFrameRetriesStaleTCPWriteOnReadCandidate(t *testing.T) {
 	}
 }
 
-func TestRouteFramePrefersNativeMeComForVirtualReads(t *testing.T) {
+func TestRouteFrameKeepsDirectExternalTemperatureReadsOnCANRoute(t *testing.T) {
 	tests := []struct {
 		name    string
 		payload string
 		reply   string
 	}{
-		{name: "metadata", payload: "?VMCBE801", reply: "00030100000001FF8000007F80000041480000"},
+		{name: "metadata", payload: "?VMCBE801", reply: "00030400000001FF8000007F80000041480000"},
 		{name: "single", payload: "?VRCBE801", reply: "41480000"},
 		{name: "bulk", payload: "?VX01CBE801", reply: "41480000"},
 	}
@@ -937,9 +943,9 @@ func TestRouteFramePrefersNativeMeComForVirtualReads(t *testing.T) {
 			reply := deviceBridgeInfoTestFrame(0x4b, 1, tc.reply)
 
 			go func() {
-				req := <-fallback.requests
+				req := <-primary.requests
 				if !bytes.Equal(req.frame, reqFrame) {
-					req.result <- response{err: fmt.Errorf("fallback request frame = %q, want %q", string(req.frame), string(reqFrame))}
+					req.result <- response{err: fmt.Errorf("primary request frame = %q, want %q", string(req.frame), string(reqFrame))}
 					return
 				}
 				req.result <- response{frame: reply}
@@ -953,19 +959,19 @@ func TestRouteFramePrefersNativeMeComForVirtualReads(t *testing.T) {
 				t.Fatalf("routeFrame reply = %q, want %q", got, reply)
 			}
 			select {
-			case req := <-primary.requests:
-				t.Fatalf("CAN route unexpectedly received virtual read %q", string(req.frame))
+			case req := <-fallback.requests:
+				t.Fatalf("fallback route unexpectedly received direct external temperature read %q", string(req.frame))
 			default:
 			}
 		})
 	}
 }
 
-func TestRouteFrameObservesVirtualMetadataActualIntoDeviceCache(t *testing.T) {
+func TestRouteFrameObservesDirectExternalTemperatureMetadataActualIntoDeviceCache(t *testing.T) {
 	dir := withDeviceBridgeCacheDir(t)
 	candidate := testRouteBroker(0x4b, "tcp:127.0.0.1:51075")
 	reqFrame := testMeComFrame(0x4b, 1, "?VMCBE801")
-	payload := "00030100000001FF8000007F80000041480000"
+	payload := "00030400000001FF8000007F80000041480000"
 	reply := deviceBridgeInfoTestFrame(0x4b, 1, payload)
 
 	go func() {
@@ -988,7 +994,7 @@ func TestRouteFrameObservesVirtualMetadataActualIntoDeviceCache(t *testing.T) {
 	snap := readSingleDeviceBridgeCacheSnapshot(t, dir)
 	param := findDeviceBridgeCacheParam(t, snap, 52200, 1)
 	if param.Float32 == nil || *param.Float32 != 12.5 {
-		t.Fatalf("observed virtual metadata cache float32 = %v, want 12.5", param.Float32)
+		t.Fatalf("observed direct metadata cache float32 = %v, want 12.5", param.Float32)
 	}
 	if param.Source != deviceBridgeCacheSourceDownstream || !param.LiveRefresh || param.UpdatedAt == "" {
 		t.Fatalf("cache metadata = source %q live %v updated %q, want downstream live timestamped", param.Source, param.LiveRefresh, param.UpdatedAt)

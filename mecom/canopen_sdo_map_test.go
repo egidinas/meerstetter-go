@@ -88,38 +88,10 @@ func TestCANopenBridgeTransformsExposeCompatibilityRuntime(t *testing.T) {
 		t.Fatalf("stable transform max instance = %d, want 4", stable.MaxInstance)
 	}
 
-	objectExternalTemperature, ok := transforms[52200]
-	if !ok {
-		t.Fatal("missing Object External Temperature bridge transform for MeCom ID 52200")
-	}
-	if objectExternalTemperature.Type != DataTypeFloat32 {
-		t.Fatalf("Object External Temperature transform type = %q, want %q", objectExternalTemperature.Type, DataTypeFloat32)
-	}
-	if objectExternalTemperature.Kind != "virtual_parameter" {
-		t.Fatalf("Object External Temperature transform kind = %q, want virtual_parameter", objectExternalTemperature.Kind)
-	}
-	if !objectExternalTemperature.Writable {
-		t.Fatal("Object External Temperature transform writable = false, want catalogue read/write access")
-	}
-	if objectExternalTemperature.MinInstance != 1 || objectExternalTemperature.MaxInstance != 1 {
-		t.Fatalf("Object External Temperature transform instance range = %d..%d, want 1..1", objectExternalTemperature.MinInstance, objectExternalTemperature.MaxInstance)
-	}
-
-	sinkFixedTemperature, ok := transforms[52201]
-	if !ok {
-		t.Fatal("missing Sink Fixed Temperature bridge transform for MeCom ID 52201")
-	}
-	if sinkFixedTemperature.Type != DataTypeFloat32 {
-		t.Fatalf("Sink Fixed Temperature transform type = %q, want %q", sinkFixedTemperature.Type, DataTypeFloat32)
-	}
-	if sinkFixedTemperature.Kind != "virtual_parameter" {
-		t.Fatalf("Sink Fixed Temperature transform kind = %q, want virtual_parameter", sinkFixedTemperature.Kind)
-	}
-	if !sinkFixedTemperature.Writable {
-		t.Fatal("Sink Fixed Temperature transform writable = false, want catalogue read/write access")
-	}
-	if sinkFixedTemperature.MinInstance != 1 || sinkFixedTemperature.MaxInstance != 4 {
-		t.Fatalf("Sink Fixed Temperature transform instance range = %d..%d, want 1..4", sinkFixedTemperature.MinInstance, sinkFixedTemperature.MaxInstance)
+	for _, id := range []int{52200, 52201} {
+		if transform, ok := transforms[id]; ok {
+			t.Fatalf("MeCom ID %d is a direct v6.32 SDO/RPDO mapping, not a bridge transform: %+v", id, transform)
+		}
 	}
 }
 
@@ -226,10 +198,12 @@ func TestCANopenCoSoCompatibilityProfileResolvesTranslationMetadata(t *testing.T
 		{id: 120, typ: DataTypeLatin1, writable: true, supported: true, translation: "bridge_transform", maxInstance: 1},
 		{id: 1200, typ: DataTypeInt32, writable: false, supported: true, translation: "bridge_transform", maxInstance: 4},
 		{id: 2010, typ: DataTypeInt32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 1},
-		{id: 52200, typ: DataTypeFloat32, writable: true, supported: true, translation: "bridge_transform", maxInstance: 1},
-		{id: 52201, typ: DataTypeFloat32, writable: true, supported: true, translation: "bridge_transform", maxInstance: 4},
+		{id: 52200, typ: DataTypeFloat32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 4},
+		{id: 52201, typ: DataTypeFloat32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 4},
 		{id: 53020, typ: DataTypeInt32, writable: false, supported: true, translation: "direct_mapping", maxInstance: 1},
 		{id: 6200, typ: DataTypeInt32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 2},
+		{id: 6300, typ: DataTypeInt32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 4},
+		{id: 6304, typ: DataTypeInt32, writable: true, supported: true, translation: "direct_mapping", maxInstance: 4},
 		{id: 65100, typ: "", writable: false, supported: false, translation: "unsupported", maxInstance: 5},
 	}
 
@@ -291,10 +265,16 @@ func TestCANopenCoSoCompatibilityMetadataUsesProfileSurface(t *testing.T) {
 		t.Fatalf("CoSo profile type for transform 1200 = %q, want int32", got)
 	}
 	if got := types[52200]; got != DataTypeFloat32 {
-		t.Fatalf("CoSo profile type for transform 52200 = %q, want float32", got)
+		t.Fatalf("CoSo profile type for external object temperature 52200 = %q, want float32", got)
 	}
 	if got := types[52201]; got != DataTypeFloat32 {
-		t.Fatalf("CoSo profile type for transform 52201 = %q, want float32", got)
+		t.Fatalf("CoSo profile type for fixed sink temperature 52201 = %q, want float32", got)
+	}
+	if got := types[6300]; got != DataTypeInt32 {
+		t.Fatalf("CoSo profile type for object temperature source selection 6300 = %q, want int32", got)
+	}
+	if got := types[6304]; got != DataTypeInt32 {
+		t.Fatalf("CoSo profile type for sink temperature source selection 6304 = %q, want int32", got)
 	}
 	if got := types[1000]; got != DataTypeFloat32 {
 		t.Fatalf("CoSo profile type for normal TEC readout 1000 = %q, want float32", got)
@@ -337,11 +317,17 @@ func TestCANopenCoSoCompatibilityMetadataUsesProfileSurface(t *testing.T) {
 	if got := maxInstances[1200]; got != 4 {
 		t.Fatalf("CoSo profile max instances for 1200 = %d, want 4", got)
 	}
-	if got := maxInstances[52200]; got != 1 {
-		t.Fatalf("CoSo profile max instances for 52200 = %d, want 1", got)
+	if got := maxInstances[52200]; got != 4 {
+		t.Fatalf("CoSo profile max instances for 52200 = %d, want 4", got)
 	}
 	if got := maxInstances[52201]; got != 4 {
 		t.Fatalf("CoSo profile max instances for 52201 = %d, want 4", got)
+	}
+	if got := maxInstances[6300]; got != 4 {
+		t.Fatalf("CoSo profile max instances for 6300 = %d, want 4", got)
+	}
+	if got := maxInstances[6304]; got != 4 {
+		t.Fatalf("CoSo profile max instances for 6304 = %d, want 4", got)
 	}
 	if got := maxInstances[1000]; got != 4 {
 		t.Fatalf("CoSo profile max instances for normal TEC readout 1000 = %d, want 4", got)
@@ -361,10 +347,16 @@ func TestCANopenCoSoCompatibilityMetadataUsesProfileSurface(t *testing.T) {
 		t.Fatal("CoSo profile writability for read-only transform 108 = true, want false")
 	}
 	if !writable[52200] {
-		t.Fatal("CoSo profile writability for Object External Temperature transform 52200 = false, want true")
+		t.Fatal("CoSo profile writability for External Object Temperature 52200 = false, want true")
 	}
 	if !writable[52201] {
-		t.Fatal("CoSo profile writability for Sink Fixed Temperature transform 52201 = false, want true")
+		t.Fatal("CoSo profile writability for Fixed Sink Temperature 52201 = false, want true")
+	}
+	if !writable[6300] {
+		t.Fatal("CoSo profile writability for Object Temperature Source Selection 6300 = false, want true")
+	}
+	if !writable[6304] {
+		t.Fatal("CoSo profile writability for Sink Temperature Source Selection 6304 = false, want true")
 	}
 	if !writable[2033] {
 		t.Fatal("CoSo profile writability for normal TEC write parameter 2033 = false, want true")
@@ -388,9 +380,11 @@ func TestCANopenCoSoCompatibilityProfileCoversPRD332TraceFailures(t *testing.T) 
 		1102:  {maxInstance: 2, translation: canopenCompatibilityTranslationDirectMapping},
 		115:   {maxInstance: 1, translation: canopenCompatibilityTranslationBridgeTransform},
 		120:   {maxInstance: 1, translation: canopenCompatibilityTranslationBridgeTransform},
-		52200: {maxInstance: 1, translation: canopenCompatibilityTranslationBridgeTransform},
-		52201: {maxInstance: 4, translation: canopenCompatibilityTranslationBridgeTransform},
+		52200: {maxInstance: 4, translation: canopenCompatibilityTranslationDirectMapping},
+		52201: {maxInstance: 4, translation: canopenCompatibilityTranslationDirectMapping},
 		6200:  {maxInstance: 2, translation: canopenCompatibilityTranslationDirectMapping},
+		6300:  {maxInstance: 4, translation: canopenCompatibilityTranslationDirectMapping},
+		6304:  {maxInstance: 4, translation: canopenCompatibilityTranslationDirectMapping},
 		52002: {maxInstance: 4, translation: canopenCompatibilityTranslationDirectMapping},
 		53020: {maxInstance: 1, translation: canopenCompatibilityTranslationDirectMapping},
 	}
@@ -433,8 +427,8 @@ func TestCANopenCompatibilityMetadataMergesMappingsAndTransforms(t *testing.T) {
 	}
 
 	mappedMaxInstances := CANopenMappedParameterMaxInstances()
-	if got := mappedMaxInstances[2040]; got != 255 {
-		t.Fatalf("mapped max instances for direct SDO 2040 = %d, want raw CANopen cap 255", got)
+	if got := mappedMaxInstances[2040]; got != 1 {
+		t.Fatalf("mapped max instances for v6.32 direct SDO 2040 = %d, want documented single instance", got)
 	}
 
 	maxInstances := CANopenCompatibilityParameterMaxInstances()
@@ -537,6 +531,46 @@ func TestCANopenSDOMapMapsMeasuredTemperatureSignals(t *testing.T) {
 			typ, ok := defaultCANopenSDOMap.ParameterType(tc.id)
 			if !ok || typ != DataTypeFloat32 {
 				t.Fatalf("parameter type for %d = %q/%v, want float32", tc.id, typ, ok)
+			}
+		})
+	}
+}
+
+func TestCANopenSDOMapMapsTECv632ExternalTemperatureRPDOTargets(t *testing.T) {
+	for _, tc := range []struct {
+		id     int
+		index  uint16
+		typ    DataType
+		signal string
+	}{
+		{id: 52200, index: 0x4200, typ: DataTypeFloat32, signal: "external object temperature"},
+		{id: 52201, index: 0x4201, typ: DataTypeFloat32, signal: "fixed sink temperature"},
+		{id: 6300, index: 0x3300, typ: DataTypeInt32, signal: "object temperature source selection"},
+		{id: 6304, index: 0x3304, typ: DataTypeInt32, signal: "sink temperature source selection"},
+	} {
+		t.Run(tc.signal, func(t *testing.T) {
+			object, ok := defaultCANopenSDOMap.ObjectForMeCom(tc.id, 4)
+			if !ok {
+				t.Fatalf("missing v6.32 CANopen mapping for MeCom ID %d instance 4", tc.id)
+			}
+			if object.Index != tc.index || object.SubIndex != 4 {
+				t.Fatalf("object for %d:4 = 0x%04X.%d, want 0x%04X.4", tc.id, object.Index, object.SubIndex, tc.index)
+			}
+			if object.Kind != tc.typ || !object.Writable {
+				t.Fatalf("object for %d kind/writable = %q/%v, want %q/read-write", tc.id, object.Kind, object.Writable, tc.typ)
+			}
+			if _, ok := defaultCANopenSDOMap.ObjectForMeCom(tc.id, 5); ok {
+				t.Fatalf("mapping for %d accepted instance 5 beyond v6.32 four-channel TEC cap", tc.id)
+			}
+			typ, ok := defaultCANopenSDOMap.ParameterType(tc.id)
+			if !ok || typ != tc.typ {
+				t.Fatalf("parameter type for %d = %q/%v, want %q", tc.id, typ, ok, tc.typ)
+			}
+			if got := defaultCANopenSDOMap.ParameterMaxInstances()[tc.id]; got != 4 {
+				t.Fatalf("parameter max instances for %d = %d, want 4", tc.id, got)
+			}
+			if !defaultCANopenSDOMap.ParameterWritability()[tc.id] {
+				t.Fatalf("parameter writability for %d = false, want true", tc.id)
 			}
 		})
 	}

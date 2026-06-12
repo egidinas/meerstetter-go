@@ -14,7 +14,7 @@ func TestReadoutUsesTECCatalogueRingForPriorityAndBulkForBackground(t *testing.T
 	})
 	client := &fakeReadoutClient{
 		pointer:    0x20,
-		bulkValues: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 1, math.NaN(), math.NaN()},
+		bulkValues: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 1, math.NaN()},
 	}
 
 	first := readout.Poll(contextWithReadoutTestTimeout(t), client, time.Unix(10, 0))

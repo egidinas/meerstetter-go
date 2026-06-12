@@ -10,7 +10,7 @@ import (
 func TestDefaultTECPollingCapacityCountsFourControllerCatalogue(t *testing.T) {
 	estimate := EstimateTECPollingCapacity(DefaultTECPollingCapacityInput(4, 4))
 
-	if got, want := estimate.TotalHighPriority, 176; got != want {
+	if got, want := estimate.TotalHighPriority, 192; got != want {
 		t.Fatalf("total high priority = %d, want %d", got, want)
 	}
 	if got, want := estimate.TotalBackground, 16; got != want {
@@ -19,13 +19,13 @@ func TestDefaultTECPollingCapacityCountsFourControllerCatalogue(t *testing.T) {
 	if got, want := estimate.RingCaptureSlotsTotal, 16; got != want {
 		t.Fatalf("ring capture slots = %d, want %d", got, want)
 	}
-	if got, want := estimate.HighPriorityOverflow, 160; got != want {
+	if got, want := estimate.HighPriorityOverflow, 176; got != want {
 		t.Fatalf("high-priority overflow = %d, want %d", got, want)
 	}
-	if got, want := estimate.RoundRobinQueueTotal, 176; got != want {
+	if got, want := estimate.RoundRobinQueueTotal, 192; got != want {
 		t.Fatalf("round-robin queue total = %d, want %d", got, want)
 	}
-	if got, want := estimate.RoundRobinCycleSeconds, 2.75; math.Abs(got-want) > 0.0001 {
+	if got, want := estimate.RoundRobinCycleSeconds, 3.0; math.Abs(got-want) > 0.0001 {
 		t.Fatalf("round-robin cycle = %.4f, want %.4f", got, want)
 	}
 	if estimate.CanKeepAllHighPriorityInRing {

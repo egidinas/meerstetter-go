@@ -20,7 +20,7 @@ func TestBuildMeComTECCatalogueUsesChannelCountWithoutEightSpotAssumption(t *tes
 	if catalogue.SourceID != "bench_mecom" || catalogue.SourceFamily != DefaultTECCatalogueDefinition().SourceFamily {
 		t.Fatalf("catalogue identity = %q/%q", catalogue.SourceID, catalogue.SourceFamily)
 	}
-	if got, want := len(catalogue.Entries), 48; got != want {
+	if got, want := len(catalogue.Entries), 51; got != want {
 		t.Fatalf("entry count = %d, want %d", got, want)
 	}
 	for _, entry := range catalogue.Entries {
@@ -43,17 +43,17 @@ func TestBuildMeComCatalogueCarriesFamilyAwareDefinitionMetadata(t *testing.T) {
 		t.Fatalf("catalogue did not validate: %v", err)
 	}
 	row := findCatalogueEntry(t, catalogue, "mecom.tec_01.object_temp_c")
-	if row.Metadata["definition_ref"] != "meerstetter.tec.v631" ||
+	if row.Metadata["definition_ref"] != "meerstetter.tec.v632" ||
 		row.Metadata["definition_system"] != MeComDefinitionSystem ||
 		row.Metadata["definition_family"] != MeerstetterDefinitionFamily ||
 		row.Metadata["definition_sub_family"] != MeerstetterSubFamilyTEC ||
-		row.Metadata["definition_version"] != "v631" {
+		row.Metadata["definition_version"] != "v632" {
 		t.Fatalf("definition metadata = %#v", row.Metadata)
 	}
 
 	entries := DefaultTECCatalogueEntries(1)
 	entry := findTECCatalogueProtocolEntry(t, entries, 1000, 1)
-	if entry.Metadata["definition_ref"] != "meerstetter.tec.v631" {
+	if entry.Metadata["definition_ref"] != "meerstetter.tec.v632" {
 		t.Fatalf("runtime catalogue definition metadata = %#v", entry.Metadata)
 	}
 }
@@ -159,6 +159,7 @@ func TestResolveMeComCatalogueDefinitionRecognizesOpenSubFamilies(t *testing.T) 
 		{subFamily: "ldd", wantSub: MeerstetterSubFamilyLDD, wantVar: MeerstetterSubFamilyLDD, wantSourceFamily: graphsem.SourceFamily("mecom_ldd")},
 		{subFamily: "LDD-130x", wantSub: MeerstetterSubFamilyLDD, wantVar: MeerstetterVariantLDD130x, wantSourceFamily: graphsem.SourceFamily("mecom_ldd_130x")},
 		{subFamily: "daq", wantSub: MeerstetterSubFamilyDAQ, wantVar: MeerstetterSubFamilyDAQ, wantSourceFamily: graphsem.SourceFamily("mecom_daq")},
+		{subFamily: "rmm-1182", wantSub: MeerstetterSubFamilyRMM, wantVar: MeerstetterVariantRMM1182, wantSourceFamily: graphsem.SourceFamily("mecom_rmm_1182")},
 	}
 	for _, tc := range cases {
 		definition, ok := ResolveMeComCatalogueDefinition("", "", tc.subFamily)
@@ -297,9 +298,31 @@ func TestDefaultTECCatalogueEntriesCarryTelemetryCommandCounterparts(t *testing.
 
 	objectTemp := findTECCatalogueProtocolEntry(t, entries, 1000, 1)
 	assertCounterpart(t, objectTemp, "setpoint", 3000)
+	assertCounterpart(t, objectTemp, "object_external_input", 52200)
+	assertCounterpart(t, objectTemp, "object_source_selection", 6300)
+
+	sinkTemp := findTECCatalogueProtocolEntry(t, entries, 1001, 1)
+	assertCounterpart(t, sinkTemp, "fixed_sink_input", 52201)
+	assertCounterpart(t, sinkTemp, "sink_source_selection", 6304)
 
 	targetTemp := findTECCatalogueProtocolEntry(t, entries, 3000, 1)
 	assertCounterpart(t, targetTemp, "measured", 1000)
+
+	externalObject := findTECCatalogueProtocolEntry(t, entries, 52200, 1)
+	assertCounterpart(t, externalObject, "source_selection", 6300)
+	assertCounterpart(t, externalObject, "measured", 1000)
+
+	fixedSink := findTECCatalogueProtocolEntry(t, entries, 52201, 1)
+	assertCounterpart(t, fixedSink, "source_selection", 6304)
+	assertCounterpart(t, fixedSink, "measured", 1001)
+
+	objectSource := findTECCatalogueProtocolEntry(t, entries, 6300, 1)
+	assertCounterpart(t, objectSource, "external_value", 52200)
+	assertCounterpart(t, objectSource, "measured", 1000)
+
+	sinkSource := findTECCatalogueProtocolEntry(t, entries, 6304, 1)
+	assertCounterpart(t, sinkSource, "fixed_value", 52201)
+	assertCounterpart(t, sinkSource, "measured", 1001)
 
 	outputPower := findTECCatalogueProtocolEntry(t, entries, 1022, 1)
 	assertCounterpart(t, outputPower, "source", 1020, 1021)

@@ -38,6 +38,7 @@ func main() {
 		addressFlag   = flag.Int("address", 0, "MeCom device address; 0 is broadcast and works for one device per link")
 		instancesFlag = flag.String("instances", "1", "comma-separated parameter instances")
 		paramsPath    = flag.String("params", mecomdict.DefaultParameterRegistryPath(), "Go parameter registry to scan; defaults to MECOM_PARAMETER_REGISTRY")
+		presetFlag    = flag.String("preset", "", "optional built-in read-only parameter preset, for example rmm-1182-hr1-pt100")
 		limitFlag     = flag.Int("limit", 0, "maximum number of unique parameters to read; 0 reads all parsed parameters")
 		modeFlag      = flag.String("mode", "bulk", "read mode: bulk uses ?VX round-robin chunks; single keeps legacy ?VR reads")
 		chunkFlag     = flag.Int("chunk", 8, "maximum parameters per ?VX bulk chunk")
@@ -61,7 +62,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	params, err := loadParameters(*paramsPath)
+	params, err := loadProbeParameters(*paramsPath, *presetFlag)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -220,6 +221,54 @@ func readOne(ctx context.Context, client *mecom.Client, target string, address, 
 		res.Error = fmt.Sprintf("unsupported registry format %q", param.Format)
 	}
 	return res
+}
+
+func loadProbeParameters(path, preset string) ([]parameterDef, error) {
+	if strings.TrimSpace(preset) != "" {
+		return presetParameterDefs(preset)
+	}
+	return loadParameters(path)
+}
+
+func presetParameterDefs(name string) ([]parameterDef, error) {
+	switch normalizePresetName(name) {
+	case "rmm-1182-hr1-pt100", "rmm-hr1-pt100":
+		return parameterDefsFromMeComParameters(mecom.DefaultRMM1182HR1Pt100Parameters())
+	default:
+		return nil, fmt.Errorf("mecomprobe: unknown preset %q", name)
+	}
+}
+
+func normalizePresetName(name string) string {
+	name = strings.TrimSpace(strings.ToLower(name))
+	name = strings.ReplaceAll(name, "_", "-")
+	return name
+}
+
+func parameterDefsFromMeComParameters(params []mecom.Parameter) ([]parameterDef, error) {
+	out := make([]parameterDef, 0, len(params))
+	for _, param := range params {
+		if param.Instance != 1 {
+			return nil, fmt.Errorf("mecomprobe: preset parameter %d uses fixed instance %d; only instance 1 presets are supported", param.ID, param.Instance)
+		}
+		format, ok := formatForDataType(param.Type)
+		if !ok {
+			return nil, fmt.Errorf("mecomprobe: preset parameter %d uses unsupported data type %q", param.ID, param.Type)
+		}
+		out = append(out, parameterDef{ID: param.ID, Name: param.Name, Format: format})
+	}
+	return out, nil
+}
+
+func formatForDataType(dataType mecom.DataType) (string, bool) {
+	switch dataType {
+	case mecom.DataTypeInt32:
+		return "INT32", true
+	case mecom.DataTypeFloat32:
+		return "FLOAT32", true
+	default:
+		return "", false
+	}
 }
 
 func loadParameters(path string) ([]parameterDef, error) {

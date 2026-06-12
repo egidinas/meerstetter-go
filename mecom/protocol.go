@@ -445,6 +445,20 @@ func ParseWriteResponse(raw []byte) error {
 	return err
 }
 
+// ParseWriteResponseForRequest validates a write acknowledgement. Some RMM
+// firmware responds to accepted write/control requests with a bare ACK carrying
+// the original request CRC instead of a standard response CRC.
+func ParseWriteResponseForRequest(raw, request []byte) error {
+	err := ParseWriteResponse(raw)
+	if err == nil {
+		return nil
+	}
+	if isBareRequestCRCAck(raw, request) {
+		return nil
+	}
+	return err
+}
+
 // DecodeNumeric decodes a MeCom 8-hex-character numeric payload.
 func DecodeNumeric(chunk string, dataType DataType) (float64, error) {
 	bits, err := strconv.ParseUint(chunk, 16, 32)
@@ -606,6 +620,24 @@ func verifyCRC(frame []byte) error {
 		return fmt.Errorf("mecom: CRC mismatch got %04X want %04X", got, want)
 	}
 	return nil
+}
+
+func isBareRequestCRCAck(raw, request []byte) bool {
+	frame := bytes.TrimSuffix(raw, []byte{FrameTerminator})
+	req := bytes.TrimSuffix(request, []byte{FrameTerminator})
+	if len(frame) != 11 || len(req) < 11 || frame[0] != '!' || req[0] != '#' {
+		return false
+	}
+	if !bytes.Equal(frame[1:7], req[1:7]) {
+		return false
+	}
+	reqPayloadEnd := len(req) - 4
+	reqCRC, err := strconv.ParseUint(string(req[reqPayloadEnd:]), 16, 16)
+	if err != nil || CRC16(req[:reqPayloadEnd]) != uint16(reqCRC) {
+		return false
+	}
+	respCRC, err := strconv.ParseUint(string(frame[7:]), 16, 16)
+	return err == nil && uint16(respCRC) == uint16(reqCRC)
 }
 
 func hexOnly(v string) string {
@@ -777,85 +809,85 @@ func (c *Client) ConfigureRingCapture(ctx context.Context, captureID uint16, par
 }
 
 func (c *Client) TriggerRingSync(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildRingTriggerSyncFrame(int(c.address), seq), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) WriteFloat32(ctx context.Context, paramID, instance int, value float32) error {
 	if err := validateParameterAddress(paramID, instance); err != nil {
 		return err
 	}
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteFloat32Frame(int(c.address), seq, paramID, instance, value), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) WriteInt32(ctx context.Context, paramID, instance int, value int32) error {
 	if err := validateParameterAddress(paramID, instance); err != nil {
 		return err
 	}
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteInt32Frame(int(c.address), seq, paramID, instance, value), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) WriteString(ctx context.Context, paramID, instance int, value string) error {
 	if err := validateParameterAddress(paramID, instance); err != nil {
 		return err
 	}
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildWriteStringFrame(int(c.address), seq, paramID, instance, value), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) WriteBigDataString(ctx context.Context, paramID, instance int, value string) error {
 	if err := validateParameterAddress(paramID, instance); err != nil {
 		return err
 	}
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildSetBigDataStringFrame(int(c.address), seq, paramID, instance, 0, value, true)
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) SaveToFlash(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildSaveToFlashFrame(int(c.address), seq), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) Reset(ctx context.Context) error {
-	raw, err := c.roundTrip(ctx, func(seq uint16) ([]byte, error) {
+	request, raw, err := c.roundTripWithRequest(ctx, func(seq uint16) ([]byte, error) {
 		return BuildResetFrame(int(c.address), seq), nil
 	})
 	if err != nil {
 		return err
 	}
-	return ParseWriteResponse(raw)
+	return ParseWriteResponseForRequest(raw, request)
 }
 
 func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataType DataType) (float64, error) {
@@ -872,15 +904,21 @@ func (c *Client) readNumeric(ctx context.Context, paramID, instance int, dataTyp
 }
 
 func (c *Client) roundTrip(ctx context.Context, buildFrame func(seq uint16) ([]byte, error)) ([]byte, error) {
+	_, raw, err := c.roundTripWithRequest(ctx, buildFrame)
+	return raw, err
+}
+
+func (c *Client) roundTripWithRequest(ctx context.Context, buildFrame func(seq uint16) ([]byte, error)) ([]byte, []byte, error) {
 	c.mu.Lock()
 	seq := c.nextSeqLocked()
 	c.mu.Unlock()
 
 	frame, err := buildFrame(seq)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return c.roundTripRaw(ctx, frame)
+	raw, err := c.roundTripRaw(ctx, frame)
+	return frame, raw, err
 }
 
 func (c *Client) roundTripRaw(ctx context.Context, frame []byte) ([]byte, error) {

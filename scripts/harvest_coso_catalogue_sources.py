@@ -9,6 +9,9 @@ manufacturer-oriented candidates separate from the active runtime catalogue.
 from __future__ import annotations
 
 import argparse
+import copy
+import csv
+import io
 import json
 import re
 import zipfile
@@ -18,8 +21,11 @@ from typing import Any, Dict, Iterable, List, MutableMapping, Optional, Tuple
 from xml.etree import ElementTree
 
 
-DEFAULT_CONFIG_NAME = "TEC Default Config 5216O.xml"
+V631_DEFAULT_CONFIG_NAME = "TEC Default Config 5216O.xml"
+V632_DEFAULT_CONFIG_NAME = "TEC Default Config 5216P.xml"
+DEFAULT_CONFIG_NAME = V631_DEFAULT_CONFIG_NAME
 EDS_NAME = "CanOpen.eds"
+PARAMETER_OVERVIEW_NAME = "ParameterOverview.csv"
 
 
 def source_ref(source_id: str, detail: str = "") -> str:
@@ -89,8 +95,7 @@ def default_safety_note(group: str, visibility: str, access: str) -> str:
     return ""
 
 
-def harvest_default_config(package: zipfile.ZipFile) -> OrderedDict:
-    raw = package.read(DEFAULT_CONFIG_NAME).decode("utf-8-sig")
+def harvest_default_config_text(raw: str, source_name: str) -> OrderedDict:
     raw = raw.replace("</Parameter>>", "</Parameter>")
     root = ElementTree.fromstring(raw)
 
@@ -139,11 +144,16 @@ def harvest_default_config(package: zipfile.ZipFile) -> OrderedDict:
     return OrderedDict(
         [
             ("schema_version", "mecom_tec_coso_defaults.v1"),
-            ("source", DEFAULT_CONFIG_NAME),
+            ("source", source_name),
             ("info", info),
             ("parameters", parameters),
         ]
     )
+
+
+def harvest_default_config(package: zipfile.ZipFile, source_name: str = DEFAULT_CONFIG_NAME) -> OrderedDict:
+    raw = package.read(source_name).decode("utf-8-sig")
+    return harvest_default_config_text(raw, source_name)
 
 
 def parse_ini_sections(text: str) -> "OrderedDict[str, OrderedDict[str, str]]":
@@ -164,8 +174,7 @@ def parse_ini_sections(text: str) -> "OrderedDict[str, OrderedDict[str, str]]":
     return sections
 
 
-def harvest_eds(package: zipfile.ZipFile) -> OrderedDict:
-    text = package.read(EDS_NAME).decode("utf-8-sig", errors="replace")
+def harvest_eds_text(text: str, source_name: str) -> OrderedDict:
     sections = parse_ini_sections(text)
     objects: "OrderedDict[str, OrderedDict[str, Any]]" = OrderedDict()
 
@@ -216,12 +225,17 @@ def harvest_eds(package: zipfile.ZipFile) -> OrderedDict:
     return OrderedDict(
         [
             ("schema_version", "mecom_tec_canopen_eds.v1"),
-            ("source", EDS_NAME),
+            ("source", source_name),
             ("file_info", sections.get("FileInfo", OrderedDict())),
             ("device_info", sections.get("DeviceInfo", OrderedDict())),
             ("objects", objects),
         ]
     )
+
+
+def harvest_eds(package: zipfile.ZipFile, source_name: str = EDS_NAME) -> OrderedDict:
+    text = package.read(source_name).decode("utf-8-sig", errors="replace")
+    return harvest_eds_text(text, source_name)
 
 
 def add_help(
@@ -451,6 +465,466 @@ def hidden_candidates() -> List[OrderedDict]:
     return candidates
 
 
+def parse_int(value: str, default: int = 0) -> int:
+    value = str(value or "").strip()
+    if not value:
+        return default
+    try:
+        return int(value, 0)
+    except ValueError:
+        return default
+
+
+def normalize_overview_flags(value: str) -> List[str]:
+    return [flag.strip() for flag in re.split(r"[,|]", value or "") if flag.strip()]
+
+
+def parameter_value_type(row: Dict[str, str]) -> str:
+    tokens = {
+        str(row.get("MinType", "")).strip().lower(),
+        str(row.get("MaxType", "")).strip().lower(),
+        str(row.get("DefaultType", "")).strip().lower(),
+    }
+    flags = set(normalize_overview_flags(row.get("Flags", "")))
+    if "Float32".lower() in tokens or "PARVALT_FLOAT" in flags:
+        return "float32"
+    if "Int32".lower() in tokens or "PARVALT_INT" in flags:
+        return "int32"
+    if "Byte".lower() in tokens or "PARVALT_BYTE" in flags:
+        return "byte"
+    if "Latin1".lower() in tokens or "PARVALT_LATIN1" in flags:
+        return "latin1"
+    return "text"
+
+
+def parameter_access(flags: Iterable[str]) -> str:
+    flag_set = set(flags)
+    if {"COM_STD_RW", "COMME_RW"} & flag_set:
+        return "rw"
+    if {"COM_STD_READ", "COMME_READ"} & flag_set:
+        return "ro"
+    return "metadata"
+
+
+def harvest_parameter_overview_text(text: str, source_name: str) -> OrderedDict:
+    reader = csv.DictReader(io.StringIO(text), delimiter=";")
+    parameters: "OrderedDict[str, OrderedDict[str, Any]]" = OrderedDict()
+    flag_counts: Dict[str, int] = {}
+    parameters_with_can_index = 0
+
+    for row in reader:
+        mepar_id = parse_int(row.get("MeComId", ""))
+        if mepar_id <= 0:
+            continue
+        flags = normalize_overview_flags(row.get("Flags", ""))
+        for flag in flags:
+            flag_counts[flag] = flag_counts.get(flag, 0) + 1
+        can_index_text = str(row.get("CanIndex", "")).strip()
+        can_index_decimal = parse_int(can_index_text)
+        if can_index_decimal > 0:
+            parameters_with_can_index += 1
+        docu_name = str(row.get("DocuName", "")).strip()
+        define_name = str(row.get("DefineName", "")).strip()
+        parameters[str(mepar_id)] = OrderedDict(
+            [
+                ("mepar_id", mepar_id),
+                ("name", define_name),
+                ("docu_name", docu_name),
+                ("instances", parse_int(row.get("NrOfInstances", ""), 1)),
+                ("can_index", f"0x{can_index_decimal:04X}" if can_index_decimal > 0 else can_index_text),
+                ("can_index_decimal", can_index_decimal),
+                ("value_type", parameter_value_type(row)),
+                ("access", parameter_access(flags)),
+                ("flags", flags),
+                ("rpdo", "COMCN_RPDO" in flags),
+                ("tpdo", "COMCN_TPDO" in flags),
+                ("flash_save", "PARSAVE_FLASH" in flags),
+                ("description", docu_name or define_name),
+            ]
+        )
+
+    return OrderedDict(
+        [
+            ("schema_version", "mecom_tec_parameter_overview.v1"),
+            ("source", source_name),
+            (
+                "summary",
+                OrderedDict(
+                    [
+                        ("total_parameters", len(parameters)),
+                        ("parameters_with_can_index", parameters_with_can_index),
+                        ("flag_counts", OrderedDict(sorted(flag_counts.items()))),
+                    ]
+                ),
+            ),
+            ("parameters", parameters),
+        ]
+    )
+
+
+def eds_object_sub_count(eds: OrderedDict, index: str) -> int:
+    obj = eds.get("objects", {}).get(index.upper())
+    if not obj:
+        return 0
+    return len([sub for sub in obj.get("subobjects", {}) if sub != "0"])
+
+
+def pdo_model_from_eds(eds: OrderedDict) -> OrderedDict:
+    receive_pdos: List[OrderedDict[str, Any]] = []
+    transmit_pdos: List[OrderedDict[str, Any]] = []
+    objects = eds.get("objects", {})
+
+    for i in range(4):
+        comm_index = f"{0x1400 + i:04X}"
+        map_index = f"{0x1600 + i:04X}"
+        comm = objects.get(comm_index, {})
+        subobjects = comm.get("subobjects", {})
+        receive_pdos.append(
+            OrderedDict(
+                [
+                    ("communication_object", "0x" + comm_index),
+                    ("mapping_object", "0x" + map_index),
+                    ("cob_id_default", subobjects.get("1", {}).get("default_value", "")),
+                    ("transmission_default", subobjects.get("2", {}).get("default_value", "")),
+                    ("mapping_slots", eds_object_sub_count(eds, map_index)),
+                ]
+            )
+        )
+    for i in range(4):
+        comm_index = f"{0x1800 + i:04X}"
+        map_index = f"{0x1A00 + i:04X}"
+        comm = objects.get(comm_index, {})
+        subobjects = comm.get("subobjects", {})
+        transmit_pdos.append(
+            OrderedDict(
+                [
+                    ("communication_object", "0x" + comm_index),
+                    ("mapping_object", "0x" + map_index),
+                    ("cob_id_default", subobjects.get("1", {}).get("default_value", "")),
+                    ("transmission_default", subobjects.get("2", {}).get("default_value", "")),
+                    ("mapping_slots", eds_object_sub_count(eds, map_index)),
+                ]
+            )
+        )
+
+    return OrderedDict(
+        [
+            ("receive_pdos", receive_pdos),
+            ("transmit_pdos", transmit_pdos),
+            (
+                "external_temperature_bindings",
+                [
+                    OrderedDict(
+                        [
+                            ("mecom_id", 52200),
+                            ("canopen_index", "0x4200"),
+                            ("direction", "receive"),
+                            ("source_selection_id", 6300),
+                            ("source_selection_value", 7),
+                            ("refresh_policy", "External Object Temperature must be refreshed every 100 ms or faster; missing refresh for more than 5 s forces NaN and stops the controller."),
+                        ]
+                    ),
+                    OrderedDict(
+                        [
+                            ("mecom_id", 52201),
+                            ("canopen_index", "0x4201"),
+                            ("direction", "receive"),
+                            ("source_selection_id", 6304),
+                            ("source_selection_value", 7),
+                            ("refresh_policy", "Fixed Sink Temperature is selected through Sink Temperature Source Selection value 7 and can be carried by RPDO in v6.32."),
+                        ]
+                    ),
+                ],
+            ),
+        ]
+    )
+
+
+def tec_v632_metadata_index(pdo_model: OrderedDict) -> OrderedDict:
+    index = metadata_index()
+    index["sources"] = [
+        OrderedDict(
+            [
+                ("id", "tec_default_config_5216p_xml"),
+                ("path", "loom/tools/Dok/" + V632_DEFAULT_CONFIG_NAME),
+                ("method", "xml_default_config_parse"),
+                ("status", "harvested"),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("id", "canopen_eds_v632"),
+                ("path", "loom/tools/Dok/" + EDS_NAME),
+                ("method", "eds_ini_parse"),
+                ("status", "harvested"),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("id", "tec_parameter_overview_v632"),
+                ("path", "loom/tools/Dok/" + PARAMETER_OVERVIEW_NAME),
+                ("method", "csv_parameter_inventory_parse"),
+                ("status", "harvested"),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("id", "tec_release_notes_v632"),
+                ("path", "loom/tools/Dok/TEC Software Release Notes 5147AT.pdf"),
+                ("method", "pdf_release_note_review"),
+                ("status", "harvested"),
+            ]
+        ),
+    ]
+    index["release_notes"] = OrderedDict(
+        [
+            ("current_version", "6.32"),
+            ("current_release_date", "2026-06-04"),
+            ("current_service_software_version", "6.32"),
+            ("current_firmware_version", "6.32"),
+            (
+                "supported_devices",
+                [
+                    OrderedDict([("device", "TEC-1089"), ("hardware_version", "1.00 - 2.10")]),
+                    OrderedDict([("device", "TEC-1090"), ("hardware_version", "1.00 - 1.90")]),
+                    OrderedDict([("device", "TEC-1091"), ("hardware_version", "0.80 - 3.51")]),
+                    OrderedDict([("device", "TEC-1092"), ("hardware_version", "1.00 - 1.10")]),
+                    OrderedDict([("device", "TEC-1122"), ("hardware_version", "1.01 - 2.00")]),
+                    OrderedDict([("device", "TEC-1123"), ("hardware_version", "1.01 - 2.00")]),
+                    OrderedDict([("device", "TEC-1161"), ("hardware_version", "1.00 - 1.30")]),
+                    OrderedDict([("device", "TEC-1162"), ("hardware_version", "1.00 - 1.30")]),
+                    OrderedDict([("device", "TEC-1163"), ("hardware_version", "1.00 - 1.30")]),
+                    OrderedDict([("device", "TEC-1166"), ("hardware_version", "1.00 - 1.30")]),
+                    OrderedDict([("device", "TEC-1167"), ("hardware_version", "1.00 - 1.30")]),
+                ],
+            ),
+            (
+                "versions",
+                [
+                    OrderedDict(
+                        [
+                            ("version", "6.32"),
+                            ("new_features", ["External Object and Sink Temperature Values can be used as CANopen RPDO."]),
+                            ("resolved_issues", ["Baud-rate may not revert after speed change in specific cases."]),
+                            ("known_issues", []),
+                        ]
+                    )
+                ],
+            ),
+            (
+                "risk_notes",
+                [
+                    OrderedDict(
+                        [
+                            ("id", "tec_v632_upgrade_floor"),
+                            ("version", "6.32"),
+                            ("summary", "Firmware v5.10 or newer must be installed before upgrading to v6.32."),
+                            ("source_evidence", ["catalogues/sources/tec_metadata_index.v632.json#release_notes"]),
+                        ]
+                    ),
+                    OrderedDict(
+                        [
+                            ("id", "tec_v632_downgrade_support"),
+                            ("version", "6.32"),
+                            ("summary", "Downgrades below v6.00 require Meerstetter Engineering remote support."),
+                            ("source_evidence", ["catalogues/sources/tec_metadata_index.v632.json#release_notes"]),
+                        ]
+                    ),
+                ],
+            ),
+        ]
+    )
+    index["pdo_model"] = pdo_model
+    return index
+
+
+def canopen_runtime_type(value_type: str) -> str:
+    value_type = str(value_type or "").lower()
+    if value_type in {"float32", "int32", "byte", "latin1"}:
+        return value_type
+    return ""
+
+
+def eds_runtime_type(data_type: str, fallback: str) -> str:
+    data_type = str(data_type or "").lower()
+    if data_type == "0x0008":
+        return "float32"
+    if data_type in {"0x0002", "0x0003", "0x0004", "0x0005", "0x0006", "0x0007"}:
+        return "int32"
+    if data_type == "0x000f":
+        return "latin1"
+    return canopen_runtime_type(fallback)
+
+
+def pdo_direction(param: Dict[str, Any], eds_sub: Dict[str, Any]) -> str:
+    if not param.get("rpdo") and not param.get("tpdo") and str(eds_sub.get("pdo_mapping", "")) != "1":
+        return ""
+    if param.get("rpdo"):
+        return "receive"
+    if param.get("tpdo"):
+        return "transmit"
+    access = str(eds_sub.get("access_type", "")).lower()
+    if "w" in access:
+        return "receive"
+    return "transmit"
+
+
+def generated_sdo_mapping(param: Dict[str, Any], eds_sub: Dict[str, Any], version: str) -> Optional[OrderedDict]:
+    can_index_decimal = int(param.get("can_index_decimal") or 0)
+    if can_index_decimal <= 0:
+        return None
+    value_type = eds_runtime_type(eds_sub.get("data_type", ""), param.get("value_type", ""))
+    if not value_type:
+        return None
+    access = str(param.get("access", "ro"))
+    if "w" in str(eds_sub.get("access_type", "")).lower():
+        access = "rw"
+    instances = int(param.get("instances") or 1)
+    instance_mode = OrderedDict([("mode", "subindex"), ("min", 1), ("max", max(1, instances))])
+    mapping = OrderedDict(
+        [
+            ("mecom_id", int(param["mepar_id"])),
+            ("name", param.get("docu_name") or param.get("name") or str(param["mepar_id"])),
+            ("value_type", value_type),
+            ("access", access),
+            ("instances", instance_mode),
+            (
+                "canopen",
+                OrderedDict(
+                    [
+                        ("index", f"0x{can_index_decimal:04X}"),
+                        ("subindex", "instance"),
+                        ("subindex_mode", "instance"),
+                        ("data_type", eds_sub.get("data_type", "")),
+                    ]
+                ),
+            ),
+            (
+                "aliases",
+                [
+                    OrderedDict([("space", "mecom_decimal"), ("id", int(param["mepar_id"]))]),
+                    OrderedDict([("space", "canopen_index"), ("id", f"0x{can_index_decimal:04X}")]),
+                    OrderedDict([("space", "canopen_object_decimal"), ("id", can_index_decimal)]),
+                ],
+            ),
+            (
+                "source_evidence",
+                [
+                    f"catalogues/sources/tec_parameter_overview.{version}.json#parameters.{param['mepar_id']}",
+                    f"catalogues/sources/canopen_eds.{version}.json#objects.{can_index_decimal:04X}",
+                ],
+            ),
+        ]
+    )
+    direction = pdo_direction(param, eds_sub)
+    if direction:
+        mapping["pdo"] = OrderedDict(
+            [
+                ("mappable", True),
+                ("direction", direction),
+                ("source", "ParameterOverview.csv COMCN flags and CanOpen.eds PDOMapping"),
+            ]
+        )
+    return mapping
+
+
+def update_profile_param(
+    profile: Dict[str, Any],
+    mecom_id: int,
+    max_instance: int,
+    value_type: str,
+    access: str,
+    translation: str = "direct_mapping",
+    cache_behavior: str = "",
+) -> None:
+    params = profile.setdefault("parameters", [])
+    for param in params:
+        if param.get("mecom_id") == mecom_id:
+            param["max_instance"] = max_instance
+            param["translation"] = translation
+            param["value_type"] = value_type
+            param["access"] = access
+            if cache_behavior:
+                param["cache_behavior"] = cache_behavior
+            return
+    fields = [
+        ("mecom_id", mecom_id),
+        ("max_instance", max_instance),
+        ("translation", translation),
+        ("value_type", value_type),
+        ("access", access),
+    ]
+    if cache_behavior:
+        fields.append(("cache_behavior", cache_behavior))
+    params.append(OrderedDict(fields))
+
+
+def harvest_sdo_map_v632(parameter_overview: OrderedDict, eds: OrderedDict, base_sdo_map: OrderedDict) -> OrderedDict:
+    objects = eds.get("objects", {})
+    mappings: List[OrderedDict[str, Any]] = []
+    for param in parameter_overview.get("parameters", {}).values():
+        can_index_decimal = int(param.get("can_index_decimal") or 0)
+        if can_index_decimal <= 0:
+            continue
+        obj = objects.get(f"{can_index_decimal:04X}")
+        if not obj:
+            continue
+        subobjects = obj.get("subobjects", {})
+        sub = subobjects.get("1") or next((value for key, value in subobjects.items() if key != "0"), None)
+        if not sub:
+            continue
+        mapping = generated_sdo_mapping(param, sub, "v632")
+        if mapping:
+            mappings.append(mapping)
+
+    mappings.sort(key=lambda item: int(item["mecom_id"]))
+    mapped_by_id = {int(entry["mecom_id"]): entry for entry in mappings}
+    bridge_transforms = [
+        copy.deepcopy(entry)
+        for entry in base_sdo_map.get("bridge_transforms", [])
+        if int(entry.get("mecom_id", 0)) not in {52200, 52201}
+    ]
+    bridge_transform_ids = {int(entry.get("mecom_id", 0)) for entry in bridge_transforms}
+    unsupported = [
+        copy.deepcopy(entry)
+        for entry in base_sdo_map.get("unsupported", [])
+        if parse_int(str(entry.get("id", "")), -1) not in mapped_by_id
+    ]
+    profiles = copy.deepcopy(base_sdo_map.get("compatibility_profiles", []))
+    for profile in profiles:
+        for param in profile.get("parameters", []):
+            mecom_id = int(param.get("mecom_id", 0) or 0)
+            mapping = mapped_by_id.get(mecom_id)
+            if not mapping or mecom_id in bridge_transform_ids:
+                continue
+            if str(param.get("translation", "")).strip().lower() != "unsupported":
+                continue
+            instances = mapping.get("instances", {})
+            param["max_instance"] = int(instances.get("max") or 1) if isinstance(instances, dict) else 1
+            param["translation"] = "direct_mapping"
+            param["value_type"] = mapping.get("value_type", "")
+            param["access"] = mapping.get("access", "")
+        update_profile_param(profile, 52200, 4, "float32", "rw", cache_behavior="metadata_live_actual")
+        update_profile_param(profile, 52201, 4, "float32", "rw", cache_behavior="metadata_live_actual")
+        update_profile_param(profile, 6300, 4, "int32", "rw")
+        update_profile_param(profile, 6304, 4, "int32", "rw")
+
+    return OrderedDict(
+        [
+            ("schema_version", "mecom_tec_canopen_sdo_map.v1"),
+            (
+                "source_policy",
+                "Runtime CANopen SDO routing uses MeCom parameter IDs as the primary key. CANopen object indexes and decimal object IDs are aliases, not replacement MeCom IDs. TEC v6.32 makes external object and fixed sink temperature direct SDO/RPDO targets instead of compatibility-only bridge values.",
+            ),
+            ("mappings", mappings),
+            ("protocol_inventory", copy.deepcopy(base_sdo_map.get("protocol_inventory", []))),
+            ("bridge_transforms", bridge_transforms),
+            ("unsupported", unsupported),
+            ("compatibility_profiles", profiles),
+        ]
+    )
+
+
 def metadata_index() -> OrderedDict:
     return OrderedDict(
         [
@@ -517,27 +991,48 @@ def write_json(path: Path, payload: OrderedDict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--package", required=True, help="Path to the Meerstetter TEC-Family Software package ZIP.")
+    parser.add_argument("--package", help="Path to the Meerstetter TEC-Family Software package ZIP.")
+    parser.add_argument("--source-dir", help="Directory containing loose TEC documentation/source files.")
+    parser.add_argument("--version", choices=("v631", "v632"), default="v631")
     parser.add_argument("--out", default="mecom/catalogues/sources")
     args = parser.parse_args()
 
-    package_path = Path(args.package)
     out = Path(args.out)
-    with zipfile.ZipFile(package_path) as package:
-        write_json(out / "tec_default_config_5216o.v631.json", harvest_default_config(package))
-        write_json(out / "canopen_eds.v631.json", harvest_eds(package))
+    if args.version == "v631":
+        if not args.package:
+            raise SystemExit("--package is required for --version v631")
+        package_path = Path(args.package)
+        with zipfile.ZipFile(package_path) as package:
+            write_json(out / "tec_default_config_5216o.v631.json", harvest_default_config(package, V631_DEFAULT_CONFIG_NAME))
+            write_json(out / "canopen_eds.v631.json", harvest_eds(package, EDS_NAME))
 
-    write_json(
-        out / "tec_tooltips.v631.json",
-        OrderedDict(
-            [
-                ("schema_version", "mecom_tec_help.v1"),
-                ("source", "Meerstetter TEC Configuration Software v6.31 CoSo BAML/decompile review"),
-                ("parameters", tooltip_rows()),
-            ]
-        ),
-    )
-    write_json(out / "tec_metadata_index.v631.json", metadata_index())
+        write_json(
+            out / "tec_tooltips.v631.json",
+            OrderedDict(
+                [
+                    ("schema_version", "mecom_tec_help.v1"),
+                    ("source", "Meerstetter TEC Configuration Software v6.31 CoSo BAML/decompile review"),
+                    ("parameters", tooltip_rows()),
+                ]
+            ),
+        )
+        write_json(out / "tec_metadata_index.v631.json", metadata_index())
+        return
+
+    if not args.source_dir:
+        raise SystemExit("--source-dir is required for --version v632")
+    source_dir = Path(args.source_dir)
+    defaults = harvest_default_config_text((source_dir / V632_DEFAULT_CONFIG_NAME).read_text(encoding="utf-8-sig"), V632_DEFAULT_CONFIG_NAME)
+    eds = harvest_eds_text((source_dir / EDS_NAME).read_text(encoding="utf-8-sig", errors="replace"), EDS_NAME)
+    overview = harvest_parameter_overview_text((source_dir / PARAMETER_OVERVIEW_NAME).read_text(encoding="utf-8-sig"), PARAMETER_OVERVIEW_NAME)
+    base_sdo_map = json.loads((out / "tec_canopen_sdo_map.v631.json").read_text(encoding="utf-8"), object_pairs_hook=OrderedDict)
+    pdo_model = pdo_model_from_eds(eds)
+
+    write_json(out / "tec_default_config_5216p.v632.json", defaults)
+    write_json(out / "canopen_eds.v632.json", eds)
+    write_json(out / "tec_parameter_overview.v632.json", overview)
+    write_json(out / "tec_canopen_sdo_map.v632.json", harvest_sdo_map_v632(overview, eds, base_sdo_map))
+    write_json(out / "tec_metadata_index.v632.json", tec_v632_metadata_index(pdo_model))
 
 
 if __name__ == "__main__":

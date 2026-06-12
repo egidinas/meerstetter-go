@@ -155,6 +155,22 @@ func TestParseRejectsBadCRC(t *testing.T) {
 	}
 }
 
+func TestParseWriteResponseForRequestAcceptsBareRequestCRCAck(t *testing.T) {
+	request := BuildWriteInt32Frame(0, 1, 2070, 1, 56)
+	raw := []byte(fmt.Sprintf("!000001%s\r", string(request[len(request)-5:len(request)-1])))
+	if err := ParseWriteResponseForRequest(raw, request); err != nil {
+		t.Fatalf("ParseWriteResponseForRequest: %v", err)
+	}
+}
+
+func TestParseWriteResponseForRequestRejectsUnmatchedBareAck(t *testing.T) {
+	request := BuildWriteInt32Frame(0, 1, 2070, 1, 56)
+	raw := []byte("!0000010000\r")
+	if err := ParseWriteResponseForRequest(raw, request); err == nil {
+		t.Fatal("ParseWriteResponseForRequest accepted unmatched bare ACK")
+	}
+}
+
 func TestClientReadFloat32(t *testing.T) {
 	rw := &scriptedReadWriter{read: bytes.NewBuffer(responseFrame("!500001+41CC0000"))}
 	client := NewClient(rw, ClientConfig{Address: 0x50, Timeout: time.Second})

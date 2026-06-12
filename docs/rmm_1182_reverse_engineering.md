@@ -15,9 +15,9 @@ keeps runtime claims separate from catalogue evidence.
 | `Software/RMM-1182-Configuration-Software.exe` | Embedded assembly and UI-resource evidence; confirms .NET 8 UI, `MeSoft.CoSoG2.RMM1182`, the bundled MeSoft MeCom command set, export/import XML config, CANopen node/bit-rate UI, and named RMM windows/parameters. |
 
 The source ZIP also says the dedicated `RMM-1182 Communications Protocol`
-document exists, but it is not included. Until that document or live captures
-are available, the CANopen EDS is the authoritative machine-readable RMM
-protocol source in this repo.
+document exists, but it is not included. The CANopen EDS remains the
+authoritative machine-readable RMM CANopen source in this repo; the live USB
+evidence below is narrower and only proves the listed serial MeCom reads.
 
 ## CANopen Identity
 
@@ -77,6 +77,45 @@ resources confirm RMM parameter families for system telemetry, communication,
 board heater, high- and low-resolution measurement, value conversion, IO, fan,
 advanced settings and ME settings, but the numeric `MeParID` bindings were not
 decoded from BAML in this pass.
+
+## Live USB MeCom Probe
+
+On 2026-06-04, one RMM-1182 connected by USB to the Odyssey computer
+`192.168.8.140` was contacted through `COM5` at 57600 baud and MeCom address
+`0`. Identity reads returned:
+
+| Command | Value |
+|---|---|
+| `?IF` | `8170-RMM-1182 SW G01` |
+| `?VI` | `00640004` |
+| `?BI` | `00000000` |
+
+The physical HR1 input had a Pt100 sensor connected. Read-only `?VM` and `?VR`
+probes showed that the RMM USB MeCom path accepts the decimal EDS object labels
+as MeParID values for the listed reads. For example, EDS object `0x3001` is
+used as MeParID `3001`, which the MeCom wire frame encodes as hexadecimal
+field `0BB9`; interpreting the raw object number as decimal `12289` returned
+`PAR_NOT_AVAILABLE`.
+
+| MeParID | Instance | Name | Type | Live sample |
+|---:|---:|---|---|---:|
+| `3000` | 1 | HR1 raw ADC | float32 | `750793.0` |
+| `3001` | 1 | HR1 resistance | float32 | `109.340462` |
+| `3002` | 1 | HR1 voltage | float32 | `NaN` |
+| `3100` | 1 | HR1 measurement type | int32 | `0` |
+| `3101` | 1 | HR1 ADC Rs | float32 | `39000` |
+| `4000` | 1 | VC1 result | float32 | `23.808823` |
+| `4001` | 1 | VC1 surveilled result | float32 | `0` |
+| `4011` | 1 | VC1 result type | int32 | `0` |
+| `4012` | 1 | VC1 conversion type | int32 | `2` |
+
+This evidence is captured in
+`mecom/catalogues/sources/rmm_1182_live_usb_mecom.v100.json`, and the helper
+`mecom.DefaultRMM1182HR1Pt100Parameters()` exposes the same read-only parameter
+set. The live resistance and conversion result are consistent with a Pt100 near
+room temperature, but the enum meaning of conversion type value `2` is not
+asserted until the missing communications protocol or software config capture
+proves it.
 
 ## Object Dictionary Shape
 
@@ -164,11 +203,14 @@ not to assert runtime behavior that the EDS or live captures do not prove.
 
 ## Integration Implications
 
-- Add RMM as a catalogue-only family for now: `meerstetter.rmm_1182.v100`.
+- Add RMM as a catalogue family: `meerstetter.rmm_1182.v100`.
+- For USB serial MeCom on this RMM-1182, HR1/VC1 read-only values can be probed
+  with decimal EDS labels as MeParID values using the `rmm-1182-hr1-pt100`
+  preset.
 - CANopen discovery can identify RMM-1182 via product number `0x49E`.
-- SDO reads/writes can be generated from the EDS object dictionary, but do not
-  map them onto MeCom parameter IDs until the missing RMM communications
-  protocol document or CoSo/RMM captures establish that crosswalk.
+- CANopen SDO reads/writes can be generated from the EDS object dictionary, but
+  the USB MeCom read evidence does not prove CANopen SDO routing or write
+  behavior.
 - Treat `rww`, `rw`, and `rwr` exactly as EDS access classes until live writes
   prove persistence, side effects and save/restore semantics.
 - PDO support is broad enough to support a telemetry wall later, but the default
@@ -182,6 +224,6 @@ not to assert runtime behavior that the EDS or live captures do not prove.
    against EDS indexes.
 3. Capture startup traffic from the RMM configuration software over CAN/RS485
    and classify SDO/PDO/MeCom command order.
-4. Probe a physical RMM-1182 with bounded SDO reads for identity, heartbeat,
-   system telemetry and measurement result objects.
+4. Extend bounded live probes beyond HR1/VC1 reads: common system telemetry,
+   HR2/LR channels, metadata/limits, and CANopen SDO identity/heartbeat.
 5. Confirm whether GPIO10 is real, hidden, or a manual typo.

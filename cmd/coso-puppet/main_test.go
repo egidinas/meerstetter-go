@@ -57,7 +57,7 @@ func TestParseMeComResponse(t *testing.T) {
 	prefix := "!4C003500010400000001FF8000007F80000000000000"
 	raw := []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
 
-	resp, err := parseMeComResponse(raw)
+	resp, err := parseMeComResponse(raw, nil)
 	if err != nil {
 		t.Fatalf("parseMeComResponse returned error: %v", err)
 	}
@@ -73,5 +73,37 @@ func TestParseMeComResponse(t *testing.T) {
 	}
 	if meta.Type != "FLOAT32" || meta.Flags != 1 || meta.MaxInstances != 4 || meta.MaxElements != 1 {
 		t.Fatalf("metadata = %+v", meta)
+	}
+}
+
+func TestParseMeComResponseRejectsMismatchedEnvelope(t *testing.T) {
+	request := buildMeComFrame(0x4b, 0x4b, "?VI")
+	prefix := "!4C004C027802E8"
+	raw := []byte(fmt.Sprintf("%s%04X%c", prefix, mecom.CRC16([]byte(prefix)), mecom.FrameTerminator))
+
+	if _, err := parseMeComResponse(raw, request); err == nil || !strings.Contains(err.Error(), "address/sequence mismatch") {
+		t.Fatalf("parseMeComResponse error = %v, want mismatch", err)
+	}
+}
+
+func TestParseMeComResponseAcceptsBareRequestCRCAck(t *testing.T) {
+	request := buildMeComFrame(0, 1, "VS08160100000038")
+	raw := []byte(fmt.Sprintf("!000001%s\r", string(request[len(request)-5:len(request)-1])))
+
+	resp, err := parseMeComResponse(raw, request)
+	if err != nil {
+		t.Fatalf("parseMeComResponse returned error: %v", err)
+	}
+	if resp.Address != 0 || resp.Sequence != 1 || resp.Status != "ok" || resp.Payload != "" {
+		t.Fatalf("response = %+v", resp)
+	}
+}
+
+func TestParseMeComResponseRejectsUnmatchedBareRequestCRCAck(t *testing.T) {
+	request := buildMeComFrame(0, 1, "VS08160100000038")
+	raw := []byte("!0000010000\r")
+
+	if _, err := parseMeComResponse(raw, request); err == nil {
+		t.Fatal("parseMeComResponse accepted unmatched bare ACK")
 	}
 }
