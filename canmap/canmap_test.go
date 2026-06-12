@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+
 	"fmt"
+	"github.com/egidinas/meerstetter-go/canopen"
 	"strings"
 	"testing"
 )
@@ -173,7 +175,7 @@ func (f fakeSDO) ReadSDORaw(_ context.Context, index uint16, sub byte) ([]byte, 
 	if data, ok := f[sdoKey(index, sub)]; ok {
 		return data, nil
 	}
-	return nil, fmt.Errorf("SDO abort 0x06020000 (object does not exist)")
+	return nil, canopen.SDOAbortError{Index: index, SubIndex: sub, Code: 0x06020000}
 }
 
 func le32(v uint32) []byte {
@@ -193,6 +195,54 @@ func tecLike(cob uint32, sel int32) fakeSDO {
 		sdoKey(0x1800, 1): le32(cobIDInvalidBit | 0x1CB),
 		sdoKey(0x1A00, 0): {0},
 		sdoKey(0x3300, 1): le32(uint32(sel)),
+	}
+}
+
+// flakySDO wraps a fakeSDO and fails the first `dropFirst` reads of each key
+// with a transient (non-abort) error, simulating dropped SDO responses under
+// bus load. ObserveNode must retry through these and still read the mapping.
+type flakySDO struct {
+	inner     fakeSDO
+	dropFirst int
+	seen      map[string]int
+}
+
+func (f *flakySDO) ReadSDORaw(ctx context.Context, index uint16, sub byte) ([]byte, error) {
+	key := sdoKey(index, sub)
+	f.seen[key]++
+	if f.seen[key] <= f.dropFirst {
+		return nil, fmt.Errorf("%s: transient timeout", key) // not an SDOAbortError
+	}
+	return f.inner.ReadSDORaw(ctx, index, sub)
+}
+
+func TestObserveNodeRetriesTransientDropsButNotAborts(t *testing.T) {
+	// Every read drops twice before succeeding; with 4 attempts the scan still
+	// recovers the full RPDO1 mapping instead of reporting the PDO absent.
+	dev := &flakySDO{inner: tecLike(0x1A1, 7), dropFirst: 2, seen: map[string]int{}}
+	obs, err := ObserveNode(context.Background(), dev, 0x4B, []SDOWrite{{Index: 0x3300, SubIndex: 1, Value: 7}})
+	if err != nil {
+		t.Fatalf("observe with transient drops: %v", err)
+	}
+	if len(obs.RPDOs) != 1 || obs.RPDOs[0].COBID != 0x1A1 {
+		t.Fatalf("transient drops should not hide RPDO1: %+v", obs.RPDOs)
+	}
+	if got := obs.RPDOs[0].Mapping; len(got) != 1 || got[0].Raw() != 0x42000120 {
+		t.Fatalf("mapping lost under transient drops: %+v", got)
+	}
+	if obs.SourceSelects["0x3300:01"] != 7 {
+		t.Fatalf("source select lost under transient drops: %+v", obs.SourceSelects)
+	}
+
+	// A genuine abort must not be retried into existence: an empty device
+	// returns no PDOs quickly. (Sanity that readSDO stops on abort.)
+	empty := &flakySDO{inner: fakeSDO{}, dropFirst: 0, seen: map[string]int{}}
+	obs2, err := ObserveNode(context.Background(), empty, 0x10, nil)
+	if err != nil {
+		t.Fatalf("observe empty device: %v", err)
+	}
+	if len(obs2.RPDOs) != 0 || len(obs2.TPDOs) != 0 {
+		t.Fatalf("empty device should expose no PDOs: %+v", obs2)
 	}
 }
 

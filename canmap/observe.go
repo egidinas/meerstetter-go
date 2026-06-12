@@ -3,13 +3,56 @@ package canmap
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
+
+	"github.com/egidinas/meerstetter-go/canopen"
 )
 
 // SDOReader is the minimal device access needed for live read-back.
 // mecom.CANopenClient satisfies it structurally.
 type SDOReader interface {
 	ReadSDORaw(ctx context.Context, index uint16, subIndex byte) ([]byte, error)
+}
+
+// sdoReadAttempts bounds how many times a single object read is retried before
+// giving up. On a shared CAN bus the gateway's background polling and other
+// nodes' high-rate PDO traffic can cause a single SDO response to be dropped;
+// retrying turns that transient loss into a successful read instead of a wrong
+// "object absent" conclusion. A genuine SDO abort is authoritative and is
+// never retried.
+const sdoReadAttempts = 4
+
+// CANopen SDO abort codes that authoritatively mean the object or subindex is
+// not in the dictionary. Only these end a PDO scan; every other abort (general
+// error 0x08000000, protocol timeout 0x05040000, resource unavailable, …) can
+// be a transient busy/contended condition on a shared bus and is retried.
+const (
+	sdoAbortObjectAbsent   = 0x06020000
+	sdoAbortSubIndexAbsent = 0x06090011
+)
+
+// readSDO reads one object, retrying transient failures (timeouts, dropped
+// frames, busy/general-error aborts) but returning immediately on a definitive
+// "object/subindex does not exist" abort, which is the device's real
+// end-of-list answer.
+func readSDO(ctx context.Context, r SDOReader, index uint16, subIndex byte) ([]byte, error) {
+	var lastErr error
+	for attempt := 0; attempt < sdoReadAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		data, err := r.ReadSDORaw(ctx, index, subIndex)
+		if err == nil {
+			return data, nil
+		}
+		var abort canopen.SDOAbortError
+		if errors.As(err, &abort) && (abort.Code == sdoAbortObjectAbsent || abort.Code == sdoAbortSubIndexAbsent) {
+			return nil, err
+		}
+		lastErr = err
+	}
+	return nil, lastErr
 }
 
 // maxScanPDOs bounds the per-node PDO scan. The RMM-1182 exposes 16 PDOs per
@@ -75,7 +118,7 @@ func ObserveNode(ctx context.Context, r SDOReader, nodeID byte, wants []SDOWrite
 		if _, done := obs.SourceSelects[key]; done {
 			continue
 		}
-		data, err := r.ReadSDORaw(ctx, uint16(w.Index), w.SubIndex)
+		data, err := readSDO(ctx, r, uint16(w.Index), w.SubIndex)
 		if err != nil {
 			obs.Errors = append(obs.Errors, fmt.Sprintf("read %s: %v", key, err))
 			continue
@@ -92,28 +135,31 @@ func ObserveNode(ctx context.Context, r SDOReader, nodeID byte, wants []SDOWrite
 func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]ObservedPDO, error) {
 	var out []ObservedPDO
 	for i := 0; i < maxScanPDOs; i++ {
-		raw, err := r.ReadSDORaw(ctx, commBase+uint16(i), 1)
+		raw, err := readSDO(ctx, r, commBase+uint16(i), 1)
 		if err != nil {
 			if ctx.Err() != nil {
 				return out, ctx.Err()
 			}
+			// After retries this is treated as the end of the PDO list (a
+			// genuine abort for an unimplemented PDO index), not a transient
+			// drop, so the scan stops here.
 			break
 		}
 		pdo := ObservedPDO{Number: i + 1}
 		cob := leUint32(raw)
 		pdo.Enabled = cob&cobIDInvalidBit == 0
 		pdo.COBID = HexUint32(cob &^ cobIDInvalidBit)
-		if tt, err := r.ReadSDORaw(ctx, commBase+uint16(i), 2); err == nil && len(tt) > 0 {
+		if tt, err := readSDO(ctx, r, commBase+uint16(i), 2); err == nil && len(tt) > 0 {
 			pdo.TransmissionType = tt[0]
 		}
-		count, err := r.ReadSDORaw(ctx, mapBase+uint16(i), 0)
+		count, err := readSDO(ctx, r, mapBase+uint16(i), 0)
 		if err == nil && len(count) > 0 {
 			n := int(count[0])
 			if n > 8 {
 				n = 8
 			}
 			for s := 1; s <= n; s++ {
-				entry, err := r.ReadSDORaw(ctx, mapBase+uint16(i), byte(s))
+				entry, err := readSDO(ctx, r, mapBase+uint16(i), byte(s))
 				if err != nil {
 					break
 				}
