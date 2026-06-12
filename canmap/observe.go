@@ -32,6 +32,14 @@ const (
 	sdoAbortSubIndexAbsent = 0x06090011
 )
 
+// isAbsentAbort reports whether err is the device's definitive "object or
+// subindex does not exist" answer, which is the only failure that ends a PDO
+// scan. Every other failure is transient or contention-related.
+func isAbsentAbort(err error) bool {
+	var abort canopen.SDOAbortError
+	return errors.As(err, &abort) && (abort.Code == sdoAbortObjectAbsent || abort.Code == sdoAbortSubIndexAbsent)
+}
+
 // readSDO reads one object, retrying transient failures (timeouts, dropped
 // frames, busy/general-error aborts) but returning immediately on a definitive
 // "object/subindex does not exist" abort, which is the device's real
@@ -46,8 +54,7 @@ func readSDO(ctx context.Context, r SDOReader, index uint16, subIndex byte) ([]b
 		if err == nil {
 			return data, nil
 		}
-		var abort canopen.SDOAbortError
-		if errors.As(err, &abort) && (abort.Code == sdoAbortObjectAbsent || abort.Code == sdoAbortSubIndexAbsent) {
+		if isAbsentAbort(err) {
 			return nil, err
 		}
 		lastErr = err
@@ -101,12 +108,15 @@ const (
 // Diff does the comparing.
 func ObserveNode(ctx context.Context, r SDOReader, nodeID byte, wants []SDOWrite) (*ObservedNode, error) {
 	obs := &ObservedNode{NodeID: nodeID}
+	var rerrs, terrs []string
 	var err error
-	obs.RPDOs, err = scanPDOs(ctx, r, rpdoCommBase, rpdoMapBase)
+	obs.RPDOs, rerrs, err = scanPDOs(ctx, r, rpdoCommBase, rpdoMapBase)
+	obs.Errors = append(obs.Errors, rerrs...)
 	if err != nil {
 		return obs, fmt.Errorf("canmap: node 0x%02X RPDO scan: %w", nodeID, err)
 	}
-	obs.TPDOs, err = scanPDOs(ctx, r, tpdoCommBase, tpdoMapBase)
+	obs.TPDOs, terrs, err = scanPDOs(ctx, r, tpdoCommBase, tpdoMapBase)
+	obs.Errors = append(obs.Errors, terrs...)
 	if err != nil {
 		return obs, fmt.Errorf("canmap: node 0x%02X TPDO scan: %w", nodeID, err)
 	}
@@ -128,22 +138,30 @@ func ObserveNode(ctx context.Context, r SDOReader, nodeID byte, wants []SDOWrite
 	return obs, nil
 }
 
-// scanPDOs walks consecutive PDO communication/mapping records until the
-// first absent record or the scan bound. A read failure on the very first
-// record is treated as "no PDOs of this kind", not an error, because devices
-// legitimately differ in PDO count.
-func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]ObservedPDO, error) {
+// scanPDOs walks consecutive PDO communication/mapping records. The scan ends
+// only at a definitive object-absent abort (the real end of the PDO list) or
+// the scan bound. A non-absent failure (timeout, busy/general abort that
+// survived retries) does NOT end the scan and is not silently dropped: it is
+// recorded as an observation error and the scan continues to the next index,
+// so a transient miss on one PDO cannot hide the PDOs after it or be reported
+// as a false "PDO not present". The returned errors are non-fatal; a non-nil
+// error return value is reserved for context cancellation.
+func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]ObservedPDO, []string, error) {
 	var out []ObservedPDO
+	var errs []string
 	for i := 0; i < maxScanPDOs; i++ {
 		raw, err := readSDO(ctx, r, commBase+uint16(i), 1)
 		if err != nil {
 			if ctx.Err() != nil {
-				return out, ctx.Err()
+				return out, errs, ctx.Err()
 			}
-			// After retries this is treated as the end of the PDO list (a
-			// genuine abort for an unimplemented PDO index), not a transient
-			// drop, so the scan stops here.
-			break
+			if isAbsentAbort(err) {
+				break // genuine end of the PDO list
+			}
+			// Transient/contention failure: record it and keep scanning so
+			// later PDOs are not hidden behind one unreadable index.
+			errs = append(errs, fmt.Sprintf("comm 0x%04X:1: %v", commBase+uint16(i), err))
+			continue
 		}
 		pdo := ObservedPDO{Number: i + 1}
 		cob := leUint32(raw)
@@ -153,7 +171,11 @@ func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]Obs
 			pdo.TransmissionType = tt[0]
 		}
 		count, err := readSDO(ctx, r, mapBase+uint16(i), 0)
-		if err == nil && len(count) > 0 {
+		if err != nil {
+			if !isAbsentAbort(err) {
+				errs = append(errs, fmt.Sprintf("map count 0x%04X:0: %v", mapBase+uint16(i), err))
+			}
+		} else if len(count) > 0 {
 			n := int(count[0])
 			if n > 8 {
 				n = 8
@@ -161,6 +183,9 @@ func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]Obs
 			for s := 1; s <= n; s++ {
 				entry, err := readSDO(ctx, r, mapBase+uint16(i), byte(s))
 				if err != nil {
+					if !isAbsentAbort(err) {
+						errs = append(errs, fmt.Sprintf("map entry 0x%04X:%d: %v", mapBase+uint16(i), s, err))
+					}
 					break
 				}
 				pdo.Mapping = append(pdo.Mapping, DecodeMapEntry(leUint32(entry)))
@@ -168,7 +193,7 @@ func scanPDOs(ctx context.Context, r SDOReader, commBase, mapBase uint16) ([]Obs
 		}
 		out = append(out, pdo)
 	}
-	return out, nil
+	return out, errs, nil
 }
 
 func leUint32(data []byte) uint32 {

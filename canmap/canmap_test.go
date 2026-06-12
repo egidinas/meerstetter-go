@@ -246,6 +246,54 @@ func TestObserveNodeRetriesTransientDropsButNotAborts(t *testing.T) {
 	}
 }
 
+// gappySDO returns a persistent non-absent error for specific keys (simulating
+// an index that never reads cleanly under contention) and serves the rest.
+type gappySDO struct {
+	data     fakeSDO
+	failKeys map[string]bool
+}
+
+func (g gappySDO) ReadSDORaw(ctx context.Context, index uint16, sub byte) ([]byte, error) {
+	key := sdoKey(index, sub)
+	if g.failKeys[key] {
+		return nil, fmt.Errorf("%s: device busy", key) // non-absent, persistent
+	}
+	return g.data.ReadSDORaw(ctx, index, sub)
+}
+
+func TestScanDoesNotTruncateOnNonAbsentFailure(t *testing.T) {
+	// RPDO1 (0x1400:1) never reads, but RPDO2 (0x1401:1) is a real PDO. The
+	// scan must not stop at the unreadable RPDO1 and hide RPDO2; it must report
+	// RPDO2 and record an observation error for the gap.
+	dev := gappySDO{
+		failKeys: map[string]bool{sdoKey(0x1400, 1): true},
+		data: fakeSDO{
+			sdoKey(0x1401, 1): le32(0x241),
+			sdoKey(0x1601, 0): {1},
+			sdoKey(0x1601, 1): le32(0x42000120),
+		},
+	}
+	obs, err := ObserveNode(context.Background(), dev, 0x4B, nil)
+	if err != nil {
+		t.Fatalf("observe: %v", err)
+	}
+	if len(obs.RPDOs) != 1 || obs.RPDOs[0].Number != 2 || obs.RPDOs[0].COBID != 0x241 {
+		t.Fatalf("RPDO2 hidden by unreadable RPDO1: %+v", obs.RPDOs)
+	}
+	if len(obs.RPDOs[0].Mapping) != 1 || obs.RPDOs[0].Mapping[0].Raw() != 0x42000120 {
+		t.Fatalf("RPDO2 mapping not read: %+v", obs.RPDOs[0].Mapping)
+	}
+	found := false
+	for _, e := range obs.Errors {
+		if strings.Contains(e, "0x1400") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("non-absent failure should be surfaced as an observation error, got: %v", obs.Errors)
+	}
+}
+
 func TestObserveNodeReadsPDOTablesAndSourceSelects(t *testing.T) {
 	dev := tecLike(0x1A1, 7)
 	obs, err := ObserveNode(context.Background(), dev, 0x4B, []SDOWrite{{Index: 0x3300, SubIndex: 1, Value: 7}})

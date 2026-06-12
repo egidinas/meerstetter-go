@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -133,6 +134,45 @@ func TestCanmapImportPatternInstantiatesForNewTestbed(t *testing.T) {
 	n, ok := reloaded.registry.NodeByRole("tec-a")
 	if !ok || n.NodeID != 0x51 || reloaded.registry.Name != "bench-b" {
 		t.Fatalf("import not persisted correctly: %+v", reloaded.registry)
+	}
+}
+
+func TestCanmapConcurrentImportAndReadAreRaceFree(t *testing.T) {
+	// Exercise the registry swap under concurrent imports, exports and GETs.
+	// With -race this fails if registry access is not serialized.
+	s, ts := canmapTestServer(t, true)
+	mkPattern := func(name string) []byte {
+		body, _ := json.Marshal(canmapImportRequest{
+			Pattern: canmap.ExportPattern(s.canmap.current()),
+			Name:    name,
+			Bindings: []canmap.Binding{
+				{Role: "rmm", NodeID: 0x20},
+				{Role: "tec-a", NodeID: 0x51},
+			},
+		})
+		return body
+	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(3)
+		name := "bench-" + string(rune('a'+i))
+		go func() {
+			defer wg.Done()
+			http.Post(ts.URL+"/api/canmap/import", "application/json", bytes.NewReader(mkPattern(name)))
+		}()
+		go func() { defer wg.Done(); http.Get(ts.URL + "/api/canmap") }()
+		go func() { defer wg.Done(); http.Get(ts.URL + "/api/canmap/export?format=pattern") }()
+	}
+	wg.Wait()
+
+	// The registry must still be loadable and internally consistent afterward.
+	reloaded, err := loadCanmap(s.canmap.path)
+	if err != nil || reloaded.registry == nil {
+		t.Fatalf("registry unusable after concurrent imports: %v", err)
+	}
+	if errs := reloaded.registry.Validate(); len(errs) > 0 {
+		t.Fatalf("persisted registry invalid after concurrent imports: %v", errs)
 	}
 }
 

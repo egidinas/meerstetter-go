@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/egidinas/meerstetter-go/canmap"
@@ -15,9 +16,40 @@ import (
 // canmapState holds the gateway's loaded CAN signal registry. The registry
 // file is the source of truth; the gateway never writes device configuration
 // from it — it only reads device state back and reports drift.
+//
+// The registry pointer is read by concurrent GET/export/live requests and
+// swapped by imports, so all access goes through the mutex. A loaded registry
+// is treated as immutable once published, so a snapshot pointer taken under
+// the read lock stays safe to use after the lock is released.
 type canmapState struct {
 	path     string
+	mu       sync.RWMutex
 	registry *canmap.Registry
+}
+
+// current returns the currently loaded registry, or nil. Safe for concurrent use.
+func (st *canmapState) current() *canmap.Registry {
+	if st == nil {
+		return nil
+	}
+	st.mu.RLock()
+	defer st.mu.RUnlock()
+	return st.registry
+}
+
+// replace atomically swaps in a new registry and persists it, rolling back the
+// in-memory pointer if the write fails so a failed import never leaves a
+// published registry that was not saved.
+func (st *canmapState) replace(reg *canmap.Registry) error {
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	prev := st.registry
+	st.registry = reg
+	if err := st.saveLocked(); err != nil {
+		st.registry = prev
+		return err
+	}
+	return nil
 }
 
 func loadCanmap(path string) (*canmapState, error) {
@@ -39,7 +71,8 @@ func loadCanmap(path string) (*canmapState, error) {
 	return st, nil
 }
 
-func (st *canmapState) save() error {
+// saveLocked persists the current registry. The caller must hold st.mu.
+func (st *canmapState) saveLocked() error {
 	if st.path == "" {
 		return fmt.Errorf("gateway started without -canmap path; registry is read-only")
 	}
@@ -138,11 +171,11 @@ func (s *server) handleCanmap(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]any{"error": "GET only"})
 		return
 	}
-	if s.canmap == nil || s.canmap.registry == nil {
+	reg := s.canmap.current()
+	if reg == nil {
 		writeJSON(w, http.StatusOK, map[string]any{"registry": nil})
 		return
 	}
-	reg := s.canmap.registry
 	body := map[string]any{"registry": reg, "is_pattern": reg.IsPattern()}
 	if r.URL.Query().Get("live") == "1" && !reg.IsPattern() {
 		observed := s.observeRegistryNodes(r, reg)
@@ -157,11 +190,11 @@ func (s *server) handleCanmap(w http.ResponseWriter, r *http.Request) {
 // returns the concrete registry; format=pattern strips node bindings so the
 // file can seed a copy of this testbed.
 func (s *server) handleCanmapExport(w http.ResponseWriter, r *http.Request) {
-	if s.canmap == nil || s.canmap.registry == nil {
+	reg := s.canmap.current()
+	if reg == nil {
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "no CAN signal registry loaded"})
 		return
 	}
-	reg := s.canmap.registry
 	name := reg.Name + "-registry"
 	if r.URL.Query().Get("format") == "pattern" {
 		reg = canmap.ExportPattern(reg)
@@ -241,10 +274,7 @@ func (s *server) handleCanmapImport(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	prev := s.canmap.registry
-	s.canmap.registry = reg
-	if err := s.canmap.save(); err != nil {
-		s.canmap.registry = prev
+	if err := s.canmap.replace(reg); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "persist registry: " + err.Error()})
 		return
 	}
