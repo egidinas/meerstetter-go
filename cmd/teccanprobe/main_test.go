@@ -60,6 +60,34 @@ func TestParseMeComDataType(t *testing.T) {
 	}
 }
 
+func TestParseSDOProbesSupportsUint16(t *testing.T) {
+	probes, err := parseSDOProbes("0x1800:5:uint16:event-timer")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(probes) != 1 {
+		t.Fatalf("probe count = %d, want 1", len(probes))
+	}
+	probe := probes[0]
+	if probe.Index != 0x1800 || probe.SubIndex != 5 || probe.Kind != "uint16" || probe.Label != "event-timer" {
+		t.Fatalf("probe = %+v", probe)
+	}
+}
+
+func TestFormatSDOValueSupportsUint16(t *testing.T) {
+	got, err := formatSDOValue(canopen.SDOUploadResponse{
+		Index:    0x1800,
+		SubIndex: 5,
+		Data:     []byte{0x34, 0x12},
+	}, "uint16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "uint16=4660(0x1234)" {
+		t.Fatalf("uint16 value = %q", got)
+	}
+}
+
 func TestMeComResponseMatchesRequestRequiresAddressAndSequence(t *testing.T) {
 	frame := canopen.Frame{
 		ID:  0x44b,

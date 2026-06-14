@@ -63,6 +63,33 @@ func TestSDODownloadExpeditedRequest(t *testing.T) {
 	}
 }
 
+func TestNMTFrame(t *testing.T) {
+	frame, err := NMTFrame(NMTEnterPreOperational, 0x4B)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if frame.ID != 0 || frame.DLC != 2 {
+		t.Fatalf("NMT frame id/dlc = 0x%X/%d, want 0/2", frame.ID, frame.DLC)
+	}
+	want := [8]byte{0x80, 0x4B}
+	if frame.Data != want {
+		t.Fatalf("NMT data = % X, want % X", frame.Data, want)
+	}
+}
+
+func TestNMTFrameAcceptsBroadcastAndRejectsInvalidNode(t *testing.T) {
+	frame, err := NMTFrame(NMTStartRemoteNode, 0)
+	if err != nil {
+		t.Fatalf("broadcast NMT should be accepted: %v", err)
+	}
+	if frame.Data[0] != 0x01 || frame.Data[1] != 0x00 {
+		t.Fatalf("broadcast NMT data = % X", frame.Data)
+	}
+	if _, err := NMTFrame(NMTStartRemoteNode, 0x80); err == nil {
+		t.Fatal("expected invalid node id error")
+	}
+}
+
 func TestSDODownloadExpeditedRequestRejectsInvalidNodeID(t *testing.T) {
 	for _, nodeID := range []byte{0, 0x80, 0xff} {
 		t.Run(fmt.Sprintf("0x%02X", nodeID), func(t *testing.T) {

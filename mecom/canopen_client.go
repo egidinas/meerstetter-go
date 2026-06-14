@@ -107,6 +107,14 @@ func (c *CANopenClient) WriteInt32(ctx context.Context, paramID, instance int, v
 	return c.writeSDO(ctx, object, buf[:])
 }
 
+// WriteSDORaw writes one arbitrary expedited CANopen SDO object. The value
+// bytes must already be little-endian object-dictionary bytes. The client waits
+// for an exact node/index/subindex download acknowledgement and ignores
+// unrelated SDO traffic on the same node.
+func (c *CANopenClient) WriteSDORaw(ctx context.Context, index uint16, subIndex byte, value []byte) error {
+	return c.writeSDO(ctx, CANopenSDOObject{Index: index, SubIndex: subIndex, Writable: true}, value)
+}
+
 func (c *CANopenClient) writeSDO(ctx context.Context, object CANopenSDOObject, value []byte) error {
 	req, err := canopen.SDODownloadExpeditedRequest(c.node, object.Index, object.SubIndex, value)
 	if err != nil {

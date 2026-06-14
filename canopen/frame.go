@@ -28,6 +28,30 @@ func validateNodeID(nodeID byte) error {
 	return nil
 }
 
+// NMTCommand is a CANopen network-management command byte.
+type NMTCommand byte
+
+const (
+	NMTStartRemoteNode     NMTCommand = 0x01
+	NMTStopRemoteNode      NMTCommand = 0x02
+	NMTEnterPreOperational NMTCommand = 0x80
+	NMTResetNode           NMTCommand = 0x81
+	NMTResetCommunication  NMTCommand = 0x82
+)
+
+// NMTFrame builds a CANopen NMT frame. nodeID 0 is the CANopen broadcast
+// address; 1..127 target one node.
+func NMTFrame(command NMTCommand, nodeID byte) (Frame, error) {
+	if nodeID > 0x7f {
+		return Frame{}, fmt.Errorf("canopen: node id 0x%02X outside 0..127", nodeID)
+	}
+	return Frame{
+		ID:   0,
+		Data: [8]byte{byte(command), nodeID},
+		DLC:  2,
+	}, nil
+}
+
 // SDOUploadRequest builds an expedited SDO upload request for one object entry.
 func SDOUploadRequest(nodeID byte, index uint16, subIndex byte) (Frame, error) {
 	if err := validateNodeID(nodeID); err != nil {

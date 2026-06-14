@@ -80,6 +80,7 @@ a pre-built browser bundle; source checkouts can build it from `web/`.
 | `cmd/mecompoll` | Continuous polling table across any number of endpoints, mixing TCP and CAN in one invocation. |
 | `cmd/mecomrun` | Executes a `sequencer.Script` JSON automation via a typed command chain. |
 | `cmd/teccanprobe` | Linux-only: SocketCAN/CANopen discovery probe. Reads identity, status, temperatures, and output-enable state for every TEC found on a CAN bus. Optionally captures raw frames to a ring file. |
+| `cmd/canpdoctl` | Linux-only: guarded CANopen SDO/NMT helper for dry-run and explicit-commit PDO setup, SDO reads/writes, NMT state changes, and host-origin PDO test publication. |
 
 ---
 

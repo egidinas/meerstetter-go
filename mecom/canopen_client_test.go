@@ -177,6 +177,50 @@ func TestCANopenClientWriteFloat32SkipsUnrelatedSDOAbort(t *testing.T) {
 	}
 }
 
+func TestCANopenClientWriteSDORawMatchesObjectIdentity(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x60, 0x99, 0x99, 0x01, 0, 0, 0, 0}},
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x60, 0x00, 0x16, 0x00, 0, 0, 0, 0}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	if err := client.WriteSDORaw(context.Background(), 0x1600, 0x00, []byte{0x01}); err != nil {
+		t.Fatalf("WriteSDORaw returned error: %v", err)
+	}
+	if len(fake.sent) != 1 {
+		t.Fatalf("sent=%d, want 1", len(fake.sent))
+	}
+	frame := fake.sent[0]
+	if frame.ID != 0x64b {
+		t.Fatalf("sent ID=0x%X, want 0x64B", frame.ID)
+	}
+	want := [8]byte{0x2F, 0x00, 0x16, 0x00, 0x01, 0, 0, 0}
+	if frame.Data != want {
+		t.Fatalf("sent data=% X, want % X", frame.Data, want)
+	}
+}
+
+func TestCANopenClientWriteSDORawReturnsMatchingAbort(t *testing.T) {
+	fake := &fakeCANTransceiver{
+		replies: []canopen.Frame{
+			{ID: 0x5cb, DLC: 8, Data: [8]byte{0x80, 0x00, 0x16, 0x00, 0x41, 0x00, 0x04, 0x06}},
+		},
+	}
+	client := NewCANopenClient(fake, ClientConfig{Address: 0x4b, Timeout: time.Second})
+	err := client.WriteSDORaw(context.Background(), 0x1600, 0x00, []byte{0x01})
+	if err == nil {
+		t.Fatal("expected matching SDO abort")
+	}
+	if !errors.Is(err, ErrWriteRejected) {
+		t.Fatalf("error = %v, want ErrWriteRejected", err)
+	}
+	var abort canopen.SDOAbortError
+	if !errors.As(err, &abort) || abort.Index != 0x1600 || abort.SubIndex != 0 {
+		t.Fatalf("error = %v, want matching SDOAbortError", err)
+	}
+}
+
 func TestCANopenClientWriteInt32SetsCascadeEnable(t *testing.T) {
 	fake := &fakeCANTransceiver{
 		replies: []canopen.Frame{

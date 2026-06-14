@@ -3,6 +3,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
@@ -49,7 +50,7 @@ func main() {
 	listen := flag.Duration("listen", 2*time.Second, "passive listen window")
 	timeout := flag.Duration("timeout", 180*time.Millisecond, "per-request response window")
 	nodesArg := flag.String("nodes", "", "CANopen node IDs to probe, e.g. 1-16,0x23")
-	sdoArg := flag.String("sdo", defaultSDOReads, "comma-separated SDO reads index:subindex:kind[:label], kind=uint32|int32|float32|byte; empty disables SDO reads")
+	sdoArg := flag.String("sdo", defaultSDOReads, "comma-separated SDO reads index:subindex:kind[:label], kind=uint32|int32|float32|uint16|byte; empty disables SDO reads")
 	addrsArg := flag.String("mecom-addrs", "", "MeCom CAN addresses to probe, e.g. 1-16,0x23")
 	paramID := flag.Int("param", 1000, "MeCom parameter ID for read-only value probe")
 	paramKindArg := flag.String("param-kind", string(mecom.DataTypeFloat32), "MeCom parameter data type for read-only value probe, kind=float32|int32")
@@ -546,7 +547,7 @@ func parseSDOProbes(v string) ([]sdoProbe, error) {
 		}
 		kind := strings.ToLower(strings.TrimSpace(fields[2]))
 		switch kind {
-		case "uint32", "int32", "float32", "byte":
+		case "uint32", "int32", "float32", "uint16", "byte":
 		default:
 			return nil, fmt.Errorf("probe %q kind %q is not supported", part, kind)
 		}
@@ -575,6 +576,12 @@ func formatSDOValue(resp canopen.SDOUploadResponse, kind string) (string, error)
 	case "float32":
 		v, err := resp.Float32()
 		return fmt.Sprintf("float32=%0.6g", v), err
+	case "uint16":
+		if len(resp.Data) != 2 {
+			return "", fmt.Errorf("canopen: 0x%04X:%02X has %d bytes, want uint16", resp.Index, resp.SubIndex, len(resp.Data))
+		}
+		v := binary.LittleEndian.Uint16(resp.Data)
+		return fmt.Sprintf("uint16=%d(0x%04X)", v, v), nil
 	case "byte":
 		v, err := resp.Byte()
 		return fmt.Sprintf("byte=%d(0x%02X)", v, v), err

@@ -1,199 +1,133 @@
 # CAN Parameter Publishing and Consuming Handbook
 
 This handbook explains how CANopen parameter publishing and consuming works in
-this repository, with the specific RMM-to-TEC and TEC-to-TEC temperature
-handover use case in mind.
+this repository, with the Meerstetter RMM-to-TEC and TEC-to-TEC temperature
+handover use cases in mind.
 
 It is based on the public CANopen PDO model, the imported Meerstetter TEC v6.32
-catalogue, the imported RMM-1182 EDS, and the repository tests that guard those
-imports. It does not claim that any live device was reconfigured during this
-write-up.
+catalogue, the imported RMM-1182 EDS, repository tests, and a bounded live CAN
+verification on 2026-06-14. The live verification used `can0` at 1 Mbit/s
+through a Kvaser USB CAN adapter, three RMM nodes (`0x37`, `0x38`, `0x39`), and
+four TEC nodes (`0x4B`, `0x4C`, `0x51`, `0x54`). All TEC outputs were verified
+disabled before and after runtime tests. No flash save was performed.
 
 No prior CAN or CANopen knowledge is assumed. If you already know CANopen, skip
-ahead to the Executive Summary.
+to the Executive Summary or the Live Verification Matrix.
 
 ## CAN and CANopen in Five Minutes
 
 **CAN bus.** All devices share one pair of wires. There is no central master and
 no point-to-point addressing: every message is broadcast, and every device on
-the bus sees every message. A message (a *frame*) consists of an identifier
-(11 bits, usually written in hex like `0x1A1`) and up to eight bytes of
-payload. The identifier does not say *who sent it* or *who should receive it* —
-it only says *what kind of message this is*. Receivers decide for themselves
-which identifiers they care about. CANopen default identifiers often encode a
-function code plus node ID by convention, but the raw CAN frame still only
-carries the resulting identifier.
+the bus sees every message. A message, or frame, has an 11-bit identifier
+usually written in hex, such as `0x1B8`, and up to eight payload bytes. The
+identifier does not say "from node X to node Y". Receivers decide which
+identifiers they care about.
 
-**CANopen.** A set of rules layered on top of CAN that gives those raw frames
-meaning. Its central idea is the **object dictionary**: every device contains a
-table of values, each addressed by a 16-bit *index* and an 8-bit *subindex*,
-written `0x4200:01`. Think of it as the device's complete settings-and-status
-spreadsheet: every temperature reading, setpoint, and configuration option has
-a fixed cell address. Meerstetter devices expose the same values over their
-proprietary MeCom protocol (by numeric parameter ID, e.g. `52200`) and over
-CANopen (by index, e.g. `0x4200`) — two doors into the same room.
+**CANopen.** CANopen gives those raw frames a device model. Its central idea is
+the **object dictionary**: every device contains a table of values, each
+addressed by a 16-bit index and an 8-bit subindex, written for example
+`0x4200:01`. Meerstetter devices expose many of the same values over MeCom
+parameter IDs and CANopen object addresses.
 
-**SDO — the phone call.** A Service Data Object transfer reads or writes one
-object dictionary entry on one specific device. You ask node 5 "what is in cell
-`0x4200:01`?" and node 5 answers you, and only you. SDOs are slow but precise:
-use them for configuration and for checking state.
+**SDO - the phone call.** A Service Data Object reads or writes one object on
+one node. Use SDO for configuration and verification: read a mapping, write a
+source selector, check a received value.
 
-**PDO — the radio broadcast.** A Process Data Object is a device repeatedly
-broadcasting a small set of live values (e.g. a temperature, every 50 ms) with
-no request and no reply. The producer packs values into a frame and sends it
-under an agreed identifier; any number of consumers listen for that identifier
-and unpack the bytes into their own object dictionary cells. From the
-producer's side it is called a **TPDO** (Transmit PDO); from a consumer's side
-the same frame is an **RPDO** (Receive PDO).
+**PDO - the radio broadcast.** A Process Data Object moves live process values.
+The producer sends a small payload under one CAN identifier. Any number of
+consumers can listen to that same identifier and unpack the payload into their
+own object dictionaries. From the producer side the frame is a **TPDO**
+(Transmit PDO). From the consumer side the same frame is an **RPDO** (Receive
+PDO).
 
-**COB-ID.** The CAN identifier a particular PDO is sent under. This is the
-entire "addressing" of a PDO: producer and consumers simply agree on a number.
-If the producer transmits under `0x1A1` and a consumer listens on `0x1A1`, they
-are connected. If they disagree, nothing happens — silently.
+**COB-ID.** The CAN identifier used by a PDO. Producer and consumer are
+connected only if they use the same COB-ID and compatible payload mapping.
 
-**PDO mapping.** The agreement about what the payload bytes *mean*: "bytes 0–3
-are a float32 going into cell `0x4200:01`". Mapping is itself stored in the
-object dictionary, so you configure it with SDO writes.
+**PDO mapping.** The byte layout. A mapping entry says which object dictionary
+cell occupies which payload bits. Example: `0x42000120` means object
+`0x4200:01`, 32 bits. CANopen payloads used here are little-endian.
 
-**NMT state.** A simple per-device run state. In *operational*, the device
-sends and acts on PDOs. In *pre-operational*, PDOs are off but SDOs still work —
-this is the state in which mapping changes are normally allowed. A device that
-answers SDOs but was never switched to operational will sit silently and
-produce no PDOs; this is a classic gotcha.
+**NMT state.** CANopen Network Management controls whether a node is
+operational, pre-operational, stopped, or resetting. Mapping changes are
+normally applied in pre-operational state. PDO traffic requires operational
+state.
 
-Putting it together for this repository's use case: an RMM measures a
-temperature and broadcasts it as a TPDO; one or two TECs are configured (via
-SDO) to consume that broadcast as an RPDO and store it in their
-external-temperature cell; finally each TEC is told (also via SDO) to use the
-external value in its control loop instead of its own sensor.
+For the main use case, an RMM publishes a temperature as a TPDO. One or more
+TECs consume the same frame as an RPDO, store it in an external temperature
+object, and can then explicitly select that external object as a local control
+source.
 
-```
-                 SDO ("phone call"): configure + verify, one-to-one
-   Host ────────────────────────────────────────────────┐
-    │                    │                               │
-    ▼                    ▼                               ▼
- ┌──────┐  TPDO       ┌───────┐                      ┌───────┐
- │ RMM  │ ═══════════▶│ TEC A │                      │ TEC B │
- │      │  broadcast  └───────┘                      └───────┘
- └──────┘  COB-ID 0x1A1   ▲                              ▲
-              ║           RPDO listens on 0x1A1          ║
-              ╚══════════════════════════════════════════╝
-                    same frame, consumed by both TECs
+```text
+              SDO: configure and verify, one host-to-one node
+   Host ------------------------------------------------------+
+    |                    |                                   |
+    v                    v                                   v
+ +------+  TPDO      +-------+                           +-------+
+ | RMM  | =========> | TEC A |                           | TEC B |
+ +------+ COB-ID     +-------+                           +-------+
+          0x1B8          ^                                   ^
+                         |                                   |
+                         +-------- same broadcast frame ------+
 ```
 
 ## Executive Summary
 
-CANopen has two different jobs here:
+The mechanism is real and useful:
 
-- Service Data Objects (SDO) read and write object dictionary entries. Use SDOs
-  to inspect values, configure PDO mappings, set source-selection parameters,
-  and verify the final device state.
-- Process Data Objects (PDO) move live process values. A Transmit PDO (TPDO) is
-  produced by one device or host. A Receive PDO (RPDO) is consumed by one or
-  more devices that are configured to listen to the same CAN identifier and
-  decode the same payload layout.
+- An RMM, a TEC, or the host can produce a PDO.
+- One PDO frame can be consumed by several TECs at the same time.
+- One TEC can consume several producers at the same time if different RPDO
+  records and different target objects are used.
+- A TEC can route an imported external object or sink value into local measured
+  temperature objects through source selector value `7`.
+- If the external object stream stops, the TEC v6.32 external object cell was
+  observed to become `NaN` after the missing-refresh timeout.
+- Device-to-device flow does not need the host once the devices are configured,
+  but the host is still needed for setup, audit, drift checks, and recovery.
 
-For the TEC v6.32 external-temperature feature, the important receive targets
-are:
+The mechanism also has hard limits:
 
-| MeCom ID | CANopen object | Type | Direction | Meaning |
+- One RPDO listens to one COB-ID at a time. Many-to-one requires several RPDOs,
+  different target objects, or time-separated reconfiguration.
+- A classic CANopen PDO carries at most eight bytes. Two `float32` values fit;
+  three do not.
+- Producer and consumer mapping must match exactly in type, length, byte order,
+  and meaning.
+- Source selection must be explicit. Receiving a value into `0x4200` or
+  `0x4201` does not by itself make a TEC use it for control.
+- Runtime SDO writes are not persistence. Saving to flash is a separate,
+  intentional step and was not performed in this live verification.
+
+## Connection Modes
+
+| Connection | What works | What is not proven |
+|---|---|---|
+| No CAN adapter | Registry editing, validation, import/export, dry-run command plans, tests, and documentation. | No live node state, no PDO traffic, no proof that a device consumed a value. |
+| Single direct USB/serial MeCom device | Read and write MeCom-visible values on that attached device, subject to the device's normal access rules. Useful for setup and diagnosis. | No peer-to-peer bus, no RMM-to-TEC PDO path, no multi-device proof, and no CANopen PDO mapping unless the attachment exposes a CANopen path too. |
+| CAN adapter, read-only | Passive capture plus SDO read-back of identity, PDO mapping, source selectors, and received values. | No proof that a proposed new mapping can be written. |
+| CAN adapter, write-enabled safe window | Apply runtime PDO mappings, source selectors, and event timers; verify value delivery; restore runtime state. | Persistence after power cycle unless flash save is intentionally executed and tested. |
+| Already configured device bus | Device-to-device flow can continue without a host forwarding values. | The host is still needed to inspect, clone, document, and repair configuration. |
+
+## TEC v6.32 Objects
+
+The TEC v6.32 catalogue exposes the key objects needed for direct
+temperature handover:
+
+| MeCom ID | CANopen object | Type | Role | Meaning |
 |---:|---|---|---|---|
-| 52200 | `0x4200:<instance>` | `float32` | RPDO receive | External Object Temperature |
-| 52201 | `0x4201:<instance>` | `float32` | RPDO receive | Fixed Sink Temperature |
-| 6300 | `0x3300:<instance>` | `int32` | SDO config | Object Temperature Source Selection |
-| 6304 | `0x3304:<instance>` | `int32` | SDO config | Sink Temperature Source Selection |
+| 52200 | `0x4200:<instance>` | `float32` | RPDO target | External object temperature |
+| 52201 | `0x4201:<instance>` | `float32` | RPDO target | Fixed sink temperature |
+| 1000 | `0x2100:<instance>` | `float32` | TPDO source | Object temperature |
+| 1001 | `0x2101:<instance>` | `float32` | TPDO source | Sink temperature |
+| 6300 | `0x3300:<instance>` | `int32` | SDO config | Object temperature source selection |
+| 6304 | `0x3304:<instance>` | `int32` | SDO config | Sink temperature source selection |
+| 6410 | `0x2410:<instance>` | `uint32`/`int32` | SDO safety state | Output enable, where `0` was disabled on the tested devices |
 
-The TEC catalogue states that source-selection value `7` selects the external
-temperature path. For `52200`, the imported metadata also records the safety
-requirement: the external object temperature must refresh every 100 ms or
-faster, and a missing refresh longer than 5 s forces `NaN` and stops the
-controller.
-
-## General CANopen Model
-
-CANopen PDO behavior is producer/consumer, not request/response. A producer
-sends a CAN frame with the configured COB-ID. Every consumer that has an RPDO
-configured for that COB-ID receives the same bytes. This is why one temperature
-value can feed more than one TEC controller, provided every consumer uses the
-same mapping and byte layout.
-
-A PDO has two object-dictionary records:
-
-| Function | RPDO range | TPDO range | What it controls |
-|---|---|---|---|
-| Communication parameters | `0x1400` to `0x15FF` | `0x1800` to `0x19FF` | COB-ID, validity, transmission type, timing |
-| Mapping parameters | `0x1600` to `0x17FF` | `0x1A00` to `0x1BFF` | Which object indexes/subindexes are packed into the frame |
-
-Each mapping entry is a 32-bit value:
-
-```
-(object_index << 16) | (subindex << 8) | bit_length
-```
-
-In other words, the eight hex digits of a mapping entry read left to right as
-*index, subindex, length in bits*. Worked example: `0x42000120` splits into
-`4200` (object index `0x4200`, external object temperature), `01` (subindex 1,
-i.e. instance 1), and `20` (hex for 32 — a 32-bit value). So this single number
-says "four bytes of this PDO's payload belong to `0x4200:01`".
-
-Examples:
-
-| Object | Mapping entry | Meaning |
-|---|---:|---|
-| `0x4200:01` | `0x42000120` | TEC external object temperature instance 1, 32-bit float |
-| `0x4201:01` | `0x42010120` | TEC fixed sink temperature instance 1, 32-bit float |
-| `0x2100:01` | `0x21000120` | TEC object temperature instance 1, 32-bit float |
-| `0x4000:01` | `0x40000120` | RMM value conversion result channel 1, 32-bit float |
-
-CANopen numeric payloads are little-endian in this codebase. A single 32-bit
-float consumes four PDO payload bytes. A classic CANopen PDO carries up to
-eight payload bytes, so the TEC v6.32 two-slot PDO model can carry two
-`float32` values per PDO.
-
-## Safe Configuration Sequence
-
-Use SDO writes for configuration. For live equipment, first back up the existing
-communication and mapping objects, ensure the output/control state is safe, then
-write the new mapping. The standard variable-PDO sequence is:
-
-1. Put the node in a state where mapping changes are allowed. For variable PDO
-   mapping this is normally NMT pre-operational.
-2. Disable the target PDO by setting bit 31 in the COB-ID entry. (The COB-ID
-   is stored as a 32-bit value; its top bit is not part of the identifier but a
-   "this PDO is invalid" flag, so setting it switches the PDO off without
-   losing the configured identifier.)
-3. Write mapping subindex `0` to `0`.
-4. Write mapping entry subindexes `1..n`.
-5. Write mapping subindex `0` to the number of mapped objects.
-6. Configure the communication parameters: COB-ID, transmission type, event
-   timer or inhibit time if used.
-7. Re-enable the PDO by clearing bit 31 in the COB-ID entry.
-8. Return the producer/consumer nodes to NMT operational.
-9. Verify the communication COB-ID, mapping entries, received object value, and
-   passive CAN traffic before relying on the value.
-10. Save parameters only after the runtime behavior is proven.
-
-Do not skip the backup step. The RMM and TEC devices can both expose many
-configurable PDOs, and losing the previous mapping can make later diagnosis
-harder than the original setup.
-
-## TEC v6.32 Specific Model
-
-The imported TEC v6.32 files add the capability needed for direct temperature
-handover:
-
-- Release note feature: "External Object and Sink Temperature Values can be used
-  as CANopen RPDO."
-- `52200` / `0x4200` is `float32`, read-write, four instances, RPDO-capable,
-  flash-save capable.
-- `52201` / `0x4201` is `float32`, read-write, four instances, RPDO-capable,
-  flash-save capable.
-- `1000` / `0x2100` is `float32`, read-only, four instances, TPDO-capable.
-- `1001` / `0x2101` is `float32`, read-only, four instances, TPDO-capable.
-- `6300` / `0x3300` selects the object temperature source. Value `7` selects
-  the external object temperature path.
-- `6304` / `0x3304` selects the sink temperature source. Value `7` selects the
-  fixed sink external-temperature path.
+The imported TEC metadata records source-selection value `7` as the external
+path. For `0x4200`, the metadata also records the safety requirement: the
+external object value must refresh every 100 ms or faster, and a missing refresh
+longer than 5 s forces `NaN` and stops the controller. The live test confirmed
+the stale external-object value becoming `NaN` after publication stopped.
 
 TEC v6.32 exposes four RPDOs and four TPDOs:
 
@@ -208,266 +142,329 @@ TEC v6.32 exposes four RPDOs and four TPDOs:
 | TPDO3 | `0x1802` | `0x1A02` | `$NODEID + 0x380` | 2 |
 | TPDO4 | `0x1803` | `0x1A03` | `$NODEID + 0x480` | 2 |
 
-`$NODEID` is the device's CANopen node ID, so with node ID `0x4B`, TPDO1 is
-sent under COB-ID `0x4B + 0x180 = 0x1CB` by default. These defaults exist so
-that out of the box no two nodes collide; you are free to override them, which
-is exactly what the handover patterns below do.
+The mapping count at subindex `0` is the activation gate. A latent value can
+remain in mapping subindex `1` while count is `0`; that slot is inactive. The
+live TEC test also showed that writing `0x00000000` into an inactive mapping
+entry can be rejected with abort `0x06040041`. For restore checks, trust the
+mapping count, COB-ID, event timer, source selector, and output-enable state,
+not cosmetic clearing of every latent slot.
 
-Transmission type defaults to `0xFE` in the imported metadata, meaning the
-device decides when to send (typically event-driven or on its internal cycle)
-rather than being polled by a sync message.
+## RMM-1182 Objects
 
-## RMM-1182 Specific Model
-
-The imported RMM-1182 EDS identifies the device as vendor `0x547`, product
-`0x49E`, with all common CAN bitrates including 1000 kbit/s enabled. It exposes
-16 RPDOs and 16 TPDOs. The EDS includes 64 PDO communication/mapping objects.
+The imported RMM-1182 EDS identifies vendor `0x547`, product `0x49E`, with all
+common CAN bitrates including 1000 kbit/s enabled. It exposes 16 RPDOs and 16
+TPDOs.
 
 Useful PDO-capable RMM objects for temperature handover are:
 
-| CANopen object | Type | Instances/channels | Meaning |
+| CANopen object | Type | Instances | Meaning |
 |---|---|---:|---|
 | `0x4000:<channel>` | `float32` | 4 | Value Conversion: Result |
 | `0x4001:<channel>` | `float32` | 4 | Value Conversion: Surveilled Result |
 | `0x4011:<channel>` | `int32` | 4 | Value Conversion: Result Type |
 | `0x3001:<channel>` | `float32` | 2 | High Resolution Measurement: Resistance |
 
-For RMM-to-TEC temperature control, `0x4000:<channel>` is the primary candidate
-only when the RMM channel is already configured to convert the measurement into
-a temperature value. `0x3001:<channel>` is resistance, not temperature, and
-should not be used as a TEC temperature input unless an external conversion
-stage is intentionally part of the design.
+For TEC temperature control, `0x4000:<channel>` is the primary candidate when
+the RMM channel is configured to convert the measurement into a temperature.
+`0x3001:<channel>` is resistance, not temperature.
 
-## Concrete Patterns
+## Safe Runtime Configuration Sequence
 
-### Host Publishes One Arbitrary Value To Both TECs
+Use SDO writes for configuration and SDO reads for proof. For live equipment:
 
-Use this when proving the TEC consumer side without relying on an RMM producer.
+1. Read and record the existing communication objects, mapping objects, source
+   selectors, event timers, and output-enable state.
+2. Confirm the control output state is safe for the test.
+3. Put the node into NMT pre-operational.
+4. Disable the PDO by setting bit 31 in the COB-ID entry.
+5. Write mapping subindex `0` to `0`.
+6. Write mapping entries `1..n`.
+7. Write communication parameters: COB-ID, transmission type, and event timer
+   if needed.
+8. Write mapping subindex `0` to the number of active mapped objects.
+9. Re-enable the PDO by clearing bit 31, or intentionally leave bit 31 set if
+   the goal is a disabled PDO record. In `canpdoctl`, `-map none` leaves the
+   final PDO record disabled by default.
+10. Return the node to NMT operational.
+11. Verify COB-ID, mapping count, mapping entries, event timer, passive traffic,
+   and target-object value.
+12. Set `0x3300:<instance> = 7` or `0x3304:<instance> = 7` only after the value,
+   cadence, and safe output state are proven.
+13. Save to flash only after runtime behavior and rollback expectations are
+   clear.
 
-1. Pick a COB-ID that does not collide with another live producer.
-2. Confirm the TEC output/control state is safe before selecting an external
-   temperature source.
-3. Configure TEC A RPDO mapping to store the first four payload bytes into
-   `0x4200:01` using mapping entry `0x42000120`.
-4. Configure TEC B the same way, with the same RPDO COB-ID and same mapping.
-5. Transmit periodic little-endian `float32` CAN payloads at that COB-ID at
-   10 Hz or faster.
-6. Verify that both TECs report the same external object temperature by SDO or
-   MeCom reads.
-7. Only after the value and cadence are proven, write `0x3300:01 = 7` on both
-   TECs to bind the external value into the object-temperature control path.
+## Tooling
 
-This is valid because PDO consumption is broadcast. There is no "address" in
-the PDO payload. The COB-ID and payload layout are the contract.
-
-### RMM Channel Feeds One Or More TECs
-
-Use this when the RMM is the temperature producer.
-
-1. Confirm which RMM channel already reports the desired temperature value.
-2. Configure an RMM TPDO to publish `0x4000:<channel>` with mapping entry
-   `(0x4000 << 16) | (channel << 8) | 0x20`. For channel 1 this is
-   `0x40000120`; for channel 2 this is `0x40000220`.
-3. Configure each consuming TEC RPDO to the RMM TPDO COB-ID.
-4. Map each TEC RPDO target to `0x4200:<instance>` or `0x4201:<instance>`.
-5. Passively capture the RMM TPDO and verify the byte value against an SDO read
-   of the RMM source object.
-6. Verify each TEC external-temperature object by SDO/MeCom read.
-7. Confirm the producer refresh cadence is 10 Hz or faster for object
-   temperature use.
-8. Only after the value and cadence are proven, and the TEC output/control state
-   is safe, set the matching TEC source-selection parameter to `7`.
-
-Two TECs can consume the same RMM TPDO. They should not require separate RMM
-producers unless they need different payload layouts or independent timing.
-
-### TEC Feeds Another TEC
-
-Use this when one TEC's own measured value should become another TEC's external
-input.
-
-1. On the producer TEC, map `0x2100:<instance>` into a TPDO for object
-   temperature, or `0x2101:<instance>` for sink temperature.
-2. On the consumer TEC, set an RPDO COB-ID equal to the producer TEC TPDO
-   COB-ID.
-3. On the consumer TEC, map the RPDO payload into `0x4200:<instance>` or
-   `0x4201:<instance>`.
-4. Passively capture the producer TPDO and verify the consumer sees the
-   producer value by SDO/MeCom read.
-5. Confirm the producer refresh cadence is 10 Hz or faster for object
-   temperature use.
-6. Only after the value and cadence are proven, and the TEC output/control state
-   is safe, set the consumer source-selection parameter to `7`.
-7. Stop the producer in a safe test window and verify the missing-refresh safety
-   behavior.
-
-## Keeping Track of Mappings Across a Fleet
-
-The mapping that makes all of this work lives in the flash of every device,
-scattered across communication and mapping objects, and on the wire a COB-ID is
-just a number with no name attached. A bench with one RMM and four TECs has
-dozens of these settings. Six months later, nobody remembers why `0x1A1`
-exists. Worse, when you build a second copy of a testbed, there is nothing to
-copy *from* except the devices themselves.
-
-This repository solves that with a **CAN signal registry**: a single
-version-controlled file that is the source of truth for every PDO contract on a
-bus. The registry can be edited, validated, imported, exported, and served with
-no CAN adapter attached. When a CAN bus is available, the same tooling reads the
-live devices back and reports where they disagree with the file. The `canmap`
-Go package owns the format and the checks; the gateway serves it; the web UI
-shows either registry-only intent or live drift when requested.
-
-### The registry, keyed by COB-ID
-
-The registry has two lists. `nodes` binds a **role** (a stable symbolic name
-like `rmm` or `tec-a`) to a concrete CANopen node ID. `signals` describes each
-PDO contract, keyed by its COB-ID — because the COB-ID *is* the contract on the
-bus. Each signal names one producer and any number of consumers in terms of
-roles, so the wiring survives hardware swaps. A starter file lives at
-[`reference/can_signal_registry.example.json`](reference/can_signal_registry.example.json).
-
-The format mirrors the concepts from the primer exactly: a signal's `producer`
-has a `tpdo` and a `mapping`; each `consumer` has an `rpdo`, a `mapping`, and
-the `source_selects` (e.g. `0x3300:01 = 7`) that route the received value into
-the control loop. The `canmap` package validates a registry on load and
-rejects the mistakes from the Failure Modes list before they reach hardware:
-duplicate COB-IDs, consumer slot lengths that do not mirror the producer,
-payloads over 64 bits, node-ID collisions, and references to undefined roles.
-
-### Live read-back and drift
-
-Documentation that is never checked rots. Run the gateway with a registry and
-`GET /api/canmap` returns the configured intent without touching hardware. Add
-`?live=1` and it will read back every reachable node's live PDO configuration
-over SDO — strictly read-only, the same bounded SDO reads `teccanprobe` uses —
-and compare it to the registry. Every live-checked signal gets a verdict:
-
-- **match**: the device's COB-ID, mapping, enable bit, and source selects equal
-  the registry.
-- **drift**: the device disagrees; the report says exactly which aspect, what
-  was expected, and what was found.
-- **unknown**: the node was offline or has no CANopen endpoint, so it could not
-  be checked. Drift is never inferred from absence.
-
-```bash
-# Serve the registry and expose it at /api/canmap.
-go run ./cmd/mecomgw -config gateway.json -canmap bench_a_signals.json
-
-# Registry only; no CAN connection required:
-curl localhost:8080/api/canmap
-# Registry plus live device read-back and per-signal verdicts; needs reachable CANopen nodes:
-curl 'localhost:8080/api/canmap?live=1'
-```
-
-In the web UI, the **CAN signal map** view renders the same data: each signal
-as a producer/consumer table, every row tagged in sync / drift / unknown, with
-the offending aspect spelled out underneath any drifting row. This is the live
-picture you wanted — the documented intent and the actual device state side by
-side, refreshed on demand.
-
-### Patterns: cloning a testbed
-
-A concrete registry describes *one* bench. To stand up a copy you do not want to
-hand-edit node IDs and hope. Export the registry as a **pattern** instead: the
-same wiring with every node ID stripped, leaving only roles. On the copy,
-import the pattern and supply fresh role-to-node bindings; the tooling
-instantiates a concrete registry for that bench, re-validating COB-IDs and node
-IDs in the process.
-
-```bash
-# On the reference bench: download the role-only pattern.
-curl 'localhost:8080/api/canmap/export?format=pattern' -o testbed_pattern.json
-
-# On a copy: instantiate it for this bench's node IDs.
-curl -X POST localhost:8080/api/canmap/import \
-  -H 'Content-Type: application/json' \
-  -d '{
-        "name": "bench-b",
-        "pattern": '"$(cat testbed_pattern.json)"',
-        "bindings": [
-          {"role": "rmm",   "node_id": 32},
-          {"role": "tec-a", "node_id": 81},
-          {"role": "tec-b", "node_id": 82}
-        ]
-      }'
-```
-
-The same export/import buttons exist in the web UI's CAN signal map view.
-Importing never writes to the devices — it only records the intended mapping.
-Immediately after an import, `GET /api/canmap?live=1` shows every signal as
-drift or unknown: that report *is* the to-do list for bringing the copied bench
-into line, and it turns green signal by signal as you apply the safe
-configuration sequence above. This keeps the human work — actually configuring
-the devices — honest, while the cloning, validation, and tracking are
-mechanical.
-
-## Practical Verification
-
-Offline verification performed by the repository:
-
-- `mecom/catalogue_sources_test.go` verifies that TEC v6.32 exposes `52200` and
-  `52201` as RPDO-capable external temperature targets, that `1000` and `1001`
-  are TPDO-capable measured temperatures, and that the metadata carries four
-  RPDOs, four TPDOs, source-selection value `7`, and the refresh policy.
-- `mecom/canopen_sdo_map_test.go` verifies that the default CANopen SDO map
-  resolves `52200`, `52201`, `6300`, and `6304` as direct TEC v6.32 CANopen
-  objects with four instances and write support.
-- `mecom/rmm_test.go` verifies the RMM family constants and catalogue entry.
-- `docs/rmm_1182_reverse_engineering.md` records the RMM EDS findings and the
-  known gap: default PDO layout and live remapping behavior still need hardware
-  confirmation.
-
-Read-only live verification path:
+`cmd/teccanprobe` is the bounded inspection tool. It can passively capture
+frames and actively read SDO objects:
 
 ```bash
 go run ./cmd/teccanprobe -if can0 -listen 5s
-go run ./cmd/teccanprobe -if can0 -active -nodes 0x4b,0x4c -sdo 0x1800:1:uint32:tpdo1-cobid,0x1A00:0:byte:tpdo1-count,0x1A00:1:uint32:tpdo1-map1,0x1400:1:uint32:rpdo1-cobid,0x1600:0:byte:rpdo1-count,0x1600:1:uint32:rpdo1-map1,0x3300:1:int32:object-source,0x4200:1:float32:external-object
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x51,0x54 \
+  -sdo 0x1400:1:uint32:rpdo1-cobid,0x1600:0:byte:rpdo1-count,0x1600:1:uint32:rpdo1-map1,0x3300:1:int32:object-source,0x4200:1:float32:external-object,0x2410:1:uint32:output-enabled
 ```
 
-Use explicit `-sdo` reads to prove mapping state without changing the bus. Prior
-read-only probing in this project showed why this matters: devices can be
-reachable by node ID while having empty TPDO mappings, so reachability alone is
-not proof that a producer is publishing the desired value.
+`cmd/canpdoctl` is the guarded setup helper. It is dry-run by default; `-commit`
+is required before it transmits anything.
 
-For an RMM producer, include the producer node in the same read-only check and
-read its source object too. For channel 1, probe `0x4000:1:float32:rmm-value`
-and compare that SDO value against the captured TPDO payload before enabling
-any TEC source-selection parameter.
+The committed commands below are individual building blocks. After each runtime
+PDO change, use the role-specific read-back examples and the restore section
+before enabling a TEC source selector or leaving the bench unattended.
 
-Write verification path, only in a safe hardware window:
+```bash
+# Show the exact SDO/NMT plan without touching the bus.
+go run ./cmd/canpdoctl pdo-apply -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x1B8 -map 0x4200:1:32 -transmission 0xFE
 
-1. Record existing `0x140x`, `0x160x`, `0x180x`, `0x1A0x`, `0x3300`, and
-   `0x3304` values for every involved node.
-2. Confirm TEC control output state is safe for test values and stale-value
-   timeout.
-3. Configure one disposable RPDO on one TEC first.
-4. Publish a known `float32` test value at the chosen COB-ID at 10 Hz or faster.
-5. Read back `0x4200:01` / MeCom `52200` and confirm the expected value.
-6. Stop publishing and confirm the documented missing-refresh behavior before
-   enabling any control loop that depends on it.
-7. Repeat for the second TEC as a multi-consumer test.
-8. Only then configure the RMM or TEC producer TPDO and save persistent
-   parameters.
+# Apply the runtime mapping.
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x1B8 -map 0x4200:1:32 -transmission 0xFE -commit
+
+# Write a source selector after the imported value is proven.
+go run ./cmd/canpdoctl sdo-write -if can0 -node 0x51 \
+  -object 0x3300:1 -type int32 -value 7 -commit
+
+# Publish a host-origin test PDO.
+go run ./cmd/canpdoctl pdo-send -if can0 -cob-id 0x2A0 \
+  -type float32 -value 26.125 -count 120 -period 50ms -commit
+
+# Apply a TPDO with a 100 ms event timer.
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x54 -dir tpdo -pdo 1 \
+  -cob-id 0x1D4 -map 0x2100:1:32 -transmission 0xFE -event-ms 100 -commit
+
+# Clear the active mapping and disable the event timer again.
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x54 -dir tpdo -pdo 1 \
+  -cob-id 0x1D4 -map none -transmission 0xFE -event-ms 0 -commit
+```
+
+For a non-empty mapping that should remain intentionally invalid, add
+`-disabled` to `pdo-apply`. For `-map none`, `canpdoctl` already leaves bit 31
+set in the final COB-ID write. Mapping entries with subindex `0` are rejected
+by default because they are often count/control entries; use
+`-allow-sub0-map` only for a confirmed scalar object.
+
+## Live Verification Matrix
+
+All rows below were runtime-only. Source selectors and PDO mappings were
+restored, and TEC outputs were read back as disabled.
+
+| Case | Runtime setup | Proof observed | Conclusion |
+|---|---|---|---|
+| RMM one-to-many | RMM node `0x38` TPDO1 `0x1B8`, TEC `0x51` and `0x54` RPDO1 both mapped to `0x4200:01`. | Both TEC external-object cells tracked the RMM value around `23.6 degC`. | One producer can feed multiple TEC consumers. |
+| One imported object in local loop | TEC `0x51` `0x3300:01` set to `7` after `0x4200:01` was populated. | `0x2100:01` followed the external-object value while output remained `0`; selector restored to `6`. | Source selector `7` routes the imported external object into the local object-temperature path. |
+| Sequential many-to-one | TEC `0x51` RPDO1 was retargeted from RMM `0x37` COB-ID `0x1B7` to RMM `0x39` COB-ID `0x1B9`. | `0x4200:01` followed the current selected producer; for node `0x39` it became the producer's `NaN`. | One RPDO follows one current COB-ID; retargeting works but is not simultaneous. |
+| Simultaneous many-to-one | TEC `0x51` RPDO1 `0x1B7 -> 0x4200:01`; RPDO2 `0x1B8 -> 0x4201:01`; source selectors `0x3300:01` and `0x3304:01` set to `7`. | `0x2100:01` followed RMM `0x37`; `0x2101:01` followed RMM `0x38`; output remained `0`; selectors restored. | A TEC can consume several producers at once when each uses a separate RPDO and target object. |
+| Host-only producer | Host sent COB-ID `0x2A0` with float32 `26.125` into TEC `0x51` RPDO1. | `0x4200:01` became `26.125`; because source selector was restored to `6`, `0x2100:01` stayed local. After publication stopped and more than 5 s elapsed, `0x4200:01` became `NaN`. | The consumer path can be proven without an RMM producer; stale timeout was observed. |
+| Two values in one PDO | TEC `0x51` RPDO1 COB-ID `0x2A1`, mapping `0x4200:01` and `0x4201:01`; host sent raw payload for `27.25` and `28.5`. | SDO reads returned `27.25` and `28.5` in the two external cells. | One classic CAN PDO can carry two float32 temperature values. |
+| One-to-many into active local loops | TEC `0x51` and `0x54` both consumed RMM `0x38` on `0x1B8 -> 0x4200:01`; both `0x3300:01` selectors set to `7`. | Both TEC object-temperature values followed the same RMM value while outputs remained disabled; selectors restored to `6`. | One producer can feed several local control-source bindings at the same time. |
+| TEC-to-TEC | TEC `0x54` TPDO1 mapped `0x2100:01` to COB-ID `0x1D4`; TEC `0x51` RPDO1 consumed `0x1D4 -> 0x4200:01`; TPDO event timer set to `100 ms`. | Passive frame `1D4#...` was seen and `0x51 0x4200:01` matched `0x54 0x2100:01` around `25.8 degC`; event timer restored to `0`. | TEC measured values can be published and consumed by another TEC using standard PDO mapping. |
+
+Restore read-back after the tests showed:
+
+- `0x51` RPDO1/RPDO2 active mapping counts `0`, source selectors
+  `0x3300:01 = 6` and `0x3304:01 = 6`, output-enable `0`.
+- `0x54` RPDO1 active mapping count `0`, TPDO1 active mapping count `0`,
+  TPDO1 event timer `0`, source selectors `0x3300:01 = 6` and
+  `0x3304:01 = 7`, output-enable `0`.
+- Other TEC nodes `0x4B` and `0x4C` had output-enable `0` and active PDO
+  mapping counts `0`.
+
+Latent mapping subindex values can remain after count is set to `0`; that is
+expected on the observed TEC firmware and should not be treated as active
+traffic by itself.
+
+## Configuration Recipes
+
+### RMM Channel Feeds One Or More TECs
+
+Use this when an RMM is the temperature producer.
+
+1. Confirm the RMM channel reports a converted temperature, not raw resistance.
+2. Confirm the RMM TPDO publishes that source object, usually
+   `0x4000:<channel>`.
+3. Configure each TEC RPDO to the same RMM TPDO COB-ID.
+4. Map each TEC target to `0x4200:<instance>` or `0x4201:<instance>`.
+5. Read the RMM source value and the TEC external target values by SDO.
+6. Capture the PDO frame and confirm cadence.
+7. Only then write the TEC source selector to `7`.
+
+Example for RMM node `0x38` TPDO1 on `0x1B8` feeding TEC node `0x51`:
+
+```bash
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x1B8 -map 0x4200:1:32 -transmission 0xFE -commit
+
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x38 \
+  -sdo 0x4000:1:float32:rmm-value
+
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x51 \
+  -sdo 0x4200:1:float32:tec-external,0x2410:1:uint32:output-enabled
+```
+
+### Host Publishes A Test Value
+
+Use this to prove the TEC consumer side without relying on an RMM producer.
+
+```bash
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x2A0 -map 0x4200:1:32 -transmission 0xFE -commit
+
+go run ./cmd/canpdoctl pdo-send -if can0 -cob-id 0x2A0 \
+  -type float32 -value 26.125 -count 120 -period 50ms -commit
+
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x51 \
+  -sdo 0x4200:1:float32:tec-external,0x2410:1:uint32:output-enabled
+```
+
+For two values in one frame:
+
+```bash
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x2A1 -map 0x4200:1:32,0x4201:1:32 -transmission 0xFE -commit
+
+go run ./cmd/canpdoctl pdo-send -if can0 -cob-id 0x2A1 \
+  -raw "00 00 da 41 00 00 e4 41" -count 20 -period 50ms -commit
+
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x51 \
+  -sdo 0x4200:1:float32:tec-external-object,0x4201:1:float32:tec-external-sink,0x2410:1:uint32:output-enabled
+```
+
+### TEC Feeds Another TEC
+
+Use this when one TEC's measured object temperature should become another TEC's
+external object input.
+
+```bash
+# Producer TEC 0x54 publishes object temperature on TPDO1.
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x54 -dir tpdo -pdo 1 \
+  -cob-id 0x1D4 -map 0x2100:1:32 -transmission 0xFE -event-ms 100 -commit
+
+# Consumer TEC 0x51 receives it as external object temperature.
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x1D4 -map 0x4200:1:32 -transmission 0xFE -commit
+
+# Verify before source selection.
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x54 \
+  -sdo 0x2100:1:float32:producer-object,0x1800:5:uint16:producer-event-ms
+
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x51 \
+  -sdo 0x4200:1:float32:consumer-external,0x2410:1:uint32:output-enabled
+```
+
+The event timer matters for observable periodic TPDO traffic. With event timer
+`0`, the TEC may still send on internal events, but a periodic handover should
+not rely on that unless the vendor documents the trigger semantics.
+
+### Restore Runtime State
+
+Restore to a known non-consuming runtime state by setting active mapping counts
+to zero, leaving the PDO invalid, and setting source selectors back to their
+desired local/default values:
+
+```bash
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x51 -dir rpdo -pdo 1 \
+  -cob-id 0x251 -map none -transmission 0xFE -commit
+
+go run ./cmd/canpdoctl sdo-write -if can0 -node 0x51 \
+  -object 0x3300:1 -type int32 -value 6 -commit
+```
+
+If the producer TPDO event timer was changed, restore it explicitly:
+
+```bash
+go run ./cmd/canpdoctl pdo-apply -if can0 -node 0x54 -dir tpdo -pdo 1 \
+  -cob-id 0x1D4 -map none -transmission 0xFE -event-ms 0 -commit
+```
+
+## CAN Signal Registry
+
+The bus-level contract should live in a version-controlled CAN signal registry,
+not only in device flash. The registry names nodes by role, records COB-IDs,
+TPDO/RPDO mappings, source selectors, expected rate, and safety notes. It can
+be loaded without CAN hardware, exported as a role-only pattern, imported for a
+second bench, and compared to live SDO read-back when CAN is available.
+
+The important separation is:
+
+- registry-only mode is intent;
+- live read-back mode is evidence;
+- drift means the live device state disagrees with the registry;
+- unknown means the node was not reachable or could not be checked.
+
+The example registry lives at
+[`reference/can_signal_registry.example.json`](reference/can_signal_registry.example.json).
+
+## Remaining Limits And Vendor MVP Scope
+
+The live tests prove that core CANopen TPDO/RPDO communication, TEC external
+temperature consumption, source selector routing, host-origin test publishing,
+and TEC-to-TEC handover can work with the current system. Those should no
+longer be framed as requests for a large new firmware feature.
+
+The useful MVP request to Meerstetter is narrower:
+
+1. Publish official RMM-1182 and TEC v6.32 PDO setup recipes for the external
+   object/sink temperature paths, including safe runtime sequence and flash-save
+   sequence.
+2. Confirm source-selection enum values and semantics, especially `7` for
+   external object and fixed-sink external temperature.
+3. Confirm periodic TPDO trigger behavior: event timer units, default behavior
+   when event timer is `0`, synchronous options if any, and recommended update
+   rates for TEC control.
+4. Provide machine-readable EDS/catalogue metadata for PDO-capable objects,
+   source-selector enums, safety timeouts, status/quality bits, and writability.
+5. Document liveness and fault handling: stale RPDO timeout, heartbeat or
+   equivalent producer supervision, EMCY/status objects, `NaN`, sensor fault,
+   and warning-state semantics.
+6. Document the single-device USB/serial setup path and explicitly state what
+   can and cannot be proven without CAN.
+
+`meerstetter-go` can cover the operator ergonomics: dry-run plans, guarded SDO
+writes, host-origin test PDOs, registry/pattern import/export, live drift
+reports, and single-device MeCom diagnostics. Meerstetter should own the
+official device semantics, persistence rules, and safety recommendations.
 
 ## Failure Modes To Check First
 
-- The node is reachable over SDO but not in NMT operational, so TPDOs are not
-  being transmitted.
-- The producer TPDO mapping count is zero.
-- The consumer RPDO COB-ID does not match the producer TPDO COB-ID.
+- The node answers SDO but is not NMT operational, so no PDO is emitted.
+- Producer TPDO mapping count is `0`.
+- Consumer RPDO COB-ID does not match producer TPDO COB-ID.
 - Two producers use the same COB-ID.
-- Producer and consumer mapping lengths differ.
-- The RMM channel publishes resistance or status, not converted temperature.
-- TEC source selection is not set to `7`, or it was set before the external
-  value and refresh cadence were proven.
-- The publish period violates the TEC external-temperature refresh requirement.
-- The mapping was tested in RAM but not saved, or was saved before validation
-  and overwrote a useful previous setup.
+- Producer and consumer mapping lengths or types differ.
+- The RMM publishes resistance, `NaN`, or a diagnostic status instead of a
+  converted temperature.
+- TEC source selector is not set to `7`, or it was set before value/cadence was
+  proven.
+- The producer refresh period violates the TEC external-temperature freshness
+  requirement.
+- A runtime mapping was tested but not saved, then lost on reboot.
+- A mapping entry remains visible in subindex `1` while mapping count is `0`;
+  that is latent, not active.
+
+## Verification Commands
+
+Repository verification:
+
+```bash
+go test ./...
+git diff --check
+```
+
+Live read-only verification:
+
+```bash
+go run ./cmd/teccanprobe -if can0 -listen 5s
+go run ./cmd/teccanprobe -if can0 -active -nodes 0x37,0x38,0x39,0x4B,0x4C,0x51,0x54 \
+  -sdo 0x1000:0:uint32:device-type,0x1018:1:uint32:vendor,0x1018:2:uint32:product,0x1018:3:uint32:revision,0x1001:0:byte:error-register
+```
+
+Live write verification should be performed only in a safe window with output
+state checked before and after every source-selection test.
 
 ## Source Traceability
 
-- Official CANopen PDO background: <https://www.can-cia.org/can-knowledge/pdo-protocol>
+- Official CANopen PDO background:
+  <https://www.can-cia.org/can-knowledge/pdo-protocol>
 - TEC v6.32 parameter inventory:
   `mecom/catalogues/sources/tec_parameter_overview.v632.json`
 - TEC v6.32 CANopen SDO map:
@@ -478,3 +475,7 @@ Write verification path, only in a safe hardware window:
   `mecom/catalogues/sources/rmm_1182_canopen_eds.v100.json`
 - RMM reverse-engineering notes:
   `docs/rmm_1182_reverse_engineering.md`
+- Local setup helper:
+  `cmd/canpdoctl`
+- Local inspection helper:
+  `cmd/teccanprobe`
