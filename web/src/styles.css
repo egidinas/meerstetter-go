@@ -293,12 +293,47 @@ a:hover { text-decoration: underline; }
 .rail .nav .dev-mini.bad {
   border-color: color-mix(in srgb, var(--bad) 45%, var(--line));
 }
+.rail .nav .dev-mini.family-tec,
+.fleet-strip .dev-mini.family-tec,
+.dev-mini.family-tec {
+  border-left: 2px solid var(--accent);
+}
+.rail .nav .dev-mini.family-rmm,
+.fleet-strip .dev-mini.family-rmm,
+.dev-mini.family-rmm {
+  border-left: 2px solid var(--series-actual);
+  background: color-mix(in srgb, var(--series-actual) 7%, var(--panel));
+}
+.rail .nav .dev-mini.family-ldd,
+.fleet-strip .dev-mini.family-ldd,
+.dev-mini.family-ldd {
+  border-left: 2px solid var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 7%, var(--panel));
+}
 .rail .nav .dev-mini .top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 4px;
   align-items: center;
 }
+.device-glyph {
+  width: 24px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--panel-3);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+.device-glyph.family-tec { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.device-glyph.family-rmm { color: var(--series-actual); border-color: color-mix(in srgb, var(--series-actual) 45%, var(--line)); }
+.device-glyph.family-ldd { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 45%, var(--line)); }
 .rail .nav .dev-mini .name {
   font-weight: 600;
   font-size: 11.5px;
@@ -307,13 +342,13 @@ a:hover { text-decoration: underline; }
   text-overflow: ellipsis;
 }
 .rail .nav .dev-mini .id {
-  grid-column: 1 / -1;
+  grid-column: 2 / -1;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--muted);
 }
 .rail .nav .dev-mini .top .right {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
 }
 .rail .nav .dev-mini .chans {
@@ -642,7 +677,7 @@ hr.sep {
   padding: 6px;
   display: grid;
   gap: 6px;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   min-width: 0;
@@ -1498,8 +1533,10 @@ hr.sep {
   font-size: 16px;
   font-weight: 600;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 .ws-head h2 .id { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-weight: 400; }
 .ws-head .right {
@@ -2863,10 +2900,52 @@ hr.sep {
   gap: 4px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  height: calc(100dvh - 58px);
+  height: 100%;
   min-height: 0;
   min-width: 0;
   align-content: stretch;
+}
+.fleet-profile-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+.fleet-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  text-align: left;
+  cursor: pointer;
+}
+.fleet-profile-card:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+.fleet-profile-card:not(:disabled):hover {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+}
+.fleet-profile-card.family-tec { border-left: 2px solid var(--accent); }
+.fleet-profile-card.family-rmm { border-left: 2px solid var(--series-actual); }
+.fleet-profile-card.family-ldd { border-left: 2px solid var(--accent-2); }
+.fleet-profile-card b {
+  display: block;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.fleet-profile-card small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.2;
 }
 .fleet-heroes .hero {
   min-height: 0;
@@ -3437,6 +3516,7 @@ hr.sep {
 .role-toggle button.on.temp   { background: color-mix(in srgb, var(--series-actual) 25%, var(--panel-3)); color: var(--series-actual); }
 .role-toggle button.on.supply { background: color-mix(in srgb, var(--series-dut) 25%, var(--panel-3)); color: var(--series-dut); }
 .role-toggle button.on.ldd    { background: color-mix(in srgb, var(--series-aux) 25%, var(--panel-3)); color: var(--series-aux); }
+.role-toggle button.on.monitor { background: color-mix(in srgb, var(--s6) 22%, var(--panel-3)); color: var(--s6); }
 
 /* ========================================================
    Bottom accordion (telemetry / telecommand in context)

@@ -90,6 +90,105 @@ function formatRouteLabel(route) {
   return { title: detail ? `${name} · ${detail}` : name, text: `${name} · ${roleText}` };
 }
 
+function deviceFamily(device) {
+  const value = String(device?.device_family || device?.family || device?.device_type || device?.deviceType || "generic").toLowerCase();
+  if (value.includes("rmm")) return "rmm";
+  if (value.includes("ldd")) return "ldd";
+  if (value.includes("tec")) return "tec";
+  return "generic";
+}
+
+function deviceProfileLabel(device) {
+  const profile = String(device?.profile_label || device?.profileLabel || "").trim();
+  if (profile) return profile;
+  const family = deviceFamily(device);
+  if (family === "rmm") return "RMM monitor";
+  if (family === "ldd") return "LDD driver";
+  if (family === "tec") return "TEC controller";
+  return "MeCom device";
+}
+
+function deviceProfileIcon(device) {
+  const icon = String(device?.profile_icon || device?.profileIcon || "").trim();
+  if (icon) return icon.slice(0, 3).toUpperCase();
+  const family = deviceFamily(device);
+  if (family === "rmm") return "RM";
+  if (family === "ldd") return "LD";
+  if (family === "tec") return "TC";
+  return "MC";
+}
+
+function deviceFamilyChipKind(device) {
+  const family = deviceFamily(device);
+  if (family === "rmm" || family === "ldd") return "info";
+  if (family === "tec") return "accent";
+  return "warn";
+}
+
+function channelRoleLabel(role) {
+  const value = String(role || "").toLowerCase();
+  if (value === "ldd") return "LDD";
+  if (value === "supply") return "supply";
+  if (value === "monitor") return "monitor";
+  if (value === "temp") return "temperature";
+  return value || "channel";
+}
+
+function channelRoleChipKind(role) {
+  const value = String(role || "").toLowerCase();
+  if (value === "supply") return "warn";
+  if (value === "ldd" || value === "monitor") return "info";
+  if (value === "temp") return "accent";
+  return "warn";
+}
+
+function roleButtonClass(role, selected) {
+  const value = String(role || "generic").toLowerCase();
+  const kind = value === "monitor" ? "monitor" : value === "ldd" ? "ldd" : value === "temp" ? "temp" : value === "supply" ? "supply" : "generic";
+  return kind + (selected ? " on" : "");
+}
+
+function deviceCatalogueDefinitionRefs(device, catalogue, channels) {
+  const explicit = device && (
+    device.catalogue_definition_refs ||
+    device.catalogueDefinitionRefs ||
+    device.catalogue_definitions ||
+    device.catalogueDefinitions
+  );
+  const refs = Array.isArray(explicit) ? explicit.slice() : [];
+  const single = device && (device.catalogue_definition_ref || device.catalogueDefinitionRef);
+  if (single) refs.push(single);
+  const normalized = Array.from(new Set(refs.map((ref) => String(ref || "").trim()).filter(Boolean))).sort();
+  if (normalized.length) return normalized;
+
+  const family = deviceFamily(device);
+  if (family === "rmm") return [];
+  if (family === "ldd") {
+    const lddRefs = catalogue
+      .map((p) => String(p.definition_ref || "").trim())
+      .filter((ref) => ref.includes(".ldd"));
+    return Array.from(new Set(lddRefs)).sort();
+  }
+
+  const roles = new Set((channels || []).map((c) => c.role));
+  return Array.from(
+    new Set(
+      catalogue
+        .filter((p) => !p.applicableModes || p.applicableModes.some((role) => roles.has(role)))
+        .map((p) => p.definition_ref)
+        .filter(Boolean)
+    )
+  ).sort();
+}
+
+function countDeviceFamilies(devices) {
+  return (devices || []).reduce((acc, device) => {
+    const family = deviceFamily(device);
+    acc[family] = (acc[family] || 0) + 1;
+    return acc;
+  }, {});
+}
+
 const GRAPH_TILE_WINDOW_OPTIONS = GRAPH_TILE_LEVELS;
 
 function channelSortRank(channel) {
@@ -153,11 +252,19 @@ function defaultHiddenSeriesForTile(tile) {
 
 export function FleetView({ onOpenDevice }) {
   useGatewayTick();
+  const devices = MecomAPI.devices();
   const channels = MecomAPI.channels();
   const settings = MecomAPI.settings();
+  const deviceById = useMemo(() => new Map(devices.map((d) => [d.id, d])), [devices]);
+  const familyCounts = countDeviceFamilies(devices);
 
-  const tempChannels = channels.filter((c) => c.role === "temp");
-  const supplyChannels = channels.filter((c) => c.role === "supply");
+  const tempChannels = channels.filter((c) => c.role === "temp" && deviceFamily(deviceById.get(c.device_id)) !== "rmm");
+  const supplyChannels = channels.filter((c) => c.role === "supply" && deviceFamily(deviceById.get(c.device_id)) !== "rmm");
+  const monitorChannels = channels.filter((c) => c.role === "monitor" || deviceFamily(deviceById.get(c.device_id)) === "rmm");
+  const openFirstFamily = (family) => {
+    const target = devices.find((d) => deviceFamily(d) === family);
+    if (target) onOpenDevice(target.id);
+  };
   const fleetTempAssignments = configDrivenGraphTileAssignments(WALLS.fleetTemp.wall_id, tempChannels);
   const fleetSupplyAssignments = configDrivenGraphTileAssignments(WALLS.fleetSupply.wall_id, supplyChannels);
   const [fleetTileLevel, setFleetTileLevel] = useState(DEFAULT_GRAPH_TILE_LEVEL);
@@ -193,6 +300,31 @@ export function FleetView({ onOpenDevice }) {
         </label>
         <Chip>{fleetTileWindow.label} shared timeline</Chip>
       </div>
+      <div className="fleet-profile-strip">
+        <button type="button" className="fleet-profile-card family-tec" onClick={() => openFirstFamily("tec")} disabled={!familyCounts.tec}>
+          <span className="device-glyph">TC</span>
+          <span>
+            <b>{familyCounts.tec || 0} TEC</b>
+            <small>{tempChannels.length} temperature · {supplyChannels.length} supply</small>
+          </span>
+        </button>
+        <button type="button" className="fleet-profile-card family-rmm" onClick={() => openFirstFamily("rmm")} disabled={!familyCounts.rmm}>
+          <span className="device-glyph">RM</span>
+          <span>
+            <b>{familyCounts.rmm || 0} RMM</b>
+            <small>{monitorChannels.length} monitor channels</small>
+          </span>
+        </button>
+        {(familyCounts.ldd || 0) > 0 && (
+          <button type="button" className="fleet-profile-card family-ldd" onClick={() => openFirstFamily("ldd")}>
+            <span className="device-glyph">LD</span>
+            <span>
+              <b>{familyCounts.ldd || 0} LDD</b>
+              <small>laser driver profile</small>
+            </span>
+          </button>
+        )}
+      </div>
       <div className="fleet-heroes">
         <HeroGraph wall={WALLS.fleetTemp} role="temp" tile={tempTile} height={220} minPlotHeight={150} initialHiddenSeries={defaultTempHidden}>
           <TempSettingsTable channels={tempChannels} holderId={settings.holder} />
@@ -218,8 +350,9 @@ export function DeviceMini({ device, onOpen }) {
   const bs = MecomAPI.brokerStats(device.id);
   const routes = Array.isArray(device.routes) ? device.routes : [];
   return (
-    <div className={"dev-mini" + (device.last_error ? " bad" : "")} onClick={onOpen}>
+    <div className={`dev-mini family-${deviceFamily(device)}${device.last_error ? " bad" : ""}`} onClick={onOpen}>
       <div className="top">
+        <span className="device-glyph">{deviceProfileIcon(device)}</span>
         <span className="name">{device.label}</span>
         <span className="id">{device.id}</span>
         <span className="right">
@@ -227,9 +360,10 @@ export function DeviceMini({ device, onOpen }) {
         </span>
       </div>
       <div className="chans">
+        <Chip kind={deviceFamilyChipKind(device)}>{deviceProfileLabel(device)}</Chip>
         {channels.map((c) => (
-          <Chip key={c.instance} kind={c.role === "supply" ? "warn" : c.role === "ldd" ? "info" : "accent"}>
-            channel {c.instance} · {c.role === "ldd" ? "LDD" : c.role === "supply" ? "supply" : "temperature"}
+          <Chip key={c.instance} kind={channelRoleChipKind(c.role)}>
+            channel {c.instance} · {channelRoleLabel(c.role)}
           </Chip>
         ))}
         {channels.length === 0 && <Chip>no channels</Chip>}
@@ -358,12 +492,16 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   const [hiddenSeries, setHiddenSeries] = useState({});
   const [ignoreOpenSensorOutliers, setIgnoreOpenSensorOutliers] = useState(true);
   const routes = Array.isArray(device?.routes) ? device.routes : [];
+  const activeDeviceFamily = deviceFamily(device);
 
   const deviceWallId = wallForDevice(deviceId).wall_id + "-" + (activeChannel?.instance || 1);
   const storedPins = assigns.forWall(deviceWallId);
   const pins = assignmentsWithPriorityDefaults(storedPins, deviceWallId, activeChannel ? [activeChannel] : []);
   const graphSections = useMemo(() => {
     const sourcePins = device && activeChannel ? pins : [];
+    const alwaysBuckets = activeChannel?.role === "monitor"
+      ? new Set(["thermal", "other"])
+      : new Set(["thermal", "power"]);
     const defs = [
       { bucket: "thermal", suffix: "thermal", title: "Temperature", empty: "Pin temperature parameters from the signal catalogue." },
       { bucket: "power", suffix: "power", title: "Power", empty: "Pin output power from the signal catalogue." },
@@ -383,8 +521,8 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
         ignoreOpenSensorOutliers: ignoreOpenSensorOutliers && def.bucket === "thermal",
       };
       return { ...def, tileId, bucketPins, tileOptions };
-    }).filter((section) => section.bucketPins.length > 0 || section.bucket === "thermal" || section.bucket === "power");
-  }, [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannelInst, tileWindowMs, tileLevel, ignoreOpenSensorOutliers]);
+    }).filter((section) => section.bucketPins.length > 0 || alwaysBuckets.has(section.bucket));
+  }, [assigns.list, deviceWallId, device?.label, deviceId, activeChannel?.instance, activeChannel?.role, activeChannelInst, tileWindowMs, tileLevel, ignoreOpenSensorOutliers]);
   function toggleSeriesVisibility(tileId, key) {
     setHiddenSeries((cur) => {
       const current = new Set(cur[tileId] || []);
@@ -420,10 +558,10 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
     if (!activeChannel) return;
     const cur = assigns.forWall(deviceWallId);
     if (cur.length > 0) return;
-    // LDD channels don't have well-established universal defaults yet — don't seed
+    // LDD and monitor channels don't have universal write/read defaults yet; leave the catalogue clean.
     const defaults = activeChannel.role === "temp" ? [3000, 1000, 1001]
       : activeChannel.role === "supply" ? [1022]
-      : []; // ldd — leave empty so tree is shown clean
+      : [];
     defaults.forEach((pid) => assigns.add(deviceWallId, pid, deviceId, activeChannel.instance));
   }, [deviceWallId, activeChannel?.instance, activeChannel?.role]);
 
@@ -448,15 +586,7 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
   if (!activeChannel) return <div style={{ padding: 32, color: "var(--muted)" }}>No channels active for {deviceId}.</div>;
 
   const deviceRoles = new Set(channels.map((c) => c.role));
-  // Build list of catalogue definition refs that are relevant to this device
-  const deviceDefinitionRefs = Array.from(
-    new Set(
-      catalogue
-        .filter((p) => !p.applicableModes || p.applicableModes.some((role) => deviceRoles.has(role)))
-        .map((p) => p.definition_ref)
-        .filter(Boolean)
-    )
-  ).sort();
+  const deviceDefinitionRefs = deviceCatalogueDefinitionRefs(device, catalogue, channels);
   const effectiveVariant = catalogueVariant && deviceDefinitionRefs.includes(catalogueVariant)
     ? catalogueVariant
     : deviceDefinitionRefs[0] || "";
@@ -518,8 +648,16 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
       />
       <div className="canvas">
         <div className="ws-head">
-          <h2>{device.label} <span className="id">{device.id} · {device.endpoint} · address {device.address}</span></h2>
+          <h2>
+            <span className={`device-glyph family-${activeDeviceFamily}`}>{deviceProfileIcon(device)}</span>
+            {device.label}
+            <span className="id">{device.id} · {device.endpoint} · address {device.address}</span>
+          </h2>
           <div className="right">
+            <Chip kind={deviceFamilyChipKind(device)}>{deviceProfileLabel(device)}</Chip>
+            {(device.capability_tags || []).slice(0, 2).map((tag) => (
+              <Chip key={tag}>{tag}</Chip>
+            ))}
             <div className="route-strip" title="Connection redundancy">
               {routes.map((route) => (
                 <Chip key={routeChipKey(device.id, route)} kind={routeChipKind(route)} title={formatRouteLabel(route).title}>
@@ -531,17 +669,17 @@ export function DeviceWorkspace({ deviceId, onOpenSequencer }) {
               <div className="role-toggle" style={{ height: 28 }}>
                 {channels.map((c) => (
                   <button key={c.instance}
-                          className={(c.role === "temp" ? "temp " : c.role === "ldd" ? "ldd " : "supply ") + (c.instance === activeChannelInst ? "on" : "")}
+                          className={roleButtonClass(c.role, c.instance === activeChannelInst)}
                           style={{ padding: "0 12px" }}
                           onClick={() => setActiveChannelInst(c.instance)}>
-                    channel {c.instance} · {c.role === "ldd" ? "LDD" : c.role === "temp" ? "temperature" : c.role}
+                    channel {c.instance} · {channelRoleLabel(c.role)}
                   </button>
                 ))}
               </div>
             )}
             {channels.length === 1 && (
-              <Chip kind={activeChannel.role === "ldd" ? "info" : activeChannel.role === "supply" ? "warn" : "accent"}>
-                channel {activeChannel.instance} · {activeChannel.role === "ldd" ? "LDD current control" : activeChannel.role === "supply" ? "supply" : "temperature control"}
+              <Chip kind={channelRoleChipKind(activeChannel.role)}>
+                channel {activeChannel.instance} · {channelRoleLabel(activeChannel.role)}
               </Chip>
             )}
             {deviceDefinitionRefs.length > 1 && (

@@ -78,7 +78,14 @@ function App() {
   const events = MecomAPI.commandEvents();
   const tempChannels = channels.filter((c) => c.role === "temp");
   const supplyChannels = channels.filter((c) => c.role === "supply");
+  const monitorChannels = channels.filter((c) => c.role === "monitor");
   const otherChannels = channels.filter((c) => c.role !== "temp" && c.role !== "supply");
+  const familyCounts = devices.reduce((acc, device) => {
+    const family = String(device.device_family || device.family || device.device_type || "generic").toLowerCase();
+    const key = family.includes("rmm") ? "rmm" : family.includes("ldd") ? "ldd" : family.includes("tec") ? "tec" : "generic";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
   const bound = devices.filter((d) => d.bound).length;
   const errors = devices.filter((d) => d.last_error).length;
   const leasedByMe = leases.filter((l) => l.holder === settings.holder).length;
@@ -86,7 +93,11 @@ function App() {
     const t = new Date(e.time).getTime();
     return (Date.now() - t) < 60_000 && (e.status === "completed" || e.status === "accepted");
   }).length;
-  const fallbackDeviceId = devices.some((d) => d.id === "tec-76") ? "tec-76" : (devices[0]?.id || "tec-76");
+  const fallbackDeviceId = devices.find((d) => d.id === "tec-4c" || d.id === "tec-76")?.id
+    || devices.find((d) => d.device_family === "tec")?.id
+    || devices.find((d) => String(d.id || "").startsWith("tec-"))?.id
+    || devices[0]?.id
+    || "tec-76";
 
   return (
     <ToastProvider>
@@ -155,8 +166,9 @@ function App() {
               <small>{isLive ? (settings.gateway || "same-origin API /api") : settings.gateway ? "explicit offline mode" : "mock fallback"}</small>
               <div className="rail-status-row"><span>Devices</span><b>{bound}/{devices.length}</b></div>
               <small>{bound} bound · {errors} errors</small>
+              <small>{familyCounts.tec || 0} TEC · {familyCounts.rmm || 0} RMM{familyCounts.ldd ? ` · ${familyCounts.ldd} LDD` : ""}</small>
               <div className="rail-status-row"><span>Channels</span><b>{channels.length}</b></div>
-              <small>{tempChannels.length} temperature · {supplyChannels.length} supply{otherChannels.length ? ` · ${otherChannels.length} other` : ""}</small>
+              <small>{tempChannels.length} temperature · {supplyChannels.length} supply · {monitorChannels.length} monitor{otherChannels.length - monitorChannels.length ? ` · ${otherChannels.length - monitorChannels.length} other` : ""}</small>
               <div className="rail-status-row"><span>Leases</span><b>{leases.length}</b></div>
               <small>{leasedByMe} you · {leases.length - leasedByMe} others</small>
               <div className="rail-status-row"><span>Writes in last minute</span><b>{writesLastMinute}</b></div>

@@ -5,6 +5,7 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const hero = await readFile(path.join(root, "src", "views", "hero.tsx"), "utf8");
 const mainView = await readFile(path.join(root, "src", "views", "main.tsx"), "utf8");
+const app = await readFile(path.join(root, "src", "App.tsx"), "utf8");
 const dict = await readFile(path.join(root, "src", "views", "dict.tsx"), "utf8");
 const api = await readFile(path.join(root, "src", "api", "mecom.ts"), "utf8");
 const atoms = await readFile(path.join(root, "src", "components", "atoms.tsx"), "utf8");
@@ -493,6 +494,66 @@ assert.match(
   "Meerstetter-generated tile series IDs must use exact device:param:instance identity",
 );
 assert.match(
+  api,
+  /const\s+DEVICE_FAMILY_PROFILES\s*=/,
+  "live device normalization must use explicit TEC/RMM/LDD family profiles instead of role-only guessing",
+);
+assert.match(
+  api,
+  /function\s+inferDeviceFamily/,
+  "live device normalization must infer a stable family from id, label, endpoint, or explicit backend type",
+);
+assert.match(
+  api,
+  /RMM monitor[\s\S]*role:\s*"monitor"/,
+  "RMM devices must default to read-only monitor channels, not TEC temperature/supply control channels",
+);
+assert.match(
+  api,
+  /function\s+channelOverrideKeysForDevice/,
+  "live TEC ids such as tec-4b must resolve the existing TEC fixture/channel metadata by CAN address",
+);
+assert.match(
+  api,
+  /rawRoleSource\s*===\s*"gateway-default"/,
+  "gateway-default channel roles must not override a stronger device-family profile such as RMM monitor",
+);
+assert.match(
+  mainView,
+  /function\s+deviceFamily/,
+  "operator UI must render devices through a shared family helper",
+);
+assert.match(
+  mainView,
+  /family-\$\{deviceFamily\(device\)\}/,
+  "device cards must expose family-specific CSS hooks for TEC/RMM/LDD graphics",
+);
+assert.match(
+  mainView,
+  /monitorChannels/,
+  "fleet view must separate RMM monitor channels from TEC temperature and supply control graphs",
+);
+assert.match(
+  mainView,
+  /function\s+deviceCatalogueDefinitionRefs/,
+  "device workspaces must prefer profile catalogue refs over role-only catalogue inference",
+);
+assert.match(
+  app,
+  /device_family\s*===\s*"tec"/,
+  "PID fallback device selection must prefer any current live TEC profile, not only stale fixture id tec-76",
+);
+assert.match(
+  styles,
+  /\.dev-mini\.family-rmm/,
+  "RMM devices must have a distinct visual treatment in the live device rail",
+);
+assert.match(
+  styles,
+  /\.role-toggle button\.on\.monitor/,
+  "monitor channels must have a stable selected-channel style",
+);
+assert.match(
   assignments,
   /fallbackSeriesVisibility/,
   "fallback graph tiles must carry missing/detached quality and default visibility metadata",
@@ -782,8 +843,13 @@ assert.doesNotMatch(
 );
 assert.match(
   styles,
-  /\.fleet-heroes\s*\{[\s\S]*height:\s*calc\(100dvh - 58px\)/,
-  "fleet graph stack must reserve only the compact viewport budget below the toolbar",
+  /\.fleet\s*\{[\s\S]*grid-template-rows:\s*auto auto minmax\(0,\s*1fr\)/,
+  "fleet graph stack must reserve the remaining grid budget below the toolbar and device-family strip",
+);
+assert.match(
+  styles,
+  /\.fleet-heroes\s*\{[\s\S]*height:\s*100%/,
+  "fleet graph stack must fill the bounded remaining row instead of hard-coding the old toolbar-only viewport height",
 );
 assert.match(
   styles,

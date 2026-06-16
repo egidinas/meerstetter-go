@@ -630,6 +630,143 @@ const DEVICES_BASE = [
   },
 ];
 
+const DEVICE_FAMILY_PROFILES = {
+  tec: {
+    family: "tec",
+    device_type: "tec",
+    label: "TEC controller",
+    short_label: "TEC",
+    icon: "TC",
+    role: "temp",
+    visual_class: "family-tec",
+    catalogue_definition_refs: [DEFAULT_CATALOGUE_DEFINITION_REF],
+    channel_role_pattern: ["temp", "supply", "temp", "supply"],
+    channel_label_prefix: "TEC",
+    capability_tags: ["temperature control", "power output"],
+  },
+  rmm: {
+    family: "rmm",
+    device_type: "rmm",
+    label: "RMM monitor",
+    short_label: "RMM",
+    icon: "RM",
+    role: "monitor",
+    visual_class: "family-rmm",
+    catalogue_definition_refs: [],
+    channel_role_pattern: ["monitor"],
+    channel_label_prefix: "RMM monitor",
+    capability_tags: ["read-only monitor", "temperature source"],
+  },
+  ldd: {
+    family: "ldd",
+    device_type: "ldd",
+    label: "LDD driver",
+    short_label: "LDD",
+    icon: "LD",
+    role: "ldd",
+    visual_class: "family-ldd",
+    catalogue_definition_refs: ["meerstetter.ldd_130x.v221"],
+    channel_role_pattern: ["ldd", "temp"],
+    channel_label_prefix: "LDD",
+    capability_tags: ["laser current", "temperature monitor"],
+  },
+  generic: {
+    family: "generic",
+    device_type: "mecom",
+    label: "MeCom device",
+    short_label: "DEV",
+    icon: "MC",
+    role: "temp",
+    visual_class: "family-generic",
+    catalogue_definition_refs: [DEFAULT_CATALOGUE_DEFINITION_REF],
+    channel_role_pattern: ["temp", "supply"],
+    channel_label_prefix: "MeCom",
+    capability_tags: ["MeCom"],
+  },
+};
+
+const TEC_ALIAS_ID_BY_ADDRESS = new Map([
+  [75, "tec-75"],
+  [76, "tec-76"],
+  [81, "tec-81"],
+  [84, "tec-84"],
+]);
+
+function normalizedDeviceAddress(device) {
+  const raw = Number(device && (device.address ?? device.node_id ?? device.nodeId));
+  if (Number.isFinite(raw) && raw > 0) return Math.floor(raw);
+  const endpoint = String(device && device.endpoint || "");
+  const match = endpoint.match(/\/0x([0-9a-f]+)/i);
+  if (match) {
+    const parsed = Number.parseInt(match[1], 16);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return NaN;
+}
+
+function inferDeviceFamily(device) {
+  const explicit = String(device && (
+    device.device_family
+    || device.deviceFamily
+    || device.family
+    || device.device_type
+    || device.deviceType
+    || device.type
+    || ""
+  )).toLowerCase();
+  if (explicit.includes("rmm")) return "rmm";
+  if (explicit.includes("ldd")) return "ldd";
+  if (explicit.includes("tec")) return "tec";
+
+  const text = [
+    device && device.id,
+    device && device.label,
+    device && device.name,
+    device && device.endpoint,
+  ].filter(Boolean).join(" ").toLowerCase();
+  if (/(^|\W)rmm(\W|$)/.test(text) || text.startsWith("rmm-")) return "rmm";
+  if (/(^|\W)ldd(\W|$)/.test(text) || text.startsWith("ldd-")) return "ldd";
+  if (/(^|\W)tec(\W|$)/.test(text) || text.startsWith("tec-")) return "tec";
+  return "generic";
+}
+
+function deviceProfileFor(device) {
+  const family = inferDeviceFamily(device);
+  return DEVICE_FAMILY_PROFILES[family] || DEVICE_FAMILY_PROFILES.generic;
+}
+
+function liveDeviceBase(device) {
+  const direct = DEVICES_BASE.find((d) => d.id === device.id);
+  if (direct) return direct;
+  const family = inferDeviceFamily(device);
+  if (family !== "tec") return {};
+  const aliasId = TEC_ALIAS_ID_BY_ADDRESS.get(normalizedDeviceAddress(device));
+  return aliasId ? (DEVICES_BASE.find((d) => d.id === aliasId) || {}) : {};
+}
+
+function genericLiveDeviceLabel(device, family) {
+  const label = String(device && device.label || "").trim();
+  if (!label) return true;
+  if (family === "tec") return /^TEC\s+0x[0-9a-f]+$/i.test(label);
+  if (family === "rmm") return /^RMM\s+0x[0-9a-f]+$/i.test(label);
+  if (family === "ldd") return /^LDD\s+0x[0-9a-f]+$/i.test(label);
+  return false;
+}
+
+function normalizeDeviceDefinitionRefs(device, profile) {
+  const raw = device && (
+    device.catalogue_definition_refs
+    || device.catalogueDefinitionRefs
+    || device.catalogue_definitions
+    || device.catalogueDefinitions
+  );
+  const refs = Array.isArray(raw) ? raw.slice() : [];
+  const single = device && (device.catalogue_definition_ref || device.catalogueDefinitionRef);
+  if (single) refs.push(single);
+  if (!refs.length) refs.push(...(profile.catalogue_definition_refs || []));
+  return Array.from(new Set(refs.map((ref) => String(ref || "").trim()).filter(Boolean)));
+}
+
 function inferTransportFromEndpoint(endpoint) {
   const value = String(endpoint || "");
   if (value.startsWith("serial+can:")) return "serial+can";
@@ -669,8 +806,11 @@ function normalizeRouteCandidate(route, activeRoute?, device?) {
 }
 
 function normalizeDeviceView(device) {
-  const base = DEVICES_BASE.find((d) => d.id === device.id) || {};
+  const base = liveDeviceBase(device || {});
   const merged = { ...base, ...device, bound: device.bound !== false, last_error: device.last_error || "" };
+  const profile = deviceProfileFor(merged);
+  if (base.label && genericLiveDeviceLabel(device, profile.family)) merged.label = base.label;
+  const catalogueDefinitionRefs = normalizeDeviceDefinitionRefs(merged, profile);
   const activeRaw = device.active_route || device.activeRoute || null;
   const activeRoute = activeRaw ? normalizeRouteCandidate(activeRaw, null, merged) : null;
   const rawRoutes = Array.isArray(device.route_candidates)
@@ -683,6 +823,16 @@ function normalizeDeviceView(device) {
   }
   return {
     ...merged,
+    device_family: profile.family,
+    family: profile.family,
+    device_type: merged.device_type || merged.deviceType || profile.device_type,
+    profile_label: merged.profile_label || merged.profileLabel || profile.label,
+    profile_short_label: merged.profile_short_label || merged.profileShortLabel || profile.short_label,
+    profile_icon: merged.profile_icon || merged.profileIcon || profile.icon,
+    profile_visual_class: profile.visual_class,
+    catalogue_definition_refs: catalogueDefinitionRefs,
+    catalogue_definition_ref: catalogueDefinitionRefs[0] || "",
+    capability_tags: Array.isArray(merged.capability_tags) ? merged.capability_tags : profile.capability_tags.slice(),
     third_party_power_control_enabled: Boolean(merged.third_party_power_control_enabled || merged.thirdPartyPowerControlEnabled),
     routes,
     active_route: activeRoute || routes.find((route) => route.active) || null,
@@ -944,24 +1094,61 @@ function channelCountForDevice(device) {
   return Math.max(1, Math.min(255, Math.floor(raw)));
 }
 
-function defaultChannelFor(deviceId, instance) {
-  const key = `${deviceId}/${instance}`;
-  const hasOverride = Object.prototype.hasOwnProperty.call(CHANNEL_ROLE_OVERRIDES, key);
-  const override = CHANNEL_ROLE_OVERRIDES[key] || {};
-  const role = override.role || (instance % 2 === 0 ? "supply" : "temp");
+function channelOverrideKeysForDevice(device, deviceId, instance) {
+  const keys = [`${deviceId}/${instance}`];
+  const profile = deviceProfileFor(device || { id: deviceId });
+  if (profile.family === "tec") {
+    const aliasId = TEC_ALIAS_ID_BY_ADDRESS.get(normalizedDeviceAddress(device || {}));
+    if (aliasId) keys.push(`${aliasId}/${instance}`);
+  }
+  return Array.from(new Set(keys));
+}
+
+function channelOverrideForDevice(device, deviceId, instance) {
+  for (const key of channelOverrideKeysForDevice(device, deviceId, instance)) {
+    if (Object.prototype.hasOwnProperty.call(CHANNEL_ROLE_OVERRIDES, key)) {
+      return { key, override: CHANNEL_ROLE_OVERRIDES[key] };
+    }
+  }
+  return { key: `${deviceId}/${instance}`, override: null };
+}
+
+function profileRoleForChannel(profile, instance) {
+  const pattern = Array.isArray(profile.channel_role_pattern) && profile.channel_role_pattern.length
+    ? profile.channel_role_pattern
+    : DEVICE_FAMILY_PROFILES.generic.channel_role_pattern;
+  return pattern[(Math.max(1, Number(instance) || 1) - 1) % pattern.length] || "temp";
+}
+
+function profileChannelLabel(profile, role, instance) {
+  if (role === "monitor") return `${profile.channel_label_prefix || "Monitor"} ch${instance}`;
+  if (role === "ldd") return `LDD ch${instance}`;
+  if (role === "supply") return `Supply ch${instance}`;
+  return `${profile.channel_label_prefix || "TEC"} ch${instance}`;
+}
+
+function defaultChannelFor(deviceId, instance, device?) {
+  const profile = deviceProfileFor(device || { id: deviceId });
+  const { override } = channelOverrideForDevice(device || { id: deviceId }, deviceId, instance);
+  const hasOverride = Boolean(override);
+  const role = override && override.role || profileRoleForChannel(profile, instance);
+  const roleSource = override && override.role_source
+    || (hasOverride ? "config" : (profile.family === "rmm" ? "device-profile" : "gateway-default"));
   return {
     device_id: deviceId,
     instance,
     role,
-    role_source: override.role_source || (hasOverride ? "config" : "gateway-default"),
-    label: override.label || (role === "ldd" ? `LDD ch${instance}` : role === "supply" ? `Supply ch${instance}` : `TEC ch${instance}`),
-    user_note: override.user_note || "",
-    hasCascade: override.hasCascade ?? false,
+    role_source: roleSource,
+    label: override && override.label || profileChannelLabel(profile, role, instance),
+    user_note: override && override.user_note || (profile.family === "rmm" ? "Read-only RMM measurement channel." : ""),
+    hasCascade: (override && override.hasCascade) ?? false,
+    device_family: profile.family,
+    profile_label: profile.label,
   };
 }
 
 const DEFAULT_CHANNELS = DEVICES_BASE.flatMap((d) =>
- Array.from({ length: channelCountForDevice(d) }, (_, idx) => defaultChannelFor(d.id, idx + 1))
+ Array.from({ length: channelCountForDevice(d) }, (_, idx) => defaultChannelFor(d.id, idx + 1, d))
 );
 
 function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
@@ -974,15 +1161,17 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
     (Array.isArray(d.channels) ? d.channels : []).forEach((rawCh) => {
       const inst = Number(rawCh && (rawCh.instance ?? rawCh.channel));
       if (!Number.isFinite(inst) || inst < 1 || inst > channelCountForDevice(d)) return;
-      const base = defaultChannelFor(d.id, inst);
+      const base = defaultChannelFor(d.id, inst, d);
       const role = String(rawCh.role || "").trim();
+      const rawRoleSource = String(rawCh.role_source || rawCh.roleSource || "").trim();
+      const useRawRole = role && !(base.role_source === "device-profile" && rawRoleSource === "gateway-default");
       byKey.set(`${d.id}/${inst}`, {
         ...base,
         ...rawCh,
         device_id: d.id,
         instance: inst,
-        role: role || base.role,
-        role_source: rawCh.role_source || rawCh.roleSource || (role ? "config" : base.role_source),
+        role: useRawRole ? role : base.role,
+        role_source: useRawRole ? (rawRoleSource || "config") : base.role_source,
         endpoint: d.endpoint,
         third_party_power_control_enabled: Boolean(
           rawCh.third_party_power_control_enabled
@@ -1000,7 +1189,10 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
     if (strictDevices && !dev) return;
     const maxInst = channelCountForDevice(dev);
     if (inst < 1 || inst > maxInst) return;
-    const base = defaultChannelFor(ch.device_id, inst);
+    const base = defaultChannelFor(ch.device_id, inst, dev);
+    const role = String(ch.role || "").trim();
+    const rawRoleSource = String(ch.role_source || ch.roleSource || "").trim();
+    const useRawRole = role && !(base.role_source === "device-profile" && rawRoleSource === "gateway-default");
     const powerControlEnabled = Boolean(
       ch.third_party_power_control_enabled
       || ch.thirdPartyPowerControlEnabled
@@ -1010,6 +1202,8 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
       ...base,
       ...ch,
       instance: inst,
+      role: useRawRole ? role : base.role,
+      role_source: useRawRole ? (rawRoleSource || ch.role_source || ch.roleSource || "config") : base.role_source,
       endpoint: dev && dev.endpoint,
       third_party_power_control_enabled: powerControlEnabled,
     });
@@ -1019,7 +1213,7 @@ function normalizeChannels(channels, devices = DEVICES_BASE, opts = {}) {
       const key = `${d.id}/${inst}`;
       if (!byKey.has(key)) {
         byKey.set(key, {
-          ...defaultChannelFor(d.id, inst),
+          ...defaultChannelFor(d.id, inst, d),
           endpoint: d.endpoint,
           third_party_power_control_enabled: Boolean(d.third_party_power_control_enabled || d.thirdPartyPowerControlEnabled),
         });
